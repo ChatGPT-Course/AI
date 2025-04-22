@@ -86,6 +86,7 @@
             backdrop-filter: blur(10px);
             margin-bottom: 30px;
             position: relative;
+            min-height: 400px;
         }
 
         .topic-selector {
@@ -432,49 +433,55 @@
             pointer-events: none;
             transition: all 0.5s ease;
             border-radius: 20px;
-            text-align: center;
             z-index: 10;
         }
 
-        .loading-icon {
+        .loader {
             width: 80px;
             height: 80px;
             border: 8px solid #FFE0B2;
             border-top-color: var(--primary);
             border-radius: 50%;
             animation: spin 1s linear infinite;
-            margin-bottom: 30px;
             position: relative;
+            transition: all 0.5s ease;
         }
 
-        .success-icon-wrapper {
+        .checkmark {
+            width: 0;
+            height: 0;
             position: absolute;
             top: 50%;
             left: 50%;
             transform: translate(-50%, -50%);
             opacity: 0;
+            transition: all 0.5s ease;
         }
 
-        .success-icon {
-            width: 100px;
-            height: 100px;
-            background: var(--primary);
+        .checkmark::after {
+            content: '✓';
+            font-size: 50px;
+            color: var(--primary);
+            background: white;
             border-radius: 50%;
+            width: 80px;
+            height: 80px;
             display: flex;
             align-items: center;
             justify-content: center;
-            color: white;
-            font-size: 50px;
-            box-shadow: 0 10px 30px rgba(255, 149, 0, 0.3);
-            transform: scale(0);
-            animation: checkmarkMove 1.5s ease forwards;
+            box-shadow: 0 0 15px rgba(0,0,0,0.1);
         }
 
-        .success-content {
+        .loading-screen.active .loader {
+            transform: scale(0);
             opacity: 0;
-            transform: translateY(20px);
-            animation: fadeUp 0.5s ease 1s forwards;
-            text-align: center;
+        }
+
+        .loading-screen.active .checkmark {
+            width: 80px;
+            height: 80px;
+            opacity: 1;
+            animation: checkmarkRise 1s ease forwards;
         }
 
         @keyframes spin {
@@ -482,19 +489,20 @@
             100% { transform: rotate(360deg); }
         }
 
-        @keyframes checkmarkMove {
-            0% { transform: scale(0); opacity: 0; }
-            50% { transform: scale(1.2); opacity: 1; }
-            100% { transform: scale(1) translateY(-100px); }
+        @keyframes checkmarkRise {
+            0% { transform: translate(-50%, -50%); }
+            100% { transform: translate(-50%, -150%); }
         }
 
-        @keyframes fadeUp {
+        .success-content {
+            opacity: 0;
+            transform: translateY(30px);
+            text-align: center;
+            animation: contentAppear 0.5s ease 1s forwards;
+        }
+
+        @keyframes contentAppear {
             to { opacity: 1; transform: translateY(0); }
-        }
-
-        .loading-screen.active {
-            opacity: 1;
-            pointer-events: all;
         }
 
         .success-title {
@@ -597,11 +605,8 @@
             </div>
 
             <div class="loading-screen" id="loading-screen">
-                <div class="loading-icon">
-                    <div class="success-icon-wrapper">
-                        <div class="success-icon">✓</div>
-                    </div>
-                </div>
+                <div class="loader"></div>
+                <div class="checkmark"></div>
                 <div class="success-content">
                     <h2 class="success-title">Ваше обращение<br>успешно отправлено!</h2>
                     <p class="success-message">Модераторы просмотрят его в<br>течение 24-х часов</p>
@@ -631,6 +636,12 @@
 
         let selectedTopic = null;
         let filesUploading = [];
+
+        // Имитация базы данных
+        const mockDatabase = {
+            "12345": { username: "ivan_ivanov" },
+            "67890": { username: "test_user" }
+        };
 
         document.addEventListener('DOMContentLoaded', function() {
             topicHeader.addEventListener('click', toggleTopics);
@@ -733,24 +744,38 @@
             submitBtn.disabled = !(selectedTopic && messageField.value.length >= 10);
         }
 
+        async function getUserData(userId) {
+            // Имитация запроса к базе данных
+            return new Promise(resolve => {
+                setTimeout(() => {
+                    resolve(mockDatabase[userId] || { username: "неизвестный_пользователь" });
+                }, 300);
+            });
+        }
+
         async function submitForm() {
             header.style.opacity = '0';
             document.getElementById('back-btn').style.pointerEvents = 'none';
             loadingScreen.classList.add('active');
 
-            const userId = getCookie('tg_user_id') || '12345';
-            const username = getCookie('tg_username') || 'unknown_user';
-
-            const escapedTopic = escapeMarkdown(selectedTopic);
-            const escapedUsername = escapeMarkdown(username);
-            const escapedMessage = escapeMarkdown(messageField.value);
-
-            const message = `📢 *${escapedTopic}*\n\n` +
-                          `👤 *Автор:* ${escapedUsername}\n` +
-                          `🆔 *Автор ID:* ${userId}\n\n` +
-                          `📝 *Содержимое:*\n${escapedMessage}`;
-
             try {
+                const userId = getCookie('tg_user_id');
+                const userData = await getUserData(userId);
+                const username = userData.username;
+
+                const escapedTopic = escapeMarkdown(selectedTopic);
+                const escapedUsername = escapeMarkdown(username);
+                const escapedMessage = escapeMarkdown(messageField.value);
+
+                const message = `📢 *${escapedTopic}*\n\n` +
+                              `👤 *Автор:* ${escapedUsername}\n` +
+                              `🆔 *Автор ID:* ${userId}\n\n` +
+                              `📝 *Содержимое:*\n${escapedMessage}`;
+
+                // Имитация задержки для анимации
+                await new Promise(resolve => setTimeout(resolve, 1500));
+
+                // Отправка данных
                 let response;
                 if (filesUploading.length) {
                     const formData = new FormData();
@@ -776,13 +801,15 @@
                 }
 
                 if (!response.ok) throw new Error('Ошибка отправки');
-                await new Promise(resolve => setTimeout(resolve, 1500));
                 
-                document.querySelector('.loading-icon').style.animation = 'none';
-                document.querySelector('.success-icon-wrapper').style.opacity = '1';
-                
+                // Запуск финальной анимации
+                document.querySelector('.loader').style.display = 'none';
+                document.querySelector('.checkmark').style.display = 'block';
+                await new Promise(resolve => setTimeout(resolve, 1000));
+
             } catch (error) {
                 alert(`Ошибка: ${error.message}`);
+            } finally {
                 loadingScreen.classList.remove('active');
                 header.style.opacity = '1';
                 document.getElementById('back-btn').style.pointerEvents = 'all';
