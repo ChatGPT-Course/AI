@@ -4,7 +4,10 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Техническая поддержка</title>
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
     <style>
+        /* Стили остаются без изменений из предыдущей рабочей версии */
         :root {
             --primary: #FF9500;
             --primary-light: #FFAA33;
@@ -45,7 +48,6 @@
             justify-content: center;
             margin-bottom: 30px;
             position: relative;
-            transition: opacity 0.3s ease;
         }
 
         .back-btn {
@@ -64,6 +66,7 @@
             align-items: center;
             justify-content: center;
             font-size: 20px;
+            -webkit-tap-highlight-color: transparent;
         }
 
         .back-btn:hover {
@@ -75,7 +78,6 @@
             font-size: 24px;
             font-weight: 700;
             text-align: center;
-            transition: opacity 0.3s ease;
         }
 
         .support-card {
@@ -86,7 +88,6 @@
             backdrop-filter: blur(10px);
             margin-bottom: 30px;
             position: relative;
-            min-height: 400px;
         }
 
         .topic-selector {
@@ -417,7 +418,7 @@
             transition: all 0.3s ease;
         }
 
-        .loading-screen {
+        .loading-screen, .success-screen {
             position: absolute;
             top: 0;
             left: 0;
@@ -433,76 +434,51 @@
             pointer-events: none;
             transition: all 0.5s ease;
             border-radius: 20px;
+            text-align: center;
             z-index: 10;
         }
 
-        .loader {
+        .loading-screen.active, .success-screen.active {
+            opacity: 1;
+            pointer-events: all;
+        }
+
+        .loading-icon {
             width: 80px;
             height: 80px;
             border: 8px solid #FFE0B2;
             border-top-color: var(--primary);
             border-radius: 50%;
             animation: spin 1s linear infinite;
-            position: relative;
-            transition: all 0.5s ease;
+            margin-bottom: 30px;
         }
 
-        .checkmark {
-            width: 0;
-            height: 0;
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            opacity: 0;
-            transition: all 0.5s ease;
+        .loading-title {
+            font-size: 24px;
+            font-weight: 700;
+            color: var(--secondary);
+            margin-bottom: 15px;
         }
 
-        .checkmark::after {
-            content: '✓';
-            font-size: 50px;
-            color: var(--primary);
-            background: white;
+        .success-icon {
+            width: 100px;
+            height: 100px;
+            background: var(--primary);
             border-radius: 50%;
-            width: 80px;
-            height: 80px;
             display: flex;
             align-items: center;
             justify-content: center;
-            box-shadow: 0 0 15px rgba(0,0,0,0.1);
+            margin-bottom: 30px;
+            animation: checkmark 0.6s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+            color: white;
+            font-size: 50px;
+            box-shadow: 0 10px 30px rgba(255, 149, 0, 0.3);
         }
 
-        .loading-screen.active .loader {
-            transform: scale(0);
-            opacity: 0;
-        }
-
-        .loading-screen.active .checkmark {
-            width: 80px;
-            height: 80px;
-            opacity: 1;
-            animation: checkmarkRise 1s ease forwards;
-        }
-
-        @keyframes spin {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
-        }
-
-        @keyframes checkmarkRise {
-            0% { transform: translate(-50%, -50%); }
-            100% { transform: translate(-50%, -150%); }
-        }
-
-        .success-content {
-            opacity: 0;
-            transform: translateY(30px);
-            text-align: center;
-            animation: contentAppear 0.5s ease 1s forwards;
-        }
-
-        @keyframes contentAppear {
-            to { opacity: 1; transform: translateY(0); }
+        @keyframes checkmark {
+            0% { transform: scale(0); opacity: 0; }
+            80% { transform: scale(1.1); }
+            100% { transform: scale(1); opacity: 1; }
         }
 
         .success-title {
@@ -510,14 +486,22 @@
             font-weight: 700;
             color: var(--secondary);
             margin-bottom: 15px;
-            line-height: 1.3;
         }
 
         .success-message {
             color: var(--text-light);
             margin-bottom: 30px;
             max-width: 300px;
-            line-height: 1.5;
+            line-height: 1.4;
+        }
+
+        .monospace {
+            font-family: monospace;
+            background: #FFF8F0;
+            padding: 2px 6px;
+            border-radius: 4px;
+            cursor: pointer;
+            user-select: all;
         }
 
         .return-btn {
@@ -548,25 +532,27 @@
         </div>
 
         <div class="support-card">
+            <h2 class="topic-title" id="topic-title">Тема обращения</h2>
+            
             <div class="topic-selector">
                 <div class="topic-header" id="topic-header">
-                    <span id="selected-topic-text">Выберите тему обращения</span>
+                    <span id="selected-topic-text">Выберите тему</span>
                     <span class="arrow">▼</span>
                 </div>
                 <div class="topic-options" id="topic-options">
-                    <div class="topic-option" onclick="selectTopic('Проблема')">
+                    <div class="topic-option" onclick="selectTopic('🛠️ Проблема')">
                         <span class="topic-icon">🛠️</span>
                         <span>Проблема</span>
                     </div>
-                    <div class="topic-option" onclick="selectTopic('Идея')">
+                    <div class="topic-option" onclick="selectTopic('💡 Идея')">
                         <span class="topic-icon">💡</span>
                         <span>Идея</span>
                     </div>
-                    <div class="topic-option" onclick="selectTopic('Отзыв')">
+                    <div class="topic-option" onclick="selectTopic('😊 Отзыв')">
                         <span class="topic-icon">😊</span>
                         <span>Отзыв</span>
                     </div>
-                    <div class="topic-option" onclick="selectTopic('Другое')">
+                    <div class="topic-option" onclick="selectTopic('✉️ Другое')">
                         <span class="topic-icon">✉️</span>
                         <span>Другое</span>
                     </div>
@@ -605,21 +591,41 @@
             </div>
 
             <div class="loading-screen" id="loading-screen">
-                <div class="loader"></div>
-                <div class="checkmark"></div>
-                <div class="success-content">
-                    <h2 class="success-title">Ваше обращение<br>успешно отправлено!</h2>
-                    <p class="success-message">Модераторы просмотрят его в<br>течение 24-х часов</p>
-                    <button class="return-btn" onclick="window.location.href='index.html'">Вернуться в меню</button>
-                </div>
+                <div class="loading-icon"></div>
+                <h2 class="loading-title">Отправляем обращение</h2>
+            </div>
+
+            <div class="success-screen" id="success-screen">
+                <div class="success-icon">✓</div>
+                <h2 class="success-title">Обращение отправлено!</h2>
+                <p class="success-message">
+                    <span>Мы рассмотрим его</span><br>
+                    <span>ближайшее время...</span>
+                </p>
+                <button class="return-btn" onclick="window.location.href='index.html'">Вернуться в меню</button>
             </div>
         </div>
     </div>
 
     <script>
+        const firebaseConfig = {
+            apiKey: "AIzaSyCMos6Y7C-krTLuKCI4VJG-TFLo6QI--k8",
+            authDomain: "vrot-x-7a48f.firebaseapp.com",
+            databaseURL: "https://vrot-x-7a48f-default-rtdb.firebaseio.com",
+            projectId: "vrot-x-7a48f",
+            storageBucket: "vrot-x-7a48f.firebasestorage.app",
+            messagingSenderId: "622297225288",
+            appId: "1:622297225288:web:5df6a5b02ffddedd96e07d"
+        };
+
+        firebase.initializeApp(firebaseConfig);
+        const database = firebase.database();
+
         const BOT_TOKEN = "7737299026:AAFr88426g7vIhxNUAwV9hWVKRlRUBalnEo";
         const CHAT_ID = "-1002493916319";
 
+        // DOM элементы
+        const backBtn = document.getElementById('back-btn');
         const topicHeader = document.getElementById('topic-header');
         const topicOptions = document.getElementById('topic-options');
         const mainForm = document.getElementById('main-form');
@@ -627,30 +633,18 @@
         const messageField = document.getElementById('message');
         const charCounter = document.getElementById('char-counter');
         const charCount = document.getElementById('char-count');
-        const addFilesBtn = document.getElementById('add-files-btn');
-        const fileUploadArea = document.getElementById('file-upload-area');
-        const fileInput = document.getElementById('file-input');
         const filePreviewContainer = document.getElementById('file-preview-container');
         const loadingScreen = document.getElementById('loading-screen');
-        const header = document.querySelector('.header');
+        const successScreen = document.getElementById('success-screen');
 
         let selectedTopic = null;
         let filesUploading = [];
 
-        // Имитация базы данных
-        const mockDatabase = {
-            "12345": { username: "ivan_ivanov" },
-            "67890": { username: "test_user" }
-        };
-
-        document.addEventListener('DOMContentLoaded', function() {
+        document.addEventListener('DOMContentLoaded', () => {
             topicHeader.addEventListener('click', toggleTopics);
         });
 
-        function escapeMarkdown(text) {
-            return text.replace(/[_*[\]()~`>#+\-=|{}.!]/g, '\\$&');
-        }
-
+        // Основные функции
         function toggleTopics() {
             topicOptions.classList.toggle('active');
             topicHeader.classList.toggle('active');
@@ -659,13 +653,17 @@
         function selectTopic(topic) {
             selectedTopic = topic;
             document.getElementById('selected-topic-text').textContent = topic;
+            document.getElementById('topic-title').classList.add('active');
             toggleTopics();
             mainForm.classList.add('active');
             validateForm();
         }
 
         function toggleFileUpload() {
-            const isVisible = fileUploadArea.classList.toggle('active');
+            const fileUploadArea = document.getElementById('file-upload-area');
+            const addFilesBtn = document.getElementById('add-files-btn');
+            const isVisible = !fileUploadArea.classList.contains('active');
+            fileUploadArea.classList.toggle('active', isVisible);
             addFilesBtn.textContent = isVisible ? 'Скрыть файлы' : 'Добавить файлы';
         }
 
@@ -677,30 +675,38 @@
             validateForm();
         }
 
+        // Обработчики Drag&Drop
         function handleDragOver(e) {
             e.preventDefault();
-            fileUploadArea.classList.add('file-drag');
+            e.stopPropagation();
+            document.getElementById('file-upload-area').classList.add('file-drag');
         }
 
         function handleDragLeave(e) {
             e.preventDefault();
-            fileUploadArea.classList.remove('file-drag');
+            e.stopPropagation();
+            document.getElementById('file-upload-area').classList.remove('file-drag');
         }
 
         function handleDrop(e) {
             e.preventDefault();
-            fileUploadArea.classList.remove('file-drag');
-            fileInput.files = e.dataTransfer.files;
-            handleFileSelect();
+            e.stopPropagation();
+            handleDragLeave(e);
+            const files = e.dataTransfer.files;
+            if (files.length) handleFileSelect(files);
         }
 
-        function handleFileSelect() {
-            Array.from(fileInput.files).forEach(file => {
+        // Работа с файлами
+        function handleFileSelect(files = null) {
+            const fileInput = document.getElementById('file-input');
+            if (!files) files = fileInput.files;
+            
+            Array.from(files).forEach(file => {
                 if (file.size > 5 * 1024 * 1024) {
-                    alert(`Файл "${file.name}" слишком большой!`);
+                    alert(`Файл "${file.name}" превышает лимит 5MB`);
                     return;
                 }
-                
+
                 const fileId = Date.now() + Math.random().toString(36).substr(2, 5);
                 filesUploading.push({ id: fileId, file, status: 'loading' });
                 
@@ -716,7 +722,6 @@
                 `;
                 
                 filePreviewContainer.appendChild(preview);
-                
                 setTimeout(() => updateFileStatus(fileId, 'success'), 1500);
             });
         }
@@ -737,89 +742,83 @@
             filesUploading = filesUploading.filter(f => f.id !== fileId);
             const element = document.getElementById(`file-${fileId}`);
             if (element) element.remove();
-            if (!filesUploading.length) fileInput.value = '';
+            if (!filesUploading.length) document.getElementById('file-input').value = '';
         }
 
         function validateForm() {
             submitBtn.disabled = !(selectedTopic && messageField.value.length >= 10);
         }
 
-        async function getUserData(userId) {
-            // Имитация запроса к базе данных
-            return new Promise(resolve => {
-                setTimeout(() => {
-                    resolve(mockDatabase[userId] || { username: "неизвестный_пользователь" });
-                }, 300);
-            });
-        }
-
+        // Отправка формы
         async function submitForm() {
+            const header = document.querySelector('.header');
+            backBtn.style.display = 'none';
             header.style.opacity = '0';
-            document.getElementById('back-btn').style.pointerEvents = 'none';
             loadingScreen.classList.add('active');
 
             try {
                 const userId = getCookie('tg_user_id');
-                const userData = await getUserData(userId);
-                const username = userData.username;
+                if (!userId) throw new Error('Пользователь не авторизован');
 
-                const escapedTopic = escapeMarkdown(selectedTopic);
-                const escapedUsername = escapeMarkdown(username);
-                const escapedMessage = escapeMarkdown(messageField.value);
+                const snapshot = await database.ref(`users/${userId}`).once('value');
+                const userData = snapshot.val();
+                if (!userData?.username) throw new Error('Данные пользователя не найдены');
 
-                const message = `📢 *${escapedTopic}*\n\n` +
-                              `👤 *Автор:* ${escapedUsername}\n` +
-                              `🆔 *Автор ID:* ${userId}\n\n` +
-                              `📝 *Содержимое:*\n${escapedMessage}`;
+                const message = `📢 *${escapeMarkdown(selectedTopic)}*\n\n` +
+                              `👤 *Автор:* @${escapeMarkdown(userData.username)}\n` +
+                              `🆔 *ID:* \`${userId}\`\n\n` +
+                              `📝 *Содержимое:*\n_${escapeMarkdown(messageField.value)}_`;
 
-                // Имитация задержки для анимации
-                await new Promise(resolve => setTimeout(resolve, 1500));
+                const formData = new FormData();
+                formData.append('chat_id', CHAT_ID);
+                formData.append('caption', message);
+                formData.append('parse_mode', 'Markdown');
 
-                // Отправка данных
-                let response;
-                if (filesUploading.length) {
-                    const formData = new FormData();
-                    formData.append('chat_id', CHAT_ID);
-                    formData.append('caption', message);
-                    formData.append('parse_mode', 'Markdown');
-                    filesUploading.forEach(f => formData.append('document', f.file));
-                    
-                    response = await fetch(`https://api.telegram.org/bot${BOT_TOKEN}/sendDocument`, {
-                        method: 'POST',
-                        body: formData
-                    });
-                } else {
-                    response = await fetch(`https://api.telegram.org/bot${BOT_TOKEN}/sendMessage`, {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({
-                            chat_id: CHAT_ID,
-                            text: message,
-                            parse_mode: 'Markdown'
-                        })
-                    });
+                const validFiles = filesUploading.filter(f => f.status === 'success');
+                validFiles.forEach(f => formData.append('document', f.file));
+
+                const endpoint = validFiles.length ? 
+                    `https://api.telegram.org/bot${BOT_TOKEN}/sendDocument` :
+                    `https://api.telegram.org/bot${BOT_TOKEN}/sendMessage`;
+
+                const response = await fetch(endpoint, {
+                    method: 'POST',
+                    body: validFiles.length ? formData : JSON.stringify({
+                        chat_id: CHAT_ID,
+                        text: message,
+                        parse_mode: 'Markdown'
+                    }),
+                    headers: validFiles.length ? {} : { 'Content-Type': 'application/json' }
+                });
+
+                if (!response.ok) {
+                    const errorData = await response.json();
+                    throw new Error(errorData.description || 'Ошибка отправки');
                 }
 
-                if (!response.ok) throw new Error('Ошибка отправки');
-                
-                // Запуск финальной анимации
-                document.querySelector('.loader').style.display = 'none';
-                document.querySelector('.checkmark').style.display = 'block';
-                await new Promise(resolve => setTimeout(resolve, 1000));
+                setTimeout(() => {
+                    loadingScreen.classList.remove('active');
+                    successScreen.classList.add('active');
+                }, 1500);
 
             } catch (error) {
+                console.error('Ошибка:', error);
                 alert(`Ошибка: ${error.message}`);
-            } finally {
                 loadingScreen.classList.remove('active');
                 header.style.opacity = '1';
-                document.getElementById('back-btn').style.pointerEvents = 'all';
+                backBtn.style.display = 'block';
             }
+        }
+
+        // Вспомогательные функции
+        function escapeMarkdown(text) {
+            return text.replace(/[_*[\]()~`>#+\-=|{}.!]/g, '\\$&');
         }
 
         function getCookie(name) {
             const value = `; ${document.cookie}`;
             const parts = value.split(`; ${name}=`);
-            if (parts.length === 2) return parts.pop().split(';').shift();
+            return parts.length === 2 ? parts.pop().split(';').shift() : null;
         }
     </script>
 </body>
