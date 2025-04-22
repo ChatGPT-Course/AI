@@ -45,7 +45,6 @@
             justify-content: center;
             margin-bottom: 30px;
             position: relative;
-            transition: opacity 0.3s ease;
         }
 
         .back-btn {
@@ -75,7 +74,6 @@
             font-size: 24px;
             font-weight: 700;
             text-align: center;
-            transition: opacity 0.3s ease;
         }
 
         .support-card {
@@ -85,8 +83,13 @@
             box-shadow: var(--shadow);
             backdrop-filter: blur(10px);
             margin-bottom: 30px;
+            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.1);
             position: relative;
-            min-height: 400px;
+        }
+
+        .support-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.1);
         }
 
         .topic-selector {
@@ -417,7 +420,7 @@
             transition: all 0.3s ease;
         }
 
-        .loading-screen {
+        .loading-screen, .success-screen {
             position: absolute;
             top: 0;
             left: 0;
@@ -433,76 +436,51 @@
             pointer-events: none;
             transition: all 0.5s ease;
             border-radius: 20px;
+            text-align: center;
             z-index: 10;
         }
 
-        .loader {
+        .loading-screen.active, .success-screen.active {
+            opacity: 1;
+            pointer-events: all;
+        }
+
+        .loading-icon {
             width: 80px;
             height: 80px;
             border: 8px solid #FFE0B2;
             border-top-color: var(--primary);
             border-radius: 50%;
             animation: spin 1s linear infinite;
-            position: relative;
-            transition: all 0.5s ease;
+            margin-bottom: 30px;
         }
 
-        .checkmark {
-            width: 0;
-            height: 0;
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            opacity: 0;
-            transition: all 0.5s ease;
+        .loading-title {
+            font-size: 24px;
+            font-weight: 700;
+            color: var(--secondary);
+            margin-bottom: 15px;
         }
 
-        .checkmark::after {
-            content: '✓';
-            font-size: 50px;
-            color: var(--primary);
-            background: white;
+        .success-icon {
+            width: 100px;
+            height: 100px;
+            background: var(--primary);
             border-radius: 50%;
-            width: 80px;
-            height: 80px;
             display: flex;
             align-items: center;
             justify-content: center;
-            box-shadow: 0 0 15px rgba(0,0,0,0.1);
+            margin-bottom: 30px;
+            animation: checkmark 0.6s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+            color: white;
+            font-size: 50px;
+            box-shadow: 0 10px 30px rgba(255, 149, 0, 0.3);
         }
 
-        .loading-screen.active .loader {
-            transform: scale(0);
-            opacity: 0;
-        }
-
-        .loading-screen.active .checkmark {
-            width: 80px;
-            height: 80px;
-            opacity: 1;
-            animation: checkmarkRise 1s ease forwards;
-        }
-
-        @keyframes spin {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
-        }
-
-        @keyframes checkmarkRise {
-            0% { transform: translate(-50%, -50%); }
-            100% { transform: translate(-50%, -150%); }
-        }
-
-        .success-content {
-            opacity: 0;
-            transform: translateY(30px);
-            text-align: center;
-            animation: contentAppear 0.5s ease 1s forwards;
-        }
-
-        @keyframes contentAppear {
-            to { opacity: 1; transform: translateY(0); }
+        @keyframes checkmark {
+            0% { transform: scale(0); opacity: 0; }
+            80% { transform: scale(1.1); }
+            100% { transform: scale(1); opacity: 1; }
         }
 
         .success-title {
@@ -510,14 +488,12 @@
             font-weight: 700;
             color: var(--secondary);
             margin-bottom: 15px;
-            line-height: 1.3;
         }
 
         .success-message {
             color: var(--text-light);
             margin-bottom: 30px;
             max-width: 300px;
-            line-height: 1.5;
         }
 
         .return-btn {
@@ -548,6 +524,7 @@
         </div>
 
         <div class="support-card">
+            <!-- Шаг 1: Выбор темы -->
             <div class="topic-selector">
                 <div class="topic-header" id="topic-header">
                     <span id="selected-topic-text">Выберите тему обращения</span>
@@ -573,6 +550,7 @@
                 </div>
             </div>
 
+            <!-- Шаг 2: Форма обращения -->
             <div class="form-section" id="main-form">
                 <div class="form-group">
                     <label for="message">Подробное описание</label>
@@ -604,22 +582,29 @@
                 </button>
             </div>
 
+            <!-- Шаг 3: Загрузка -->
             <div class="loading-screen" id="loading-screen">
-                <div class="loader"></div>
-                <div class="checkmark"></div>
-                <div class="success-content">
-                    <h2 class="success-title">Ваше обращение<br>успешно отправлено!</h2>
-                    <p class="success-message">Модераторы просмотрят его в<br>течение 24-х часов</p>
-                    <button class="return-btn" onclick="window.location.href='index.html'">Вернуться в меню</button>
-                </div>
+                <div class="loading-icon"></div>
+                <h2 class="loading-title">Отправляем обращение</h2>
+            </div>
+
+            <!-- Шаг 4: Успешная отправка -->
+            <div class="success-screen" id="success-screen">
+                <div class="success-icon">✓</div>
+                <h2 class="success-title">Ваше обращение успешно отправлено!</h2>
+                <p class="success-message">Мы ответим вам в ближайшее время</p>
+                <button class="return-btn" onclick="window.location.href='index.html'">Вернуться в меню</button>
             </div>
         </div>
     </div>
 
     <script>
+        // Конфигурация
         const BOT_TOKEN = "7737299026:AAFr88426g7vIhxNUAwV9hWVKRlRUBalnEo";
         const CHAT_ID = "-1002493916319";
 
+        // Элементы DOM
+        const backBtn = document.getElementById('back-btn');
         const topicHeader = document.getElementById('topic-header');
         const topicOptions = document.getElementById('topic-options');
         const mainForm = document.getElementById('main-form');
@@ -632,21 +617,20 @@
         const fileInput = document.getElementById('file-input');
         const filePreviewContainer = document.getElementById('file-preview-container');
         const loadingScreen = document.getElementById('loading-screen');
-        const header = document.querySelector('.header');
+        const successScreen = document.getElementById('success-screen');
 
+        // Состояние
         let selectedTopic = null;
+        let selectedFile = null;
+        let filesVisible = false;
         let filesUploading = [];
 
-        // Имитация базы данных
-        const mockDatabase = {
-            "12345": { username: "ivan_ivanov" },
-            "67890": { username: "test_user" }
-        };
-
+        // Инициализация
         document.addEventListener('DOMContentLoaded', function() {
             topicHeader.addEventListener('click', toggleTopics);
         });
 
+        // Функция экранирования Markdown
         function escapeMarkdown(text) {
             return text.replace(/[_*[\]()~`>#+\-=|{}.!]/g, '\\$&');
         }
@@ -665,49 +649,66 @@
         }
 
         function toggleFileUpload() {
-            const isVisible = fileUploadArea.classList.toggle('active');
-            addFilesBtn.textContent = isVisible ? 'Скрыть файлы' : 'Добавить файлы';
+            filesVisible = !filesVisible;
+            fileUploadArea.classList.toggle('active', filesVisible);
+            addFilesBtn.textContent = filesVisible ? 'Скрыть файлы' : 'Добавить файлы';
         }
 
         function updateCounter() {
             const length = messageField.value.length;
             charCount.textContent = length;
-            charCounter.classList.toggle('error', length < 10);
-            charCounter.classList.toggle('visible', length > 0);
+            
+            if (length < 10) {
+                charCounter.classList.add('error');
+                charCounter.classList.add('visible');
+            } else {
+                charCounter.classList.remove('error');
+                charCounter.classList.toggle('visible', length > 0);
+            }
+            
             validateForm();
         }
 
         function handleDragOver(e) {
             e.preventDefault();
+            e.stopPropagation();
             fileUploadArea.classList.add('file-drag');
         }
 
         function handleDragLeave(e) {
             e.preventDefault();
+            e.stopPropagation();
             fileUploadArea.classList.remove('file-drag');
         }
 
         function handleDrop(e) {
             e.preventDefault();
+            e.stopPropagation();
             fileUploadArea.classList.remove('file-drag');
-            fileInput.files = e.dataTransfer.files;
-            handleFileSelect();
+            
+            if (e.dataTransfer.files.length) {
+                fileInput.files = e.dataTransfer.files;
+                handleFileSelect();
+            }
         }
 
         function handleFileSelect() {
-            Array.from(fileInput.files).forEach(file => {
+            const files = Array.from(fileInput.files);
+            if (files.length === 0) return;
+            
+            files.forEach(file => {
                 if (file.size > 5 * 1024 * 1024) {
-                    alert(`Файл "${file.name}" слишком большой!`);
+                    alert(`Файл "${file.name}" слишком большой. Максимальный размер: 5MB`);
                     return;
                 }
                 
                 const fileId = Date.now() + Math.random().toString(36).substr(2, 5);
                 filesUploading.push({ id: fileId, file, status: 'loading' });
                 
-                const preview = document.createElement('div');
-                preview.className = 'file-preview';
-                preview.id = `file-${fileId}`;
-                preview.innerHTML = `
+                const filePreview = document.createElement('div');
+                filePreview.className = 'file-preview';
+                filePreview.id = `file-${fileId}`;
+                filePreview.innerHTML = `
                     <div class="file-info">
                         <span class="file-status loading">↻</span>
                         <span class="file-name">${file.name}</span>
@@ -715,74 +716,78 @@
                     <span class="remove-file" onclick="removeFile('${fileId}')">🗑️</span>
                 `;
                 
-                filePreviewContainer.appendChild(preview);
+                filePreviewContainer.appendChild(filePreview);
                 
-                setTimeout(() => updateFileStatus(fileId, 'success'), 1500);
+                setTimeout(() => {
+                    updateFileStatus(fileId, 'success');
+                }, 1500);
             });
         }
 
         function updateFileStatus(fileId, status) {
-            const file = filesUploading.find(f => f.id === fileId);
-            if (!file) return;
+            const index = filesUploading.findIndex(f => f.id === fileId);
+            if (index === -1) return;
             
-            file.status = status;
+            filesUploading[index].status = status;
             const statusElement = document.querySelector(`#file-${fileId} .file-status`);
+            
             if (statusElement) {
-                statusElement.className = `file-status ${status}`;
-                statusElement.textContent = status === 'success' ? '✓' : '✕';
+                statusElement.classList.remove('loading', 'success', 'error');
+                statusElement.classList.add(status);
+                
+                if (status === 'success') {
+                    statusElement.textContent = '✓';
+                } else if (status === 'error') {
+                    statusElement.textContent = '✕';
+                }
             }
         }
 
         function removeFile(fileId) {
-            filesUploading = filesUploading.filter(f => f.id !== fileId);
-            const element = document.getElementById(`file-${fileId}`);
-            if (element) element.remove();
-            if (!filesUploading.length) fileInput.value = '';
+            const index = filesUploading.findIndex(f => f.id === fileId);
+            if (index !== -1) filesUploading.splice(index, 1);
+            
+            const fileElement = document.getElementById(`file-${fileId}`);
+            if (fileElement) fileElement.remove();
+            
+            if (filesUploading.length === 0) fileInput.value = '';
         }
 
         function validateForm() {
-            submitBtn.disabled = !(selectedTopic && messageField.value.length >= 10);
-        }
-
-        async function getUserData(userId) {
-            // Имитация запроса к базе данных
-            return new Promise(resolve => {
-                setTimeout(() => {
-                    resolve(mockDatabase[userId] || { username: "неизвестный_пользователь" });
-                }, 300);
-            });
+            const isValid = selectedTopic && messageField.value.length >= 10;
+            submitBtn.disabled = !isValid;
         }
 
         async function submitForm() {
-            header.style.opacity = '0';
-            document.getElementById('back-btn').style.pointerEvents = 'none';
+            backBtn.disabled = true;
+            document.querySelector('.header-title').style.opacity = '0.5';
             loadingScreen.classList.add('active');
+            
+            const userId = getCookie('tg_user_id') || '12345';
+            const username = getCookie('tg_username') || 'unknown_user';
+            
+            // Экранирование текста
+            const escapedTopic = escapeMarkdown(selectedTopic);
+            const escapedUsername = escapeMarkdown(username);
+            const escapedMessage = escapeMarkdown(messageField.value);
+            
+            const message = `📢 *${escapedTopic}*\n\n` +
+                           `👤 *Отправитель:* @${escapedUsername} \\(ID: ${userId}\\)\n\n` +
+                           `📝 *Содержимое:*\n${escapedMessage}`;
 
             try {
-                const userId = getCookie('tg_user_id');
-                const userData = await getUserData(userId);
-                const username = userData.username;
-
-                const escapedTopic = escapeMarkdown(selectedTopic);
-                const escapedUsername = escapeMarkdown(username);
-                const escapedMessage = escapeMarkdown(messageField.value);
-
-                const message = `📢 *${escapedTopic}*\n\n` +
-                              `👤 *Автор:* ${escapedUsername}\n` +
-                              `🆔 *Автор ID:* ${userId}\n\n` +
-                              `📝 *Содержимое:*\n${escapedMessage}`;
-
-                // Имитация задержки для анимации
-                await new Promise(resolve => setTimeout(resolve, 1500));
-
-                // Отправка данных
                 let response;
-                if (filesUploading.length) {
+                
+                if (filesUploading.length > 0) {
                     const formData = new FormData();
                     formData.append('chat_id', CHAT_ID);
                     formData.append('caption', message);
+                    
+                    filesUploading.filter(f => f.status === 'success').forEach((fileObj) => {
+                        formData.append('document', fileObj.file);
+                    });
+                    
                     formData.append('parse_mode', 'Markdown');
-                    filesUploading.forEach(f => formData.append('document', f.file));
                     
                     response = await fetch(`https://api.telegram.org/bot${BOT_TOKEN}/sendDocument`, {
                         method: 'POST',
@@ -799,20 +804,17 @@
                         })
                     });
                 }
-
-                if (!response.ok) throw new Error('Ошибка отправки');
                 
-                // Запуск финальной анимации
-                document.querySelector('.loader').style.display = 'none';
-                document.querySelector('.checkmark').style.display = 'block';
-                await new Promise(resolve => setTimeout(resolve, 1000));
-
-            } catch (error) {
-                alert(`Ошибка: ${error.message}`);
-            } finally {
+                const result = await response.json();
+                if (!result.ok) throw new Error(result.description || 'Неизвестная ошибка');
+                
                 loadingScreen.classList.remove('active');
-                header.style.opacity = '1';
-                document.getElementById('back-btn').style.pointerEvents = 'all';
+                successScreen.classList.add('active');
+            } catch (error) {
+                alert(`Ошибка при отправке: ${error.message}`);
+                loadingScreen.classList.remove('active');
+                backBtn.disabled = false;
+                document.querySelector('.header-title').style.opacity = '1';
             }
         }
 
