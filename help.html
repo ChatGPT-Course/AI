@@ -4,6 +4,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Техническая поддержка</title>
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
     <style>
         :root {
             --primary: #FF9500;
@@ -45,6 +47,7 @@
             justify-content: center;
             margin-bottom: 30px;
             position: relative;
+            transition: opacity 0.3s ease;
         }
 
         .back-btn {
@@ -74,6 +77,7 @@
             font-size: 24px;
             font-weight: 700;
             text-align: center;
+            transition: opacity 0.3s ease;
         }
 
         .support-card {
@@ -83,13 +87,26 @@
             box-shadow: var(--shadow);
             backdrop-filter: blur(10px);
             margin-bottom: 30px;
-            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.1);
             position: relative;
         }
 
-        .support-card:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.1);
+        .topic-title {
+            color: var(--secondary);
+            font-size: 18px;
+            font-weight: 600;
+            margin-bottom: 15px;
+            display: none;
+        }
+
+        .topic-title.active {
+            display: block;
+        }
+
+        .selected-topic {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            color: var(--secondary);
         }
 
         .topic-selector {
@@ -488,6 +505,9 @@
             font-weight: 700;
             color: var(--secondary);
             margin-bottom: 15px;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
         }
 
         .success-message {
@@ -524,33 +544,33 @@
         </div>
 
         <div class="support-card">
-            <!-- Шаг 1: Выбор темы -->
+            <h2 class="topic-title" id="topic-title">Тема обращения</h2>
+            
             <div class="topic-selector">
                 <div class="topic-header" id="topic-header">
-                    <span id="selected-topic-text">Выберите тему обращения</span>
+                    <span id="selected-topic-text">Выберите тему</span>
                     <span class="arrow">▼</span>
                 </div>
                 <div class="topic-options" id="topic-options">
-                    <div class="topic-option" onclick="selectTopic('Проблема')">
+                    <div class="topic-option" onclick="selectTopic('🛠️ Проблема')">
                         <span class="topic-icon">🛠️</span>
                         <span>Проблема</span>
                     </div>
-                    <div class="topic-option" onclick="selectTopic('Идея')">
+                    <div class="topic-option" onclick="selectTopic('💡 Идея')">
                         <span class="topic-icon">💡</span>
                         <span>Идея</span>
                     </div>
-                    <div class="topic-option" onclick="selectTopic('Отзыв')">
+                    <div class="topic-option" onclick="selectTopic('😊 Отзыв')">
                         <span class="topic-icon">😊</span>
                         <span>Отзыв</span>
                     </div>
-                    <div class="topic-option" onclick="selectTopic('Другое')">
+                    <div class="topic-option" onclick="selectTopic('✉️ Другое')">
                         <span class="topic-icon">✉️</span>
                         <span>Другое</span>
                     </div>
                 </div>
             </div>
 
-            <!-- Шаг 2: Форма обращения -->
             <div class="form-section" id="main-form">
                 <div class="form-group">
                     <label for="message">Подробное описание</label>
@@ -582,28 +602,40 @@
                 </button>
             </div>
 
-            <!-- Шаг 3: Загрузка -->
             <div class="loading-screen" id="loading-screen">
                 <div class="loading-icon"></div>
                 <h2 class="loading-title">Отправляем обращение</h2>
             </div>
 
-            <!-- Шаг 4: Успешная отправка -->
             <div class="success-screen" id="success-screen">
                 <div class="success-icon">✓</div>
-                <h2 class="success-title">Ваше обращение успешно отправлено!</h2>
-                <p class="success-message">Мы ответим вам в ближайшее время</p>
+                <h2 class="success-title">
+                    <span>Ваше обращение</span>
+                    <span>успешно отправлено!</span>
+                </h2>
+                <p class="success-message">Мы рассмотрим его совсем скоро...</p>
                 <button class="return-btn" onclick="window.location.href='index.html'">Вернуться в меню</button>
             </div>
         </div>
     </div>
 
     <script>
-        // Конфигурация
+        const firebaseConfig = {
+            apiKey: "AIzaSyCMos6Y7C-krTLuKCI4VJG-TFLo6QI--k8",
+            authDomain: "vrot-x-7a48f.firebaseapp.com",
+            databaseURL: "https://vrot-x-7a48f-default-rtdb.firebaseio.com",
+            projectId: "vrot-x-7a48f",
+            storageBucket: "vrot-x-7a48f.firebasestorage.app",
+            messagingSenderId: "622297225288",
+            appId: "1:622297225288:web:5df6a5b02ffddedd96e07d"
+        };
+
+        firebase.initializeApp(firebaseConfig);
+        const database = firebase.database();
+
         const BOT_TOKEN = "7737299026:AAFr88426g7vIhxNUAwV9hWVKRlRUBalnEo";
         const CHAT_ID = "-1002493916319";
 
-        // Элементы DOM
         const backBtn = document.getElementById('back-btn');
         const topicHeader = document.getElementById('topic-header');
         const topicOptions = document.getElementById('topic-options');
@@ -618,19 +650,17 @@
         const filePreviewContainer = document.getElementById('file-preview-container');
         const loadingScreen = document.getElementById('loading-screen');
         const successScreen = document.getElementById('success-screen');
+        const topicTitle = document.getElementById('topic-title');
 
-        // Состояние
         let selectedTopic = null;
         let selectedFile = null;
         let filesVisible = false;
         let filesUploading = [];
 
-        // Инициализация
         document.addEventListener('DOMContentLoaded', function() {
             topicHeader.addEventListener('click', toggleTopics);
         });
 
-        // Функция экранирования Markdown
         function escapeMarkdown(text) {
             return text.replace(/[_*[\]()~`>#+\-=|{}.!]/g, '\\$&');
         }
@@ -643,6 +673,7 @@
         function selectTopic(topic) {
             selectedTopic = topic;
             document.getElementById('selected-topic-text').textContent = topic;
+            topicTitle.classList.add('active');
             toggleTopics();
             mainForm.classList.add('active');
             validateForm();
@@ -759,35 +790,41 @@
         }
 
         async function submitForm() {
-            backBtn.disabled = true;
-            document.querySelector('.header-title').style.opacity = '0.5';
+            const header = document.querySelector('.header');
+            backBtn.style.display = 'none';
+            header.style.opacity = '0';
             loadingScreen.classList.add('active');
-            
-            const userId = getCookie('tg_user_id') || '12345';
-            const username = getCookie('tg_username') || 'unknown_user';
-            
-            // Экранирование текста
-            const escapedTopic = escapeMarkdown(selectedTopic);
-            const escapedUsername = escapeMarkdown(username);
-            const escapedMessage = escapeMarkdown(messageField.value);
-            
-            const message = `📢 *${escapedTopic}*\n\n` +
-                           `👤 *Отправитель:* @${escapedUsername} \\(ID: ${userId}\\)\n\n` +
-                           `📝 *Содержимое:*\n${escapedMessage}`;
 
             try {
-                let response;
+                const userId = getCookie('tg_user_id');
+                if (!userId) throw new Error('Пользователь не авторизован');
+
+                const snapshot = await database.ref(`users/${userId}`).once('value');
+                const userData = snapshot.val();
                 
-                if (filesUploading.length > 0) {
+                if (!userData || !userData.username) {
+                    throw new Error('Данные пользователя не найдены');
+                }
+
+                const escapedTopic = escapeMarkdown(selectedTopic);
+                const escapedUsername = escapeMarkdown(userData.username);
+                const escapedMessage = escapeMarkdown(messageField.value);
+
+                const message = `📢 *${escapedTopic}*\n\n` +
+                              `👤 *Автор:* ${escapedUsername}\n` +
+                              `🆔 *Автор ID:* ${userId}\n\n` +
+                              `📝 *Содержимое:*\n${escapedMessage}`;
+
+                let response;
+                if (filesUploading.length) {
                     const formData = new FormData();
                     formData.append('chat_id', CHAT_ID);
                     formData.append('caption', message);
+                    formData.append('parse_mode', 'Markdown');
                     
-                    filesUploading.filter(f => f.status === 'success').forEach((fileObj) => {
+                    filesUploading.filter(f => f.status === 'success').forEach(fileObj => {
                         formData.append('document', fileObj.file);
                     });
-                    
-                    formData.append('parse_mode', 'Markdown');
                     
                     response = await fetch(`https://api.telegram.org/bot${BOT_TOKEN}/sendDocument`, {
                         method: 'POST',
@@ -804,17 +841,17 @@
                         })
                     });
                 }
-                
-                const result = await response.json();
-                if (!result.ok) throw new Error(result.description || 'Неизвестная ошибка');
+
+                if (!response.ok) throw new Error('Ошибка отправки');
                 
                 loadingScreen.classList.remove('active');
                 successScreen.classList.add('active');
+
             } catch (error) {
-                alert(`Ошибка при отправке: ${error.message}`);
+                alert(`Ошибка: ${error.message}`);
                 loadingScreen.classList.remove('active');
-                backBtn.disabled = false;
-                document.querySelector('.header-title').style.opacity = '1';
+                header.style.opacity = '1';
+                backBtn.style.display = 'block';
             }
         }
 
