@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="ru">
 <head>
@@ -628,11 +627,14 @@
 
         // Инициализация
         document.addEventListener('DOMContentLoaded', function() {
-            // Назначение обработчиков
             topicHeader.addEventListener('click', toggleTopics);
         });
 
-        // Функции
+        // Функция экранирования Markdown
+        function escapeMarkdown(text) {
+            return text.replace(/[_*[\]()~`>#+\-=|{}.!]/g, '\\$&');
+        }
+
         function toggleTopics() {
             topicOptions.classList.toggle('active');
             topicHeader.classList.toggle('active');
@@ -716,7 +718,6 @@
                 
                 filePreviewContainer.appendChild(filePreview);
                 
-                // Имитация загрузки файла
                 setTimeout(() => {
                     updateFileStatus(fileId, 'success');
                 }, 1500);
@@ -744,19 +745,12 @@
 
         function removeFile(fileId) {
             const index = filesUploading.findIndex(f => f.id === fileId);
-            if (index !== -1) {
-                filesUploading.splice(index, 1);
-            }
+            if (index !== -1) filesUploading.splice(index, 1);
             
             const fileElement = document.getElementById(`file-${fileId}`);
-            if (fileElement) {
-                fileElement.remove();
-            }
+            if (fileElement) fileElement.remove();
             
-            // Если файлов больше нет, очищаем input
-            if (filesUploading.length === 0) {
-                fileInput.value = '';
-            }
+            if (filesUploading.length === 0) fileInput.value = '';
         }
 
         function validateForm() {
@@ -765,18 +759,21 @@
         }
 
         async function submitForm() {
-            // Блокируем интерфейс
             backBtn.disabled = true;
             document.querySelector('.header-title').style.opacity = '0.5';
             loadingScreen.classList.add('active');
             
-            // Получаем данные пользователя (имитация)
             const userId = getCookie('tg_user_id') || '12345';
             const username = getCookie('tg_username') || 'unknown_user';
             
-            const message = `📢 *${selectedTopic}*\n\n` +
-                           `👤 *Отправитель:* @${username} (ID: ${userId})\n\n` +
-                           `📝 *Содержимое:*\n${messageField.value}`;
+            // Экранирование текста
+            const escapedTopic = escapeMarkdown(selectedTopic);
+            const escapedUsername = escapeMarkdown(username);
+            const escapedMessage = escapeMarkdown(messageField.value);
+            
+            const message = `📢 *${escapedTopic}*\n\n` +
+                           `👤 *Отправитель:* @${escapedUsername} \\(ID: ${userId}\\)\n\n` +
+                           `📝 *Содержимое:*\n${escapedMessage}`;
 
             try {
                 let response;
@@ -786,8 +783,7 @@
                     formData.append('chat_id', CHAT_ID);
                     formData.append('caption', message);
                     
-                    // Добавляем только успешно загруженные файлы
-                    filesUploading.filter(f => f.status === 'success').forEach((fileObj, index) => {
+                    filesUploading.filter(f => f.status === 'success').forEach((fileObj) => {
                         formData.append('document', fileObj.file);
                     });
                     
@@ -812,7 +808,6 @@
                 const result = await response.json();
                 if (!result.ok) throw new Error(result.description || 'Неизвестная ошибка');
                 
-                // Показываем экран успеха
                 loadingScreen.classList.remove('active');
                 successScreen.classList.add('active');
             } catch (error) {
@@ -823,7 +818,6 @@
             }
         }
 
-        // Вспомогательная функция для получения cookie
         function getCookie(name) {
             const value = `; ${document.cookie}`;
             const parts = value.split(`; ${name}=`);
