@@ -7,7 +7,23 @@
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
     <style>
-        /* Стили остаются без изменений из предыдущей рабочей версии */
+        /* Обновленные стили */
+        .topic-title {
+            font-weight: 600;
+            color: var(--secondary);
+            font-size: 15px;
+            margin-bottom: 15px;
+            display: none;
+        }
+
+        .file-preview-container {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+
+        /* Остальные стили остаются без изменений */
         :root {
             --primary: #FF9500;
             --primary-light: #FFAA33;
@@ -283,12 +299,6 @@
             color: var(--text-light);
         }
 
-        .file-preview-container {
-            display: flex;
-            flex-direction: column;
-            gap: 10px;
-        }
-
         .file-preview {
             padding: 12px 15px;
             background: #FFF8F0;
@@ -562,7 +572,7 @@
             <div class="form-section" id="main-form">
                 <div class="form-group">
                     <label for="message">Подробное описание</label>
-                    <textarea id="message" placeholder="Опишите вашу проблему максимально подробно..." 
+                    <textarea id="message" placeholder="Выберите тему для отображения подсказки" 
                               maxlength="600" oninput="updateCounter()"></textarea>
                     <div class="char-counter" id="char-counter">
                         <span class="error-text">Минимум 10 символов</span>
@@ -570,7 +580,7 @@
                     </div>
                 </div>
 
-                <div class="add-files-btn" id="add-files-btn" onclick="toggleFileUpload()">Добавить файлы</div>
+                <div class="add-files-btn" id="add-files-btn" onclick="toggleFileUpload()">+ Добавить файлы</div>
 
                 <div class="file-upload-area" id="file-upload-area" 
                      onclick="document.getElementById('file-input').click()"
@@ -579,7 +589,7 @@
                      ondrop="handleDrop(event)">
                     <div class="file-upload-icon">📎</div>
                     <div class="file-upload-text">Перетащите файл сюда или нажмите для выбора</div>
-                    <div class="file-upload-hint">Максимальный размер: 5MB</div>
+                    <div class="file-upload-hint">Максимальный размер: 100MB</div>
                     <input type="file" class="file-input" id="file-input" onchange="handleFileSelect()">
                 </div>
                 <div class="file-preview-container" id="file-preview-container"></div>
@@ -654,6 +664,16 @@
             selectedTopic = topic;
             document.getElementById('selected-topic-text').textContent = topic;
             document.getElementById('topic-title').classList.add('active');
+            
+            // Обновление плейсхолдера
+            const placeholderMap = {
+                '🛠️ Проблема': 'Опишите вашу проблему максимально подробно...',
+                '💡 Идея': 'Опишите вашу идею как можно подробнее...',
+                '😊 Отзыв': 'Поделитесь вашими впечатлениями...',
+                '✉️ Другое': 'Опишите ваш вопрос или предложение...'
+            };
+            messageField.placeholder = placeholderMap[topic] || 'Выберите тему для отображения подсказки';
+            
             toggleTopics();
             mainForm.classList.add('active');
             validateForm();
@@ -663,8 +683,9 @@
             const fileUploadArea = document.getElementById('file-upload-area');
             const addFilesBtn = document.getElementById('add-files-btn');
             const isVisible = !fileUploadArea.classList.contains('active');
+            
             fileUploadArea.classList.toggle('active', isVisible);
-            addFilesBtn.textContent = isVisible ? 'Скрыть файлы' : 'Добавить файлы';
+            addFilesBtn.textContent = isVisible ? '- Скрыть файлы' : '+ Добавить файлы';
         }
 
         function updateCounter() {
@@ -702,8 +723,8 @@
             if (!files) files = fileInput.files;
             
             Array.from(files).forEach(file => {
-                if (file.size > 5 * 1024 * 1024) {
-                    alert(`Файл "${file.name}" превышает лимит 5MB`);
+                if (file.size > 100 * 1024 * 1024) {
+                    alert(`Файл "${file.name}" превышает лимит 100MB`);
                     return;
                 }
 
