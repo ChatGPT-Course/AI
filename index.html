@@ -751,48 +751,48 @@
         }
 
         async function initTelegramApp() {
-    const tg = Telegram.WebApp;
-    const user = tg.initDataUnsafe.user;
-    state.userId = user?.id?.toString() || "test-user";
-    state.username = user?.username || null;
-    
-    setCookie('tg_user_id', state.userId, 30);
-    
-    document.getElementById('user-name-text').textContent = 
-        [user?.first_name, user?.last_name].filter(Boolean).join(' ') || 'Пользователь';
-    
-    document.getElementById('user-id').textContent = `(${state.userId})`;
-    
-    const avatarElement = document.getElementById('user-avatar');
-    const fallbackElement = document.getElementById('avatar-fallback');
-    
-    // Всегда очищаем аватар перед загрузкой
-    avatarElement.innerHTML = '';
-    fallbackElement.style.display = 'block';
-
-    if (user?.photo_url) {
-        const img = new Image();
-        img.crossOrigin = 'anonymous'; // Разрешаем CORS
-        img.src = user.photo_url.replace('http://', 'https://'); // Форсируем HTTPS
-        
-        img.onload = () => {
-            fallbackElement.style.display = 'none';
-            avatarElement.appendChild(img);
-        };
-        
-        img.onerror = () => {
-            console.error('Ошибка загрузки аватарки');
+            const tg = Telegram.WebApp;
+            const user = tg.initDataUnsafe.user;
+            state.userId = user?.id?.toString() || "test-user";
+            state.username = user?.username || null;
+            
+            setCookie('tg_user_id', state.userId, 30);
+            
+            document.getElementById('user-name-text').textContent = 
+                [user?.first_name, user?.last_name].filter(Boolean).join(' ') || 'Пользователь';
+            
+            document.getElementById('user-id').textContent = `(${state.userId})`;
+            
+            const avatarElement = document.getElementById('user-avatar');
+            const fallbackElement = document.getElementById('avatar-fallback');
+            
+            // Всегда очищаем аватар перед загрузкой
+            avatarElement.innerHTML = '';
             fallbackElement.style.display = 'block';
-            const fallback = user?.first_name?.charAt(0).toUpperCase() || 'U';
-            fallbackElement.textContent = fallback;
-        };
-    } else {
-        const fallback = user?.first_name?.charAt(0).toUpperCase() || 'U';
-        fallbackElement.textContent = fallback;
-    }
-
-    await initDatabaseListener();
-}
+        
+            if (user?.photo_url) {
+                const img = new Image();
+                img.crossOrigin = 'anonymous'; // Разрешаем CORS
+                img.src = user.photo_url.replace('http://', 'https://'); // Форсируем HTTPS
+                
+                img.onload = () => {
+                    fallbackElement.style.display = 'none';
+                    avatarElement.appendChild(img);
+                };
+                
+                img.onerror = () => {
+                    console.error('Ошибка загрузки аватарки');
+                    fallbackElement.style.display = 'block';
+                    const fallback = user?.first_name?.charAt(0).toUpperCase() || 'U';
+                    fallbackElement.textContent = fallback;
+                };
+            } else {
+                const fallback = user?.first_name?.charAt(0).toUpperCase() || 'U';
+                fallbackElement.textContent = fallback;
+            }
+        
+            await initDatabaseListener();
+        }
         async function initTestMode() {
             document.getElementById('user-name-text').textContent = 'Тестовый пользователь';
             state.userId = getCookie('tg_user_id') || "test-user";
