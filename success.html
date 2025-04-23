@@ -3,80 +3,129 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Оплата успешна</title>
+    <title>Оплата успешно завершена</title>
     <style>
         body {
             font-family: 'Arial', sans-serif;
-            background-color: #f5f7fa;
+            background: linear-gradient(135deg, #FFA500 0%, #FFD700 100%);
             margin: 0;
             padding: 0;
             display: flex;
             justify-content: center;
             align-items: center;
-            height: 100vh;
-            text-align: center;
+            min-height: 100vh;
         }
-        .success-container {
+
+        .success-card {
             background: white;
-            border-radius: 16px;
+            border-radius: 24px;
             padding: 40px;
-            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+            box-shadow: 0 8px 32px rgba(0,0,0,0.1);
+            text-align: center;
             max-width: 400px;
             width: 90%;
+            transform: translateY(0);
+            animation: cardAppear 0.6s ease-out;
         }
+
+        .checkmark-wrapper {
+            margin: 0 auto 30px;
+            width: 100px;
+            height: 100px;
+            position: relative;
+        }
+
         .checkmark {
-            color: #4CAF50;
-            font-size: 72px;
-            margin-bottom: 20px;
+            stroke: #FFA500;
+            stroke-width: 4;
+            stroke-linecap: round;
+            stroke-linejoin: round;
+            fill: none;
+            animation: drawCheckmark 1s ease-in-out forwards,
+                       scaleCheckmark 0.3s ease-out 0.9s forwards;
         }
-        .success-title {
-            font-size: 24px;
-            font-weight: bold;
+
+        .success-text {
+            font-size: 22px;
+            font-weight: 600;
+            color: #2F2F2F;
             margin-bottom: 30px;
-            color: #2d3748;
+            line-height: 1.4;
         }
+
         .return-button {
-            background: #4285f4;
+            background: #FFA500;
             color: white;
             border: none;
-            border-radius: 8px;
-            padding: 12px 24px;
-            font-size: 16px;
+            border-radius: 12px;
+            padding: 16px 32px;
+            font-size: 18px;
             font-weight: 500;
             cursor: pointer;
-            transition: background 0.3s;
+            transition: all 0.3s ease;
             text-decoration: none;
-            display: inline-block;
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
         }
+
         .return-button:hover {
-            background: #3367d6;
+            background: #FF8C00;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(255,140,0,0.3);
         }
+
         .telegram-icon {
-            vertical-align: middle;
-            margin-right: 8px;
-            width: 20px;
-            height: 20px;
+            width: 24px;
+            height: 24px;
+            fill: white;
+        }
+
+        @keyframes drawCheckmark {
+            0% {
+                stroke-dasharray: 100;
+                stroke-dashoffset: 100;
+            }
+            100% {
+                stroke-dasharray: 100;
+                stroke-dashoffset: 0;
+            }
+        }
+
+        @keyframes scaleCheckmark {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.1); }
+            100% { transform: scale(1); }
+        }
+
+        @keyframes cardAppear {
+            0% {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            100% {
+                opacity: 1;
+                transform: translateY(0);
+            }
         }
     </style>
 </head>
 <body>
-    <div class="success-container">
-        <div class="checkmark">✓</div>
-        <div class="success-title">Полный курс успешно куплен</div>
-        <a href="https://t.me/ai_eggo_2_bot?start=payment_success" class="return-button">
-            <svg class="telegram-icon" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                <path d="M12 22C17.5228 22 22 17.5228 22 12C22 6.47715 17.5228 2 12 2C6.47715 2 2 6.47715 2 12C2 17.5228 6.47715 22 12 22Z" stroke="currentColor" stroke-width="2"/>
-                <path d="M8 13L11 16L16 8" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+    <div class="success-card">
+        <div class="checkmark-wrapper">
+            <svg class="checkmark" viewBox="0 0 52 52">
+                <path d="M14.1 27.2l7.1 7.2 16.7-16.8"/>
+            </svg>
+        </div>
+        
+        <div class="success-text">Полный курс<br>успешно куплен</div>
+        
+        <a href="https://t.me/ai_eggo_2_bot" class="return-button">
+            <svg class="telegram-icon" viewBox="0 0 24 24">
+                <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm4.64 6.8c-.25 0-.52.02-.8.07-1.53.22-4.52.85-7.28 1.62-.53.15-.9.56-.9 1.11s.37.96.9 1.11l2.04.6c.43 1.36 1.28 3.08 1.89 3.85.33.42.87.56 1.35.39.5-.18.8-.66.8-1.18v-1.93c1.3-.15 2.6-.3 3.55-.34.51-.03.92-.41.92-.92 0-.5-.41-.91-.92-.92-.95-.04-2.25-.19-3.55-.34v-1.25c0-.52-.3-1-.8-1.18-.49-.17-1.02-.03-1.35.39-.61.77-1.46 2.49-1.89 3.85l-1.39-.41c-.53-.16-1.17.06-1.46.51-.29.45-.19 1.04.22 1.37 1.22 1.02 3.35 2.43 5.28 2.43.36 0 .71-.05 1.05-.14 1.72-.49 3.45-1.82 4.2-3.41.68-1.45.68-3.18.01-4.63-.69-1.47-2.02-2.65-3.77-3.15-.33-.09-.68-.14-1.04-.14z"/>
             </svg>
             Вернуться в бота
         </a>
     </div>
-
-    <script>
-        // Автоматический редирект в бота через 5 секунд
-        setTimeout(function() {
-            window.location.href = "https://t.me/ai_eggo_2_bot?start=payment_success";
-        }, 5000);
-    </script>
 </body>
 </html>
