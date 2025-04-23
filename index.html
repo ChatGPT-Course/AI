@@ -1,1 +1,992 @@
-с
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Доступ к курсу</title>
+    <script src="https://telegram.org/js/telegram-web-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.0/firebase-database-compat.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #FF7A00;
+            --primary-light: #FF9E40;
+            --secondary: #FFD700;
+            --white: #FFFFFF;
+            --gray: #F5F5F5;
+            --dark: #333333;
+            --success: #4CAF50;
+            --error: #F44336;
+            --locked-bg: #F0F0F0;
+            --module-label: #666666;
+            --disabled: #CCCCCC;
+            --support-bg: #FFF5E6;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Montserrat', sans-serif;
+            outline: none !important;
+        }
+
+        body {
+            background: linear-gradient(135deg, #FFF3E0 0%, #FFFFFF 100%);
+            color: var(--dark);
+            min-height: 100vh;
+            padding: 20px;
+            position: relative;
+            overflow-x: hidden;
+        }
+
+        /* Фоновые элементы */
+        body::before {
+            content: "";
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: 
+                radial-gradient(circle at 20% 30%, rgba(255, 210, 0, 0.1) 0%, transparent 20%),
+                radial-gradient(circle at 80% 70%, rgba(255, 122, 0, 0.1) 0%, transparent 20%),
+                radial-gradient(circle at 40% 80%, rgba(255, 158, 0, 0.1) 0%, transparent 20%);
+            z-index: -1;
+            pointer-events: none;
+        }
+
+        /* Кнопка поддержки */
+        .support-container {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: flex-end;
+            gap: 15px;
+            z-index: 100;
+        }
+
+        .support-btn {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            background: var(--primary);
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+            box-shadow: 0 4px 12px rgba(255, 122, 0, 0.3);
+            cursor: pointer;
+            transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            position: relative;
+            z-index: 2;
+            border: none;
+            user-select: none;
+        }
+
+        .support-btn:hover {
+            transform: scale(1.1);
+            background: var(--primary-light);
+        }
+
+        .support-btn.active {
+            transform: rotate(90deg) scale(0.9);
+            background: var(--error);
+        }
+
+        .support-options {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            transform: translateY(100%);
+            opacity: 0;
+            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            pointer-events: none;
+        }
+
+        .support-options.active {
+            transform: translateY(0);
+            opacity: 1;
+            pointer-events: all;
+        }
+
+        .support-option {
+            padding: 12px 20px;
+            border-radius: 30px;
+            background: var(--support-bg);
+            color: var(--dark);
+            font-weight: 500;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+            cursor: pointer;
+            transition: all 0.2s;
+            transform: translateX(20px);
+            opacity: 0;
+            border: none;
+            text-decoration: none;
+        }
+
+        .support-options.active .support-option {
+            transform: translateX(0);
+            opacity: 1;
+        }
+
+        .support-option:nth-child(1) {
+            transition-delay: 0.1s;
+        }
+
+        .support-option:nth-child(2) {
+            transition-delay: 0.2s;
+        }
+
+        .support-option:hover {
+            transform: translateX(0) scale(1.05);
+            box-shadow: 0 6px 16px rgba(0, 0, 0, 0.15);
+            background: #FFEDCC;
+        }
+
+        .support-option.disabled {
+            background: var(--disabled);
+            color: #888;
+            cursor: not-allowed;
+        }
+
+        .support-option.disabled:hover {
+            transform: translateX(0) !important;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+            background: var(--disabled);
+        }
+
+        .support-icon {
+            font-size: 20px;
+        }
+
+        /* Остальные стили остаются без изменений */
+        .loading-screen {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(135deg, var(--white) 0%, #FFF3E0 100%);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+            transition: opacity 0.5s ease;
+        }
+
+        .loading-text {
+            font-size: 20px;
+            font-weight: 500;
+            margin-bottom: 20px;
+            color: var(--primary);
+        }
+
+        .loading-balls {
+            display: flex;
+            gap: 12px;
+        }
+
+        .loading-ball {
+            width: 16px;
+            height: 16px;
+            border-radius: 50%;
+            animation: bounce 1s infinite ease-in-out;
+        }
+
+        .loading-ball:nth-child(1) {
+            background: var(--primary);
+            animation-delay: 0s;
+        }
+
+        .loading-ball:nth-child(2) {
+            background: var(--secondary);
+            animation-delay: 0.2s;
+        }
+
+        .loading-ball:nth-child(3) {
+            background: #AAAAAA;
+            animation-delay: 0.4s;
+        }
+
+        @keyframes bounce {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-10px); }
+        }
+
+        #app-content {
+            opacity: 0;
+            transition: opacity 0.5s ease;
+        }
+
+        .profile-header {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            background: var(--white);
+            padding: 20px;
+            border-radius: 16px;
+            margin-bottom: 20px;
+            box-shadow: 0 4px 16px rgba(255, 122, 0, 0.1);
+            border: 1px solid rgba(255, 122, 0, 0.1);
+        }
+
+        .avatar {
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+            font-weight: bold;
+            font-size: 24px;
+            color: white;
+        }
+
+        .avatar img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .user-info {
+            flex: 1;
+        }
+
+        .user-name {
+            font-weight: 600;
+            font-size: 18px;
+            margin-bottom: 5px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .user-id {
+            font-size: 14px;
+            color: rgba(0, 0, 0, 0.4);
+            font-weight: 500;
+        }
+
+        .access-info {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .access-status {
+            font-size: 14px;
+            font-weight: 500;
+        }
+
+        .access-help {
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            background: var(--primary);
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 12px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.2s;
+            border: none;
+        }
+
+        .access-help:hover {
+            transform: scale(1.1);
+            background: var(--primary-light);
+        }
+
+        .divider {
+            height: 2px;
+            background: linear-gradient(to right, transparent, var(--primary), var(--secondary), transparent);
+            margin: 20px 0;
+            border: none;
+        }
+
+        .section-title {
+            font-size: 18px;
+            font-weight: 600;
+            color: var(--primary);
+            margin-bottom: 15px;
+            text-align: center;
+        }
+
+        .modules-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+
+        .module-card {
+            background: var(--white);
+            border-radius: 16px;
+            padding: 15px;
+            box-shadow: 0 4px 16px rgba(255, 122, 0, 0.1);
+            transition: all 0.3s ease;
+            border: 1px solid rgba(255, 122, 0, 0.1);
+            position: relative;
+            overflow: hidden;
+            aspect-ratio: 1/1;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .module-card.locked {
+            background: var(--locked-bg);
+            border-color: var(--gray);
+        }
+
+        .module-label {
+            background: var(--module-label);
+            color: white;
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 12px;
+            font-weight: 500;
+            align-self: flex-start;
+            margin-bottom: auto;
+        }
+
+        .module-content {
+            margin-top: auto;
+            text-align: center;
+        }
+
+        .module-title {
+            font-weight: 500;
+            font-size: 16px;
+            color: var(--dark);
+            line-height: 1.3;
+        }
+
+        .module-card.locked .module-title {
+            color: #666;
+        }
+
+        .module-title b {
+            font-weight: 600;
+        }
+
+        .lock-icon {
+            position: absolute;
+            top: 15px;
+            right: 15px;
+            font-size: 20px;
+            opacity: 0.8;
+            color: var(--primary);
+        }
+
+        /* Модальные окна */
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0,0,0,0.5);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+        }
+
+        .modal-content {
+            background: var(--white);
+            border-radius: 16px;
+            padding: 30px 25px;
+            width: 85%;
+            max-width: 300px;
+            text-align: center;
+            position: relative;
+            box-shadow: 0 8px 32px rgba(0,0,0,0.2);
+        }
+
+        .close-modal {
+            position: absolute;
+            top: 15px;
+            right: 15px;
+            font-size: 20px;
+            cursor: pointer;
+            color: #999;
+            transition: color 0.2s;
+            border: none;
+            background: none;
+        }
+
+        .close-modal:hover {
+            color: var(--primary);
+        }
+
+        .modal-title {
+            background: linear-gradient(to right, var(--primary), var(--secondary));
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+            font-weight: 700;
+            font-size: 20px;
+            margin-bottom: 15px;
+            text-align: center;
+        }
+
+        .modal-text {
+            margin-bottom: 25px;
+            line-height: 1.5;
+            font-size: 15px;
+            text-align: left;
+        }
+
+        .modal-btn {
+            background: linear-gradient(to right, var(--primary), var(--primary-light));
+            color: var(--white);
+            border: none;
+            padding: 14px;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            width: 100%;
+            font-size: 16px;
+            transition: all 0.2s;
+            margin-top: 10px;
+        }
+
+        .modal-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(255, 122, 0, 0.2);
+        }
+
+        .modal-buttons {
+            display: flex;
+            gap: 10px;
+            margin-top: 20px;
+        }
+
+        .modal-btn-secondary {
+            background: var(--white);
+            color: var(--primary);
+            border: 1px solid var(--primary);
+        }
+
+        .modal-btn-secondary:hover {
+            background: rgba(255, 122, 0, 0.1);
+        }
+    </style>
+</head>
+<body>
+    <!-- Экран загрузки -->
+    <div class="loading-screen" id="loading-screen">
+        <div class="loading-text">Загрузка</div>
+        <div class="loading-balls">
+            <div class="loading-ball"></div>
+            <div class="loading-ball"></div>
+            <div class="loading-ball"></div>
+        </div>
+    </div>
+
+    <!-- Основной контент -->
+    <div id="app-content">
+        <!-- Шапка профиля -->
+        <div class="profile-header">
+            <div class="avatar" id="user-avatar">
+                <span id="avatar-fallback">U</span>
+            </div>
+            <div class="user-info">
+                <div class="user-name" id="user-name">
+                    <span id="user-name-text">Загрузка...</span>
+                    <span class="user-id" id="user-id"></span>
+                </div>
+                <div class="access-info">
+                    <div class="access-status" id="access-status">Проверка доступа...</div>
+                    <div class="access-help" id="access-help">?</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Разделительная линия -->
+        <hr class="divider">
+
+        <!-- Секция модулей -->
+        <div class="section-title">Модули курса</div>
+
+        <!-- Модули курса -->
+        <div class="modules-grid" id="modules-container">
+            <!-- Заполнится динамически -->
+        </div>
+
+        <!-- Заключительная разделительная линия -->
+        <hr class="divider">
+
+        <!-- Контейнер поддержки -->
+        <div class="support-container">
+            <div class="support-options" id="supportOptions">
+                <a href="help.html" class="support-option">
+                    <span class="support-icon">📩</span>
+                    Создать обращение
+                </a>
+                <button class="support-option" id="contactSupportBtn">
+                    <span class="support-icon">💬</span>
+                    Написать в поддержку
+                </button>
+            </div>
+            <button class="support-btn" id="supportBtn">🛟</button>
+        </div>
+
+        <!-- Модальное окно блокировки -->
+        <div class="modal-overlay" id="lock-modal">
+            <div class="modal-content">
+                <button class="close-modal" id="close-lock-modal">×</button>
+                <div class="modal-text">
+                    Этот модуль недоступен в демо-версии. Для полного доступа к материалам курса необходимо оформить подписку.
+                </div>
+                <button class="modal-btn" id="to-payment-btn">Получить полный доступ</button>
+            </div>
+        </div>
+
+        <!-- Модальное окно справки -->
+        <div class="modal-overlay" id="help-modal">
+            <div class="modal-content">
+                <button class="close-modal" id="close-help-modal">×</button>
+                <div class="modal-title" id="help-modal-title"></div>
+                <div class="modal-text" id="help-modal-text"></div>
+                <button class="modal-btn" id="help-payment-btn" style="display: none;">Получить полный доступ</button>
+            </div>
+        </div>
+
+        <!-- Модальное окно подтверждения связи с поддержкой -->
+        <div class="modal-overlay" id="contact-modal">
+            <div class="modal-content">
+                <button class="close-modal" id="close-contact-modal">×</button>
+                <div class="modal-title">Подтверждение</div>
+                <div class="modal-text">
+                    После нажатия на кнопку "Связаться" приложение будет закрыто и вы получите ссылку на телеграмм аккаунт администратора.
+                </div>
+                <div class="modal-buttons">
+                    <button class="modal-btn modal-btn-secondary" id="cancel-contact-btn">Отмена</button>
+                    <button class="modal-btn" id="confirm-contact-btn">Связаться</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Конфиг Firebase
+        const firebaseConfig = {
+            apiKey: "AIzaSyCMos6Y7C-krTLuKCI4VJG-TFLo6QI--k8",
+            authDomain: "vrot-x-7a48f.firebaseapp.com",
+            databaseURL: "https://vrot-x-7a48f-default-rtdb.firebaseio.com",
+            projectId: "vrot-x-7a48f",
+            storageBucket: "vrot-x-7a48f.appspot.com",
+            messagingSenderId: "622297225288",
+            appId: "1:622297225288:web:5df6a5b02ffddedd96e07d"
+        };
+
+        // Конфигурация Puzzle Bot API
+        const puzzleBotConfig = {
+            apiToken: 'Xer726MfatevnjQzPJaP4TfPSd7dd1HN',
+            commandName: 'Помощь'
+        };
+
+        // Инициализация Firebase
+        const app = firebase.initializeApp(firebaseConfig);
+        const database = firebase.database();
+
+        // Состояние приложения
+        const state = {
+            userId: null,
+            username: null,
+            isPaid: false,
+            dbRef: null,
+            isLoaded: false
+        };
+
+        // Инициализация кнопки поддержки
+        function initSupportButton() {
+            const supportBtn = document.getElementById('supportBtn');
+            const supportOptions = document.getElementById('supportOptions');
+            const contactSupportBtn = document.getElementById('contactSupportBtn');
+
+            supportBtn.addEventListener('click', () => {
+                supportBtn.classList.toggle('active');
+                supportOptions.classList.toggle('active');
+                
+                if (supportBtn.classList.contains('active')) {
+                    supportBtn.innerHTML = '×';
+                } else {
+                    supportBtn.innerHTML = '🛟';
+                }
+            });
+
+            // Обработчик кнопки "Написать в поддержку"
+            contactSupportBtn.addEventListener('click', () => {
+                document.getElementById('contact-modal').style.display = 'flex';
+                supportBtn.classList.remove('active');
+                supportOptions.classList.remove('active');
+                supportBtn.innerHTML = '🛟';
+            });
+        }
+
+        // Надежная функция закрытия WebApp
+        function closeMiniApp() {
+            // 1. Основной способ через Telegram WebApp API
+            if (window.Telegram && Telegram.WebApp && Telegram.WebApp.close) {
+                try {
+                    Telegram.WebApp.close();
+                    return;
+                } catch (e) {
+                    console.error("Ошибка при закрытии через Telegram API:", e);
+                }
+            }
+
+            // 2. Резервный способ через редирект
+            try {
+                window.location.href = "https://t.me";
+                setTimeout(() => {
+                    try {
+                        window.close();
+                    } catch (e) {
+                        console.error("Ошибка при window.close():", e);
+                    }
+                }, 100);
+            } catch (e) {
+                console.error("Ошибка при редиректе:", e);
+            }
+        }
+
+        // Отправка команды без ожидания ответа
+        function sendHelpCommand() {
+            if (!state.userId) return;
+
+            const url = new URL('https://api.puzzlebot.top/');
+            url.searchParams.append('token', puzzleBotConfig.apiToken);
+            url.searchParams.append('method', 'sendCommand');
+            url.searchParams.append('command_name', puzzleBotConfig.commandName);
+            url.searchParams.append('tg_chat_id', state.userId);
+
+            // Отправляем запрос без ожидания ответа
+            fetch(url.toString(), {
+                method: 'GET',
+                headers: {'Accept': 'application/json'},
+                keepalive: true // Гарантирует отправку даже при закрытии страницы
+            }).catch(() => {}); // Игнорируем ошибки
+        }
+
+        // Функция для сохранения ID в cookie
+        function setCookie(name, value, days) {
+            let expires = "";
+            if (days) {
+                const date = new Date();
+                date.setTime(date.getTime() + (days * 24 * 60 * 60 * 1000));
+                expires = "; expires=" + date.toUTCString();
+            }
+            document.cookie = name + "=" + (value || "") + expires + "; path=/";
+        }
+
+        // Функция для получения ID из cookie
+        function getCookie(name) {
+            const nameEQ = name + "=";
+            const ca = document.cookie.split(';');
+            for(let i=0; i < ca.length; i++) {
+                let c = ca[i];
+                while (c.charAt(0) === ' ') c = c.substring(1, c.length);
+                if (c.indexOf(nameEQ) === 0) return c.substring(nameEQ.length, c.length);
+            }
+            return null;
+        }
+
+        // Функция для скрытия экрана загрузки
+        function hideLoadingScreen() {
+            const loadingScreen = document.getElementById('loading-screen');
+            loadingScreen.style.opacity = '0';
+            setTimeout(() => {
+                loadingScreen.style.display = 'none';
+                document.getElementById('app-content').style.opacity = '1';
+            }, 500);
+        }
+
+        // Функция для инициализации промокодов
+        async function initPromoCodes() {
+            return new Promise((resolve) => {
+                const promoCodesRef = database.ref('promo');
+                
+                promoCodesRef.once('value').then((snapshot) => {
+                    if (!snapshot.exists()) {
+                        // Создаем структуру промокодов
+                        const defaultPromoCodes = {
+                            TEST1: { activation: 0, price: 0 },
+                            TEST2: { activation: 0, price: 0 },
+                            TEST3: { activation: 0, price: 0 }
+                        };
+                        
+                        promoCodesRef.set(defaultPromoCodes)
+                            .then(() => {
+                                console.log('Промокоды инициализированы');
+                                resolve();
+                            })
+                            .catch((error) => {
+                                console.error('Ошибка при создании промокодов:', error);
+                                resolve();
+                            });
+                    } else {
+                        resolve();
+                    }
+                }).catch((error) => {
+                    console.error('Ошибка при проверке промокодов:', error);
+                    resolve();
+                });
+            });
+        }
+
+        // Основная функция
+        document.addEventListener('DOMContentLoaded', async () => {
+            // Показываем экран загрузки
+            const loadingScreen = document.getElementById('loading-screen');
+            loadingScreen.style.display = 'flex';
+            
+            // Инициализируем модальные окна
+            initModals();
+            initSupportButton();
+
+            // Убираем стандартную заставку Telegram
+            if (window.Telegram?.WebApp) {
+                Telegram.WebApp.ready();
+                Telegram.WebApp.expand();
+                Telegram.WebApp.enableClosingConfirmation();
+            }
+
+            // Инициализируем промокоды
+            await initPromoCodes();
+
+            if (window.Telegram?.WebApp) {
+                await initTelegramApp();
+            } else {
+                await initTestMode();
+            }
+
+            // Помечаем, что загрузка завершена
+            state.isLoaded = true;
+            hideLoadingScreen();
+        });
+
+        function initModals() {
+            // Модальное окно блокировки
+            document.getElementById('close-lock-modal').addEventListener('click', () => {
+                document.getElementById('lock-modal').style.display = 'none';
+            });
+
+            document.getElementById('to-payment-btn').addEventListener('click', () => {
+                window.location.href = "oplata.html";
+            });
+
+            // Модальное окно справки
+            document.getElementById('access-help').addEventListener('click', showHelpModal);
+            document.getElementById('close-help-modal').addEventListener('click', () => {
+                document.getElementById('help-modal').style.display = 'none';
+            });
+
+            document.getElementById('help-payment-btn').addEventListener('click', () => {
+                window.location.href = "oplata.html";
+            });
+
+            // Модальное окно подтверждения связи с поддержкой
+            document.getElementById('close-contact-modal').addEventListener('click', () => {
+                document.getElementById('contact-modal').style.display = 'none';
+            });
+
+            document.getElementById('cancel-contact-btn').addEventListener('click', () => {
+                document.getElementById('contact-modal').style.display = 'none';
+            });
+
+            document.getElementById('confirm-contact-btn').addEventListener('click', () => {
+                // Отправляем команду боту
+                sendHelpCommand();
+                
+                // Закрываем мини-приложение
+                closeMiniApp();
+                
+                // Дополнительная попытка закрытия через 500мс
+                setTimeout(closeMiniApp, 500);
+            });
+        }
+
+        function showHelpModal() {
+            const helpModal = document.getElementById('help-modal');
+            const titleElement = document.getElementById('help-modal-title');
+            const textElement = document.getElementById('help-modal-text');
+            const paymentBtn = document.getElementById('help-payment-btn');
+
+            if (state.isPaid) {
+                titleElement.textContent = "Полный доступ";
+                textElement.textContent = "Полная версия курса без ограничений.";
+                paymentBtn.style.display = 'none';
+            } else {
+                titleElement.textContent = "Демо-просмотр";
+                textElement.textContent = "Ограниченная версия курса, позволяет получить небольшой материал для ознакомления курса. Для получения всех услуг - приобретите курс полностью.";
+                paymentBtn.style.display = 'block';
+            }
+
+            helpModal.style.display = 'flex';
+        }
+
+        async function initTelegramApp() {
+            const tg = Telegram.WebApp;
+            const user = tg.initDataUnsafe.user;
+            state.userId = user.id.toString();
+            state.username = user.username || null;
+            
+            // Сохраняем ID пользователя в cookie
+            setCookie('tg_user_id', state.userId, 30);
+            
+            // Устанавливаем данные пользователя
+            document.getElementById('user-name-text').textContent = 
+                [user.first_name, user.last_name].filter(Boolean).join(' ') || 'Пользователь';
+            
+            // Добавляем ID пользователя
+            document.getElementById('user-id').textContent = `(${state.userId})`;
+            
+            // Аватар
+            const avatarElement = document.getElementById('user-avatar');
+            if (user.photo_url) {
+                const img = new Image();
+                img.src = user.photo_url;
+                img.onload = () => {
+                    avatarElement.innerHTML = '';
+                    avatarElement.appendChild(img);
+                    checkAllLoaded();
+                };
+                img.onerror = () => {
+                    const fallback = user.first_name?.charAt(0).toUpperCase() || 'U';
+                    document.getElementById('avatar-fallback').textContent = fallback;
+                    checkAllLoaded();
+                };
+            } else {
+                const fallback = user.first_name?.charAt(0).toUpperCase() || 'U';
+                document.getElementById('avatar-fallback').textContent = fallback;
+                checkAllLoaded();
+            }
+
+            // Инициализируем слушатель изменений в БД
+            await initDatabaseListener();
+        }
+
+        function checkAllLoaded() {
+            if (state.userId && state.isLoaded) {
+                hideLoadingScreen();
+            }
+        }
+
+        async function initTestMode() {
+            // Для тестирования без Telegram
+            document.getElementById('user-name-text').textContent = 'Тестовый пользователь';
+            state.userId = getCookie('tg_user_id') || "test-user";
+            state.username = "test_user";
+            document.getElementById('user-id').textContent = `(${state.userId})`;
+            document.getElementById('avatar-fallback').textContent = 'T';
+            
+            const urlParams = new URLSearchParams(window.location.search);
+            state.isPaid = urlParams.get('oplata') === '1';
+            
+            await updateUI();
+        }
+
+        async function initDatabaseListener() {
+            return new Promise((resolve) => {
+                state.dbRef = database.ref('users/' + state.userId);
+                
+                // Обработчик изменений
+                state.dbRef.on('value', (snapshot) => {
+                    const userData = snapshot.val();
+                    if (userData) {
+                        state.isPaid = userData.oplata === 1;
+                        
+                        // Если username отсутствует в БД, сохраняем его
+                        if (!userData.username && state.username) {
+                            state.dbRef.update({ username: state.username });
+                        }
+                    }
+                    updateUI().then(resolve);
+                });
+
+                // Создаем запись пользователя если не существует
+                state.dbRef.once('value').then((snapshot) => {
+                    if (!snapshot.exists()) {
+                        state.dbRef.set({
+                            name: document.getElementById('user-name-text').textContent,
+                            username: state.username,
+                            oplata: 0
+                        });
+                    }
+                });
+            });
+        }
+
+        async function updateUI() {
+            return new Promise((resolve) => {
+                // Обновляем статус доступа
+                const statusElement = document.getElementById('access-status');
+                if (state.isPaid) {
+                    statusElement.textContent = "Полный доступ";
+                    statusElement.style.color = "var(--primary)";
+                } else {
+                    statusElement.textContent = "Демо просмотр";
+                    statusElement.style.color = "#666";
+                }
+
+                // Рендерим модули
+                renderModules(false);
+                resolve();
+            });
+        }
+
+        function renderModules(withAnimation = true) {
+            const modules = [
+                { id: 0, title: "Доступ к<br><b>ChatGPT</b>", isDemo: true },
+                { id: 1, title: "Основы<br><b>ChatGPT</b>" },
+                { id: 2, title: "<b>ChatGPT</b><br><b>PRO</b>" },
+                { id: 3, title: "<b>ChatGPT</b><br><b>MASTER</b>" }
+            ];
+
+            let html = '';
+            modules.forEach((module, index) => {
+                const isLocked = !module.isDemo && !state.isPaid;
+                html += `
+                    <div class="module-card ${isLocked ? 'locked' : ''}" 
+                         style="${withAnimation ? `animation: fadeIn 0.4s ease ${index * 0.1}s forwards;` : 'opacity: 1;'}"
+                         onclick="handleModuleClick(${module.id}, ${isLocked})">
+                        <div class="module-label">Модуль ${module.id}</div>
+                        ${isLocked ? '<div class="lock-icon">🔒</div>' : ''}
+                        <div class="module-content">
+                            <div class="module-title">${module.title}</div>
+                        </div>
+                    </div>
+                `;
+            });
+            document.getElementById('modules-container').innerHTML = html;
+        }
+
+        function handleModuleClick(moduleId, isLocked) {
+            if (isLocked) {
+                document.getElementById('lock-modal').style.display = 'flex';
+                return;
+            }
+            alert(`Открываем модуль ${moduleId}`);
+        }
+
+        // Глобальные функции для обработки событий
+        window.handleModuleClick = handleModuleClick;
+    </script>
+</body>
+</html>
