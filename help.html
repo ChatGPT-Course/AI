@@ -2,71 +2,90 @@
 <html lang="ru">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Техническая поддержка</title>
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
     <style>
-        /* Стили остаются без изменений из предыдущей рабочей версии */
+        /* Основные переменные стилей */
         :root {
             --primary: #FF9500;
             --primary-light: #FFAA33;
             --secondary: #FF6B00;
             --accent: #FFD700;
-            --background: linear-gradient(135deg, #FFF8F0 0%, #FFE8D6 100%);
-            --card-bg: rgba(255, 255, 255, 0.95);
+            --background: #FFFFFF;
+            --card-bg: #FFFFFF;
             --text: #333333;
             --text-light: #666666;
             --error: #FF3B30;
             --success: #34C759;
             --shadow: 0 8px 30px rgba(0, 0, 0, 0.08);
+            --border-radius: 16px;
+            --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
         }
 
+        /* Сброс стилей и базовые настройки */
         * {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
-            font-family: 'Segoe UI', -apple-system, BlinkMacSystemFont, sans-serif;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        html {
+            font-size: 16px;
+            height: 100%;
+            overflow: hidden;
         }
 
         body {
             background: var(--background);
             color: var(--text);
-            min-height: 100vh;
-            line-height: 1.6;
+            height: 100vh;
+            width: 100vw;
+            overflow: hidden;
+            position: relative;
+            display: flex;
+            flex-direction: column;
         }
 
-        .container {
-            max-width: 600px;
-            margin: 0 auto;
+        /* Контейнер приложения */
+        .app-container {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
             padding: 20px;
+            overflow: hidden;
+            position: relative;
         }
 
+        /* Шапка */
         .header {
             display: flex;
             align-items: center;
             justify-content: center;
-            margin-bottom: 30px;
             position: relative;
+            padding: 10px 0;
+            margin-bottom: 25px;
+            z-index: 10;
         }
 
         .back-btn {
             position: absolute;
             left: 0;
-            background: none;
-            border: 2px solid var(--primary);
-            color: var(--primary);
             width: 40px;
             height: 40px;
-            border-radius: 10px;
-            font-weight: bold;
+            border: 2px solid var(--primary);
+            border-radius: 12px;
+            background: none;
+            color: var(--primary);
+            font-size: 20px;
             cursor: pointer;
-            transition: all 0.3s ease;
+            transition: var(--transition);
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 20px;
-            -webkit-tap-highlight-color: transparent;
         }
 
         .back-btn:hover {
@@ -74,83 +93,70 @@
         }
 
         .header-title {
-            color: var(--secondary);
-            font-size: 24px;
+            font-size: 1.5rem;
             font-weight: 700;
+            color: var(--secondary);
             text-align: center;
         }
 
-        .support-card {
-            background: var(--card-bg);
-            border-radius: 20px;
-            padding: 30px;
-            box-shadow: var(--shadow);
-            backdrop-filter: blur(10px);
-            margin-bottom: 30px;
-            position: relative;
+        /* Основная форма */
+        .main-content {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
         }
 
+        /* Выбор темы */
         .topic-selector {
-            margin-bottom: 25px;
+            margin-bottom: 1.5rem;
             position: relative;
         }
 
         .topic-header {
+            background: var(--card-bg);
+            border: 2px solid #FFE0B2;
+            border-radius: var(--border-radius);
+            padding: 1rem;
+            cursor: pointer;
             display: flex;
             align-items: center;
             justify-content: space-between;
-            padding: 16px 20px;
-            background: white;
-            border-radius: 14px;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            border: 2px solid #FFE0B2;
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.03);
-        }
-
-        .topic-header:hover {
-            border-color: var(--primary-light);
-            box-shadow: 0 6px 16px rgba(255, 149, 0, 0.1);
+            transition: var(--transition);
         }
 
         .topic-header.active {
             border-color: var(--primary);
+            box-shadow: 0 4px 12px rgba(255, 149, 0, 0.1);
         }
 
         .topic-options {
             position: absolute;
-            top: 100%;
+            top: calc(100% + 5px);
             left: 0;
             right: 0;
+            background: var(--card-bg);
+            border-radius: var(--border-radius);
+            box-shadow: var(--shadow);
             max-height: 0;
             overflow: hidden;
-            transition: all 0.4s ease;
-            margin-top: 5px;
-            background: white;
-            border-radius: 14px;
-            transform-origin: top;
-            transform: scaleY(0);
-            opacity: 0;
-            border: 2px solid #FFE0B2;
-            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
-            z-index: 10;
+            transition: var(--transition);
+            z-index: 100;
         }
 
         .topic-options.active {
             max-height: 400px;
-            transform: scaleY(1);
-            opacity: 1;
+            border: 2px solid #FFE0B2;
         }
 
         .topic-option {
-            padding: 12px 20px;
-            cursor: pointer;
-            transition: all 0.2s ease;
+            padding: 1rem;
             display: flex;
             align-items: center;
-            gap: 12px;
-            border-bottom: 1px solid #FFF0E0;
-            font-size: 14px;
+            gap: 1rem;
+            cursor: pointer;
+            transition: var(--transition);
+            border-bottom: 1px solid rgba(255, 224, 178, 0.3);
         }
 
         .topic-option:last-child {
@@ -159,52 +165,51 @@
 
         .topic-option:hover {
             background: rgba(255, 149, 0, 0.05);
-            transform: translateX(5px);
         }
 
         .topic-icon {
-            font-size: 18px;
-            width: 24px;
+            font-size: 1.25rem;
+            width: 30px;
             text-align: center;
-            flex-shrink: 0;
+        }
+
+        /* Форма обращения */
+        .support-form {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
         }
 
         .form-section {
-            opacity: 0;
-            max-height: 0;
-            overflow: hidden;
-            transition: all 0.4s ease;
-            transform: translateY(10px);
-        }
-
-        .form-section.active {
-            opacity: 1;
-            max-height: 1000px;
-            transform: translateY(0);
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            overflow-y: auto;
+            padding-bottom: 20px;
         }
 
         .form-group {
-            margin-bottom: 20px;
+            margin-bottom: 1.5rem;
         }
 
         label {
             display: block;
-            margin-bottom: 10px;
+            margin-bottom: 0.75rem;
             font-weight: 600;
             color: var(--secondary);
-            font-size: 15px;
         }
 
         textarea {
             width: 100%;
-            padding: 16px 20px;
+            padding: 1rem;
             border: 2px solid #FFE0B2;
-            border-radius: 14px;
+            border-radius: var(--border-radius);
             min-height: 150px;
             resize: vertical;
-            font-size: 15px;
-            transition: all 0.3s ease;
-            background: white;
+            font-size: 1rem;
+            transition: var(--transition);
+            background: var(--card-bg);
         }
 
         textarea:focus {
@@ -213,36 +218,33 @@
             box-shadow: 0 0 0 3px rgba(255, 149, 0, 0.2);
         }
 
-        .add-files-btn {
-            display: inline-flex;
-            align-items: center;
-            gap: 8px;
+        /* Загрузка файлов */
+        .file-upload-section {
+            margin: 1rem 0;
+        }
+
+        .file-upload-trigger {
             color: var(--primary);
             font-weight: 600;
             cursor: pointer;
-            margin-bottom: 20px;
-            transition: all 0.3s ease;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            transition: var(--transition);
         }
 
-        .add-files-btn:hover {
+        .file-upload-trigger:hover {
             color: var(--secondary);
-            transform: translateX(5px);
-        }
-
-        .add-files-btn::before {
-            content: "+";
-            font-size: 20px;
         }
 
         .file-upload-area {
             border: 2px dashed #FFE0B2;
-            border-radius: 14px;
-            padding: 30px;
+            border-radius: var(--border-radius);
+            padding: 2rem;
             text-align: center;
             cursor: pointer;
-            transition: all 0.3s ease;
-            background: white;
-            margin-bottom: 20px;
+            transition: var(--transition);
+            margin: 1rem 0;
             position: relative;
             overflow: hidden;
             display: none;
@@ -252,12 +254,7 @@
             display: block;
         }
 
-        .file-upload-area:hover {
-            border-color: var(--primary-light);
-            background: rgba(255, 149, 0, 0.03);
-        }
-
-        .file-upload-area.file-drag {
+        .file-upload-area.dragover {
             border-color: var(--primary);
             background: rgba(255, 149, 0, 0.05);
         }
@@ -266,38 +263,22 @@
             display: none;
         }
 
-        .file-upload-icon {
-            font-size: 40px;
-            color: var(--primary);
-            margin-bottom: 15px;
-            transition: all 0.3s ease;
-        }
-
-        .file-upload-text {
-            color: var(--text-light);
-            margin-bottom: 5px;
-        }
-
-        .file-upload-hint {
-            font-size: 13px;
-            color: var(--text-light);
-        }
-
-        .file-preview-container {
+        /* Прелоадеры файлов */
+        .file-previews {
             display: flex;
             flex-direction: column;
-            gap: 10px;
+            gap: 0.75rem;
+            margin-top: 1rem;
         }
 
         .file-preview {
-            padding: 12px 15px;
-            background: #FFF8F0;
-            border-radius: 10px;
+            background: rgba(255, 224, 178, 0.1);
+            border-radius: 12px;
+            padding: 0.75rem 1rem;
             display: flex;
             align-items: center;
             justify-content: space-between;
             animation: fadeIn 0.3s ease;
-            position: relative;
         }
 
         @keyframes fadeIn {
@@ -305,121 +286,108 @@
             to { opacity: 1; transform: translateY(0); }
         }
 
-        .file-status {
-            margin-right: 10px;
-            font-size: 18px;
-        }
-
-        .file-status.loading {
-            color: var(--primary);
-            animation: spin 1s linear infinite;
-        }
-
-        .file-status.success {
-            color: var(--success);
-        }
-
-        .file-status.error {
-            color: var(--error);
-        }
-
-        @keyframes spin {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
-        }
-
         .file-info {
             display: flex;
             align-items: center;
-            gap: 10px;
+            gap: 0.75rem;
             overflow: hidden;
-            flex-grow: 1;
+        }
+
+        .file-status {
+            width: 24px;
+            height: 24px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
         }
 
         .file-name {
             white-space: nowrap;
             overflow: hidden;
             text-overflow: ellipsis;
+            max-width: 200px;
         }
 
-        .remove-file {
+        .file-progress {
+            width: 100px;
+            height: 4px;
+            background: #eee;
+            border-radius: 2px;
+            overflow: hidden;
+            margin-left: auto;
+        }
+
+        .file-progress-bar {
+            height: 100%;
+            background: var(--primary);
+            transition: width 0.3s ease;
+        }
+
+        .file-remove {
             color: #999;
             cursor: pointer;
-            font-size: 18px;
-            margin-left: 10px;
-            transition: all 0.2s ease;
+            margin-left: 1rem;
+            transition: var(--transition);
         }
 
-        .remove-file:hover {
+        .file-remove:hover {
             color: var(--error);
         }
 
+        /* Счётчик символов */
         .char-counter {
             display: flex;
             justify-content: space-between;
-            font-size: 14px;
+            font-size: 0.875rem;
             color: var(--text-light);
-            margin-top: -10px;
-            margin-bottom: 20px;
+            margin-top: 0.5rem;
             opacity: 0;
             height: 0;
-            transition: all 0.3s ease;
+            transition: var(--transition);
         }
 
         .char-counter.visible {
             opacity: 1;
             height: auto;
-            margin-bottom: 20px;
         }
 
         .char-counter.error {
             color: var(--error);
         }
 
+        /* Кнопка отправки */
         .submit-btn {
-            width: 100%;
-            padding: 18px;
             background: var(--primary);
             color: white;
             border: none;
-            border-radius: 14px;
-            font-size: 16px;
+            border-radius: var(--border-radius);
+            padding: 1.25rem;
+            font-size: 1rem;
             font-weight: 600;
             cursor: pointer;
-            transition: all 0.3s ease;
-            position: relative;
-            overflow: hidden;
-            box-shadow: 0 4px 15px rgba(255, 149, 0, 0.3);
+            transition: var(--transition);
+            margin-top: auto;
             display: flex;
             align-items: center;
             justify-content: center;
-            gap: 8px;
+            gap: 0.5rem;
         }
 
         .submit-btn:disabled {
-            background: #FFD8B2;
+            opacity: 0.7;
             cursor: not-allowed;
-            box-shadow: none;
-            transform: none !important;
+            background: #FFD8B2;
         }
 
         .submit-btn:hover:not(:disabled) {
             background: var(--primary-light);
-            transform: translateY(-3px);
-            box-shadow: 0 8px 20px rgba(255, 149, 0, 0.4);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 15px rgba(255, 149, 0, 0.3);
         }
 
-        .submit-btn:active:not(:disabled) {
-            transform: translateY(0);
-        }
-
-        .submit-icon {
-            font-size: 18px;
-            transition: all 0.3s ease;
-        }
-
-        .loading-screen, .success-screen {
-            position: absolute;
+        /* Полноэкранные модалки */
+        .fullscreen-overlay {
+            position: fixed;
             top: 0;
             left: 0;
             right: 0;
@@ -429,50 +397,51 @@
             flex-direction: column;
             align-items: center;
             justify-content: center;
-            padding: 40px;
+            padding: 2rem;
+            z-index: 1000;
             opacity: 0;
-            pointer-events: none;
-            transition: all 0.5s ease;
-            border-radius: 20px;
-            text-align: center;
-            z-index: 10;
+            visibility: hidden;
+            transition: var(--transition);
         }
 
-        .loading-screen.active, .success-screen.active {
+        .fullscreen-overlay.active {
             opacity: 1;
-            pointer-events: all;
+            visibility: visible;
         }
 
-        .loading-icon {
+        /* Лоадер */
+        .loading-indicator {
             width: 80px;
             height: 80px;
             border: 8px solid #FFE0B2;
             border-top-color: var(--primary);
             border-radius: 50%;
             animation: spin 1s linear infinite;
-            margin-bottom: 30px;
+            margin-bottom: 2rem;
         }
 
-        .loading-title {
-            font-size: 24px;
-            font-weight: 700;
-            color: var(--secondary);
-            margin-bottom: 15px;
+        @keyframes spin {
+            100% { transform: rotate(360deg); }
+        }
+
+        /* Экран успеха */
+        .success-screen {
+            text-align: center;
+            max-width: 400px;
         }
 
         .success-icon {
             width: 100px;
             height: 100px;
-            background: var(--primary);
+            background: var(--success);
             border-radius: 50%;
             display: flex;
             align-items: center;
             justify-content: center;
-            margin-bottom: 30px;
-            animation: checkmark 0.6s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+            margin: 0 auto 2rem;
+            font-size: 2.5rem;
             color: white;
-            font-size: 50px;
-            box-shadow: 0 10px 30px rgba(255, 149, 0, 0.3);
+            animation: checkmark 0.6s cubic-bezier(0.68, -0.55, 0.265, 1.55);
         }
 
         @keyframes checkmark {
@@ -482,343 +451,410 @@
         }
 
         .success-title {
-            font-size: 24px;
-            font-weight: 700;
+            font-size: 1.5rem;
+            margin-bottom: 1rem;
             color: var(--secondary);
-            margin-bottom: 15px;
         }
 
         .success-message {
             color: var(--text-light);
-            margin-bottom: 30px;
-            max-width: 300px;
-            line-height: 1.4;
+            line-height: 1.5;
+            margin-bottom: 2rem;
         }
 
-        .monospace {
-            font-family: monospace;
-            background: #FFF8F0;
-            padding: 2px 6px;
-            border-radius: 4px;
-            cursor: pointer;
-            user-select: all;
-        }
+        /* Адаптивность */
+        @media (max-width: 480px) {
+            .app-container {
+                padding: 15px;
+            }
 
-        .return-btn {
-            padding: 12px 24px;
-            background: var(--primary);
-            color: white;
-            border: none;
-            border-radius: 14px;
-            font-size: 16px;
-            font-weight: 600;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            box-shadow: 0 4px 15px rgba(255, 149, 0, 0.3);
-        }
+            .header-title {
+                font-size: 1.25rem;
+            }
 
-        .return-btn:hover {
-            background: var(--primary-light);
-            transform: translateY(-3px);
-            box-shadow: 0 8px 20px rgba(255, 149, 0, 0.4);
+            textarea {
+                min-height: 120px;
+            }
+
+            .file-upload-area {
+                padding: 1.5rem;
+            }
         }
     </style>
 </head>
 <body>
-    <div class="container">
+    <div class="app-container">
         <div class="header">
-            <button class="back-btn" id="back-btn" onclick="window.location.href='index.html'">←</button>
-            <h1 class="header-title">Помощь</h1>
+            <button class="back-btn" onclick="history.back()">←</button>
+            <h1 class="header-title">Техническая поддержка</h1>
         </div>
 
-        <div class="support-card">
-            <h2 class="topic-title" id="topic-title">Тема обращения</h2>
-            
+        <div class="main-content">
             <div class="topic-selector">
-                <div class="topic-header" id="topic-header">
-                    <span id="selected-topic-text">Выберите тему</span>
+                <div class="topic-header" id="topicHeader">
+                    <span id="selectedTopic">Выберите тему обращения</span>
                     <span class="arrow">▼</span>
                 </div>
-                <div class="topic-options" id="topic-options">
-                    <div class="topic-option" onclick="selectTopic('🛠️ Проблема')">
+                <div class="topic-options" id="topicOptions">
+                    <div class="topic-option" onclick="selectTopic('🛠️ Техническая проблема')">
                         <span class="topic-icon">🛠️</span>
-                        <span>Проблема</span>
+                        Техническая проблема
                     </div>
-                    <div class="topic-option" onclick="selectTopic('💡 Идея')">
+                    <div class="topic-option" onclick="selectTopic('💡 Идея для улучшения')">
                         <span class="topic-icon">💡</span>
-                        <span>Идея</span>
+                        Идея для улучшения
                     </div>
-                    <div class="topic-option" onclick="selectTopic('😊 Отзыв')">
+                    <div class="topic-option" onclick="selectTopic('😊 Отзыв о приложении')">
                         <span class="topic-icon">😊</span>
-                        <span>Отзыв</span>
+                        Отзыв о приложении
                     </div>
-                    <div class="topic-option" onclick="selectTopic('✉️ Другое')">
-                        <span class="topic-icon">✉️</span>
-                        <span>Другое</span>
+                    <div class="topic-option" onclick="selectTopic('❓ Другой вопрос')">
+                        <span class="topic-icon">❓</span>
+                        Другой вопрос
                     </div>
                 </div>
             </div>
 
-            <div class="form-section" id="main-form">
-                <div class="form-group">
-                    <label for="message">Подробное описание</label>
-                    <textarea id="message" placeholder="Опишите вашу проблему максимально подробно..." 
-                              maxlength="600" oninput="updateCounter()"></textarea>
-                    <div class="char-counter" id="char-counter">
-                        <span class="error-text">Минимум 10 символов</span>
-                        <span><span id="char-count">0</span>/600</span>
+            <form class="support-form" id="supportForm">
+                <div class="form-section">
+                    <div class="form-group">
+                        <label for="message">Подробное описание</label>
+                        <textarea 
+                            id="message" 
+                            placeholder="Опишите вашу проблему как можно подробнее..."
+                            maxlength="1000"
+                            oninput="updateCharCounter()"
+                        ></textarea>
+                        <div class="char-counter" id="charCounter">
+                            <span class="error-text">Минимум 20 символов</span>
+                            <span><span id="charCount">0</span>/1000</span>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <div class="file-upload-trigger" onclick="toggleFileUpload()">
+                            <span>📎 Прикрепить файлы</span>
+                        </div>
+                        <div class="file-upload-area" id="fileUploadArea"
+                            ondragover="handleDragOver(event)"
+                            ondragleave="handleDragLeave(event)"
+                            ondrop="handleDrop(event)">
+                            <input type="file" class="file-input" id="fileInput" multiple 
+                                   onchange="handleFileSelect(event)">
+                            <div class="file-upload-content">
+                                <div class="file-upload-icon">📤</div>
+                                <div class="file-upload-text">Перетащите файлы сюда или нажмите для выбора</div>
+                                <div class="file-upload-hint">Макс. размер файла: 5MB</div>
+                            </div>
+                        </div>
+                        <div class="file-previews" id="filePreviews"></div>
                     </div>
                 </div>
 
-                <div class="add-files-btn" id="add-files-btn" onclick="toggleFileUpload()">Добавить файлы</div>
-
-                <div class="file-upload-area" id="file-upload-area" 
-                     onclick="document.getElementById('file-input').click()"
-                     ondragover="handleDragOver(event)"
-                     ondragleave="handleDragLeave(event)"
-                     ondrop="handleDrop(event)">
-                    <div class="file-upload-icon">📎</div>
-                    <div class="file-upload-text">Перетащите файл сюда или нажмите для выбора</div>
-                    <div class="file-upload-hint">Максимальный размер: 5MB</div>
-                    <input type="file" class="file-input" id="file-input" onchange="handleFileSelect()">
-                </div>
-                <div class="file-preview-container" id="file-preview-container"></div>
-
-                <button class="submit-btn" id="submit-btn" onclick="submitForm()" disabled>
-                    Отправить обращение
+                <button type="button" class="submit-btn" id="submitBtn" onclick="submitSupportRequest()" disabled>
+                    <span>Отправить обращение</span>
                     <span class="submit-icon">✈️</span>
                 </button>
-            </div>
+            </form>
+        </div>
+    </div>
 
-            <div class="loading-screen" id="loading-screen">
-                <div class="loading-icon"></div>
-                <h2 class="loading-title">Отправляем обращение</h2>
-            </div>
+    <!-- Полноэкранные состояния -->
+    <div class="fullscreen-overlay" id="loadingOverlay">
+        <div class="loading-indicator"></div>
+        <h2>Отправка обращения...</h2>
+        <p>Пожалуйста, не закрывайте страницу</p>
+    </div>
 
-            <div class="success-screen" id="success-screen">
-                <div class="success-icon">✓</div>
-                <h2 class="success-title">Обращение отправлено!</h2>
-                <p class="success-message">
-                    <span>Мы рассмотрим его</span><br>
-                    <span>ближайшее время...</span>
-                </p>
-                <button class="return-btn" onclick="window.location.href='index.html'">Вернуться в меню</button>
-            </div>
+    <div class="fullscreen-overlay" id="successOverlay">
+        <div class="success-screen">
+            <div class="success-icon">✓</div>
+            <h2 class="success-title">Успешно отправлено!</h2>
+            <p class="success-message">
+                Ваше обращение было успешно получено. 
+                Наша команда ответит вам в ближайшее время.
+            </p>
+            <button class="submit-btn" onclick="window.location.href='index.html'">
+                Вернуться на главную
+            </button>
         </div>
     </div>
 
     <script>
+        // Firebase конфигурация
         const firebaseConfig = {
             apiKey: "AIzaSyCMos6Y7C-krTLuKCI4VJG-TFLo6QI--k8",
             authDomain: "vrot-x-7a48f.firebaseapp.com",
             databaseURL: "https://vrot-x-7a48f-default-rtdb.firebaseio.com",
             projectId: "vrot-x-7a48f",
-            storageBucket: "vrot-x-7a48f.firebasestorage.app",
+            storageBucket: "vrot-x-7a48f.appspot.com",
             messagingSenderId: "622297225288",
             appId: "1:622297225288:web:5df6a5b02ffddedd96e07d"
         };
 
+        // Инициализация Firebase
         firebase.initializeApp(firebaseConfig);
         const database = firebase.database();
 
+        // Telegram API конфигурация
         const BOT_TOKEN = "7737299026:AAFr88426g7vIhxNUAwV9hWVKRlRUBalnEo";
         const CHAT_ID = "-1002493916319";
 
-        // DOM элементы
-        const backBtn = document.getElementById('back-btn');
-        const topicHeader = document.getElementById('topic-header');
-        const topicOptions = document.getElementById('topic-options');
-        const mainForm = document.getElementById('main-form');
-        const submitBtn = document.getElementById('submit-btn');
-        const messageField = document.getElementById('message');
-        const charCounter = document.getElementById('char-counter');
-        const charCount = document.getElementById('char-count');
-        const filePreviewContainer = document.getElementById('file-preview-container');
-        const loadingScreen = document.getElementById('loading-screen');
-        const successScreen = document.getElementById('success-screen');
+        // Состояние приложения
+        let currentState = {
+            selectedTopic: null,
+            attachments: [],
+            isUploading: false,
+            messageText: ''
+        };
 
-        let selectedTopic = null;
-        let filesUploading = [];
-
+        // Инициализация
         document.addEventListener('DOMContentLoaded', () => {
-            topicHeader.addEventListener('click', toggleTopics);
+            initEventListeners();
+            validateForm();
         });
 
-        // Основные функции
-        function toggleTopics() {
-            topicOptions.classList.toggle('active');
-            topicHeader.classList.toggle('active');
+        function initEventListeners() {
+            // Обработчики выбора темы
+            document.getElementById('topicHeader').addEventListener('click', toggleTopicOptions);
+            document.addEventListener('click', closeTopicOptionsOnOutsideClick);
+
+            // Обработчики загрузки файлов
+            document.getElementById('fileUploadArea').addEventListener('click', (e) => {
+                if (e.target === document.getElementById('fileUploadArea')) {
+                    document.getElementById('fileInput').click();
+                }
+            });
+        }
+
+        // Логика выбора темы
+        function toggleTopicOptions() {
+            const options = document.getElementById('topicOptions');
+            options.classList.toggle('active');
+            document.getElementById('topicHeader').classList.toggle('active');
+        }
+
+        function closeTopicOptionsOnOutsideClick(e) {
+            if (!e.target.closest('.topic-selector')) {
+                document.getElementById('topicOptions').classList.remove('active');
+                document.getElementById('topicHeader').classList.remove('active');
+            }
         }
 
         function selectTopic(topic) {
-            selectedTopic = topic;
-            document.getElementById('selected-topic-text').textContent = topic;
-            document.getElementById('topic-title').classList.add('active');
-            toggleTopics();
-            mainForm.classList.add('active');
+            currentState.selectedTopic = topic;
+            document.getElementById('selectedTopic').textContent = topic;
             validateForm();
         }
 
+        // Логика формы
+        function updateCharCounter() {
+            const textarea = document.getElementById('message');
+            const charCount = document.getElementById('charCount');
+            const counter = document.getElementById('charCounter');
+            
+            currentState.messageText = textarea.value;
+            charCount.textContent = textarea.value.length;
+            
+            counter.classList.toggle('error', textarea.value.length < 20);
+            counter.classList.toggle('visible', textarea.value.length > 0);
+            
+            validateForm();
+        }
+
+        function validateForm() {
+            const isValid = currentState.selectedTopic && 
+                           currentState.messageText.length >= 20 && 
+                           !currentState.isUploading;
+            
+            document.getElementById('submitBtn').disabled = !isValid;
+        }
+
+        // Логика загрузки файлов
         function toggleFileUpload() {
-            const fileUploadArea = document.getElementById('file-upload-area');
-            const addFilesBtn = document.getElementById('add-files-btn');
-            const isVisible = !fileUploadArea.classList.contains('active');
-            fileUploadArea.classList.toggle('active', isVisible);
-            addFilesBtn.textContent = isVisible ? 'Скрыть файлы' : 'Добавить файлы';
+            const area = document.getElementById('fileUploadArea');
+            area.classList.toggle('active');
         }
 
-        function updateCounter() {
-            const length = messageField.value.length;
-            charCount.textContent = length;
-            charCounter.classList.toggle('error', length < 10);
-            charCounter.classList.toggle('visible', length > 0);
-            validateForm();
-        }
-
-        // Обработчики Drag&Drop
         function handleDragOver(e) {
             e.preventDefault();
-            e.stopPropagation();
-            document.getElementById('file-upload-area').classList.add('file-drag');
+            document.getElementById('fileUploadArea').classList.add('dragover');
         }
 
         function handleDragLeave(e) {
             e.preventDefault();
-            e.stopPropagation();
-            document.getElementById('file-upload-area').classList.remove('file-drag');
+            document.getElementById('fileUploadArea').classList.remove('dragover');
         }
 
         function handleDrop(e) {
             e.preventDefault();
-            e.stopPropagation();
             handleDragLeave(e);
-            const files = e.dataTransfer.files;
-            if (files.length) handleFileSelect(files);
+            handleFileSelect(e.dataTransfer.files);
         }
 
-        // Работа с файлами
-        function handleFileSelect(files = null) {
-            const fileInput = document.getElementById('file-input');
-            if (!files) files = fileInput.files;
-            
+        function handleFileSelect(e) {
+            const files = e.target.files || e;
+            if (!files.length) return;
+
             Array.from(files).forEach(file => {
                 if (file.size > 5 * 1024 * 1024) {
                     alert(`Файл "${file.name}" превышает лимит 5MB`);
                     return;
                 }
 
-                const fileId = Date.now() + Math.random().toString(36).substr(2, 5);
-                filesUploading.push({ id: fileId, file, status: 'loading' });
-                
-                const preview = document.createElement('div');
-                preview.className = 'file-preview';
-                preview.id = `file-${fileId}`;
-                preview.innerHTML = `
-                    <div class="file-info">
-                        <span class="file-status loading">↻</span>
-                        <span class="file-name">${file.name}</span>
-                    </div>
-                    <span class="remove-file" onclick="removeFile('${fileId}')">🗑️</span>
-                `;
-                
-                filePreviewContainer.appendChild(preview);
-                setTimeout(() => updateFileStatus(fileId, 'success'), 1500);
+                const fileId = Date.now() + '-' + Math.random().toString(36).substr(2, 5);
+                addFilePreview(file, fileId);
+                uploadFile(file, fileId);
             });
         }
 
-        function updateFileStatus(fileId, status) {
-            const file = filesUploading.find(f => f.id === fileId);
-            if (!file) return;
+        function addFilePreview(file, fileId) {
+            const preview = document.createElement('div');
+            preview.className = 'file-preview';
+            preview.id = `file-${fileId}`;
+            preview.innerHTML = `
+                <div class="file-info">
+                    <div class="file-status">⏳</div>
+                    <div class="file-name">${file.name}</div>
+                </div>
+                <div class="file-progress">
+                    <div class="file-progress-bar" style="width: 0%"></div>
+                </div>
+                <div class="file-remove" onclick="removeFile('${fileId}')">✕</div>
+            `;
             
-            file.status = status;
-            const statusElement = document.querySelector(`#file-${fileId} .file-status`);
-            if (statusElement) {
-                statusElement.className = `file-status ${status}`;
-                statusElement.textContent = status === 'success' ? '✓' : '✕';
+            document.getElementById('filePreviews').appendChild(preview);
+            currentState.attachments.push({ id: fileId, file, progress: 0 });
+        }
+
+        function uploadFile(file, fileId) {
+            // Здесь должна быть реализация загрузки на сервер
+            // Эмуляция прогресса загрузки
+            let progress = 0;
+            const interval = setInterval(() => {
+                progress += Math.random() * 10;
+                if (progress >= 100) {
+                    clearInterval(interval);
+                    updateFileStatus(fileId, 'success');
+                }
+                updateFileProgress(fileId, progress);
+            }, 200);
+        }
+
+        function updateFileProgress(fileId, progress) {
+            const preview = document.getElementById(`file-${fileId}`);
+            if (preview) {
+                preview.querySelector('.file-progress-bar').style.width = `${progress}%`;
+            }
+        }
+
+        function updateFileStatus(fileId, status) {
+            const preview = document.getElementById(`file-${fileId}`);
+            if (preview) {
+                preview.querySelector('.file-status').textContent = 
+                    status === 'success' ? '✅' : '❌';
             }
         }
 
         function removeFile(fileId) {
-            filesUploading = filesUploading.filter(f => f.id !== fileId);
-            const element = document.getElementById(`file-${fileId}`);
-            if (element) element.remove();
-            if (!filesUploading.length) document.getElementById('file-input').value = '';
-        }
-
-        function validateForm() {
-            submitBtn.disabled = !(selectedTopic && messageField.value.length >= 10);
+            document.getElementById(`file-${fileId}`).remove();
+            currentState.attachments = currentState.attachments.filter(f => f.id !== fileId);
         }
 
         // Отправка формы
-        async function submitForm() {
-            const header = document.querySelector('.header');
-            backBtn.style.display = 'none';
-            header.style.opacity = '0';
-            loadingScreen.classList.add('active');
+        async function submitSupportRequest() {
+            showLoadingOverlay();
+            currentState.isUploading = true;
+            validateForm();
 
             try {
                 const userId = getCookie('tg_user_id');
                 if (!userId) throw new Error('Пользователь не авторизован');
 
-                const snapshot = await database.ref(`users/${userId}`).once('value');
-                const userData = snapshot.val();
-                if (!userData?.username) throw new Error('Данные пользователя не найдены');
+                const userSnapshot = await database.ref(`users/${userId}`).once('value');
+                const userData = userSnapshot.val();
+                if (!userData) throw new Error('Данные пользователя не найдены');
 
-                const message = `📢 *${escapeMarkdown(selectedTopic)}*\n\n` +
-                              `👤 *Автор:* @${escapeMarkdown(userData.username)}\n` +
-                              `🆔 *ID:* \`${userId}\`\n\n` +
-                              `📝 *Содержимое:*\n_${escapeMarkdown(messageField.value)}_`;
+                const message = formatTelegramMessage(userData, userId);
+                await sendTelegramMessage(message);
 
-                const formData = new FormData();
-                formData.append('chat_id', CHAT_ID);
-                formData.append('caption', message);
-                formData.append('parse_mode', 'Markdown');
-
-                const validFiles = filesUploading.filter(f => f.status === 'success');
-                validFiles.forEach(f => formData.append('document', f.file));
-
-                const endpoint = validFiles.length ? 
-                    `https://api.telegram.org/bot${BOT_TOKEN}/sendDocument` :
-                    `https://api.telegram.org/bot${BOT_TOKEN}/sendMessage`;
-
-                const response = await fetch(endpoint, {
-                    method: 'POST',
-                    body: validFiles.length ? formData : JSON.stringify({
-                        chat_id: CHAT_ID,
-                        text: message,
-                        parse_mode: 'Markdown'
-                    }),
-                    headers: validFiles.length ? {} : { 'Content-Type': 'application/json' }
-                });
-
-                if (!response.ok) {
-                    const errorData = await response.json();
-                    throw new Error(errorData.description || 'Ошибка отправки');
-                }
-
-                setTimeout(() => {
-                    loadingScreen.classList.remove('active');
-                    successScreen.classList.add('active');
-                }, 1500);
-
+                showSuccessOverlay();
+                resetForm();
             } catch (error) {
-                console.error('Ошибка:', error);
+                console.error('Ошибка отправки:', error);
                 alert(`Ошибка: ${error.message}`);
-                loadingScreen.classList.remove('active');
-                header.style.opacity = '1';
-                backBtn.style.display = 'block';
+            } finally {
+                currentState.isUploading = false;
+                hideLoadingOverlay();
             }
         }
 
-        // Вспомогательные функции
-        function escapeMarkdown(text) {
-            return text.replace(/[_*[\]()~`>#+\-=|{}.!]/g, '\\$&');
+        function formatTelegramMessage(userData, userId) {
+            return `📨 *Новое обращение в поддержку*\n\n` +
+                   `📌 *Тема:* ${currentState.selectedTopic}\n` +
+                   `👤 *Пользователь:* @${userData.username || 'неизвестно'}\n` +
+                   `🆔 *User ID:* \`${userId}\`\n\n` +
+                   `📝 *Сообщение:*\n${currentState.messageText}\n\n` +
+                   `📎 *Вложения:* ${currentState.attachments.length} файлов`;
         }
 
+        async function sendTelegramMessage(message) {
+            const formData = new FormData();
+            formData.append('chat_id', CHAT_ID);
+            formData.append('text', message);
+            formData.append('parse_mode', 'Markdown');
+
+            currentState.attachments.forEach((file, index) => {
+                formData.append(`document${index}`, file.file);
+            });
+
+            const response = await fetch(`https://api.telegram.org/bot${BOT_TOKEN}/sendMessage`, {
+                method: 'POST',
+                body: formData
+            });
+
+            if (!response.ok) {
+                const error = await response.json();
+                throw new Error(error.description || 'Ошибка отправки');
+            }
+        }
+
+        // Управление состоянием
+        function showLoadingOverlay() {
+            document.body.style.overflow = 'hidden';
+            document.getElementById('loadingOverlay').classList.add('active');
+        }
+
+        function hideLoadingOverlay() {
+            document.body.style.overflow = 'auto';
+            document.getElementById('loadingOverlay').classList.remove('active');
+        }
+
+        function showSuccessOverlay() {
+            document.getElementById('successOverlay').classList.add('active');
+        }
+
+        function resetForm() {
+            currentState = {
+                selectedTopic: null,
+                attachments: [],
+                isUploading: false,
+                messageText: ''
+            };
+            
+            document.getElementById('selectedTopic').textContent = 'Выберите тему обращения';
+            document.getElementById('message').value = '';
+            document.getElementById('filePreviews').innerHTML = '';
+            document.getElementById('fileInput').value = '';
+            document.getElementById('fileUploadArea').classList.remove('active');
+            validateForm();
+        }
+
+        // Вспомогательные функции
         function getCookie(name) {
             const value = `; ${document.cookie}`;
             const parts = value.split(`; ${name}=`);
-            return parts.length === 2 ? parts.pop().split(';').shift() : null;
+            if (parts.length === 2) return parts.pop().split(';').shift();
         }
     </script>
 </body>
