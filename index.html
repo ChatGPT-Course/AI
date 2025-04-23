@@ -225,7 +225,6 @@
             width: 60px;
             height: 60px;
             border-radius: 50%;
-            background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
             display: flex;
             align-items: center;
             justify-content: center;
@@ -233,6 +232,26 @@
             font-weight: bold;
             font-size: 24px;
             color: white;
+            position: relative;
+            background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
+        }
+        
+        #avatar-fallback {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 2;
+        }
+        
+        .avatar img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            position: relative;
+            z-index: 1;
         }
 
         .user-info {
@@ -765,31 +784,35 @@
             
             const avatarElement = document.getElementById('user-avatar');
             const fallbackElement = document.getElementById('avatar-fallback');
-            
-            // Всегда очищаем аватар перед загрузкой
-            avatarElement.innerHTML = '';
-            fallbackElement.style.display = 'block';
+        
+            // Всегда показываем фолбэк по умолчанию
+            fallbackElement.style.display = 'flex';
+            avatarElement.style.background = 'linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%)';
         
             if (user?.photo_url) {
                 const img = new Image();
-                img.crossOrigin = 'anonymous'; // Разрешаем CORS
-                img.src = user.photo_url.replace('http://', 'https://'); // Форсируем HTTPS
+                img.style.display = 'none'; // Сначала скрываем изображение
                 
                 img.onload = () => {
+                    // Показываем изображение и скрываем фолбэк только после загрузки
+                    img.style.display = 'block';
                     fallbackElement.style.display = 'none';
                     avatarElement.appendChild(img);
                 };
                 
                 img.onerror = () => {
                     console.error('Ошибка загрузки аватарки');
-                    fallbackElement.style.display = 'block';
-                    const fallback = user?.first_name?.charAt(0).toUpperCase() || 'U';
-                    fallbackElement.textContent = fallback;
+                    fallbackElement.style.display = 'flex';
+                    img.remove();
                 };
-            } else {
-                const fallback = user?.first_name?.charAt(0).toUpperCase() || 'U';
-                fallbackElement.textContent = fallback;
+        
+                // Пробуем загрузить через прокси для обхода CORS
+                img.src = `https://corsproxy.io/?${encodeURIComponent(user.photo_url)}`;
             }
+            
+            // Устанавливаем фолбэк
+            const fallback = user?.first_name?.charAt(0).toUpperCase() || 'U';
+            fallbackElement.textContent = fallback;
         
             await initDatabaseListener();
         }
