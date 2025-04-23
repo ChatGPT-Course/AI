@@ -3,11 +3,10 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Техническая поддержка</title>
+    <title>Создание обращения</title>
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
     <style>
-        /* Основные переменные стилей */
         :root {
             --primary: #FF9500;
             --primary-light: #FFAA33;
@@ -24,7 +23,6 @@
             --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
         }
 
-        /* Сброс стилей и базовые настройки */
         * {
             margin: 0;
             padding: 0;
@@ -50,7 +48,6 @@
             flex-direction: column;
         }
 
-        /* Контейнер приложения */
         .app-container {
             flex: 1;
             display: flex;
@@ -60,7 +57,6 @@
             position: relative;
         }
 
-        /* Шапка */
         .header {
             display: flex;
             align-items: center;
@@ -99,7 +95,6 @@
             text-align: center;
         }
 
-        /* Основная форма */
         .main-content {
             flex: 1;
             display: flex;
@@ -107,7 +102,6 @@
             overflow: hidden;
         }
 
-        /* Выбор темы */
         .topic-selector {
             margin-bottom: 1.5rem;
             position: relative;
@@ -173,7 +167,6 @@
             text-align: center;
         }
 
-        /* Форма обращения */
         .support-form {
             flex: 1;
             display: flex;
@@ -218,7 +211,6 @@
             box-shadow: 0 0 0 3px rgba(255, 149, 0, 0.2);
         }
 
-        /* Загрузка файлов */
         .file-upload-section {
             margin: 1rem 0;
         }
@@ -263,7 +255,6 @@
             display: none;
         }
 
-        /* Прелоадеры файлов */
         .file-previews {
             display: flex;
             flex-direction: column;
@@ -334,7 +325,6 @@
             color: var(--error);
         }
 
-        /* Счётчик символов */
         .char-counter {
             display: flex;
             justify-content: space-between;
@@ -355,7 +345,6 @@
             color: var(--error);
         }
 
-        /* Кнопка отправки */
         .submit-btn {
             background: var(--primary);
             color: white;
@@ -371,6 +360,9 @@
             align-items: center;
             justify-content: center;
             gap: 0.5rem;
+            position: sticky;
+            bottom: 20px;
+            z-index: 100;
         }
 
         .submit-btn:disabled {
@@ -385,7 +377,6 @@
             box-shadow: 0 4px 15px rgba(255, 149, 0, 0.3);
         }
 
-        /* Полноэкранные модалки */
         .fullscreen-overlay {
             position: fixed;
             top: 0;
@@ -409,7 +400,6 @@
             visibility: visible;
         }
 
-        /* Лоадер */
         .loading-indicator {
             width: 80px;
             height: 80px;
@@ -424,23 +414,20 @@
             100% { transform: rotate(360deg); }
         }
 
-        /* Экран успеха */
         .success-screen {
             text-align: center;
             max-width: 400px;
         }
 
         .success-icon {
-            width: 100px;
-            height: 100px;
-            background: var(--success);
-            border-radius: 50%;
+            width: 120px;
+            height: 120px;
             display: flex;
             align-items: center;
             justify-content: center;
             margin: 0 auto 2rem;
-            font-size: 2.5rem;
-            color: white;
+            font-size: 4rem;
+            color: var(--success);
             animation: checkmark 0.6s cubic-bezier(0.68, -0.55, 0.265, 1.55);
         }
 
@@ -453,7 +440,8 @@
         .success-title {
             font-size: 1.5rem;
             margin-bottom: 1rem;
-            color: var(--secondary);
+            color: var(--text);
+            font-weight: 700;
         }
 
         .success-message {
@@ -462,7 +450,6 @@
             margin-bottom: 2rem;
         }
 
-        /* Адаптивность */
         @media (max-width: 480px) {
             .app-container {
                 padding: 15px;
@@ -479,14 +466,18 @@
             .file-upload-area {
                 padding: 1.5rem;
             }
+
+            .submit-btn {
+                bottom: 15px;
+            }
         }
     </style>
 </head>
 <body>
     <div class="app-container">
         <div class="header">
-            <button class="back-btn" onclick="history.back()">←</button>
-            <h1 class="header-title">Техническая поддержка</h1>
+            <button class="back-btn" onclick="history.back()">&lt;</button>
+            <h1 class="header-title">📨 Создание обращения</h1>
         </div>
 
         <div class="main-content">
@@ -559,20 +550,18 @@
         </div>
     </div>
 
-    <!-- Полноэкранные состояния -->
     <div class="fullscreen-overlay" id="loadingOverlay">
         <div class="loading-indicator"></div>
-        <h2>Отправка обращения...</h2>
-        <p>Пожалуйста, не закрывайте страницу</p>
+        <h2>Отправляем обращение...</h2>
+        <p>Это может занять несколько секунд...</p>
     </div>
 
     <div class="fullscreen-overlay" id="successOverlay">
         <div class="success-screen">
             <div class="success-icon">✓</div>
-            <h2 class="success-title">Успешно отправлено!</h2>
+            <h2 class="success-title">Ваше обращение успешно отправлено!</h2>
             <p class="success-message">
-                Ваше обращение было успешно получено. 
-                Наша команда ответит вам в ближайшее время.
+                Мы просмотрим его в течение 24-х часов.
             </p>
             <button class="submit-btn" onclick="window.location.href='index.html'">
                 Вернуться на главную
@@ -581,7 +570,6 @@
     </div>
 
     <script>
-        // Firebase конфигурация
         const firebaseConfig = {
             apiKey: "AIzaSyCMos6Y7C-krTLuKCI4VJG-TFLo6QI--k8",
             authDomain: "vrot-x-7a48f.firebaseapp.com",
@@ -592,15 +580,12 @@
             appId: "1:622297225288:web:5df6a5b02ffddedd96e07d"
         };
 
-        // Инициализация Firebase
         firebase.initializeApp(firebaseConfig);
         const database = firebase.database();
 
-        // Telegram API конфигурация
         const BOT_TOKEN = "7737299026:AAFr88426g7vIhxNUAwV9hWVKRlRUBalnEo";
         const CHAT_ID = "-1002493916319";
 
-        // Состояние приложения
         let currentState = {
             selectedTopic: null,
             attachments: [],
@@ -608,18 +593,15 @@
             messageText: ''
         };
 
-        // Инициализация
         document.addEventListener('DOMContentLoaded', () => {
             initEventListeners();
             validateForm();
         });
 
         function initEventListeners() {
-            // Обработчики выбора темы
             document.getElementById('topicHeader').addEventListener('click', toggleTopicOptions);
             document.addEventListener('click', closeTopicOptionsOnOutsideClick);
 
-            // Обработчики загрузки файлов
             document.getElementById('fileUploadArea').addEventListener('click', (e) => {
                 if (e.target === document.getElementById('fileUploadArea')) {
                     document.getElementById('fileInput').click();
@@ -627,7 +609,6 @@
             });
         }
 
-        // Логика выбора темы
         function toggleTopicOptions() {
             const options = document.getElementById('topicOptions');
             options.classList.toggle('active');
@@ -644,10 +625,11 @@
         function selectTopic(topic) {
             currentState.selectedTopic = topic;
             document.getElementById('selectedTopic').textContent = topic;
+            document.getElementById('topicOptions').classList.remove('active');
+            document.getElementById('topicHeader').classList.remove('active');
             validateForm();
         }
 
-        // Логика формы
         function updateCharCounter() {
             const textarea = document.getElementById('message');
             const charCount = document.getElementById('charCount');
@@ -670,7 +652,6 @@
             document.getElementById('submitBtn').disabled = !isValid;
         }
 
-        // Логика загрузки файлов
         function toggleFileUpload() {
             const area = document.getElementById('fileUploadArea');
             area.classList.toggle('active');
@@ -728,8 +709,6 @@
         }
 
         function uploadFile(file, fileId) {
-            // Здесь должна быть реализация загрузки на сервер
-            // Эмуляция прогресса загрузки
             let progress = 0;
             const interval = setInterval(() => {
                 progress += Math.random() * 10;
@@ -761,7 +740,6 @@
             currentState.attachments = currentState.attachments.filter(f => f.id !== fileId);
         }
 
-        // Отправка формы
         async function submitSupportRequest() {
             showLoadingOverlay();
             currentState.isUploading = true;
@@ -790,8 +768,9 @@
         }
 
         function formatTelegramMessage(userData, userId) {
-            return `📨 *Новое обращение в поддержку*\n\n` +
-                   `📌 *Тема:* ${currentState.selectedTopic}\n` +
+            const cleanTopic = currentState.selectedTopic.split(' ').slice(1).join(' ');
+            return `📨 *Новое обращение*\n\n` +
+                   `📌 *Тема:* ${cleanTopic}\n` +
                    `👤 *Пользователь:* @${userData.username || 'неизвестно'}\n` +
                    `🆔 *User ID:* \`${userId}\`\n\n` +
                    `📝 *Сообщение:*\n${currentState.messageText}\n\n` +
@@ -819,7 +798,6 @@
             }
         }
 
-        // Управление состоянием
         function showLoadingOverlay() {
             document.body.style.overflow = 'hidden';
             document.getElementById('loadingOverlay').classList.add('active');
@@ -850,7 +828,6 @@
             validateForm();
         }
 
-        // Вспомогательные функции
         function getCookie(name) {
             const value = `; ${document.cookie}`;
             const parts = value.split(`; ${name}=`);
