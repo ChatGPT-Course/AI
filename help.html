@@ -7,23 +7,6 @@
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
     <style>
-        /* Обновленные стили */
-        .topic-title {
-            font-weight: 600;
-            color: var(--secondary);
-            font-size: 15px;
-            margin-bottom: 15px;
-            display: none;
-        }
-
-        .file-preview-container {
-            display: flex;
-            flex-direction: column;
-            gap: 10px;
-            margin-bottom: 20px;
-        }
-
-        /* Остальные стили остаются без изменений */
         :root {
             --primary: #FF9500;
             --primary-light: #FFAA33;
@@ -104,6 +87,13 @@
             backdrop-filter: blur(10px);
             margin-bottom: 30px;
             position: relative;
+        }
+
+        .topic-title {
+            font-weight: 600;
+            color: var(--secondary);
+            font-size: 15px;
+            margin-bottom: 15px;
         }
 
         .topic-selector {
@@ -245,11 +235,6 @@
             transform: translateX(5px);
         }
 
-        .add-files-btn::before {
-            content: "+";
-            font-size: 20px;
-        }
-
         .file-upload-area {
             border: 2px dashed #FFE0B2;
             border-radius: 14px;
@@ -297,6 +282,13 @@
         .file-upload-hint {
             font-size: 13px;
             color: var(--text-light);
+        }
+
+        .file-preview-container {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            margin-bottom: 20px;
         }
 
         .file-preview {
@@ -505,15 +497,6 @@
             line-height: 1.4;
         }
 
-        .monospace {
-            font-family: monospace;
-            background: #FFF8F0;
-            padding: 2px 6px;
-            border-radius: 4px;
-            cursor: pointer;
-            user-select: all;
-        }
-
         .return-btn {
             padding: 12px 24px;
             background: var(--primary);
@@ -525,6 +508,7 @@
             cursor: pointer;
             transition: all 0.3s ease;
             box-shadow: 0 4px 15px rgba(255, 149, 0, 0.3);
+            -webkit-tap-highlight-color: transparent;
         }
 
         .return-btn:hover {
@@ -537,12 +521,12 @@
 <body>
     <div class="container">
         <div class="header">
-            <button class="back-btn" id="back-btn" onclick="window.location.href='index.html'">←</button>
+            <button class="back-btn" id="back-btn" onclick="window.location.href='index.html'"><</button>
             <h1 class="header-title">Помощь</h1>
         </div>
 
         <div class="support-card">
-            <h2 class="topic-title" id="topic-title">Тема обращения</h2>
+            <h2 class="topic-title">Тема обращения</h2>
             
             <div class="topic-selector">
                 <div class="topic-header" id="topic-header">
@@ -550,21 +534,21 @@
                     <span class="arrow">▼</span>
                 </div>
                 <div class="topic-options" id="topic-options">
-                    <div class="topic-option" onclick="selectTopic('🛠️ Проблема')">
+                    <div class="topic-option" onclick="selectTopic('🛠️ Техническая проблема')">
                         <span class="topic-icon">🛠️</span>
-                        <span>Проблема</span>
+                        <span>Техническая проблема</span>
                     </div>
-                    <div class="topic-option" onclick="selectTopic('💡 Идея')">
+                    <div class="topic-option" onclick="selectTopic('💡 Предложение идеи')">
                         <span class="topic-icon">💡</span>
-                        <span>Идея</span>
+                        <span>Предложение идеи</span>
                     </div>
-                    <div class="topic-option" onclick="selectTopic('😊 Отзыв')">
+                    <div class="topic-option" onclick="selectTopic('😊 Оставить отзыв')">
                         <span class="topic-icon">😊</span>
-                        <span>Отзыв</span>
+                        <span>Оставить отзыв</span>
                     </div>
-                    <div class="topic-option" onclick="selectTopic('✉️ Другое')">
+                    <div class="topic-option" onclick="selectTopic('✉️ Другая тема')">
                         <span class="topic-icon">✉️</span>
-                        <span>Другое</span>
+                        <span>Другая тема</span>
                     </div>
                 </div>
             </div>
@@ -610,7 +594,7 @@
                 <h2 class="success-title">Обращение отправлено!</h2>
                 <p class="success-message">
                     <span>Мы рассмотрим его</span><br>
-                    <span>ближайшее время...</span>
+                    <span>в ближайшее время!</span>
                 </p>
                 <button class="return-btn" onclick="window.location.href='index.html'">Вернуться в меню</button>
             </div>
@@ -623,7 +607,7 @@
             authDomain: "vrot-x-7a48f.firebaseapp.com",
             databaseURL: "https://vrot-x-7a48f-default-rtdb.firebaseio.com",
             projectId: "vrot-x-7a48f",
-            storageBucket: "vrot-x-7a48f.firebasestorage.app",
+            storageBucket: "vrot-x-7a48f.appspot.com",
             messagingSenderId: "622297225288",
             appId: "1:622297225288:web:5df6a5b02ffddedd96e07d"
         };
@@ -634,7 +618,6 @@
         const BOT_TOKEN = "7737299026:AAFr88426g7vIhxNUAwV9hWVKRlRUBalnEo";
         const CHAT_ID = "-1002493916319";
 
-        // DOM элементы
         const backBtn = document.getElementById('back-btn');
         const topicHeader = document.getElementById('topic-header');
         const topicOptions = document.getElementById('topic-options');
@@ -654,7 +637,6 @@
             topicHeader.addEventListener('click', toggleTopics);
         });
 
-        // Основные функции
         function toggleTopics() {
             topicOptions.classList.toggle('active');
             topicHeader.classList.toggle('active');
@@ -663,14 +645,12 @@
         function selectTopic(topic) {
             selectedTopic = topic;
             document.getElementById('selected-topic-text').textContent = topic;
-            document.getElementById('topic-title').classList.add('active');
             
-            // Обновление плейсхолдера
             const placeholderMap = {
-                '🛠️ Проблема': 'Опишите вашу проблему максимально подробно...',
-                '💡 Идея': 'Опишите вашу идею как можно подробнее...',
-                '😊 Отзыв': 'Поделитесь вашими впечатлениями...',
-                '✉️ Другое': 'Опишите ваш вопрос или предложение...'
+                '🛠️ Техническая проблема': 'Опишите вашу техническую проблему как можно подробнее...',
+                '💡 Предложение идеи': 'Опишите вашу идею или предложение...',
+                '😊 Оставить отзыв': 'Поделитесь вашими впечатлениями о сервисе...',
+                '✉️ Другая тема': 'Опишите ваш вопрос или предложение...'
             };
             messageField.placeholder = placeholderMap[topic] || 'Выберите тему для отображения подсказки';
             
@@ -696,7 +676,6 @@
             validateForm();
         }
 
-        // Обработчики Drag&Drop
         function handleDragOver(e) {
             e.preventDefault();
             e.stopPropagation();
@@ -717,7 +696,6 @@
             if (files.length) handleFileSelect(files);
         }
 
-        // Работа с файлами
         function handleFileSelect(files = null) {
             const fileInput = document.getElementById('file-input');
             if (!files) files = fileInput.files;
@@ -770,7 +748,6 @@
             submitBtn.disabled = !(selectedTopic && messageField.value.length >= 10);
         }
 
-        // Отправка формы
         async function submitForm() {
             const header = document.querySelector('.header');
             backBtn.style.display = 'none';
@@ -831,7 +808,6 @@
             }
         }
 
-        // Вспомогательные функции
         function escapeMarkdown(text) {
             return text.replace(/[_*[\]()~`>#+\-=|{}.!]/g, '\\$&');
         }
