@@ -3,181 +3,155 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>DeepSeek Chat в Telegram</title>
-    <script src="https://telegram.org/js/telegram-web-app.js"></script>
+    <title>Чат с ИИ для курса</title>
     <style>
         body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            margin: 0;
-            padding: 0;
-            background-color: #f4f4f9;
-            color: #333;
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f5f5f5;
         }
-        .container {
-            max-width: 100%;
-            height: 100vh;
-            display: flex;
-            flex-direction: column;
-            padding: 10px;
-            box-sizing: border-box;
-        }
-        .chat-container {
-            flex: 1;
-            overflow-y: auto;
-            padding: 10px;
-            background: #fff;
+        #chat-container {
+            background-color: white;
             border-radius: 10px;
-            margin-bottom: 10px;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            height: 500px;
+            overflow-y: auto;
+            padding: 20px;
+            margin-bottom: 20px;
         }
         .message {
             margin-bottom: 15px;
-            padding: 10px;
-            border-radius: 8px;
-            max-width: 80%;
+            padding: 10px 15px;
+            border-radius: 18px;
+            max-width: 70%;
+            word-wrap: break-word;
         }
         .user-message {
-            background: #007bff;
-            color: white;
+            background-color: #e3f2fd;
             margin-left: auto;
-            border-bottom-right-radius: 0;
+            border-bottom-right-radius: 5px;
         }
         .ai-message {
-            background: #e9ecef;
+            background-color: #f1f1f1;
             margin-right: auto;
-            border-bottom-left-radius: 0;
+            border-bottom-left-radius: 5px;
         }
-        .input-area {
+        #input-container {
             display: flex;
             gap: 10px;
         }
         #user-input {
-            flex: 1;
+            flex-grow: 1;
             padding: 10px;
             border: 1px solid #ddd;
             border-radius: 20px;
             outline: none;
         }
         #send-button {
-            background: #007bff;
+            padding: 10px 20px;
+            background-color: #4CAF50;
             color: white;
             border: none;
             border-radius: 20px;
-            padding: 10px 15px;
             cursor: pointer;
         }
-        #send-button:hover {
-            background: #0056b3;
-        }
-        .log-container {
-            background: #f8f9fa;
-            padding: 10px;
-            border-radius: 5px;
-            margin-top: 10px;
-            font-size: 12px;
-            max-height: 100px;
-            overflow-y: auto;
+        .loading {
+            color: #666;
+            font-style: italic;
         }
     </style>
 </head>
 <body>
-    <div class="container">
-        <h2>DeepSeek Chat</h2>
-        <div class="chat-container" id="chat">
-            <!-- Сообщения будут здесь -->
-        </div>
-        <div class="input-area">
-            <input type="text" id="user-input" placeholder="Напишите сообщение..." />
-            <button id="send-button">Отправить</button>
-        </div>
-        <div class="log-container" id="log">
-            <strong>Логи действий:</strong><br>
-            <!-- Логи будут здесь -->
-        </div>
+    <h1>Чат с ИИ для тестового курса</h1>
+    <div id="chat-container"></div>
+    <div id="input-container">
+        <input type="text" id="user-input" placeholder="Введите вопрос..." autocomplete="off">
+        <button id="send-button">Отправить</button>
     </div>
 
     <script>
-        // Инициализация Telegram WebApp
-        const tg = window.Telegram.WebApp;
-        tg.expand(); // Развернуть приложение на весь экран
-        const userId = tg.initDataUnsafe?.user?.id || "Аноним";
-
-        // Элементы DOM
-        const chat = document.getElementById('chat');
-        const userInput = document.getElementById('user-input');
-        const sendButton = document.getElementById('send-button');
-        const logArea = document.getElementById('log');
-
-        // Логируем действия
-        function logAction(message) {
-            const timestamp = new Date().toLocaleTimeString();
-            logArea.innerHTML += `[${timestamp}] ${message}<br>`;
-            logArea.scrollTop = logArea.scrollHeight;
-        }
-
-        // Добавляем сообщение в чат
-        function addMessage(text, isUser) {
-            const messageDiv = document.createElement('div');
-            messageDiv.classList.add('message');
-            messageDiv.classList.add(isUser ? 'user-message' : 'ai-message');
-            messageDiv.textContent = text;
-            chat.appendChild(messageDiv);
-            chat.scrollTop = chat.scrollHeight;
-        }
-
-        // Отправка запроса в DeepSeek API
-        async function sendToDeepSeek(message) {
-            logAction(`Отправка запроса в DeepSeek: "${message}"`);
+        document.addEventListener('DOMContentLoaded', function() {
+            const chatContainer = document.getElementById('chat-container');
+            const userInput = document.getElementById('user-input');
+            const sendButton = document.getElementById('send-button');
             
-            try {
-                const response = await fetch('https://api.deepseek.com/v1/chat/completions', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'Authorization': 'sk-f556c162410e4e21982a0c709dadebfa' // 🔴 Замените на свой API-ключ!
-                    },
-                    body: JSON.stringify({
-                        model: "deepseek-chat",
-                        messages: [{ role: "user", content: message }],
-                        max_tokens: 1000
-                    })
-                });
+            // Добавляем инструкцию при загрузке
+            addMessageToChat('ai', 'Привет! Я ИИ-ассистент для тестового курса. Чем могу помочь?');
 
-                if (!response.ok) {
-                    throw new Error(`Ошибка API: ${response.status}`);
+            async function sendMessage() {
+                const message = userInput.value.trim();
+                if (!message) return;
+                
+                addMessageToChat('user', message);
+                userInput.value = '';
+                sendButton.disabled = true;
+                
+                // Индикатор загрузки
+                const loadingId = 'loading-' + Date.now();
+                addMessageToChat('ai', '<span id="'+loadingId+'">ИИ думает...</span>', true);
+                
+                try {
+                    // В реальном проекте используйте серверный прокси для API ключа!
+                    const response = await fetch('https://api.openai.com/v1/chat/completions', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'Authorization': 'Bearer YOUR_API_KEY' // ЗАМЕНИТЕ на ваш новый ключ
+                        },
+                        body: JSON.stringify({
+                            model: "gpt-3.5-turbo", // Используем GPT-3.5
+                            messages: [{
+                                role: "system",
+                                content: "Ты помощник для тестового курса под названием 'test_tg_course'. Отвечай кратко и по делу."
+                            }, {
+                                role: "user",
+                                content: message
+                            }],
+                            temperature: 0.5,
+                            max_tokens: 300
+                        })
+                    });
+                    
+                    const data = await response.json();
+                    const aiResponse = data.choices[0].message.content;
+                    
+                    // Удаляем индикатор загрузки и добавляем ответ
+                    document.getElementById(loadingId).remove();
+                    addMessageToChat('ai', aiResponse);
+                    
+                } catch (error) {
+                    console.error('Ошибка:', error);
+                    document.getElementById(loadingId).remove();
+                    addMessageToChat('ai', 'Ошибка соединения с ИИ. Попробуйте позже.');
+                } finally {
+                    sendButton.disabled = false;
+                    userInput.focus();
                 }
-
-                const data = await response.json();
-                const aiResponse = data.choices[0].message.content;
-                logAction(`Получен ответ от DeepSeek: "${aiResponse}"`);
-                return aiResponse;
-            } catch (error) {
-                logAction(`Ошибка: ${error.message}`);
-                return "Произошла ошибка при запросе к ИИ. Попробуйте позже.";
             }
-        }
-
-        // Обработчик отправки сообщения
-        sendButton.addEventListener('click', async () => {
-            const message = userInput.value.trim();
-            if (!message) return;
-
-            addMessage(message, true);
-            userInput.value = '';
             
-            const aiResponse = await sendToDeepSeek(message);
-            addMessage(aiResponse, false);
-        });
-
-        // Отправка по Enter
-        userInput.addEventListener('keypress', (e) => {
-            if (e.key === 'Enter') {
-                sendButton.click();
+            function addMessageToChat(sender, message, isHtml = false) {
+                const messageDiv = document.createElement('div');
+                messageDiv.classList.add('message');
+                messageDiv.classList.add(sender === 'user' ? 'user-message' : 'ai-message');
+                
+                if (isHtml) {
+                    messageDiv.innerHTML = message;
+                } else {
+                    messageDiv.textContent = message;
+                }
+                
+                chatContainer.appendChild(messageDiv);
+                chatContainer.scrollTop = chatContainer.scrollHeight;
             }
+            
+            // Обработчики событий
+            userInput.addEventListener('keypress', function(e) {
+                if (e.key === 'Enter') sendMessage();
+            });
+            sendButton.addEventListener('click', sendMessage);
         });
-
-        // Логируем старт
-        logAction(`Приложение запущено. Пользователь: ${userId}`);
     </script>
 </body>
 </html>
