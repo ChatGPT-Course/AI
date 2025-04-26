@@ -69,6 +69,63 @@
             z-index: 100;
         }
 
+        .nav-container {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: var(--white);
+            padding: 12px 20px;
+            box-shadow: 0 -4px 16px rgba(0, 0, 0, 0.05);
+            border-top: 1px solid rgba(255, 122, 0, 0.1);
+            z-index: 500;
+        }
+    
+        .nav-buttons {
+            display: flex;
+            justify-content: space-around;
+            gap: 10px;
+        }
+    
+        .nav-btn {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 6px;
+            padding: 10px;
+            border-radius: 12px;
+            background: none;
+            border: none;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            text-decoration: none;
+            color: var(--dark);
+        }
+    
+        .nav-btn.active {
+            background: rgba(255, 122, 0, 0.1);
+            color: var(--primary);
+        }
+    
+        .nav-btn:not(.active):hover {
+            background: rgba(255, 122, 0, 0.05);
+        }
+    
+        .nav-icon {
+            font-size: 20px;
+            transition: transform 0.2s;
+        }
+    
+        .nav-btn.active .nav-icon {
+            transform: scale(1.1);
+        }
+    
+        .nav-label {
+            font-size: 12px;
+            font-weight: 500;
+            white-space: nowrap;
+    }
         .support-btn {
             width: 50px;
             height: 50px;
@@ -988,5 +1045,17 @@
         // Глобальные функции для обработки событий
         window.handleModuleClick = handleModuleClick;
     </script>
+<div class="nav-container">
+    <div class="nav-buttons">
+        <button class="nav-btn active">
+            <span class="nav-icon">🏠</span>
+            <span class="nav-label">Главная</span>
+        </button>
+        <a href="chat.html" class="nav-btn">
+            <span class="nav-icon">🤖</span>
+            <span class="nav-label">ИИ-Ассистент</span>
+        </a>
+    </div>
+</div>
 </body>
 </html>
