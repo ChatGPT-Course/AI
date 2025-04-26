@@ -3,257 +3,263 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>AI Ассистент</title>
-    <script src="https://www.gstatic.com/firebasejs/9.6.0/firebase-app-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.6.0/firebase-database-compat.js"></script>
+    <title>NeuroChat</title>
     <style>
         :root {
-            --primary: #FFA857;
-            --bg: linear-gradient(135deg, #FFF3E0 0%, #FFECB3 100%);
-            --card-bg: rgba(255, 255, 255, 0.95);
-            --text: #2F2F2F;
-            --border: rgba(255, 168, 87, 0.3);
+            --primary: #FF6B35;
+            --primary-dark: #D45A2B;
+            --bg: #1A1A1A;
+            --text: #FFFFFF;
         }
 
         * {
             box-sizing: border-box;
             margin: 0;
             padding: 0;
-            font-family: 'Segoe UI', system-ui;
         }
 
         body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
             background: var(--bg);
             color: var(--text);
             height: 100vh;
-            overflow: hidden;
+            display: flex;
+            flex-direction: column;
         }
 
-        .loader-container {
-            position: fixed;
-            top: 0;
-            left: 0;
+        .chat-container {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 1rem;
+            flex-grow: 1;
             width: 100%;
-            height: 100%;
             display: flex;
             flex-direction: column;
-            justify-content: center;
-            align-items: center;
-            z-index: 1000;
-            background: var(--bg);
         }
 
-        .container {
-            display: none;
-            height: 100vh;
-            flex-direction: column;
-            margin: 12px;
-            border-radius: 16px;
-            background: var(--card-bg);
-            box-shadow: 0 4px 24px rgba(0,0,0,0.05);
-            border: 1px solid var(--border);
-        }
-
-        .header {
-            padding: 16px;
-            border-bottom: 1px solid var(--border);
+        .chat-header {
             display: flex;
             align-items: center;
-            gap: 12px;
+            gap: 1rem;
+            padding: 1rem 0;
+            border-bottom: 2px solid var(--primary);
+            margin-bottom: 1rem;
         }
 
-        .back-button {
-            padding: 8px 16px;
-            border-radius: 8px;
+        .neuro-icon {
+            width: 40px;
+            height: 40px;
             background: var(--primary);
-            color: white;
-            text-decoration: none;
-            transition: transform 0.2s;
-        }
-
-        .chat-wrapper {
-            flex: 1;
+            border-radius: 50%;
             display: flex;
-            flex-direction: column;
-            padding: 16px;
-            gap: 12px;
+            align-items: center;
+            justify-content: center;
+            animation: pulse 2s infinite;
         }
 
         .chat-messages {
-            flex: 1;
+            flex-grow: 1;
             overflow-y: auto;
-            padding: 12px;
-            border: 1px solid var(--border);
+            padding: 1rem;
+            background: rgba(255,255,255,0.05);
             border-radius: 12px;
+            margin-bottom: 1rem;
             display: flex;
             flex-direction: column;
-            gap: 8px;
+            gap: 1rem;
         }
 
         .message {
             max-width: 80%;
-            padding: 12px;
-            border-radius: 12px;
-            animation: fadeIn 0.3s;
+            padding: 1rem;
+            border-radius: 1rem;
+            animation: fadeIn 0.3s ease;
         }
 
         .user-message {
             background: var(--primary);
-            color: white;
             align-self: flex-end;
+            border-bottom-right-radius: 4px;
         }
 
         .bot-message {
-            background: rgba(255, 168, 87, 0.1);
-            border: 1px solid var(--border);
+            background: rgba(255,255,255,0.1);
+            border: 1px solid var(--primary);
             align-self: flex-start;
+            border-bottom-left-radius: 4px;
         }
 
-        .input-wrapper {
+        .typing-indicator {
+            display: none;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 1rem;
+            background: rgba(255,255,255,0.05);
+            border-radius: 2rem;
+            width: fit-content;
+        }
+
+        .dot {
+            width: 8px;
+            height: 8px;
+            background: var(--primary);
+            border-radius: 50%;
+            animation: bounce 1.4s infinite;
+        }
+
+        .dot:nth-child(2) { animation-delay: 0.2s; }
+        .dot:nth-child(3) { animation-delay: 0.4s; }
+
+        .input-container {
             display: flex;
-            gap: 8px;
+            gap: 0.5rem;
+            padding: 1rem 0;
         }
 
         #user-input {
-            flex: 1;
-            padding: 12px;
-            border: 1px solid var(--border);
-            border-radius: 8px;
+            flex-grow: 1;
+            padding: 1rem;
+            border: none;
+            border-radius: 2rem;
+            background: rgba(255,255,255,0.1);
+            color: var(--text);
+            font-size: 1rem;
+            outline: none;
+            transition: 0.3s;
         }
 
-        #send-btn {
-            padding: 12px 20px;
-            background: var(--primary);
+        #user-input:focus {
+            box-shadow: 0 0 0 2px var(--primary);
+        }
+
+        button {
+            padding: 1rem 2rem;
             border: none;
-            border-radius: 8px;
+            border-radius: 2rem;
+            background: var(--primary);
             color: white;
+            font-weight: bold;
             cursor: pointer;
+            transition: 0.3s;
+        }
+
+        button:hover {
+            background: var(--primary-dark);
+            transform: translateY(-1px);
+        }
+
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.1); }
+            100% { transform: scale(1); }
+        }
+
+        @keyframes bounce {
+            0%, 80%, 100% { transform: translateY(0); }
+            40% { transform: translateY(-10px); }
         }
 
         @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(8px); }
-            to { opacity: 1; transform: none; }
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        @media (max-width: 600px) {
+            .chat-container {
+                padding: 0.5rem;
+            }
+
+            .message {
+                max-width: 90%;
+                font-size: 0.9rem;
+            }
+
+            #user-input {
+                padding: 0.8rem;
+            }
+
+            button {
+                padding: 0.8rem 1.5rem;
+            }
         }
     </style>
 </head>
 <body>
-    <div class="loader-container" id="loader">
-        Загрузка...
-    </div>
-
-    <div class="container" id="app-container">
-        <div class="header">
-            <a class="back-button" href="index.html">← Назад</a>
-            <h2>AI Ассистент</h2>
+    <div class="chat-container">
+        <div class="chat-header">
+            <div class="neuro-icon">
+                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/>
+                </svg>
+            </div>
+            <h1>NeuroChat</h1>
         </div>
 
-        <div class="chat-wrapper">
-            <div class="chat-messages" id="chat-messages"></div>
-            <div class="input-wrapper">
-                <input type="text" id="user-input" placeholder="Ваше сообщение...">
-                <button id="send-btn">Отправить</button>
-            </div>
+        <div class="chat-messages" id="chat-output"></div>
+
+        <div class="typing-indicator" id="typing">
+            <div class="dot"></div>
+            <div class="dot"></div>
+            <div class="dot"></div>
+        </div>
+
+        <div class="input-container">
+            <input type="text" id="user-input" placeholder="Напишите сообщение..." autocomplete="off">
+            <button onclick="sendMessage()">Отправить</button>
         </div>
     </div>
 
     <script>
-        // Конфигурация Firebase
-        const firebaseConfig = {
-            apiKey: "AIzaSyCMos6Y7C-krTLuKCI4VJG-TFLo6QI--k8",
-            authDomain: "vrot-x-7a48f.firebaseapp.com",
-            databaseURL: "https://vrot-x-7a48f-default-rtdb.firebaseio.com",
-            projectId: "vrot-x-7a48f",
-            storageBucket: "vrot-x-7a48f.firebasestorage.app",
-            messagingSenderId: "622297225288",
-            appId: "1:622297225288:web:5df6a5b02ffddedd96e07d"
-        };
-
-        // Инициализация Firebase
-        firebase.initializeApp(firebaseConfig);
-        const database = firebase.database();
-
-        // Конфигурация Cloudflare Worker
-        const CLOUDFLARE_WORKER_URL = 'https://openai-proxy.egorspirin10.workers.dev/';
-
-        // Элементы интерфейса
-        const loader = document.getElementById('loader');
-        const appContainer = document.getElementById('app-container');
-        const chatMessages = document.getElementById('chat-messages');
+        const API_ENDPOINT = 'ВАШ_CLOUDFLARE_WORKER_URL';
+        const chatOutput = document.getElementById('chat-output');
         const userInput = document.getElementById('user-input');
-        const sendBtn = document.getElementById('send-btn');
+        const typingIndicator = document.getElementById('typing');
 
-        // Проверка доступа
-        async function checkAccess() {
-            const userId = getCookie('tg_user_id');
-            if (!userId) return showError('Пользователь не авторизован');
+        function createMessageElement(text, isUser) {
+            const messageDiv = document.createElement('div');
+            messageDiv.className = `message ${isUser ? 'user-message' : 'bot-message'}`;
+            messageDiv.textContent = text;
+            return messageDiv;
+        }
+
+        async function sendMessage() {
+            const message = userInput.value.trim();
+            if (!message) return;
+
+            userInput.value = '';
+            chatOutput.appendChild(createMessageElement(message, true));
+            
+            // Показать индикатор набора
+            typingIndicator.style.display = 'flex';
+            chatOutput.scrollTop = chatOutput.scrollHeight;
 
             try {
-                const snapshot = await database.ref(`users/${userId}`).get();
-                const userData = snapshot.val();
+                const response = await fetch(API_ENDPOINT, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ message })
+                });
 
-                if (!userData || userData.oplata !== 1) {
-                    return showError('Доступ запрещен');
-                }
-
-                const now = new Date();
-                const expDate = new Date(userData.date_expi.replace(/(\d+).(\d+).(\d+) (\d+):(\d+):(\d+)/, '$3-$2-$1T$4:$5:$6'));
+                if (!response.ok) throw new Error('Ошибка сервера');
                 
-                if (now > expDate) {
-                    showError('Срок подписки истек');
-                } else {
-                    initChat();
-                }
+                const data = await response.json();
+                chatOutput.appendChild(createMessageElement(data.reply, false));
+                
             } catch (error) {
-                showError('Ошибка подключения');
+                chatOutput.appendChild(createMessageElement(`Ошибка: ${error.message}`, false));
+            } finally {
+                typingIndicator.style.display = 'none';
+                chatOutput.scrollTop = chatOutput.scrollHeight;
             }
         }
 
-        // Инициализация чата
-        function initChat() {
-            loader.style.display = 'none';
-            appContainer.style.display = 'flex';
+        // Обработка Enter
+        userInput.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') sendMessage();
+        });
 
-            sendBtn.addEventListener('click', async () => {
-                const message = userInput.value.trim();
-                if (!message) return;
-
-                addMessage(message, 'user');
-                userInput.value = '';
-
-                try {
-                    const response = await fetch(CLOUDFLARE_WORKER_URL, {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({ message })
-                    });
-
-                    const data = await response.json();
-                    addMessage(data.reply, 'bot');
-                } catch (error) {
-                    addMessage('Ошибка соединения', 'error');
-                }
-            });
-        }
-
-        // Вспомогательные функции
-        function addMessage(text, type) {
-            const msgDiv = document.createElement('div');
-            msgDiv.className = `message ${type}-message`;
-            msgDiv.textContent = text;
-            chatMessages.appendChild(msgDiv);
-            chatMessages.scrollTop = chatMessages.scrollHeight;
-        }
-
-        function getCookie(name) {
-            return document.cookie.match(`(^|;)\\s*${name}\\s*=\\s*([^;]+)`)?.pop() || '';
-        }
-
-        function showError(message) {
-            loader.innerHTML = message;
-        }
-
-        // Инициализация
-        window.onload = checkAccess;
+        // Автофокус на поле ввода
+        userInput.focus();
     </script>
 </body>
 </html>
