@@ -924,7 +924,7 @@
                 state.dbRef.once('value').then((snapshot) => {
                     if (!snapshot.exists()) {
                         state.dbRef.set({
-                             name: document.getElementById('user-name-text').textContent,
+                            name: document.getElementById('user-name-text').textContent,
                             username: state.username,
                             oplata: 0,
                             date_oplata: "-",
