@@ -485,13 +485,31 @@
             background: rgba(255, 122, 0, 0.1);
         }
 
-        /* Полное удаление синей обводки и box-shadow для всех поддерживающих кнопок */
+        /* Полное удаление синей обводки и фона для всех поддерживающих кнопок и ссылок */
+        .support-btn,
+        .support-option,
+        .support-options a,
+        .support-options button {
+            outline: none !important;
+            box-shadow: none !important;
+        }
+
         .support-btn:focus, .support-btn:active, .support-btn:focus-visible, .support-btn:focus-within,
         .support-option:focus, .support-option:active, .support-option:focus-visible, .support-option:focus-within,
         .support-options a:focus, .support-options a:active, .support-options a:focus-visible, .support-options a:focus-within,
         .support-options button:focus, .support-options button:active, .support-options button:focus-visible, .support-options button:focus-within {
             outline: none !important;
             box-shadow: none !important;
+            background: inherit !important;
+            color: inherit !important;
+        }
+
+        /* Для Firefox */
+        .support-btn::-moz-focus-inner,
+        .support-option::-moz-focus-inner,
+        .support-options a::-moz-focus-inner,
+        .support-options button::-moz-focus-inner {
+            border: 0 !important;
         }
     </style>
 </head>
