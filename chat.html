@@ -50,6 +50,19 @@
         .modal-content h2 { margin-bottom: 16px; }
         .modal-content button { margin-top: 20px; padding: 12px 24px; border: none; border-radius: 8px; background: var(--primary); color: #fff; font-size: 1rem; cursor: pointer; }
         .modal-content button:hover { background: var(--primary-light); }
+        .clock-button {
+            position: absolute;
+            right: 16px;
+            top: 8px;
+            background: none;
+            border: none;
+            cursor: pointer;
+            padding: 4px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .clock-button svg { display: block; }
     </style>
 </head>
 <body>
@@ -64,6 +77,9 @@
             </svg>
         </a>
         <div class="header-title">AI eggo</div>
+        <button class="clock-button" onclick="if(currentUser){showAccessDaysLeft(isAccessAllowed(currentUser).dateExpired)}" title="Сколько дней осталось?">
+            <svg width="24" height="24" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10" fill="#FFA500"/><path d="M12 7v5l4 2" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </button>
     </div>
     <div class="chat-container" id="chat-container" style="display:none;">
         <div class="chat-messages" id="chat-output"></div>
