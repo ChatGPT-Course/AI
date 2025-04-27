@@ -646,8 +646,11 @@
 
         function hideLoadingScreen() {
             const loadingScreen = document.getElementById('loading-screen');
-            loadingScreen.style.display = 'none';
-            document.getElementById('app-content').style.opacity = '1';
+            loadingScreen.style.opacity = '0';
+            setTimeout(() => {
+                loadingScreen.style.display = 'none';
+                document.getElementById('app-content').style.opacity = '1';
+            }, 300);
         }
 
         async function initPromoCodes() {
@@ -682,6 +685,8 @@
         document.addEventListener('DOMContentLoaded', async () => {
             const loadingScreen = document.getElementById('loading-screen');
             loadingScreen.style.display = 'flex';
+            loadingScreen.style.opacity = '1';
+            document.getElementById('app-content').style.opacity = '0';
             initModals();
             initSupportButton();
 
@@ -690,9 +695,6 @@
                 Telegram.WebApp.expand();
                 Telegram.WebApp.enableClosingConfirmation();
             }
-
-            // Скрываем экран загрузки сразу после инициализации DOM и Telegram
-            hideLoadingScreen();
 
             await initPromoCodes();
 
@@ -711,6 +713,9 @@
                     window.location.href = 'chat.html';
                 });
             }
+
+            // Скрываем экран загрузки только после полной инициализации
+            hideLoadingScreen();
         });
 
         function initModals() {
