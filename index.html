@@ -484,24 +484,6 @@
         .modal-btn-secondary:hover {
             background: rgba(255, 122, 0, 0.1);
         }
-
-        /* Убираем outline и тень во всех состояниях для всех интерактивных элементов */
-        a, button, input, textarea, select, .module-card, .support-btn, .support-option {
-            outline: none !important;
-            box-shadow: none !important;
-            -webkit-tap-highlight-color: transparent;
-        }
-
-        a:hover, button:hover, input:hover, textarea:hover, select:hover, 
-        .module-card:hover, .support-btn:hover, .support-option:hover,
-        a:focus, button:focus, input:focus, textarea:focus, select:focus, 
-        .module-card:focus, .support-btn:focus, .support-option:focus,
-        a:active, button:active, input:active, textarea:active, select:active, 
-        .module-card:active, .support-btn:active, .support-option:active {
-            outline: none !important;
-            box-shadow: none !important;
-            -webkit-tap-highlight-color: transparent;
-        }
     </style>
 </head>
 <body>
@@ -551,16 +533,16 @@
         <!-- Контейнер поддержки -->
         <div class="support-container">
             <div class="support-options" id="supportOptions">
-                <a href="chat.html" class="support-option">
-                    <span class="support-icon" style="font-weight: bold; color: var(--secondary);">AI</span>
-                    ИИ-Ассистент
-                </a>
                 <a href="help.html" class="support-option">
                     <span class="support-icon">📩</span>
                     Создать обращение
                 </a>
+                <button class="support-option" id="contactSupportBtn">
+                    <span class="support-icon">💬</span>
+                    Написать в поддержку
+                </button>
             </div>
-            <button class="support-btn" id="supportBtn">⋮</button>
+            <button class="support-btn" id="supportBtn">🛟</button>
         </div>
 
         <!-- Модальное окно блокировки -->
@@ -628,9 +610,7 @@
             username: null,
             isPaid: false,
             dbRef: null,
-            isLoaded: false,
-            avatarLoaded: false,
-            userLoaded: false
+            isLoaded: false
         };
 
         // Инициализация кнопки поддержки
@@ -646,7 +626,7 @@
                 if (supportBtn.classList.contains('active')) {
                     supportBtn.innerHTML = '×';
                 } else {
-                    supportBtn.innerHTML = '⋮';
+                    supportBtn.innerHTML = '🛟';
                 }
             });
 
@@ -655,7 +635,7 @@
                 document.getElementById('contact-modal').style.display = 'flex';
                 supportBtn.classList.remove('active');
                 supportOptions.classList.remove('active');
-                supportBtn.innerHTML = '⋮';
+                supportBtn.innerHTML = '🛟';
             });
         }
 
@@ -798,7 +778,7 @@
 
             // Помечаем, что загрузка завершена
             state.isLoaded = true;
-            checkAllLoaded();
+            hideLoadingScreen();
         });
 
         function initModals() {
@@ -862,19 +842,22 @@
         }
 
         async function initTelegramApp() {
-            state.userLoaded = false;
-            state.avatarLoaded = false;
-
             const tg = Telegram.WebApp;
             const user = tg.initDataUnsafe.user;
             state.userId = user.id.toString();
             state.username = user.username || null;
             
+            // Сохраняем ID пользователя в cookie
             setCookie('tg_user_id', state.userId, 30);
+            
+            // Устанавливаем данные пользователя
             document.getElementById('user-name-text').textContent = 
                 [user.first_name, user.last_name].filter(Boolean).join(' ') || 'Пользователь';
+            
+            // Добавляем ID пользователя
             document.getElementById('user-id').textContent = `(${state.userId})`;
-
+            
+            // Аватар
             const avatarElement = document.getElementById('user-avatar');
             if (user.photo_url) {
                 const img = new Image();
@@ -882,53 +865,54 @@
                 img.onload = () => {
                     avatarElement.innerHTML = '';
                     avatarElement.appendChild(img);
-                    state.avatarLoaded = true;
                     checkAllLoaded();
                 };
                 img.onerror = () => {
                     const fallback = user.first_name?.charAt(0).toUpperCase() || 'U';
                     document.getElementById('avatar-fallback').textContent = fallback;
-                    state.avatarLoaded = true;
                     checkAllLoaded();
                 };
             } else {
                 const fallback = user.first_name?.charAt(0).toUpperCase() || 'U';
                 document.getElementById('avatar-fallback').textContent = fallback;
-                state.avatarLoaded = true;
                 checkAllLoaded();
             }
 
+            // Инициализируем слушатель изменений в БД
             await initDatabaseListener();
-            state.userLoaded = true;
-            checkAllLoaded();
+        }
+
+        function checkAllLoaded() {
+            if (state.userId && state.isLoaded) {
+                hideLoadingScreen();
+            }
         }
 
         async function initTestMode() {
-            state.userLoaded = false;
-            state.avatarLoaded = false;
+            // Для тестирования без Telegram
             document.getElementById('user-name-text').textContent = 'Тестовый пользователь';
             state.userId = getCookie('tg_user_id') || "test-user";
             state.username = "test_user";
             document.getElementById('user-id').textContent = `(${state.userId})`;
             document.getElementById('avatar-fallback').textContent = 'T';
-            state.avatarLoaded = true;
+            
+            const urlParams = new URLSearchParams(window.location.search);
+            state.isPaid = urlParams.get('oplata') === '1';
+            
             await updateUI();
-            state.userLoaded = true;
-            checkAllLoaded();
         }
 
         async function initDatabaseListener() {
             return new Promise((resolve) => {
-                let resolved = false;
                 state.dbRef = database.ref('users/' + state.userId);
-
+                
                 // Обработчик изменений
                 state.dbRef.on('value', (snapshot) => {
-                    if (resolved) return;
-                    resolved = true;
                     const userData = snapshot.val();
                     if (userData) {
                         state.isPaid = userData.oplata === 1;
+                        
+                        // Если username отсутствует в БД, сохраняем его
                         if (!userData.username && state.username) {
                             state.dbRef.update({ username: state.username });
                         }
@@ -947,20 +931,7 @@
                             date_expired: "-"
                         });
                     }
-                }).catch(() => {
-                    if (!resolved) {
-                        resolved = true;
-                        resolve();
-                    }
                 });
-
-                // Таймаут на 3 секунды — если нет ответа, продолжаем дальше
-                setTimeout(() => {
-                    if (!resolved) {
-                        resolved = true;
-                        resolve();
-                    }
-                }, 3000);
             });
         }
 
@@ -1018,17 +989,6 @@
 
         // Глобальные функции для обработки событий
         window.handleModuleClick = handleModuleClick;
-
-        // Функция для получения URL аватарки из cookie
-        function getAvatarFromCookie() {
-            return getCookie('tg_user_avatar');
-        }
-
-        function checkAllLoaded() {
-            if (state.avatarLoaded && state.userLoaded && state.isLoaded) {
-                hideLoadingScreen();
-            }
-        }
     </script>
 </body>
 </html>
