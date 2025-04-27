@@ -485,19 +485,23 @@
             background: rgba(255, 122, 0, 0.1);
         }
 
-        /* Убираем синюю обводку и тень при фокусе/нажатии на все кнопки и support-option */
-        button,
-        button:focus,
-        button:active,
-        button:focus-visible,
-        .support-option:focus,
-        .support-option:active,
-        .support-option:focus-visible,
-        a.support-option:focus,
-        a.support-option:active,
-        a.support-option:focus-visible {
+        /* Убираем outline для всех элементов */
+        a, button, input, textarea, select, .module-card, .support-btn, .support-option {
+            outline: none !important;
+        }
+
+        /* Убираем outline при фокусе */
+        a:focus, button:focus, input:focus, 
+        textarea:focus, select:focus, 
+        .module-card:focus, .support-btn:focus, 
+        .support-option:focus {
             outline: none !important;
             box-shadow: none !important;
+        }
+
+        /* Для современных браузеров (лучшая практика) */
+        :focus-visible {
+            outline: none !important;
         }
     </style>
 </head>
