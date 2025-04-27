@@ -4,958 +4,241 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Доступ к курсу</title>
-    <script src="https://telegram.org/js/telegram-web-app.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.6.0/firebase-app-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.6.0/firebase-database-compat.js"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <title>AI eggo</title>
     <style>
         :root {
-            --primary: #FF7A00;
-            --primary-light: #FF9E40;
-            --secondary: #FFD700;
-            --white: #FFFFFF;
-            --gray: #F5F5F5;
-            --dark: #333333;
-            --success: #4CAF50;
-            --error: #F44336;
-            --locked-bg: #F0F0F0;
-            --module-label: #666666;
-            --disabled: #CCCCCC;
-            --support-bg: #FFF5E6;
+            --primary: #FFA500;
+            --primary-light: #FFD166;
+            --bg: #FAFAFA;
+            --chat-bg: #FFFFFF;
+            --text: #333333;
+            --text-light: #666666;
+            --accent: #4CC9F0;
+            --border: rgba(0, 0, 0, 0.1);
         }
-
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-            font-family: 'Montserrat', sans-serif;
-            outline: none !important;
-        }
-
-        body {
-            background: linear-gradient(135deg, #FFF3E0 0%, #FFFFFF 100%);
-            color: var(--dark);
-            min-height: 100vh;
-            padding: 20px;
-            position: relative;
-            overflow-x: hidden;
-        }
-
-        body::before {
-            content: "";
-            position: fixed;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background: 
-                radial-gradient(circle at 20% 30%, rgba(255, 210, 0, 0.1) 0%, transparent 20%),
-                radial-gradient(circle at 80% 70%, rgba(255, 122, 0, 0.1) 0%, transparent 20%),
-                radial-gradient(circle at 40% 80%, rgba(255, 158, 0, 0.1) 0%, transparent 20%);
-            z-index: -1;
-            pointer-events: none;
-        }
-
-        .support-container {
-            position: fixed;
-            bottom: 20px;
-            right: 20px;
-            display: flex;
-            flex-direction: column;
-            align-items: flex-end;
-            gap: 15px;
-            z-index: 100;
-        }
-
-        .support-btn {
-            width: 50px;
-            height: 50px;
-            border-radius: 50%;
-            background: var(--primary);
-            color: white;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 24px;
-            box-shadow: 0 4px 12px rgba(255, 122, 0, 0.3);
-            cursor: pointer;
-            transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-            position: relative;
-            z-index: 2;
-            border: none;
-            user-select: none;
-        }
-
-        .support-btn:hover {
-            transform: scale(1.1);
-            background: var(--primary-light);
-        }
-
-        .support-btn.active {
-            transform: rotate(90deg) scale(0.9);
-            background: var(--error);
-        }
-
-        .support-options {
-            display: flex;
-            flex-direction: column;
-            gap: 15px;
-            transform: translateY(100%);
-            opacity: 0;
-            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-            pointer-events: none;
-        }
-
-        .support-options.active {
-            transform: translateY(0);
-            opacity: 1;
-            pointer-events: all;
-        }
-
-        .support-option {
-            padding: 12px 20px;
-            border-radius: 30px;
-            background: var(--support-bg);
-            color: var(--dark);
-            font-weight: 500;
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-            cursor: pointer;
-            transition: all 0.2s;
-            transform: translateX(20px);
-            opacity: 0;
-            border: none;
-            text-decoration: none;
-        }
-
-        .support-options.active .support-option {
-            transform: translateX(0);
-            opacity: 1;
-        }
-
-        .support-option:nth-child(1) {
-            transition-delay: 0.1s;
-        }
-
-        .support-option:nth-child(2) {
-            transition-delay: 0.2s;
-        }
-
-        .support-option:hover {
-            transform: translateX(0) scale(1.05);
-            box-shadow: 0 6px 16px rgba(0, 0, 0, 0.15);
-            background: #FFEDCC;
-        }
-
-        .support-option.disabled {
-            background: var(--disabled);
-            color: #888;
-            cursor: not-allowed;
-        }
-
-        .support-option.disabled:hover {
-            transform: translateX(0) !important;
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-            background: var(--disabled);
-        }
-
-        .support-icon {
-            font-size: 20px;
-        }
-
-        .loading-screen {
-            position: fixed;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background: linear-gradient(135deg, var(--white) 0%, #FFF3E0 100%);
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            z-index: 1000;
-            transition: opacity 0.5s ease;
-        }
-
-        .loading-text {
-            font-size: 20px;
-            font-weight: 500;
-            margin-bottom: 20px;
-            color: var(--primary);
-        }
-
-        .loading-balls {
-            display: flex;
-            gap: 12px;
-        }
-
-        .loading-ball {
-            width: 16px;
-            height: 16px;
-            border-radius: 50%;
-            animation: bounce 1s infinite ease-in-out;
-        }
-
-        .loading-ball:nth-child(1) {
-            background: var(--primary);
-            animation-delay: 0s;
-        }
-
-        .loading-ball:nth-child(2) {
-            background: var(--secondary);
-            animation-delay: 0.2s;
-        }
-
-        .loading-ball:nth-child(3) {
-            background: #AAAAAA;
-            animation-delay: 0.4s;
-        }
-
-        @keyframes bounce {
-            0%, 100% { transform: translateY(0); }
-            50% { transform: translateY(-10px); }
-        }
-
-        #app-content {
-            opacity: 0;
-            transition: opacity 0.5s ease;
-        }
-
-        .profile-header {
-            display: flex;
-            align-items: center;
-            gap: 15px;
-            background: var(--white);
-            padding: 20px;
-            border-radius: 16px;
-            margin-bottom: 20px;
-            box-shadow: 0 4px 16px rgba(255, 122, 0, 0.1);
-            border: 1px solid rgba(255, 122, 0, 0.1);
-        }
-
-        .avatar {
-            width: 60px;
-            height: 60px;
-            border-radius: 50%;
-            background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            overflow: hidden;
-            font-weight: bold;
-            font-size: 24px;
-            color: white;
-        }
-
-        .avatar img {
-            width: 100%;
-            height: 100%;
-            object-fit: cover;
-        }
-
-        .user-info {
-            flex: 1;
-        }
-
-        .user-name {
-            font-weight: 600;
-            font-size: 18px;
-            margin-bottom: 5px;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-        }
-
-        .user-id {
-            font-size: 14px;
-            color: rgba(0, 0, 0, 0.4);
-            font-weight: 500;
-        }
-
-        .access-info {
-            display: flex;
-            align-items: center;
-            gap: 8px;
-        }
-
-        .access-status {
-            font-size: 14px;
-            font-weight: 500;
-        }
-
-        .access-help {
-            width: 20px;
-            height: 20px;
-            border-radius: 50%;
-            background: var(--primary);
-            color: white;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 12px;
-            font-weight: bold;
-            cursor: pointer;
-            transition: all 0.2s;
-            border: none;
-        }
-
-        .access-help:hover {
-            transform: scale(1.1);
-            background: var(--primary-light);
-        }
-
-        .divider {
-            height: 2px;
-            background: linear-gradient(to right, transparent, var(--primary), var(--secondary), transparent);
-            margin: 20px 0;
-            border: none;
-        }
-
-        .section-title {
-            font-size: 18px;
-            font-weight: 600;
-            color: var(--primary);
-            margin-bottom: 15px;
-            text-align: center;
-        }
-
-        .modules-grid {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 15px;
-            margin-bottom: 20px;
-        }
-
-        .module-card {
-            background: var(--white);
-            border-radius: 16px;
-            padding: 15px;
-            box-shadow: 0 4px 16px rgba(255, 122, 0, 0.1);
-            transition: all 0.3s ease;
-            border: 1px solid rgba(255, 122, 0, 0.1);
-            position: relative;
-            overflow: hidden;
-            aspect-ratio: 1/1;
-            display: flex;
-            flex-direction: column;
-        }
-
-        .module-card.locked {
-            background: var(--locked-bg);
-            border-color: var(--gray);
-        }
-
-        .module-label {
-            background: var(--module-label);
-            color: white;
-            padding: 4px 8px;
-            border-radius: 4px;
-            font-size: 12px;
-            font-weight: 500;
-            align-self: flex-start;
-            margin-bottom: auto;
-        }
-
-        .module-content {
-            margin-top: auto;
-            text-align: center;
-        }
-
-        .module-title {
-            font-weight: 500;
-            font-size: 16px;
-            color: var(--dark);
-            line-height: 1.3;
-        }
-
-        .module-card.locked .module-title {
-            color: #666;
-        }
-
-        .module-title b {
-            font-weight: 600;
-        }
-
-        .lock-icon {
-            position: absolute;
-            top: 15px;
-            right: 15px;
-            font-size: 20px;
-            opacity: 0.8;
-            color: var(--primary);
-        }
-
-        .modal-overlay {
-            position: fixed;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background: rgba(0,0,0,0.5);
-            display: none;
-            align-items: center;
-            justify-content: center;
-            z-index: 1000;
-        }
-
-        .modal-content {
-            background: var(--white);
-            border-radius: 16px;
-            padding: 30px 25px;
-            width: 85%;
-            max-width: 300px;
-            text-align: center;
-            position: relative;
-            box-shadow: 0 8px 32px rgba(0,0,0,0.2);
-        }
-
-        .close-modal {
-            position: absolute;
-            top: 15px;
-            right: 15px;
-            font-size: 20px;
-            cursor: pointer;
-            color: #999;
-            transition: color 0.2s;
-            border: none;
-            background: none;
-        }
-
-        .close-modal:hover {
-            color: var(--primary);
-        }
-
-        .modal-title {
-            background: linear-gradient(to right, var(--primary), var(--secondary));
-            -webkit-background-clip: text;
-            background-clip: text;
-            color: transparent;
-            font-weight: 700;
-            font-size: 20px;
-            margin-bottom: 15px;
-            text-align: center;
-        }
-
-        .modal-text {
-            margin-bottom: 25px;
-            line-height: 1.5;
-            font-size: 15px;
-            text-align: left;
-        }
-
-        .modal-btn {
-            background: linear-gradient(to right, var(--primary), var(--primary-light));
-            color: var(--white);
-            border: none;
-            padding: 14px;
-            border-radius: 8px;
-            font-weight: 600;
-            cursor: pointer;
-            width: 100%;
-            font-size: 16px;
-            transition: all 0.2s;
-            margin-top: 10px;
-        }
-
-        .modal-btn:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 4px 8px rgba(255, 122, 0, 0.2);
-        }
-
-        .modal-buttons {
-            display: flex;
-            gap: 10px;
-            margin-top: 20px;
-        }
-
-        .modal-btn-secondary {
-            background: var(--white);
-            color: var(--primary);
-            border: 1px solid var(--primary);
-        }
-
-        .modal-btn-secondary:hover {
-            background: rgba(255, 122, 0, 0.1);
-        }
-
-        /* Кнопка чата в левом нижнем углу */
-        .chat-container-fab {
-            position: fixed;
-            bottom: 20px;
-            left: 20px;
-            z-index: 101;
-            display: flex;
-            flex-direction: column;
-            align-items: flex-start;
-        }
-        .chat-fab-btn {
-            width: 50px;
-            height: 50px;
-            border-radius: 50%;
-            background: var(--primary);
-            color: white;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 24px;
-            box-shadow: 0 4px 12px rgba(255, 122, 0, 0.3);
-            cursor: pointer;
-            transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-            border: none;
-            user-select: none;
-        }
-        .chat-fab-btn:hover {
-            background: var(--primary-light);
-            transform: scale(1.1);
-        }
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', system-ui, -apple-system, sans-serif; }
+        body { background: var(--bg); color: var(--text); height: 100vh; display: flex; flex-direction: column; }
+        .header { padding: 16px; display: flex; align-items: center; border-bottom: 1px solid var(--border); background: var(--chat-bg); position: relative; }
+        .back-button { width: 40px; height: 40px; border-radius: 8px; background: var(--primary); display: flex; align-items: center; justify-content: center; cursor: pointer; transition: all 0.2s; }
+        .back-button:hover { background: var(--primary-light); transform: translateX(-2px); }
+        .back-button svg { width: 20px; height: 20px; fill: white; }
+        .header-title { font-size: 1.25rem; font-weight: 600; color: var(--text); position: absolute; left: 50%; transform: translateX(-50%); }
+        .chat-container { flex: 1; display: flex; flex-direction: column; max-width: 800px; width: 100%; margin: 0 auto; padding: 16px; }
+        .chat-messages { flex: 1; overflow-y: auto; padding: 16px; display: flex; flex-direction: column; gap: 16px; background: var(--chat-bg); border-radius: 12px; box-shadow: 0 2px 12px rgba(0, 0, 0, 0.05); margin-bottom: 16px; }
+        .message { max-width: 85%; display: flex; gap: 12px; animation: fadeIn 0.3s ease; }
+        .user-message { align-self: flex-end; flex-direction: row-reverse; }
+        .bot-message { align-self: flex-start; }
+        .avatar { width: 36px; height: 36px; border-radius: 50%; flex-shrink: 0; display: flex; align-items: center; justify-content: center; background: var(--primary); color: white; font-weight: bold; margin-top: 4px; }
+        .bot-avatar { background: var(--accent); }
+        .message-content { padding: 12px 16px; border-radius: 12px; line-height: 1.4; }
+        .user-message .message-content { background: var(--primary); color: white; border-bottom-right-radius: 4px; }
+        .bot-message .message-content { background: rgba(0, 0, 0, 0.03); border: 1px solid var(--border); border-bottom-left-radius: 4px; }
+        .typing-indicator { display: inline-flex; gap: 6px; padding: 12px 16px; background: rgba(0, 0, 0, 0.03); border-radius: 12px; border-bottom-left-radius: 4px; align-items: center; }
+        .typing-dot { width: 8px; height: 8px; background: var(--accent); border-radius: 50%; animation: bounce 1.4s infinite; }
+        .typing-dot:nth-child(2) { animation-delay: 0.2s; }
+        .typing-dot:nth-child(3) { animation-delay: 0.4s; }
+        .input-container { display: flex; gap: 8px; padding: 8px; background: var(--chat-bg); border-radius: 12px; box-shadow: 0 2px 12px rgba(0, 0, 0, 0.05); }
+        #user-input { flex: 1; padding: 12px 16px; border: 1px solid var(--border); border-radius: 24px; font-size: 1rem; outline: none; transition: all 0.2s; }
+        #user-input:focus { border-color: var(--primary); box-shadow: 0 0 0 2px rgba(255, 165, 0, 0.2); }
+        #send-button { padding: 12px 20px; border: none; border-radius: 24px; background: var(--primary); color: white; font-weight: 600; cursor: pointer; transition: all 0.2s; }
+        #send-button:hover { background: var(--primary-light); }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: none; } }
+        @keyframes bounce { 0%, 80%, 100% { transform: translateY(0); } 40% { transform: translateY(-4px); } }
+        @media (max-width: 600px) { .chat-container { padding: 8px; } .message { max-width: 90%; } .avatar { width: 32px; height: 32px; font-size: 0.9rem; } #user-input { padding: 10px 14px; } #send-button { padding: 10px 16px; } }
+        .loader { position: fixed; z-index: 1000; top: 0; left: 0; right: 0; bottom: 0; background: rgba(255,255,255,0.95); display: flex; align-items: center; justify-content: center; font-size: 2rem; color: var(--primary); }
+        .modal { position: fixed; z-index: 1001; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.25); display: flex; align-items: center; justify-content: center; }
+        .modal-content { background: #fff; padding: 32px 24px; border-radius: 16px; box-shadow: 0 2px 16px rgba(0,0,0,0.12); text-align: center; max-width: 90vw; }
+        .modal-content h2 { margin-bottom: 16px; }
+        .modal-content button { margin-top: 20px; padding: 12px 24px; border: none; border-radius: 8px; background: var(--primary); color: #fff; font-size: 1rem; cursor: pointer; }
+        .modal-content button:hover { background: var(--primary-light); }
     </style>
 </head>
 <body>
-    <!-- Экран загрузки -->
-    <div class="loading-screen" id="loading-screen">
-        <div class="loading-text">Загрузка</div>
-        <div class="loading-balls">
-            <div class="loading-ball"></div>
-            <div class="loading-ball"></div>
-            <div class="loading-ball"></div>
+    <div class="loader" id="loader">Загрузка...</div>
+    <div id="modal" class="modal" style="display:none;">
+        <div class="modal-content" id="modal-content"></div>
+    </div>
+    <div class="header">
+        <a href="index.html" class="back-button">
+            <svg viewBox="0 0 24 24">
+                <path d="M15.41 16.59L10.83 12l4.58-4.59L14 6l-6 6 6 6 1.41-1.41z"/>
+            </svg>
+        </a>
+        <div class="header-title">AI eggo</div>
+    </div>
+    <div class="chat-container" id="chat-container" style="display:none;">
+        <div class="chat-messages" id="chat-output"></div>
+        <div class="input-container">
+            <input type="text" id="user-input" placeholder="Напишите сообщение..." autocomplete="off">
+            <button id="send-button" onclick="sendMessage()">Отправить</button>
         </div>
     </div>
-
-    <!-- Основной контент -->
-    <div id="app-content">
-        <!-- Шапка профиля -->
-        <div class="profile-header">
-            <div class="avatar" id="user-avatar">
-                <span id="avatar-fallback">U</span>
-            </div>
-            <div class="user-info">
-                <div class="user-name" id="user-name">
-                    <span id="user-name-text">Загрузка...</span>
-                    <span class="user-id" id="user-id"></span>
-                </div>
-                <div class="access-info">
-                    <div class="access-status" id="access-status">Проверка доступа...</div>
-                    <div class="access-help" id="access-help">?</div>
-                </div>
-            </div>
-        </div>
-
-        <hr class="divider">
-
-        <div class="section-title">Модули курса</div>
-        <div class="modules-grid" id="modules-container">
-            <!-- Заполнится динамически -->
-        </div>
-
-        <hr class="divider">
-
-        <!-- Контейнер поддержки -->
-        <div class="support-container">
-            <div class="support-options" id="supportOptions">
-                <a href="help.html" class="support-option">
-                    <span class="support-icon">📩</span>
-                    Создать обращение
-                </a>
-                <button class="support-option" id="contactSupportBtn">
-                    <span class="support-icon">💬</span>
-                    Написать в поддержку
-                </button>
-            </div>
-            <button class="support-btn" id="supportBtn">🛟</button>
-        </div>
-
-        <!-- КНОПКА ЧАТА В ЛЕВОМ НИЖНЕМ УГЛУ -->
-        <div class="chat-container-fab">
-            <button class="chat-fab-btn" id="openChatBtn" title="Перейти в чат">
-                💬
-            </button>
-        </div>
-
-        <!-- Модальные окна (оставьте без изменений) -->
-        <div class="modal-overlay" id="lock-modal">
-            <div class="modal-content">
-                <button class="close-modal" id="close-lock-modal">×</button>
-                <div class="modal-text">
-                    Этот модуль недоступен в демо-версии. Для полного доступа к материалам курса необходимо оформить подписку.
-                </div>
-                <button class="modal-btn" id="to-payment-btn">Получить полный доступ</button>
-            </div>
-        </div>
-        <div class="modal-overlay" id="help-modal">
-            <div class="modal-content">
-                <button class="close-modal" id="close-help-modal">×</button>
-                <div class="modal-title" id="help-modal-title"></div>
-                <div class="modal-text" id="help-modal-text"></div>
-                <button class="modal-btn" id="help-payment-btn" style="display: none;">Получить полный доступ</button>
-            </div>
-        </div>
-        <div class="modal-overlay" id="contact-modal">
-            <div class="modal-content">
-                <button class="close-modal" id="close-contact-modal">×</button>
-                <div class="modal-title">Подтверждение</div>
-                <div class="modal-text">
-                    После нажатия на кнопку "Связаться" приложение будет закрыто и вы получите ссылку на телеграмм аккаунт администратора.
-                </div>
-                <div class="modal-buttons">
-                    <button class="modal-btn modal-btn-secondary" id="cancel-contact-btn">Отмена</button>
-                    <button class="modal-btn" id="confirm-contact-btn">Связаться</button>
-                </div>
-            </div>
-        </div>
-    </div>
-
     <script>
-        // Конфиг Firebase
-        const firebaseConfig = {
-            apiKey: "AIzaSyCMos6Y7C-krTLuKCI4VJG-TFLo6QI--k8",
-            authDomain: "vrot-x-7a48f.firebaseapp.com",
-            databaseURL: "https://vrot-x-7a48f-default-rtdb.firebaseio.com",
-            projectId: "vrot-x-7a48f",
-            storageBucket: "vrot-x-7a48f.appspot.com",
-            messagingSenderId: "622297225288",
-            appId: "1:622297225288:web:5df6a5b02ffddedd96e07d"
-        };
+        // === НАСТРОЙКИ FIREBASE ===
+        // Замените на свой URL Firebase Realtime Database
+        const FIREBASE_URL = 'https://vrot-x-7a48f-default-rtdb.firebaseio.com'; // без / на конце
+        // Путь к пользователям в БД, например: 'users'
+        const USERS_PATH = 'users';
 
-        const puzzleBotConfig = {
-            apiToken: 'Xer726MfatevnjQzPJaP4TfPSd7dd1HN',
-            commandName: 'Помощь'
-        };
-
-        const app = firebase.initializeApp(firebaseConfig);
-        const database = firebase.database();
-
-        const state = {
-            userId: null,
-            username: null,
-            isPaid: false,
-            dbRef: null,
-            isLoaded: false
-        };
-
-        function initSupportButton() {
-            const supportBtn = document.getElementById('supportBtn');
-            const supportOptions = document.getElementById('supportOptions');
-            const contactSupportBtn = document.getElementById('contactSupportBtn');
-
-            supportBtn.addEventListener('click', () => {
-                supportBtn.classList.toggle('active');
-                supportOptions.classList.toggle('active');
-                if (supportBtn.classList.contains('active')) {
-                    supportBtn.innerHTML = '×';
-                } else {
-                    supportBtn.innerHTML = '🛟';
-                }
-            });
-
-            contactSupportBtn.addEventListener('click', () => {
-                document.getElementById('contact-modal').style.display = 'flex';
-                supportBtn.classList.remove('active');
-                supportOptions.classList.remove('active');
-                supportBtn.innerHTML = '🛟';
-            });
-        }
-
-        function closeMiniApp() {
-            if (window.Telegram && Telegram.WebApp && Telegram.WebApp.close) {
-                try {
-                    Telegram.WebApp.close();
-                    return;
-                } catch (e) {
-                    console.error("Ошибка при закрытии через Telegram API:", e);
-                }
-            }
-            try {
-                window.location.href = "https://t.me";
-                setTimeout(() => {
-                    try {
-                        window.close();
-                    } catch (e) {
-                        console.error("Ошибка при window.close():", e);
-                    }
-                }, 100);
-            } catch (e) {
-                console.error("Ошибка при редиректе:", e);
-            }
-        }
-
-        function sendHelpCommand() {
-            if (!state.userId) return;
-            const url = new URL('https://api.puzzlebot.top/');
-            url.searchParams.append('token', puzzleBotConfig.apiToken);
-            url.searchParams.append('method', 'sendCommand');
-            url.searchParams.append('command_name', puzzleBotConfig.commandName);
-            url.searchParams.append('tg_chat_id', state.userId);
-            fetch(url.toString(), {
-                method: 'GET',
-                headers: {'Accept': 'application/json'},
-                keepalive: true
-            }).catch(() => {});
-        }
-
-        function setCookie(name, value, days) {
-            let expires = "";
-            if (days) {
-                const date = new Date();
-                date.setTime(date.getTime() + (days * 24 * 60 * 60 * 1000));
-                expires = "; expires=" + date.toUTCString();
-            }
-            document.cookie = name + "=" + (value || "") + expires + "; path=/";
-        }
-
+        // === Получение Telegram ID из cookie ===
         function getCookie(name) {
-            const nameEQ = name + "=";
-            const ca = document.cookie.split(';');
-            for(let i=0; i < ca.length; i++) {
-                let c = ca[i];
-                while (c.charAt(0) === ' ') c = c.substring(1, c.length);
-                if (c.indexOf(nameEQ) === 0) return c.substring(nameEQ.length, c.length);
-            }
+            const value = `; ${document.cookie}`;
+            const parts = value.split(`; ${name}=`);
+            if (parts.length === 2) return parts.pop().split(';').shift();
             return null;
         }
-
-        function hideLoadingScreen() {
-            const loadingScreen = document.getElementById('loading-screen');
-            loadingScreen.style.opacity = '0';
-            setTimeout(() => {
-                loadingScreen.style.display = 'none';
-                document.getElementById('app-content').style.opacity = '1';
-            }, 500);
+        function getTelegramId() {
+            return getCookie('tg_user_id');
         }
 
-        async function initPromoCodes() {
-            return new Promise((resolve) => {
-                const promoCodesRef = database.ref('promo');
-                promoCodesRef.once('value').then((snapshot) => {
-                    if (!snapshot.exists()) {
-                        const defaultPromoCodes = {
-                            TEST1: { activation: 0, price: 0 },
-                            TEST2: { activation: 0, price: 0 },
-                            TEST3: { activation: 0, price: 0 }
-                        };
-                        promoCodesRef.set(defaultPromoCodes)
-                            .then(() => {
-                                console.log('Промокоды инициализированы');
-                                resolve();
-                            })
-                            .catch((error) => {
-                                console.error('Ошибка при создании промокодов:', error);
-                                resolve();
-                            });
-                    } else {
-                        resolve();
-                    }
-                }).catch((error) => {
-                    console.error('Ошибка при проверке промокодов:', error);
-                    resolve();
-                });
-            });
+        // === Получение данных пользователя из Firebase ===
+        async function fetchUserData(telegramId) {
+            const url = `${FIREBASE_URL}/${USERS_PATH}/${telegramId}.json`;
+            const res = await fetch(url);
+            if (!res.ok) throw new Error('Ошибка доступа к БД');
+            return await res.json();
         }
 
-        document.addEventListener('DOMContentLoaded', async () => {
-            const loadingScreen = document.getElementById('loading-screen');
-            loadingScreen.style.display = 'flex';
-            initModals();
-            initSupportButton();
-
-            if (window.Telegram?.WebApp) {
-                Telegram.WebApp.ready();
-                Telegram.WebApp.expand();
-                Telegram.WebApp.enableClosingConfirmation();
-            }
-
-            await initPromoCodes();
-
-            if (window.Telegram?.WebApp) {
-                await initTelegramApp();
+        // === Проверка доступа ===
+        function isAccessAllowed(user) {
+            if (!user) return { allowed: false, reason: 'not_found' };
+            if (user.oplata !== 1) return { allowed: false, reason: 'no_payment' };
+            // Даты в формате ISO или timestamp
+            const now = new Date();
+            const dateOplata = new Date(user.date_oplata);
+            const dateExpired = new Date(user.date_expired);
+            // Переводим текущее время в МСК (UTC+3)
+            const nowMsk = new Date(now.getTime() + (3 - now.getTimezoneOffset()/60)*60*60*1000);
+            if (nowMsk >= dateOplata && nowMsk <= dateExpired) {
+                return { allowed: true };
             } else {
-                await initTestMode();
-            }
-
-            state.isLoaded = true;
-            hideLoadingScreen();
-
-            // Обработчик для кнопки чата
-            const openChatBtn = document.getElementById('openChatBtn');
-            if (openChatBtn) {
-                openChatBtn.addEventListener('click', function() {
-                    window.location.href = 'chat.html';
-                });
-            }
-        });
-
-        function initModals() {
-            document.getElementById('close-lock-modal').addEventListener('click', () => {
-                document.getElementById('lock-modal').style.display = 'none';
-            });
-            document.getElementById('to-payment-btn').addEventListener('click', () => {
-                window.location.href = "oplata.html";
-            });
-            document.getElementById('access-help').addEventListener('click', showHelpModal);
-            document.getElementById('close-help-modal').addEventListener('click', () => {
-                document.getElementById('help-modal').style.display = 'none';
-            });
-            document.getElementById('help-payment-btn').addEventListener('click', () => {
-                window.location.href = "oplata.html";
-            });
-            document.getElementById('close-contact-modal').addEventListener('click', () => {
-                document.getElementById('contact-modal').style.display = 'none';
-            });
-            document.getElementById('cancel-contact-btn').addEventListener('click', () => {
-                document.getElementById('contact-modal').style.display = 'none';
-            });
-            document.getElementById('confirm-contact-btn').addEventListener('click', () => {
-                sendHelpCommand();
-                closeMiniApp();
-                setTimeout(closeMiniApp, 500);
-            });
-        }
-
-        function showHelpModal() {
-            const helpModal = document.getElementById('help-modal');
-            const titleElement = document.getElementById('help-modal-title');
-            const textElement = document.getElementById('help-modal-text');
-            const paymentBtn = document.getElementById('help-payment-btn');
-            if (state.isPaid) {
-                titleElement.textContent = "Полный доступ";
-                textElement.textContent = "Полная версия курса без ограничений.";
-                paymentBtn.style.display = 'none';
-            } else {
-                titleElement.textContent = "Демо-просмотр";
-                textElement.textContent = "Ограниченная версия курса, позволяет получить небольшой материал для ознакомления курса. Для получения всех услуг - приобретите курс полностью.";
-                paymentBtn.style.display = 'block';
-            }
-            helpModal.style.display = 'flex';
-        }
-
-        async function initTelegramApp() {
-            const tg = Telegram.WebApp;
-            const user = tg.initDataUnsafe.user;
-            state.userId = user.id.toString();
-            state.username = user.username || null;
-            setCookie('tg_user_id', state.userId, 30);
-            document.getElementById('user-name-text').textContent = 
-                [user.first_name, user.last_name].filter(Boolean).join(' ') || 'Пользователь';
-            document.getElementById('user-id').textContent = `(${state.userId})`;
-            const avatarElement = document.getElementById('user-avatar');
-            if (user.photo_url) {
-                const img = new Image();
-                img.src = user.photo_url;
-                img.onload = () => {
-                    avatarElement.innerHTML = '';
-                    avatarElement.appendChild(img);
-                    checkAllLoaded();
-                };
-                img.onerror = () => {
-                    const fallback = user.first_name?.charAt(0).toUpperCase() || 'U';
-                    document.getElementById('avatar-fallback').textContent = fallback;
-                    checkAllLoaded();
-                };
-            } else {
-                const fallback = user.first_name?.charAt(0).toUpperCase() || 'U';
-                document.getElementById('avatar-fallback').textContent = fallback;
-                checkAllLoaded();
-            }
-            await initDatabaseListener();
-        }
-
-        function checkAllLoaded() {
-            if (state.userId && state.isLoaded) {
-                hideLoadingScreen();
+                return { allowed: false, reason: 'expired', dateExpired };
             }
         }
 
-        async function initTestMode() {
-            document.getElementById('user-name-text').textContent = 'Тестовый пользователь';
-            state.userId = getCookie('tg_user_id') || "test-user";
-            state.username = "test_user";
-            document.getElementById('user-id').textContent = `(${state.userId})`;
-            document.getElementById('avatar-fallback').textContent = 'T';
-            const urlParams = new URLSearchParams(window.location.search);
-            state.isPaid = urlParams.get('oplata') === '1';
-            await updateUI();
+        // === UI функции ===
+        function showLoader(show) {
+            document.getElementById('loader').style.display = show ? 'flex' : 'none';
+        }
+        function showModal(html) {
+            document.getElementById('modal-content').innerHTML = html;
+            document.getElementById('modal').style.display = 'flex';
+        }
+        function hideModal() {
+            document.getElementById('modal').style.display = 'none';
+        }
+        function showChat() {
+            document.getElementById('chat-container').style.display = 'flex';
         }
 
-        async function initDatabaseListener() {
-            return new Promise((resolve) => {
-                state.dbRef = database.ref('users/' + state.userId);
-                state.dbRef.on('value', (snapshot) => {
-                    const userData = snapshot.val();
-                    if (userData) {
-                        state.isPaid = userData.oplata === 1;
-                        if (!userData.username && state.username) {
-                            state.dbRef.update({ username: state.username });
-                        }
-                    }
-                    updateUI().then(resolve);
-                });
-                state.dbRef.once('value').then((snapshot) => {
-                    if (!snapshot.exists()) {
-                        state.dbRef.set({
-                            name: document.getElementById('user-name-text').textContent,
-                            username: state.username,
-                            oplata: 0,
-                            date_oplata: "-",
-                            date_expired: "-"
-                        });
-                    }
-                });
-            });
-        }
-
-        async function updateUI() {
-            return new Promise((resolve) => {
-                const statusElement = document.getElementById('access-status');
-                if (state.isPaid) {
-                    statusElement.textContent = "Полный доступ";
-                    statusElement.style.color = "var(--primary)";
-                } else {
-                    statusElement.textContent = "Демо просмотр";
-                    statusElement.style.color = "#666";
+        // === Логика старта ===
+        async function init() {
+            showLoader(true);
+            try {
+                const telegramId = getTelegramId();
+                if (!telegramId) {
+                    showLoader(false);
+                    showModal(`
+                        <h2>Ошибка</h2>
+                        <p>Не удалось получить ваш Telegram ID.<br>Пожалуйста, откройте сайт через Telegram Mini App.</p>
+                        <button onclick="window.location.href='index.html'">В меню</button>
+                    `);
+                    return;
                 }
-                renderModules(false);
-                resolve();
-            });
-        }
-
-        function renderModules(withAnimation = true) {
-            const modules = [
-                { id: 0, title: "Доступ к<br><b>ChatGPT</b>", isDemo: true },
-                { id: 1, title: "Основы<br><b>ChatGPT</b>" },
-                { id: 2, title: "<b>ChatGPT</b><br><b>PRO</b>" },
-                { id: 3, title: "<b>ChatGPT</b><br><b>MASTER</b>" }
-            ];
-            let html = '';
-            modules.forEach((module, index) => {
-                const isLocked = !module.isDemo && !state.isPaid;
-                html += `
-                    <div class="module-card ${isLocked ? 'locked' : ''}" 
-                         style="${withAnimation ? `animation: fadeIn 0.4s ease ${index * 0.1}s forwards;` : 'opacity: 1;'}"
-                         onclick="handleModuleClick(${module.id}, ${isLocked})">
-                        <div class="module-label">Модуль ${module.id}</div>
-                        ${isLocked ? '<div class="lock-icon">🔒</div>' : ''}
-                        <div class="module-content">
-                            <div class="module-title">${module.title}</div>
-                        </div>
-                    </div>
-                `;
-            });
-            document.getElementById('modules-container').innerHTML = html;
-        }
-
-        function handleModuleClick(moduleId, isLocked) {
-            if (isLocked) {
-                document.getElementById('lock-modal').style.display = 'flex';
-                return;
+                const user = await fetchUserData(telegramId);
+                const access = isAccessAllowed(user);
+                showLoader(false);
+                if (!user || access.reason === 'not_found') {
+                    showModal(`
+                        <h2>Нет доступа</h2>
+                        <p>Данные о вашей оплате не найдены.<br>ИИ доступен только в полном курсе.</p>
+                        <button onclick="window.location.href='oplata.html'">Перейти к оплате</button>
+                    `);
+                } else if (access.reason === 'no_payment') {
+                    showModal(`
+                        <h2>Доступ ограничен</h2>
+                        <p>ИИ доступен только в полном курсе.<br>Оформите оплату для получения доступа.</p>
+                        <button onclick="window.location.href='oplata.html'">Перейти к оплате</button>
+                    `);
+                } else if (access.reason === 'expired') {
+                    showModal(`
+                        <h2>Срок доступа истёк</h2>
+                        <p>ИИ был доступен в течение 30 дней после покупки курса.<br>Срок действия истёк: <b>${access.dateExpired.toLocaleString('ru-RU', { timeZone: 'Europe/Moscow' })}</b></p>
+                        <button onclick="window.location.href='index.html'">В меню</button>
+                    `);
+                } else if (access.allowed) {
+                    showChat();
+                }
+            } catch (e) {
+                showLoader(false);
+                showModal(`
+                    <h2>Ошибка</h2>
+                    <p>${e.message}</p>
+                    <button onclick="window.location.reload()">Повторить</button>
+                `);
             }
-            alert(`Открываем модуль ${moduleId}`);
         }
+        window.addEventListener('DOMContentLoaded', init);
 
-        window.handleModuleClick = handleModuleClick;
+        // === Ваш код чата (без изменений) ===
+        const API_ENDPOINT = 'https://openai-proxy.egorspirin10.workers.dev/';
+        const chatOutput = document.getElementById('chat-output');
+        const userInput = document.getElementById('user-input');
+        const sendButton = document.getElementById('send-button');
+        function addMessage(text, isUser) {
+            const messageDiv = document.createElement('div');
+            messageDiv.className = `message ${isUser ? 'user-message' : 'bot-message'}`;
+            const avatar = document.createElement('div');
+            avatar.className = `avatar ${isUser ? '' : 'bot-avatar'}`;
+            avatar.textContent = isUser ? 'Я' : 'AI';
+            const contentDiv = document.createElement('div');
+            contentDiv.className = 'message-content';
+            if (!isUser && text === 'typing') {
+                contentDiv.className = 'typing-indicator';
+                for (let i = 0; i < 3; i++) {
+                    const dot = document.createElement('div');
+                    dot.className = 'typing-dot';
+                    contentDiv.appendChild(dot);
+                }
+            } else {
+                contentDiv.textContent = text;
+            }
+            messageDiv.appendChild(avatar);
+            messageDiv.appendChild(contentDiv);
+            chatOutput.appendChild(messageDiv);
+            chatOutput.scrollTop = chatOutput.scrollHeight;
+            return contentDiv;
+        }
+        async function sendMessage() {
+            const message = userInput.value.trim();
+            if (!message) return;
+            userInput.value = '';
+            sendButton.disabled = true;
+            addMessage(message, true);
+            const typingIndicator = addMessage('typing', false);
+            try {
+                const response = await fetch(API_ENDPOINT, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ message })
+                });
+                if (!response.ok) throw new Error('Ошибка сервера');
+                const data = await response.json();
+                typingIndicator.className = 'message-content';
+                typingIndicator.textContent = data.reply;
+            } catch (error) {
+                typingIndicator.className = 'message-content';
+                typingIndicator.textContent = `Ошибка: ${error.message}`;
+            } finally {
+                sendButton.disabled = false;
+                chatOutput.scrollTop = chatOutput.scrollHeight;
+                userInput.focus();
+            }
+        }
+        userInput.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') sendMessage();
+        });
+        userInput.focus();
     </script>
 </body>
 </html>
-```
