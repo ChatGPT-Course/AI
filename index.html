@@ -902,7 +902,13 @@
             }
 
             // Инициализируем слушатель изменений в БД
-            await initDatabaseListener();
+            try {
+                await initDatabaseListener();
+                checkAllLoaded();
+            } catch (error) {
+                console.error('Ошибка при инициализации слушателя БД:', error);
+                hideLoadingScreen(); // Ensure loading screen is hidden even if there's an error
+            }
         }
 
         function checkAllLoaded() {
@@ -922,7 +928,13 @@
             const urlParams = new URLSearchParams(window.location.search);
             state.isPaid = urlParams.get('oplata') === '1';
             
-            await updateUI();
+            try {
+                await updateUI();
+                checkAllLoaded();
+            } catch (error) {
+                console.error('Ошибка при обновлении UI в тестовом режиме:', error);
+                hideLoadingScreen(); // Ensure loading screen is hidden even if there's an error
+            }
         }
 
         async function initDatabaseListener() {
