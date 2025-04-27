@@ -451,6 +451,58 @@
             background: var(--primary-light);
             transform: scale(1.1);
         }
+        .support-option.ai-assistant {
+            background: linear-gradient(90deg, #FFA500 0%, #FF7A00 100%);
+            color: #fff;
+            font-weight: 600;
+            border: none;
+            box-shadow: 0 4px 12px rgba(255, 122, 0, 0.13);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 1rem;
+            transition: background 0.3s, box-shadow 0.3s, transform 0.2s;
+            outline: none !important;
+            user-select: none;
+        }
+        .support-option.ai-assistant:active,
+        .support-option.ai-assistant:focus {
+            outline: none !important;
+            box-shadow: none !important;
+            background: linear-gradient(90deg, #FFB347 0%, #FF7A00 100%);
+        }
+        .support-option.ai-assistant svg {
+            width: 28px;
+            height: 28px;
+            flex-shrink: 0;
+        }
+        .support-options {
+            transition: opacity 0.45s cubic-bezier(.4,2,.6,1), transform 0.45s cubic-bezier(.4,2,.6,1);
+            will-change: opacity, transform;
+        }
+        .support-options {
+            opacity: 0;
+            transform: translateY(30px) scale(0.98);
+            pointer-events: none;
+        }
+        .support-options.active {
+            opacity: 1;
+            transform: translateY(0) scale(1);
+            pointer-events: all;
+        }
+        .support-option:focus,
+        .support-option:active {
+            outline: none !important;
+            box-shadow: none !important;
+        }
+        .module-card {
+            cursor: pointer;
+            transition: box-shadow 0.2s, transform 0.2s;
+        }
+        .module-card:active {
+            box-shadow: 0 6px 24px rgba(255, 122, 0, 0.18);
+            transform: scale(0.98);
+        }
     </style>
 </head>
 <body>
@@ -495,8 +547,11 @@
         <!-- Контейнер поддержки -->
         <div class="support-container">
             <div class="support-options" id="supportOptions">
-                <button class="support-option" id="openChatBtn">
-                    🤖 ИИ-Ассистент
+                <button class="support-option ai-assistant" id="openChatBtn">
+                    <span style="display:flex;align-items:center;">
+                        <svg viewBox="0 0 32 32" fill="none"><rect x="3" y="10" width="26" height="12" rx="6" fill="#fffbe6" stroke="#FFA500" stroke-width="2"/><rect x="7" y="14" width="18" height="4" rx="2" fill="#FFA500"/><text x="16" y="19.5" text-anchor="middle" font-size="2.1em" font-family="Montserrat,Arial,sans-serif" fill="#fff" font-weight="bold">AI</text></svg>
+                    </span>
+                    <span>ИИ-Ассистент</span>
                 </button>
                 <a href="help.html" class="support-option">
                     <span class="support-icon">📩</span>
@@ -887,6 +942,10 @@
         }
 
         window.handleModuleClick = handleModuleClick;
+
+        document.querySelectorAll('.support-option').forEach(btn => {
+            btn.addEventListener('mousedown', e => btn.blur());
+        });
     </script>
 </body>
 </html>
