@@ -91,7 +91,9 @@
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 24px;
+            font-size: 32px;
+            text-align: center;
+            line-height: 1;
             box-shadow: 0 4px 12px rgba(255, 122, 0, 0.3);
             cursor: pointer;
             position: relative;
@@ -561,7 +563,7 @@
                     Написать в поддержку
                 </button>
             </div>
-            <button class="support-btn" id="supportBtn">…</button>
+            <button class="support-btn" id="supportBtn"><span class="dots-center">…</span></button>
         </div>
 
         <!-- Модальное окно блокировки -->
@@ -645,7 +647,7 @@
                 if (supportBtn.classList.contains('active')) {
                     supportBtn.innerHTML = '×';
                 } else {
-                    supportBtn.innerHTML = '…';
+                    supportBtn.innerHTML = '<span class="dots-center">…</span>';
                 }
             });
 
@@ -654,7 +656,7 @@
                 document.getElementById('contact-modal').style.display = 'flex';
                 supportBtn.classList.remove('active');
                 supportOptions.classList.remove('active');
-                supportBtn.innerHTML = '…';
+                supportBtn.innerHTML = '<span class="dots-center">…</span>';
             });
         }
 
