@@ -99,27 +99,15 @@
         }
 
         // === Проверка доступа ===
-        function parseMskDate(str) {
-            if (!str) return null;
-            const [datePart, timePart] = str.split(' ');
-            if (!datePart || !timePart) return null;
-            const [day, month, year] = datePart.split('.').map(Number);
-            const [hour, minute, second] = timePart.split(':').map(Number);
-            // Создаём дату в МСК (локальное время)
-            return new Date(year, month - 1, day, hour, minute, second);
-        }
         function isAccessAllowed(user) {
             if (!user) return { allowed: false, reason: 'not_found' };
             if (user.oplata !== 1) return { allowed: false, reason: 'no_payment' };
-            const nowMsk = new Date(); // Локальное время, если сервер и клиент в МСК
-            const dateOplata = parseMskDate(user.date_oplata);
-            let dateExpired = parseMskDate(user.date_expired);
-            if (!dateExpired && dateOplata) {
-                dateExpired = new Date(dateOplata.getTime() + 14 * 24 * 60 * 60 * 1000);
-            }
-            if (!dateOplata || !dateExpired) return { allowed: false, reason: 'date_error' };
-            if (nowMsk >= dateOplata && nowMsk <= dateExpired) {
-                return { allowed: true };
+            const now = Date.now();
+            const dateOplata = Number(user.date_oplata); // timestamp
+            if (!dateOplata) return { allowed: false, reason: 'date_error' };
+            const dateExpired = dateOplata + 2 * 60 * 1000; // 2 минуты в мс
+            if (now >= dateOplata && now <= dateExpired) {
+                return { allowed: true, dateExpired };
             } else {
                 return { allowed: false, reason: 'expired', dateExpired };
             }
@@ -151,9 +139,10 @@
                 hideModal();
             } else if (access.reason === 'expired') {
                 document.getElementById('chat-container').style.display = 'none';
+                const dateExpiredStr = access.dateExpired ? new Date(access.dateExpired).toLocaleString('ru-RU', { timeZone: 'Europe/Moscow' }) : '';
                 showModal(`
                     <h2>Срок доступа истёк</h2>
-                    <p>ИИ был доступен в течение 14 дней после покупки курса.<br>Срок действия истёк: <b>${access.dateExpired ? access.dateExpired.toLocaleString('ru-RU', { timeZone: 'Europe/Moscow' }) : ''}</b></p>
+                    <p>Доступ к ИИ был предоставлен на 2 минуты после оплаты.<br>Срок действия истёк: <b>${dateExpiredStr}</b></p>
                     <button onclick="window.location.href='index.html'">В меню</button>
                 `);
             }
@@ -182,14 +171,14 @@
                         <button onclick="window.location.href='oplata.html'">Перейти к оплате</button>
                     `);
                 } else if (access.reason === 'expired') {
+                    const dateExpiredStr = access.dateExpired ? new Date(access.dateExpired).toLocaleString('ru-RU', { timeZone: 'Europe/Moscow' }) : '';
                     showModal(`
                         <h2>Срок доступа истёк</h2>
-                        <p>ИИ был доступен в течение 14 дней после покупки курса.<br>Срок действия истёк: <b>${access.dateExpired ? access.dateExpired.toLocaleString('ru-RU', { timeZone: 'Europe/Moscow' }) : ''}</b></p>
+                        <p>Доступ к ИИ был предоставлен на 2 минуты после оплаты.<br>Срок действия истёк: <b>${dateExpiredStr}</b></p>
                         <button onclick="window.location.href='index.html'">В меню</button>
                     `);
                 } else if (access.allowed) {
                     showChat();
-                    // Запускаем периодическую проверку доступа
                     if (accessCheckInterval) clearInterval(accessCheckInterval);
                     accessCheckInterval = setInterval(checkAccessAndUpdateUI, 3000);
                 }
