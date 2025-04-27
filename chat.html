@@ -181,23 +181,25 @@
     </div>
     <script>
         // === НАСТРОЙКИ FIREBASE ===
-        // Замените на свой URL Firebase Realtime Database
-        const FIREBASE_URL = 'https://vrot-x-7a48f-default-rtdb.firebaseio.com'; // без / на конце
-        // Путь к пользователям в БД, например: 'users'
+        const FIREBASE_URL = 'https://vrot-x-7a48f-default-rtdb.firebaseio.com';
         const USERS_PATH = 'users';
 
-        // === Получение Telegram ID из cookie ===
+        // === Получение данных пользователя ===
         function getCookie(name) {
             const value = `; ${document.cookie}`;
             const parts = value.split(`; ${name}=`);
             if (parts.length === 2) return parts.pop().split(';').shift();
             return null;
         }
+
         function getTelegramId() {
             return getCookie('tg_user_id');
         }
 
-        // === Получение данных пользователя из Firebase ===
+        function getUserAvatar() {
+            return getCookie('tg_user_avatar') || null;
+        }
+
         async function fetchUserData(telegramId) {
             const url = `${FIREBASE_URL}/${USERS_PATH}/${telegramId}.json`;
             const res = await fetch(url);
@@ -207,11 +209,11 @@
 
         // === Проверка доступа ===
         function parseDateDMY(str) {
-            // str: 'дд.мм.гггг'
             if (!str) return null;
             const [day, month, year] = str.split('.').map(Number);
             return new Date(year, month - 1, day);
         }
+
         function daysLeft(dateExpired) {
             const today = new Date();
             today.setHours(0,0,0,0);
@@ -219,15 +221,14 @@
             dateExpired.setHours(0,0,0,0);
             return Math.max(0, Math.ceil((dateExpired - today) / (24*60*60*1000)));
         }
+
         function isAccessAllowed(user) {
             if (!user) return { allowed: false, reason: 'not_found' };
             if (user.oplata !== 1) return { allowed: false, reason: 'no_payment' };
             const dateOplata = parseDateDMY(user.date_oplata);
             if (!dateOplata) return { allowed: false, reason: 'date_error' };
-            // Последний день доступа: день оплаты + 1 день
             const dateExpired = new Date(dateOplata);
-            dateExpired.setDate(dateExpired.getDate() + 1); // 2 дня: день оплаты и следующий
-            // Сравниваем только дату (без времени)
+            dateExpired.setDate(dateExpired.getDate() + 1);
             const today = new Date();
             today.setHours(0,0,0,0);
             dateExpired.setHours(0,0,0,0);
@@ -242,24 +243,126 @@
         function showLoader(show) {
             document.getElementById('loader').style.display = show ? 'flex' : 'none';
         }
+
         function showModal(html) {
             document.getElementById('modal-content').innerHTML = html;
             document.getElementById('modal').style.display = 'flex';
         }
+
         function hideModal() {
             document.getElementById('modal').style.display = 'none';
         }
+
         function showChat() {
             document.getElementById('chat-container').style.display = 'flex';
         }
-        function showAccessDaysLeft(dateExpired) {
-            const left = daysLeft(dateExpired);
-            showModal(`<h2>Информация</h2><p>Доступ к ИИ-ассистенту доступен еще <b>${left}</b> ${left === 1 ? 'день' : (left >= 2 && left <= 4 ? 'дня' : 'дней')}.</p><button onclick=\"hideModal()\">Ок</button>`);
+
+        // === Логика чата ===
+        const API_ENDPOINT = 'https://openai-proxy.egorspirin10.workers.dev/';
+        const chatOutput = document.getElementById('chat-output');
+        const userInput = document.getElementById('user-input');
+        const sendButton = document.getElementById('send-button');
+
+        function addMessage(text, isUser, isTyping) {
+            const messageDiv = document.createElement('div');
+            messageDiv.className = `message ${isUser ? 'user-message' : 'bot-message'}`;
+            if (isUser) messageDiv.classList.add('fade-in-slide');
+            
+            const avatar = document.createElement('div');
+            avatar.className = `avatar ${isUser ? '' : 'bot-avatar'}`;
+            
+            if (isUser) {
+                const avatarUrl = getUserAvatar();
+                if (avatarUrl) {
+                    const img = document.createElement('img');
+                    img.src = avatarUrl;
+                    img.alt = 'avatar';
+                    img.style.width = '100%';
+                    img.style.height = '100%';
+                    img.style.objectFit = 'cover';
+                    img.style.borderRadius = '50%';
+                    avatar.appendChild(img);
+                } else {
+                    avatar.textContent = 'Я';
+                }
+            } else {
+                avatar.textContent = 'AI';
+            }
+            
+            const contentDiv = document.createElement('div');
+            contentDiv.className = 'message-content';
+            
+            if (!isUser && isTyping) {
+                contentDiv.className = 'typing-indicator';
+                for (let i = 0; i < 3; i++) {
+                    const dot = document.createElement('div');
+                    dot.className = 'typing-dot';
+                    contentDiv.appendChild(dot);
+                }
+            } else {
+                contentDiv.textContent = text;
+            }
+            
+            messageDiv.appendChild(avatar);
+            messageDiv.appendChild(contentDiv);
+            chatOutput.appendChild(messageDiv);
+            chatOutput.scrollTop = chatOutput.scrollHeight;
+            return contentDiv;
         }
 
-        // === Логика старта ===
+        async function sendMessage() {
+            const message = userInput.value.trim();
+            if (!message) return;
+            
+            userInput.value = '';
+            sendButton.disabled = true;
+            addMessage(message, true, false);
+            
+            await new Promise(r => setTimeout(r, 250));
+            const typingIndicator = addMessage('', false, true);
+            
+            try {
+                const response = await fetch(API_ENDPOINT, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ message })
+                });
+                
+                if (!response.ok) throw new Error('Ошибка сервера');
+                const data = await response.json();
+                
+                typingIndicator.className = 'message-content';
+                typingIndicator.textContent = data.reply;
+                userInput.blur();
+            } catch (error) {
+                typingIndicator.className = 'message-content';
+                typingIndicator.textContent = `Ошибка: ${error.message}`;
+            } finally {
+                sendButton.disabled = false;
+                chatOutput.scrollTop = chatOutput.scrollHeight;
+            }
+        }
+
+        // Авто-рост textarea
+        userInput.addEventListener('input', function() {
+            this.style.height = 'auto';
+            const maxHeight = 84;
+            this.style.height = Math.min(this.scrollHeight, maxHeight) + 'px';
+        });
+
+        userInput.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter' && !e.shiftKey) {
+                e.preventDefault();
+                sendMessage();
+            }
+        });
+
+        userInput.focus();
+
+        // === Логика доступа ===
         let currentUser = null;
         let accessCheckInterval = null;
+
         async function checkAccessAndUpdateUI() {
             if (!currentUser) return;
             const access = isAccessAllowed(currentUser);
@@ -276,6 +379,7 @@
                 `);
             }
         }
+
         async function init() {
             showLoader(true);
             try {
@@ -289,10 +393,12 @@
                     `);
                     return;
                 }
+                
                 const user = await fetchUserData(telegramId);
                 currentUser = user;
                 const access = isAccessAllowed(user);
                 showLoader(false);
+                
                 if (!user || access.reason === 'not_found' || access.reason === 'no_payment') {
                     showModal(`
                         <h2>Доступ ограничен</h2>
@@ -309,7 +415,7 @@
                 } else if (access.allowed) {
                     showChat();
                     if (accessCheckInterval) clearInterval(accessCheckInterval);
-                    accessCheckInterval = setInterval(checkAccessAndUpdateUI, 5000); // 5 секунд
+                    accessCheckInterval = setInterval(checkAccessAndUpdateUI, 5000);
                 }
             } catch (e) {
                 showLoader(false);
@@ -320,108 +426,21 @@
                 `);
             }
         }
-        window.addEventListener('DOMContentLoaded', init);
-
-        // === Ваш код чата (с анимациями) ===
-        const API_ENDPOINT = 'https://openai-proxy.egorspirin10.workers.dev/';
-        const chatOutput = document.getElementById('chat-output');
-        const userInput = document.getElementById('user-input');
-        const sendButton = document.getElementById('send-button');
-        function addMessage(text, isUser, isTyping) {
-            const messageDiv = document.createElement('div');
-            messageDiv.className = `message ${isUser ? 'user-message' : 'bot-message'}`;
-            if (isUser) messageDiv.classList.add('fade-in-slide');
-            const avatar = document.createElement('div');
-            avatar.className = `avatar ${isUser ? '' : 'bot-avatar'}`;
-            if (isUser) {
-                const avatarUrl = localStorage.getItem('user_avatar');
-                if (avatarUrl) {
-                    const img = document.createElement('img');
-                    img.src = avatarUrl;
-                    img.alt = 'avatar';
-                    img.style.width = '100%';
-                    img.style.height = '100%';
-                    img.style.objectFit = 'cover';
-                    img.style.borderRadius = '50%';
-                    avatar.appendChild(img);
-                } else {
-                    avatar.textContent = 'Я';
-                }
-            } else {
-                avatar.textContent = 'AI';
-            }
-            const contentDiv = document.createElement('div');
-            contentDiv.className = 'message-content';
-            if (!isUser && isTyping) {
-                contentDiv.className = 'typing-indicator';
-                for (let i = 0; i < 3; i++) {
-                    const dot = document.createElement('div');
-                    dot.className = 'typing-dot';
-                    contentDiv.appendChild(dot);
-                }
-            } else {
-                contentDiv.textContent = text;
-            }
-            messageDiv.appendChild(avatar);
-            messageDiv.appendChild(contentDiv);
-            chatOutput.appendChild(messageDiv);
-            chatOutput.scrollTop = chatOutput.scrollHeight;
-            return contentDiv;
-        }
-        async function sendMessage() {
-            const message = userInput.value.trim();
-            if (!message) return;
-            userInput.value = '';
-            sendButton.disabled = true;
-            addMessage(message, true, false);
-            // Плавная задержка для эффекта появления
-            await new Promise(r => setTimeout(r, 250));
-            const typingIndicator = addMessage('', false, true);
-            try {
-                const response = await fetch(API_ENDPOINT, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ message })
-                });
-                if (!response.ok) throw new Error('Ошибка сервера');
-                const data = await response.json();
-                typingIndicator.className = 'message-content';
-                typingIndicator.textContent = data.reply;
-                userInput.blur(); // Снимаем фокус после ответа ИИ
-            } catch (error) {
-                typingIndicator.className = 'message-content';
-                typingIndicator.textContent = `Ошибка: ${error.message}`;
-            } finally {
-                sendButton.disabled = false;
-                chatOutput.scrollTop = chatOutput.scrollHeight;
-            }
-        }
-        // Авто-рост textarea
-        userInput.addEventListener('input', function() {
-            this.style.height = 'auto';
-            const maxHeight = 84; // 3 строки по ~28px
-            this.style.height = Math.min(this.scrollHeight, maxHeight) + 'px';
-        });
-        userInput.addEventListener('keypress', (e) => {
-            if (e.key === 'Enter' && !e.shiftKey) {
-                e.preventDefault();
-                sendMessage();
-            }
-        });
-        userInput.focus();
 
         function formatDateDMY(date) {
             return date.toLocaleDateString('ru-RU', { day: '2-digit', month: 'long', year: 'numeric' });
         }
+
         function toggleAccessPopover(e) {
             if (!currentUser) return;
             const access = isAccessAllowed(currentUser);
             const popover = document.getElementById('access-popover');
+            
             if (popover.style.display === 'block') {
                 popover.style.display = 'none';
                 return;
             }
-            // Даты доступа
+            
             const dateOplata = parseDateDMY(currentUser.date_oplata);
             const dateStart = new Date(dateOplata);
             const dateEnd = new Date(dateOplata);
@@ -430,8 +449,10 @@
             dateEnd.setHours(0,0,0,0);
             const today = new Date();
             today.setHours(0,0,0,0);
+            
             let mainText = '';
             let stickerSVG = '';
+            
             if (today.getTime() === dateEnd.getTime()) {
                 mainText = 'ИИ-Ассистент активен <b>последний день</b>';
                 stickerSVG = `<svg width="28" height="28" viewBox="0 0 28 28"><ellipse cx="14" cy="14" rx="13" ry="13" fill="#ffe0a3"/><ellipse cx="14" cy="14" rx="11" ry="11" fill="#fff"/><rect x="13" y="7" width="2" height="8" rx="1" fill="#FFA500"/><rect x="13" y="14" width="6" height="2" rx="1" fill="#FFA500"/><ellipse cx="14" cy="14" rx="11" ry="11" fill="none" stroke="#FFA500" stroke-width="1.5"/></svg>`;
@@ -440,6 +461,7 @@
                 mainText = `ИИ-Ассистент активен еще <b>${left}</b> ${left === 1 ? 'день' : (left >= 2 && left <= 4 ? 'дня' : 'дней')}`;
                 stickerSVG = `<svg width="28" height="28" viewBox="0 0 28 28"><ellipse cx="14" cy="14" rx="13" ry="13" fill="#d6eaff"/><ellipse cx="14" cy="14" rx="11" ry="11" fill="#fff"/><path d="M14 8 v6 l4 2" stroke="#4CC9F0" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" fill="none"/><ellipse cx="14" cy="14" rx="11" ry="11" fill="none" stroke="#4CC9F0" stroke-width="1.5"/></svg>`;
             }
+            
             popover.innerHTML = `
                 <button class='access-close' onclick='document.getElementById("access-popover").style.display="none"'>&times;</button>
                 <div class='access-main'>
@@ -456,9 +478,11 @@
                     </span>
                 </div>
             `;
-            // Позиционируем popover под кнопкой справа
+            
             popover.style.display = 'block';
         }
+
+        window.addEventListener('DOMContentLoaded', init);
     </script>
 </body>
 </html>
