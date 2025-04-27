@@ -789,13 +789,14 @@
             await initPromoCodes();
 
             if (window.Telegram?.WebApp) {
-                initTelegramApp(); // Load in background
+                await initTelegramApp();
             } else {
-                initTestMode(); // Load in background
+                await initTestMode();
             }
 
-            // Закрываем экран загрузки через 1 секунду
-            setTimeout(hideLoadingScreen, 1000);
+            // Помечаем, что загрузка завершена
+            state.isLoaded = true;
+            hideLoadingScreen();
         });
 
         function initModals() {
@@ -882,17 +883,14 @@
                 img.onload = () => {
                     avatarElement.innerHTML = '';
                     avatarElement.appendChild(img);
-                    checkAllLoaded();
                 };
                 img.onerror = () => {
                     const fallback = user.first_name?.charAt(0).toUpperCase() || 'U';
                     document.getElementById('avatar-fallback').textContent = fallback;
-                    checkAllLoaded();
                 };
             } else {
                 const fallback = user.first_name?.charAt(0).toUpperCase() || 'U';
                 document.getElementById('avatar-fallback').textContent = fallback;
-                checkAllLoaded();
             }
 
             // Сохраняем URL аватарки в cookie
@@ -901,13 +899,7 @@
             }
 
             // Инициализируем слушатель изменений в БД
-            try {
-                await initDatabaseListener();
-                checkAllLoaded();
-            } catch (error) {
-                console.error('Ошибка при инициализации слушателя БД:', error);
-                hideLoadingScreen(); // Ensure loading screen is hidden even if there's an error
-            }
+            await initDatabaseListener();
         }
 
         async function initTestMode() {
@@ -921,19 +913,7 @@
             const urlParams = new URLSearchParams(window.location.search);
             state.isPaid = urlParams.get('oplata') === '1';
             
-            try {
-                await updateUI();
-                checkAllLoaded();
-            } catch (error) {
-                console.error('Ошибка при обновлении UI в тестовом режиме:', error);
-                hideLoadingScreen(); // Ensure loading screen is hidden even if there's an error
-            }
-        }
-
-        function checkAllLoaded() {
-            if (state.userId && state.isLoaded) {
-                hideLoadingScreen();
-            }
+            await updateUI();
         }
 
         async function initDatabaseListener() {
