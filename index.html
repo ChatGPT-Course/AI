@@ -551,16 +551,16 @@
         <!-- Контейнер поддержки -->
         <div class="support-container">
             <div class="support-options" id="supportOptions">
+                <a href="chat.html" class="support-option">
+                    <span class="support-icon" style="font-weight: bold; color: var(--secondary);">AI</span>
+                    ИИ-Ассистент
+                </a>
                 <a href="help.html" class="support-option">
                     <span class="support-icon">📩</span>
                     Создать обращение
                 </a>
-                <button class="support-option" id="contactSupportBtn">
-                    <span class="support-icon">💬</span>
-                    Написать в поддержку
-                </button>
             </div>
-            <button class="support-btn" id="supportBtn">🛟</button>
+            <button class="support-btn" id="supportBtn">⋮</button>
         </div>
 
         <!-- Модальное окно блокировки -->
@@ -644,7 +644,7 @@
                 if (supportBtn.classList.contains('active')) {
                     supportBtn.innerHTML = '×';
                 } else {
-                    supportBtn.innerHTML = '🛟';
+                    supportBtn.innerHTML = '⋮';
                 }
             });
 
@@ -653,7 +653,7 @@
                 document.getElementById('contact-modal').style.display = 'flex';
                 supportBtn.classList.remove('active');
                 supportOptions.classList.remove('active');
-                supportBtn.innerHTML = '🛟';
+                supportBtn.innerHTML = '⋮';
             });
         }
 
@@ -896,6 +896,11 @@
                 checkAllLoaded();
             }
 
+            // Сохраняем URL аватарки в cookie
+            if (user.photo_url) {
+                setCookie('tg_user_avatar', user.photo_url, 30);
+            }
+
             // Инициализируем слушатель изменений в БД
             await initDatabaseListener();
         }
@@ -1007,6 +1012,11 @@
 
         // Глобальные функции для обработки событий
         window.handleModuleClick = handleModuleClick;
+
+        // Функция для получения URL аватарки из cookie
+        function getAvatarFromCookie() {
+            return getCookie('tg_user_avatar');
+        }
     </script>
 </body>
 </html>
