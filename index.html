@@ -485,10 +485,11 @@
             background: rgba(255, 122, 0, 0.1);
         }
 
-        /* Убираем outline и тень во всех состояниях */
+        /* Убираем outline и тень во всех состояниях для всех интерактивных элементов */
         a, button, input, textarea, select, .module-card, .support-btn, .support-option {
             outline: none !important;
             box-shadow: none !important;
+            -webkit-tap-highlight-color: transparent;
         }
 
         a:hover, button:hover, input:hover, textarea:hover, select:hover, 
@@ -499,6 +500,7 @@
         .module-card:active, .support-btn:active, .support-option:active {
             outline: none !important;
             box-shadow: none !important;
+            -webkit-tap-highlight-color: transparent;
         }
     </style>
 </head>
