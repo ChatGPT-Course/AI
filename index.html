@@ -105,20 +105,54 @@
         .support-option {
             min-width: 220px;
             min-height: 48px;
-            justify-content: flex-start;
-            opacity: 0;
-            transform: translateY(30px) scale(0.98);
-            transition: opacity 0.45s cubic-bezier(.4,2,.6,1), transform 0.45s cubic-bezier(.4,2,.6,1);
+            border-radius: 30px;
+            background: linear-gradient(90deg, #FFD166 0%, #FFA500 100%);
+            color: #333;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 1rem;
+            transition: background 0.2s, box-shadow 0.2s, transform 0.15s, opacity 0.2s;
             outline: none !important;
-            box-shadow: none !important;
-        }
-        .support-options.active .support-option {
+            box-shadow: 0 2px 8px rgba(255, 165, 0, 0.08);
+            margin-bottom: 8px;
+            border: none;
+            cursor: pointer;
             opacity: 1;
-            transform: translateY(0) scale(1);
+            transform: scale(1);
+            user-select: none;
         }
-        .support-options.active .support-option:nth-child(1) { transition-delay: 0.15s; }
-        .support-options.active .support-option:nth-child(2) { transition-delay: 0.3s; }
-        .support-options.active .support-option:nth-child(3) { transition-delay: 0.45s; }
+        .support-option:last-child { margin-bottom: 0; }
+        .support-option:active {
+            background: linear-gradient(90deg, #FFC300 0%, #FFA500 100%);
+            box-shadow: 0 1px 4px rgba(255, 165, 0, 0.12);
+            transform: scale(0.97);
+        }
+        .support-option:focus { outline: none !important; }
+        .support-option.disabled, .support-option[disabled] {
+            background: var(--disabled);
+            color: #888;
+            cursor: not-allowed;
+            box-shadow: none;
+        }
+        .ai-assistant span:first-child {
+            font-weight: bold;
+            color: #FFD700;
+            font-size: 1.2em;
+            margin-right: 8px;
+        }
+        .support-options {
+            opacity: 0;
+            transform: scale(0.98);
+            pointer-events: none;
+            transition: opacity 0.2s, transform 0.2s;
+        }
+        .support-options.active {
+            opacity: 1;
+            transform: scale(1);
+            pointer-events: all;
+        }
         .support-btn:focus,
         .support-btn:active {
             outline: none !important;
@@ -126,14 +160,17 @@
         }
         .module-card {
             cursor: pointer;
-            transition: box-shadow 0.2s, transform 0.2s;
+            transition: box-shadow 0.18s, transform 0.15s, background 0.18s;
             outline: none !important;
-            box-shadow: none !important;
+            box-shadow: 0 2px 8px rgba(255, 165, 0, 0.07);
+            background: #fff;
         }
         .module-card:focus,
         .module-card:active {
             outline: none !important;
-            box-shadow: none !important;
+            box-shadow: 0 4px 16px rgba(255, 165, 0, 0.13);
+            background: #FFF3E0;
+            transform: scale(0.98);
         }
         .support-icon {
             font-size: 20px;
@@ -539,7 +576,7 @@
         <div class="support-container">
             <div class="support-options" id="supportOptions">
                 <button class="support-option ai-assistant" id="openChatBtn">
-                    <span style="font-weight:bold; color:#FFD700; font-size:1.2em; margin-right:8px;">AI</span>
+                    <span>AI</span>
                     <span>ИИ-Ассистент</span>
                 </button>
                 <a href="help.html" class="support-option">
@@ -933,7 +970,7 @@
 
         window.handleModuleClick = handleModuleClick;
 
-        document.querySelectorAll('.support-option').forEach(btn => {
+        document.querySelectorAll('.support-option, .module-card, .support-btn').forEach(btn => {
             btn.addEventListener('mousedown', e => btn.blur());
         });
     </script>
