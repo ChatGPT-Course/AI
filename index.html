@@ -484,6 +484,13 @@
         .modal-btn-secondary:hover {
             background: rgba(255, 122, 0, 0.1);
         }
+
+        /* Убираем синюю обводку при фокусе и активном состоянии для support-btn и support-option */
+        .support-btn:focus, .support-btn:active,
+        .support-option:focus, .support-option:active {
+            outline: none !important;
+            box-shadow: none !important;
+        }
     </style>
 </head>
 <body>
