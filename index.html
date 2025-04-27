@@ -918,23 +918,21 @@
 
         async function initDatabaseListener() {
             return new Promise((resolve) => {
+                let resolved = false;
                 state.dbRef = database.ref('users/' + state.userId);
-                
+
                 // Обработчик изменений
                 state.dbRef.on('value', (snapshot) => {
+                    if (resolved) return;
+                    resolved = true;
                     const userData = snapshot.val();
                     if (userData) {
                         state.isPaid = userData.oplata === 1;
-                        
-                        // Если username отсутствует в БД, сохраняем его
                         if (!userData.username && state.username) {
                             state.dbRef.update({ username: state.username });
                         }
                     }
-                    updateUI().then(() => {
-                        hideLoadingScreen(); // Ensure loading screen is hidden after DB connection
-                        resolve();
-                    });
+                    updateUI().then(resolve);
                 });
 
                 // Создаем запись пользователя если не существует
@@ -946,16 +944,22 @@
                             oplata: 0,
                             date_oplata: "-",
                             date_expired: "-"
-                        }).then(() => {
-                            hideLoadingScreen(); // Ensure loading screen is hidden after DB connection
-                            resolve();
                         });
                     }
-                }).catch((error) => {
-                    console.error('Ошибка при создании записи пользователя:', error);
-                    hideLoadingScreen(); // Ensure loading screen is hidden even if there's an error
-                    resolve();
+                }).catch(() => {
+                    if (!resolved) {
+                        resolved = true;
+                        resolve();
+                    }
                 });
+
+                // Таймаут на 3 секунды — если нет ответа, продолжаем дальше
+                setTimeout(() => {
+                    if (!resolved) {
+                        resolved = true;
+                        resolve();
+                    }
+                }, 3000);
             });
         }
 
