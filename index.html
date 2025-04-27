@@ -57,6 +57,116 @@
             pointer-events: none;
         }
 
+        /* Кнопка поддержки */
+        .support-container {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: flex-end;
+            gap: 15px;
+            z-index: 100;
+        }
+
+        .support-btn {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            background: var(--primary);
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+            box-shadow: 0 4px 12px rgba(255, 122, 0, 0.3);
+            cursor: pointer;
+            transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            position: relative;
+            z-index: 2;
+            border: none;
+            user-select: none;
+        }
+
+        .support-btn:hover {
+            transform: scale(1.1);
+            background: var(--primary-light);
+        }
+
+        .support-btn.active {
+            transform: rotate(90deg) scale(0.9);
+            background: var(--error);
+        }
+
+        .support-options {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            transform: translateY(100%);
+            opacity: 0;
+            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            pointer-events: none;
+        }
+
+        .support-options.active {
+            transform: translateY(0);
+            opacity: 1;
+            pointer-events: all;
+        }
+
+        .support-option {
+            padding: 12px 20px;
+            border-radius: 30px;
+            background: var(--support-bg);
+            color: var(--dark);
+            font-weight: 500;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+            cursor: pointer;
+            transition: all 0.2s;
+            transform: translateX(20px);
+            opacity: 0;
+            border: none;
+            text-decoration: none;
+        }
+
+        .support-options.active .support-option {
+            transform: translateX(0);
+            opacity: 1;
+        }
+
+        .support-option:nth-child(1) {
+            transition-delay: 0.1s;
+        }
+
+        .support-option:nth-child(2) {
+            transition-delay: 0.2s;
+        }
+
+        .support-option:hover {
+            transform: translateX(0) scale(1.05);
+            box-shadow: 0 6px 16px rgba(0, 0, 0, 0.15);
+            background: #FFEDCC;
+        }
+
+        .support-option.disabled {
+            background: var(--disabled);
+            color: #888;
+            cursor: not-allowed;
+        }
+
+        .support-option.disabled:hover {
+            transform: translateX(0) !important;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+            background: var(--disabled);
+        }
+
+        .support-icon {
+            font-size: 20px;
+        }
+
         /* Остальные стили остаются без изменений */
         .loading-screen {
             position: fixed;
@@ -374,6 +484,16 @@
         .modal-btn-secondary:hover {
             background: rgba(255, 122, 0, 0.1);
         }
+
+        .support-btn:active,
+        .support-option:active,
+        .modal-btn:active,
+        .modal-btn-secondary:active,
+        .close-modal:active,
+        .access-help:active {
+            transform: scale(0.95);
+            transition: transform 0.08s cubic-bezier(0.4, 0, 0.2, 1);
+        }
     </style>
 </head>
 <body>
@@ -420,6 +540,21 @@
         <!-- Заключительная разделительная линия -->
         <hr class="divider">
 
+        <!-- Контейнер поддержки -->
+        <div class="support-container">
+            <div class="support-options" id="supportOptions">
+                <a href="help.html" class="support-option">
+                    <span class="support-icon">📩</span>
+                    Создать обращение
+                </a>
+                <button class="support-option" id="contactSupportBtn">
+                    <span class="support-icon">💬</span>
+                    Написать в поддержку
+                </button>
+            </div>
+            <button class="support-btn" id="supportBtn">🛟</button>
+        </div>
+
         <!-- Модальное окно блокировки -->
         <div class="modal-overlay" id="lock-modal">
             <div class="modal-content">
@@ -451,6 +586,7 @@
                 </div>
                 <div class="modal-buttons">
                     <button class="modal-btn modal-btn-secondary" id="cancel-contact-btn">Отмена</button>
+                    <button class="modal-btn" id="confirm-contact-btn">Связаться</button>
                 </div>
             </div>
         </div>
@@ -486,6 +622,100 @@
             dbRef: null,
             isLoaded: false
         };
+
+        // Инициализация кнопки поддержки
+        function initSupportButton() {
+            const supportBtn = document.getElementById('supportBtn');
+            const supportOptions = document.getElementById('supportOptions');
+            const contactSupportBtn = document.getElementById('contactSupportBtn');
+
+            supportBtn.addEventListener('click', () => {
+                supportBtn.classList.toggle('active');
+                supportOptions.classList.toggle('active');
+                
+                if (supportBtn.classList.contains('active')) {
+                    supportBtn.innerHTML = '×';
+                } else {
+                    supportBtn.innerHTML = '🛟';
+                }
+            });
+
+            // Обработчик кнопки "Написать в поддержку"
+            contactSupportBtn.addEventListener('click', () => {
+                document.getElementById('contact-modal').style.display = 'flex';
+                supportBtn.classList.remove('active');
+                supportOptions.classList.remove('active');
+                supportBtn.innerHTML = '🛟';
+            });
+        }
+
+        // Надежная функция закрытия WebApp
+        function closeMiniApp() {
+            // 1. Основной способ через Telegram WebApp API
+            if (window.Telegram && Telegram.WebApp && Telegram.WebApp.close) {
+                try {
+                    Telegram.WebApp.close();
+                    return;
+                } catch (e) {
+                    console.error("Ошибка при закрытии через Telegram API:", e);
+                }
+            }
+
+            // 2. Резервный способ через редирект
+            try {
+                window.location.href = "https://t.me";
+                setTimeout(() => {
+                    try {
+                        window.close();
+                    } catch (e) {
+                        console.error("Ошибка при window.close():", e);
+                    }
+                }, 100);
+            } catch (e) {
+                console.error("Ошибка при редиректе:", e);
+            }
+        }
+
+        // Отправка команды без ожидания ответа
+        function sendHelpCommand() {
+            if (!state.userId) return;
+
+            const url = new URL('https://api.puzzlebot.top/');
+            url.searchParams.append('token', puzzleBotConfig.apiToken);
+            url.searchParams.append('method', 'sendCommand');
+            url.searchParams.append('command_name', puzzleBotConfig.commandName);
+            url.searchParams.append('tg_chat_id', state.userId);
+
+            // Отправляем запрос без ожидания ответа
+            fetch(url.toString(), {
+                method: 'GET',
+                headers: {'Accept': 'application/json'},
+                keepalive: true // Гарантирует отправку даже при закрытии страницы
+            }).catch(() => {}); // Игнорируем ошибки
+        }
+
+        // Функция для сохранения ID в cookie
+        function setCookie(name, value, days) {
+            let expires = "";
+            if (days) {
+                const date = new Date();
+                date.setTime(date.getTime() + (days * 24 * 60 * 60 * 1000));
+                expires = "; expires=" + date.toUTCString();
+            }
+            document.cookie = name + "=" + (value || "") + expires + "; path=/";
+        }
+
+        // Функция для получения ID из cookie
+        function getCookie(name) {
+            const nameEQ = name + "=";
+            const ca = document.cookie.split(';');
+            for(let i=0; i < ca.length; i++) {
+                let c = ca[i];
+                while (c.charAt(0) === ' ') c = c.substring(1, c.length);
+                if (c.indexOf(nameEQ) === 0) return c.substring(nameEQ.length, c.length);
+            }
+            return null;
+        }
 
         // Функция для скрытия экрана загрузки
         function hideLoadingScreen() {
@@ -538,6 +768,7 @@
             
             // Инициализируем модальные окна
             initModals();
+            initSupportButton();
 
             // Убираем стандартную заставку Telegram
             if (window.Telegram?.WebApp) {
