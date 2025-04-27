@@ -628,7 +628,9 @@
             username: null,
             isPaid: false,
             dbRef: null,
-            isLoaded: false
+            isLoaded: false,
+            avatarLoaded: false,
+            userLoaded: false
         };
 
         // Инициализация кнопки поддержки
@@ -796,7 +798,7 @@
 
             // Помечаем, что загрузка завершена
             state.isLoaded = true;
-            hideLoadingScreen();
+            checkAllLoaded();
         });
 
         function initModals() {
@@ -860,22 +862,19 @@
         }
 
         async function initTelegramApp() {
+            state.userLoaded = false;
+            state.avatarLoaded = false;
+
             const tg = Telegram.WebApp;
             const user = tg.initDataUnsafe.user;
             state.userId = user.id.toString();
             state.username = user.username || null;
             
-            // Сохраняем ID пользователя в cookie
             setCookie('tg_user_id', state.userId, 30);
-            
-            // Устанавливаем данные пользователя
             document.getElementById('user-name-text').textContent = 
                 [user.first_name, user.last_name].filter(Boolean).join(' ') || 'Пользователь';
-            
-            // Добавляем ID пользователя
             document.getElementById('user-id').textContent = `(${state.userId})`;
-            
-            // Аватар
+
             const avatarElement = document.getElementById('user-avatar');
             if (user.photo_url) {
                 const img = new Image();
@@ -883,37 +882,39 @@
                 img.onload = () => {
                     avatarElement.innerHTML = '';
                     avatarElement.appendChild(img);
+                    state.avatarLoaded = true;
+                    checkAllLoaded();
                 };
                 img.onerror = () => {
                     const fallback = user.first_name?.charAt(0).toUpperCase() || 'U';
                     document.getElementById('avatar-fallback').textContent = fallback;
+                    state.avatarLoaded = true;
+                    checkAllLoaded();
                 };
             } else {
                 const fallback = user.first_name?.charAt(0).toUpperCase() || 'U';
                 document.getElementById('avatar-fallback').textContent = fallback;
+                state.avatarLoaded = true;
+                checkAllLoaded();
             }
 
-            // Сохраняем URL аватарки в cookie
-            if (user.photo_url) {
-                setCookie('tg_user_avatar', user.photo_url, 30);
-            }
-
-            // Инициализируем слушатель изменений в БД
             await initDatabaseListener();
+            state.userLoaded = true;
+            checkAllLoaded();
         }
 
         async function initTestMode() {
-            // Для тестирования без Telegram
+            state.userLoaded = false;
+            state.avatarLoaded = false;
             document.getElementById('user-name-text').textContent = 'Тестовый пользователь';
             state.userId = getCookie('tg_user_id') || "test-user";
             state.username = "test_user";
             document.getElementById('user-id').textContent = `(${state.userId})`;
             document.getElementById('avatar-fallback').textContent = 'T';
-            
-            const urlParams = new URLSearchParams(window.location.search);
-            state.isPaid = urlParams.get('oplata') === '1';
-            
+            state.avatarLoaded = true;
             await updateUI();
+            state.userLoaded = true;
+            checkAllLoaded();
         }
 
         async function initDatabaseListener() {
@@ -1021,6 +1022,12 @@
         // Функция для получения URL аватарки из cookie
         function getAvatarFromCookie() {
             return getCookie('tg_user_avatar');
+        }
+
+        function checkAllLoaded() {
+            if (state.avatarLoaded && state.userLoaded && state.isLoaded) {
+                hideLoadingScreen();
+            }
         }
     </script>
 </body>
