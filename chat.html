@@ -105,14 +105,21 @@
             const [day, month, year] = str.split('.').map(Number);
             return new Date(year, month - 1, day);
         }
+        function daysLeft(dateExpired) {
+            const today = new Date();
+            today.setHours(0,0,0,0);
+            dateExpired = new Date(dateExpired);
+            dateExpired.setHours(0,0,0,0);
+            return Math.max(0, Math.ceil((dateExpired - today) / (24*60*60*1000)));
+        }
         function isAccessAllowed(user) {
             if (!user) return { allowed: false, reason: 'not_found' };
             if (user.oplata !== 1) return { allowed: false, reason: 'no_payment' };
             const dateOplata = parseDateDMY(user.date_oplata);
             if (!dateOplata) return { allowed: false, reason: 'date_error' };
-            // Последний день доступа
+            // Последний день доступа: день оплаты + 1 день
             const dateExpired = new Date(dateOplata);
-            dateExpired.setDate(dateExpired.getDate() + 13); // 14 дней включая день оплаты
+            dateExpired.setDate(dateExpired.getDate() + 1); // 2 дня: день оплаты и следующий
             // Сравниваем только дату (без времени)
             const today = new Date();
             today.setHours(0,0,0,0);
@@ -138,6 +145,10 @@
         function showChat() {
             document.getElementById('chat-container').style.display = 'flex';
         }
+        function showAccessDaysLeft(dateExpired) {
+            const left = daysLeft(dateExpired);
+            showModal(`<h2>Информация</h2><p>Доступ к ИИ-ассистенту доступен еще <b>${left}</b> ${left === 1 ? 'день' : (left >= 2 && left <= 4 ? 'дня' : 'дней')}.</p><button onclick=\"hideModal()\">Ок</button>`);
+        }
 
         // === Логика старта ===
         let currentUser = null;
@@ -150,11 +161,11 @@
                 hideModal();
             } else if (access.reason === 'expired') {
                 document.getElementById('chat-container').style.display = 'none';
-                const dateExpiredStr = access.dateExpired ? new Date(access.dateExpired).toLocaleString('ru-RU', { timeZone: 'Europe/Moscow' }) : '';
+                const dateExpiredStr = access.dateExpired ? access.dateExpired.toLocaleDateString('ru-RU', { timeZone: 'Europe/Moscow' }) : '';
                 showModal(`
                     <h2>Срок доступа истёк</h2>
-                    <p>Доступ к ИИ был предоставлен на 2 минуты после оплаты.<br>Срок действия истёк: <b>${dateExpiredStr}</b></p>
-                    <button onclick="window.location.href='index.html'">В меню</button>
+                    <p>Доступ к ИИ был предоставлен на 2 дня после оплаты.<br>Срок действия истёк: <b>${dateExpiredStr}</b></p>
+                    <button onclick=\"window.location.href='index.html'\">В меню</button>
                 `);
             }
         }
@@ -179,45 +190,46 @@
                     showModal(`
                         <h2>Доступ ограничен</h2>
                         <p>ИИ доступен только в полном курсе.<br>Оформите оплату для получения доступа.</p>
-                        <button onclick="window.location.href='oplata.html'">Перейти к оплате</button>
+                        <button onclick=\"window.location.href='oplata.html'\">Перейти к оплате</button>
                     `);
                 } else if (access.reason === 'expired') {
-                    const dateExpiredStr = access.dateExpired ? new Date(access.dateExpired).toLocaleString('ru-RU', { timeZone: 'Europe/Moscow' }) : '';
+                    const dateExpiredStr = access.dateExpired ? access.dateExpired.toLocaleDateString('ru-RU', { timeZone: 'Europe/Moscow' }) : '';
                     showModal(`
                         <h2>Срок доступа истёк</h2>
-                        <p>Доступ к ИИ был предоставлен на 2 минуты после оплаты.<br>Срок действия истёк: <b>${dateExpiredStr}</b></p>
-                        <button onclick="window.location.href='index.html'">В меню</button>
+                        <p>Доступ к ИИ был предоставлен на 2 дня после оплаты.<br>Срок действия истёк: <b>${dateExpiredStr}</b></p>
+                        <button onclick=\"window.location.href='index.html'\">В меню</button>
                     `);
                 } else if (access.allowed) {
                     showChat();
                     if (accessCheckInterval) clearInterval(accessCheckInterval);
-                    accessCheckInterval = setInterval(checkAccessAndUpdateUI, 3000);
+                    accessCheckInterval = setInterval(checkAccessAndUpdateUI, 5000); // 5 секунд
                 }
             } catch (e) {
                 showLoader(false);
                 showModal(`
                     <h2>Ошибка</h2>
                     <p>${e.message}</p>
-                    <button onclick="window.location.reload()">Повторить</button>
+                    <button onclick=\"window.location.reload()\">Повторить</button>
                 `);
             }
         }
         window.addEventListener('DOMContentLoaded', init);
 
-        // === Ваш код чата (без изменений) ===
+        // === Ваш код чата (с анимациями) ===
         const API_ENDPOINT = 'https://openai-proxy.egorspirin10.workers.dev/';
         const chatOutput = document.getElementById('chat-output');
         const userInput = document.getElementById('user-input');
         const sendButton = document.getElementById('send-button');
-        function addMessage(text, isUser) {
+        function addMessage(text, isUser, isTyping) {
             const messageDiv = document.createElement('div');
             messageDiv.className = `message ${isUser ? 'user-message' : 'bot-message'}`;
+            if (isUser) messageDiv.classList.add('fade-in-slide');
             const avatar = document.createElement('div');
             avatar.className = `avatar ${isUser ? '' : 'bot-avatar'}`;
             avatar.textContent = isUser ? 'Я' : 'AI';
             const contentDiv = document.createElement('div');
             contentDiv.className = 'message-content';
-            if (!isUser && text === 'typing') {
+            if (!isUser && isTyping) {
                 contentDiv.className = 'typing-indicator';
                 for (let i = 0; i < 3; i++) {
                     const dot = document.createElement('div');
@@ -238,8 +250,10 @@
             if (!message) return;
             userInput.value = '';
             sendButton.disabled = true;
-            addMessage(message, true);
-            const typingIndicator = addMessage('typing', false);
+            addMessage(message, true, false);
+            // Плавная задержка для эффекта появления
+            await new Promise(r => setTimeout(r, 250));
+            const typingIndicator = addMessage('', false, true);
             try {
                 const response = await fetch(API_ENDPOINT, {
                     method: 'POST',
