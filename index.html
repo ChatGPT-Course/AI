@@ -574,7 +574,6 @@
         function initSupportButton() {
             const supportBtn = document.getElementById('supportBtn');
             const supportOptions = document.getElementById('supportOptions');
-            const contactSupportBtn = document.getElementById('contactSupportBtn');
 
             supportBtn.addEventListener('click', () => {
                 supportBtn.classList.toggle('active');
@@ -582,15 +581,8 @@
                 if (supportBtn.classList.contains('active')) {
                     supportBtn.innerHTML = '×';
                 } else {
-                    supportBtn.innerHTML = '🛟';
+                    supportBtn.innerHTML = '⋯';
                 }
-            });
-
-            contactSupportBtn.addEventListener('click', () => {
-                document.getElementById('contact-modal').style.display = 'flex';
-                supportBtn.classList.remove('active');
-                supportOptions.classList.remove('active');
-                supportBtn.innerHTML = '🛟';
             });
         }
 
