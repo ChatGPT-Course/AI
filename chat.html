@@ -170,10 +170,8 @@
             <span style="font-weight: 600; letter-spacing: 0.5px;">AI</span>
             <span style="display: flex; align-items: center;">
                 <svg width="32" height="32" viewBox="0 0 32 32" style="vertical-align: middle;">
-                    <ellipse cx="16" cy="18" rx="12" ry="10" fill="#fffbe6" stroke="#ffd166" stroke-width="2"/>
-                    <ellipse cx="16" cy="20" rx="6.5" ry="5.5" fill="#ffe0a3"/>
-                    <ellipse cx="16" cy="20" rx="3.5" ry="3" fill="#ffd166"/>
-                    <ellipse cx="16" cy="20" rx="1.5" ry="1.2" fill="#fff" opacity="0.7"/>
+                    <ellipse cx="16" cy="16" rx="11" ry="15" fill="#FFA500"/>
+                    <ellipse cx="13" cy="11" rx="3.5" ry="5" fill="#fff" opacity="0.45"/>
                 </svg>
                 <span style="font-size: 1.25rem; font-weight: 600; color: var(--text); margin-left: 2px;">о</span>
             </span>
@@ -186,7 +184,7 @@
     <div class="chat-container" id="chat-container" style="display:none;">
         <div class="chat-messages" id="chat-output"></div>
         <div class="input-container">
-            <textarea id="user-input" placeholder="Напишите сообщение..." autocomplete="off" rows="1" style="resize:none; min-height:44px; max-height:160px; overflow-y:auto;"></textarea>
+            <textarea id="user-input" placeholder="Напишите сообщение..." autocomplete="off" rows="1" style="resize:none; min-height:44px; max-height:84px; overflow-y:auto;"></textarea>
             <button id="send-button" onclick="sendMessage()">Отправить</button>
         </div>
     </div>
@@ -382,19 +380,20 @@
                 const data = await response.json();
                 typingIndicator.className = 'message-content';
                 typingIndicator.textContent = data.reply;
+                userInput.blur(); // Снимаем фокус после ответа ИИ
             } catch (error) {
                 typingIndicator.className = 'message-content';
                 typingIndicator.textContent = `Ошибка: ${error.message}`;
             } finally {
                 sendButton.disabled = false;
                 chatOutput.scrollTop = chatOutput.scrollHeight;
-                userInput.focus();
             }
         }
         // Авто-рост textarea
         userInput.addEventListener('input', function() {
             this.style.height = 'auto';
-            this.style.height = Math.min(this.scrollHeight, 160) + 'px';
+            const maxHeight = 84; // 3 строки по ~28px
+            this.style.height = Math.min(this.scrollHeight, maxHeight) + 'px';
         });
         userInput.addEventListener('keypress', (e) => {
             if (e.key === 'Enter' && !e.shiftKey) {
@@ -440,11 +439,16 @@
                     <span class='access-sticker'>${stickerSVG}</span>
                     <span style="font-size:0.97rem; font-weight:500; white-space:nowrap;">${mainText}</span>
                 </div>
-                <div class='access-dates'><span class='access-label'>Доступ открыт:</span> ${formatDateDMY(dateStart)}</div>
+                <div class='access-dates'><span class='access-label'>Открытие:</span> ${formatDateDMY(dateStart)}</div>
                 <div class='access-dates'><span class='access-label'>Закрытие:</span> ${formatDateDMY(dateEnd)}</div>
+                <div style="font-size:0.78rem; color:#b7b7b7; margin-top:8px; display:flex; align-items:center; gap:4px; justify-content:left;">
+                    <svg width="15" height="15" viewBox="0 0 20 20" style="vertical-align:middle;"><circle cx="10" cy="10" r="9" fill="#ffe0a3" stroke="#FFA500" stroke-width="1.2"/><text x="10" y="15" text-anchor="middle" font-size="13" font-family="Arial" fill="#FFA500">?</text></svg>
+                    <span>Доступ к ИИ чату предоставляется лишь на 2 недели для удобства работы и проведений тестов.</span>
+                </div>
             `;
             // Позиционируем popover под кнопкой справа
             popover.style.display = 'block';
+            setTimeout(() => { popover.style.display = 'none'; }, 5000);
         }
     </script>
 </body>
