@@ -75,6 +75,7 @@
             box-shadow: none !important;
             -webkit-tap-highlight-color: transparent;
         }
+
         .support-btn:focus, .support-btn:active, .support-btn:focus-visible, .support-btn:focus-within,
         .support-option:focus, .support-option:active, .support-option:focus-visible, .support-option:focus-within {
             outline: none !important;
@@ -863,6 +864,10 @@
             
             // Сохраняем ID пользователя в cookie
             setCookie('tg_user_id', state.userId, 30);
+            // Сохраняем аватар пользователя в cookie
+            if (user.photo_url) {
+                setCookie('tg_user_avatar', user.photo_url, 30);
+            }
             
             // Устанавливаем данные пользователя
             document.getElementById('user-name-text').textContent = 
