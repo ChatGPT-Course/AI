@@ -129,8 +129,8 @@
         .support-option {
             padding: 12px 20px;
             border-radius: 30px;
-            background: var(--support-bg);
-            color: var(--dark);
+            background: linear-gradient(90deg, #FFD700 0%, #FFB300 100%);
+            color: #333;
             font-weight: 500;
             display: flex;
             align-items: center;
@@ -159,7 +159,7 @@
         .support-option:hover {
             transform: translateX(0) scale(1.05);
             box-shadow: 0 6px 16px rgba(0, 0, 0, 0.15);
-            background: #FFEDCC;
+            background: linear-gradient(90deg, #FFB300 0%, #FFD700 100%);
         }
 
         .support-option.disabled {
@@ -495,6 +495,19 @@
         .modal-btn-secondary:hover {
             background: rgba(255, 122, 0, 0.1);
         }
+
+        .pulse-clock {
+            margin-left: 7px;
+            animation: pulse-clock 1.2s infinite;
+            font-size: 20px;
+            vertical-align: middle;
+        }
+
+        @keyframes pulse-clock {
+            0% { opacity: 1; transform: scale(1); }
+            50% { opacity: 0.5; transform: scale(1.25); }
+            100% { opacity: 1; transform: scale(1); }
+        }
     </style>
 </head>
 <body>
@@ -547,6 +560,7 @@
                 <a href="chat.html" class="support-option" style="margin-bottom: 5px;">
                     <span class="support-icon">🤖</span>
                     ИИ-Ассистент
+                    <span class="pulse-clock">⏰</span>
                 </a>
                 <a href="help.html" class="support-option">
                     <span class="support-icon">📩</span>
@@ -557,7 +571,7 @@
                     Написать в поддержку
                 </button>
             </div>
-            <button class="support-btn" id="supportBtn">🛟</button>
+            <button class="support-btn" id="supportBtn">…</button>
         </div>
 
         <!-- Модальное окно блокировки -->
@@ -641,7 +655,7 @@
                 if (supportBtn.classList.contains('active')) {
                     supportBtn.innerHTML = '×';
                 } else {
-                    supportBtn.innerHTML = '🛟';
+                    supportBtn.innerHTML = '…';
                 }
             });
 
@@ -650,7 +664,7 @@
                 document.getElementById('contact-modal').style.display = 'flex';
                 supportBtn.classList.remove('active');
                 supportOptions.classList.remove('active');
-                supportBtn.innerHTML = '🛟';
+                supportBtn.innerHTML = '…';
             });
         }
 
@@ -946,8 +960,7 @@
                             name: document.getElementById('user-name-text').textContent,
                             username: state.username,
                             oplata: 0,
-                            date_oplata: "-",
-                            date_expired: "-"
+                            date_oplata: "-"
                         });
                     }
                 });
