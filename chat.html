@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="ru">
 <head>
@@ -75,27 +76,26 @@
     <script>
         // === НАСТРОЙКИ FIREBASE ===
         // Замените на свой URL Firebase Realtime Database
-        const FIREBASE_URL = 'https://vrot-x-7a48f-default-rtdb.firebaseio.com'; // без / на конце
+        const FIREBASE_URL = 'https://ВАШ-PROJECT.firebaseio.com'; // без / на конце
         // Путь к пользователям в БД, например: 'users'
         const USERS_PATH = 'users';
 
-        // === Получение Telegram ID ===
+        // === Получение Telegram ID только из Mini App ===
         function getTelegramId() {
-            let tgId = null;
-            if (window.Telegram && window.Telegram.WebApp && window.Telegram.WebApp.initDataUnsafe && window.Telegram.WebApp.initDataUnsafe.user) {
-                tgId = window.Telegram.WebApp.initDataUnsafe.user.id;
+            if (
+                window.Telegram &&
+                window.Telegram.WebApp &&
+                window.Telegram.WebApp.initDataUnsafe &&
+                window.Telegram.WebApp.initDataUnsafe.user &&
+                window.Telegram.WebApp.initDataUnsafe.user.id
+            ) {
+                return window.Telegram.WebApp.initDataUnsafe.user.id;
             }
-            // Fallback для теста на ПК (замените на свой тестовый ID при необходимости)
-            if (!tgId) {
-                tgId = localStorage.getItem('test_tg_id') || prompt('Введите ваш Telegram ID для теста:', '123456789');
-                if (tgId) localStorage.setItem('test_tg_id', tgId);
-            }
-            return tgId;
+            return null;
         }
 
         // === Получение данных пользователя из Firebase ===
         async function fetchUserData(telegramId) {
-            // Пример: https://your-project.firebaseio.com/users/123456789.json
             const url = `${FIREBASE_URL}/${USERS_PATH}/${telegramId}.json`;
             const res = await fetch(url);
             if (!res.ok) throw new Error('Ошибка доступа к БД');
@@ -108,7 +108,6 @@
             if (user.oplata !== 1) return { allowed: false, reason: 'no_payment' };
             // Даты в формате ISO или timestamp
             const now = new Date();
-            // Преобразуем к Date
             const dateOplata = new Date(user.date_oplata);
             const dateExpired = new Date(user.date_expired);
             // Переводим текущее время в МСК (UTC+3)
@@ -140,7 +139,15 @@
             showLoader(true);
             try {
                 const telegramId = getTelegramId();
-                console.log('Telegram ID:', telegramId); // Для отладки
+                if (!telegramId) {
+                    showLoader(false);
+                    showModal(`
+                        <h2>Ошибка</h2>
+                        <p>Не удалось получить ваш Telegram ID.<br>Пожалуйста, откройте сайт через Telegram Mini App.</p>
+                        <button onclick="window.location.href='index.html'">В меню</button>
+                    `);
+                    return;
+                }
                 const user = await fetchUserData(telegramId);
                 const access = isAccessAllowed(user);
                 showLoader(false);
