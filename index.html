@@ -654,11 +654,8 @@
 
         function hideLoadingScreen() {
             const loadingScreen = document.getElementById('loading-screen');
-            loadingScreen.style.opacity = '0';
-            setTimeout(() => {
-                loadingScreen.style.display = 'none';
-                document.getElementById('app-content').style.opacity = '1';
-            }, 500);
+            loadingScreen.style.display = 'none';
+            document.getElementById('app-content').style.opacity = '1';
         }
 
         async function initPromoCodes() {
@@ -702,6 +699,9 @@
                 Telegram.WebApp.enableClosingConfirmation();
             }
 
+            // Скрываем экран загрузки сразу после инициализации DOM и Telegram
+            hideLoadingScreen();
+
             await initPromoCodes();
 
             if (window.Telegram?.WebApp) {
@@ -711,7 +711,6 @@
             }
 
             state.isLoaded = true;
-            hideLoadingScreen();
 
             // Новый обработчик для ИИ-Ассистента
             const openChatBtn = document.getElementById('openChatBtn');
