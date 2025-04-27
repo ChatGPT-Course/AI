@@ -99,14 +99,25 @@
         }
 
         // === Проверка доступа ===
+        function parseDateDMY(str) {
+            // str: 'дд.мм.гггг'
+            if (!str) return null;
+            const [day, month, year] = str.split('.').map(Number);
+            return new Date(year, month - 1, day);
+        }
         function isAccessAllowed(user) {
             if (!user) return { allowed: false, reason: 'not_found' };
             if (user.oplata !== 1) return { allowed: false, reason: 'no_payment' };
-            const now = Date.now();
-            const dateOplata = Number(user.date_oplata); // timestamp
+            const dateOplata = parseDateDMY(user.date_oplata);
             if (!dateOplata) return { allowed: false, reason: 'date_error' };
-            const dateExpired = dateOplata + 2 * 60 * 1000; // 2 минуты в мс
-            if (now >= dateOplata && now <= dateExpired) {
+            // Последний день доступа
+            const dateExpired = new Date(dateOplata);
+            dateExpired.setDate(dateExpired.getDate() + 13); // 14 дней включая день оплаты
+            // Сравниваем только дату (без времени)
+            const today = new Date();
+            today.setHours(0,0,0,0);
+            dateExpired.setHours(0,0,0,0);
+            if (today <= dateExpired) {
                 return { allowed: true, dateExpired };
             } else {
                 return { allowed: false, reason: 'expired', dateExpired };
