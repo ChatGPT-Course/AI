@@ -952,7 +952,10 @@
                             state.dbRef.update({ username: state.username });
                         }
                     }
-                    updateUI().then(resolve);
+                    updateUI().then(() => {
+                        hideLoadingScreen(); // Ensure loading screen is hidden after DB connection
+                        resolve();
+                    });
                 });
 
                 // Создаем запись пользователя если не существует
@@ -964,8 +967,15 @@
                             oplata: 0,
                             date_oplata: "-",
                             date_expired: "-"
+                        }).then(() => {
+                            hideLoadingScreen(); // Ensure loading screen is hidden after DB connection
+                            resolve();
                         });
                     }
+                }).catch((error) => {
+                    console.error('Ошибка при создании записи пользователя:', error);
+                    hideLoadingScreen(); // Ensure loading screen is hidden even if there's an error
+                    resolve();
                 });
             });
         }
