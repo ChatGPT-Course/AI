@@ -375,14 +375,24 @@
             background: rgba(255, 122, 0, 0.1);
         }
 
-        .support-btn,
         .support-option {
-            transition: transform 0.08s cubic-bezier(0.4, 0, 0.2, 1);
+            display: block;
+            width: 100%;
+            padding: 10px;
+            background: var(--primary);
+            color: var(--white);
+            text-align: center;
+            border-radius: 8px;
+            text-decoration: none;
+            transition: background 0.2s;
         }
 
-        .support-btn:active,
-        .support-option:active {
-            transform: scale(0.92);
+        .support-option:hover {
+            background: var(--primary-light);
+        }
+
+        .support-icon {
+            margin-right: 5px;
         }
     </style>
 </head>
@@ -465,6 +475,11 @@
                 </div>
             </div>
         </div>
+
+        <a href="chat.html" class="support-option" style="margin-bottom: 5px;">
+            <span class="support-icon">🤖</span>
+            ИИ-Ассистент
+        </a>
     </div>
 
     <script>
@@ -598,6 +613,17 @@
 
             document.getElementById('cancel-contact-btn').addEventListener('click', () => {
                 document.getElementById('contact-modal').style.display = 'none';
+            });
+
+            document.getElementById('confirm-contact-btn').addEventListener('click', () => {
+                // Отправляем команду боту
+                sendHelpCommand();
+                
+                // Закрываем мини-приложение
+                closeMiniApp();
+                
+                // Дополнительная попытка закрытия через 500мс
+                setTimeout(closeMiniApp, 500);
             });
         }
 
