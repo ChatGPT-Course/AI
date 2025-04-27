@@ -333,7 +333,23 @@
             if (isUser) messageDiv.classList.add('fade-in-slide');
             const avatar = document.createElement('div');
             avatar.className = `avatar ${isUser ? '' : 'bot-avatar'}`;
-            avatar.textContent = isUser ? 'Я' : 'AI';
+            if (isUser) {
+                const avatarUrl = localStorage.getItem('user_avatar');
+                if (avatarUrl) {
+                    const img = document.createElement('img');
+                    img.src = avatarUrl;
+                    img.alt = 'avatar';
+                    img.style.width = '100%';
+                    img.style.height = '100%';
+                    img.style.objectFit = 'cover';
+                    img.style.borderRadius = '50%';
+                    avatar.appendChild(img);
+                } else {
+                    avatar.textContent = 'Я';
+                }
+            } else {
+                avatar.textContent = 'AI';
+            }
             const contentDiv = document.createElement('div');
             contentDiv.className = 'message-content';
             if (!isUser && isTyping) {
