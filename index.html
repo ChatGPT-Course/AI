@@ -485,28 +485,16 @@
             background: rgba(255, 122, 0, 0.1);
         }
 
-        /* Убираем outline для всех элементов */
+        /* Убираем outline и тень во всех состояниях */
         a, button, input, textarea, select, .module-card, .support-btn, .support-option {
-            outline: none !important;
-        }
-
-        /* Убираем outline при фокусе */
-        a:focus, button:focus, input:focus, 
-        textarea:focus, select:focus, 
-        .module-card:focus, .support-btn:focus, 
-        .support-option:focus {
             outline: none !important;
             box-shadow: none !important;
         }
 
-        /* Для современных браузеров (лучшая практика) */
-        :focus-visible {
-            outline: none !important;
-        }
-
-        /* Убираем outline и тень при наведении и нажатии */
         a:hover, button:hover, input:hover, textarea:hover, select:hover, 
         .module-card:hover, .support-btn:hover, .support-option:hover,
+        a:focus, button:focus, input:focus, textarea:focus, select:focus, 
+        .module-card:focus, .support-btn:focus, .support-option:focus,
         a:active, button:active, input:active, textarea:active, select:active, 
         .module-card:active, .support-btn:active, .support-option:active {
             outline: none !important;
