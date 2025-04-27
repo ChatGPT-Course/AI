@@ -15,27 +15,31 @@
             --secondary: #FFD700;
             --white: #FFFFFF;
             --gray: #F5F5F5;
-            --dark: #222;
+            --dark: #232323;
             --success: #4CAF50;
             --error: #F44336;
             --locked-bg: #F8F8F8;
             --module-label: #888;
             --disabled: #CCCCCC;
-            --support-bg: #FFF5E6;
         }
         body {
             background: linear-gradient(135deg, #FFF3E0 0%, #FFFFFF 100%);
             color: var(--dark);
             min-height: 100vh;
-            padding: 0;
             font-family: 'Montserrat', sans-serif;
+            margin: 0;
         }
         .main-header {
             display: flex;
             justify-content: space-between;
-            align-items: center;
+            align-items: flex-end;
             padding: 32px 32px 0 32px;
             background: transparent;
+        }
+        .logo-block {
+            display: flex;
+            flex-direction: column;
+            align-items: flex-start;
         }
         .logo {
             font-size: 2.1rem;
@@ -43,14 +47,20 @@
             color: var(--primary);
             letter-spacing: 1px;
         }
-        .user-profile {
+        .slogan {
+            font-size: 1rem;
+            color: #888;
+            margin-top: 2px;
+            font-weight: 500;
+        }
+        .user-menu {
             display: flex;
             align-items: center;
             gap: 16px;
         }
-        .user-profile .avatar {
-            width: 56px;
-            height: 56px;
+        .user-menu .avatar {
+            width: 48px;
+            height: 48px;
             border-radius: 50%;
             background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
             display: flex;
@@ -58,75 +68,85 @@
             justify-content: center;
             overflow: hidden;
             font-weight: bold;
-            font-size: 26px;
+            font-size: 22px;
             color: white;
         }
-        .user-profile .avatar img {
+        .user-menu .avatar img {
             width: 100%;
             height: 100%;
             object-fit: cover;
         }
-        .user-profile .user-name {
+        .user-menu .user-name {
             font-weight: 600;
             font-size: 1.1rem;
             color: var(--dark);
         }
-        .welcome-block {
-            padding: 18px 32px 0 32px;
+        .welcome-progress {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 32px 32px 0 32px;
+            flex-wrap: wrap;
+            gap: 32px;
         }
-        .welcome-block h1 {
+        .welcome {
+            flex: 1 1 300px;
+        }
+        .welcome h1 {
             font-size: 2.1rem;
             font-weight: 700;
             margin-bottom: 6px;
             color: var(--primary);
         }
-        .welcome-block p {
+        .welcome p {
             font-size: 1.1rem;
             color: #555;
         }
-        .progress-block {
-            padding: 18px 32px 0 32px;
+        .radial-progress {
+            width: 110px;
+            height: 110px;
+            position: relative;
             display: flex;
-            flex-direction: column;
-            align-items: flex-start;
-            gap: 10px;
+            align-items: center;
+            justify-content: center;
         }
-        .progress-bar {
-            width: 100%;
-            height: 14px;
-            background: #FFE0A3;
-            border-radius: 8px;
-            overflow: hidden;
-            margin-bottom: 4px;
+        .radial-progress svg {
+            width: 110px;
+            height: 110px;
+            transform: rotate(-90deg);
         }
-        .progress {
-            height: 100%;
-            background: linear-gradient(90deg, var(--primary), var(--primary-light));
-            border-radius: 8px;
-            transition: width 0.5s;
+        .radial-progress .progress-text {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            font-size: 1.3rem;
+            font-weight: 700;
+            color: var(--primary);
         }
         .continue-btn {
             background: linear-gradient(90deg, var(--primary), var(--primary-light));
             color: var(--white);
             border: none;
-            padding: 12px 28px;
-            border-radius: 8px;
-            font-weight: 600;
-            font-size: 1rem;
+            padding: 14px 32px;
+            border-radius: 10px;
+            font-weight: 700;
+            font-size: 1.1rem;
             cursor: pointer;
-            margin-top: 8px;
+            margin-top: 18px;
             transition: background 0.2s;
+            box-shadow: 0 2px 8px rgba(255, 122, 0, 0.08);
         }
         .continue-btn:hover {
             background: linear-gradient(90deg, var(--primary-light), var(--primary));
         }
-        .modules-grid {
+        .modules-board {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
             gap: 28px;
             padding: 32px;
         }
-        .module-card {
+        .module-tile {
             background: var(--white);
             border-radius: 20px;
             box-shadow: 0 4px 24px rgba(255, 122, 0, 0.08);
@@ -139,56 +159,45 @@
             min-height: 200px;
             transition: box-shadow 0.2s, transform 0.2s;
         }
-        .module-card.unlocked:hover {
+        .module-tile.unlocked:hover {
             box-shadow: 0 8px 32px rgba(255, 122, 0, 0.18);
             transform: translateY(-4px) scale(1.03);
         }
-        .module-card.locked {
+        .module-tile.locked {
             background: var(--locked-bg);
             border-color: var(--gray);
             opacity: 0.7;
         }
-        .module-label {
-            background: var(--module-label);
-            color: white;
-            padding: 4px 10px;
-            border-radius: 6px;
-            font-size: 13px;
-            font-weight: 500;
-            align-self: flex-start;
-            margin-bottom: 12px;
-        }
-        .module-icon {
+        .module-tile .icon {
             font-size: 2.5rem;
             margin-bottom: 12px;
         }
-        .module-title {
+        .module-tile .title {
             font-size: 1.18rem;
             font-weight: 700;
             margin-bottom: 8px;
             color: var(--primary);
         }
-        .module-desc {
+        .module-tile .desc {
             font-size: 1.01rem;
             color: #666;
             margin-bottom: 18px;
         }
-        .start-btn {
-            background: linear-gradient(90deg, var(--primary), var(--primary-light));
-            color: var(--white);
-            border: none;
-            padding: 10px 22px;
-            border-radius: 7px;
-            font-weight: 600;
-            font-size: 1rem;
-            cursor: pointer;
-            margin-top: auto;
-            transition: background 0.2s;
+        .module-tile .status {
+            position: absolute;
+            top: 18px;
+            right: 18px;
+            font-size: 1.5rem;
+            opacity: 0.8;
         }
-        .start-btn:disabled {
-            background: #eee;
-            color: #aaa;
-            cursor: not-allowed;
+        .module-tile .status.done {
+            color: var(--success);
+        }
+        .module-tile .status.locked {
+            color: var(--disabled);
+        }
+        .module-tile .status.current {
+            color: var(--primary);
         }
         .quick-actions {
             display: flex;
@@ -228,52 +237,54 @@
             text-decoration: none;
             font-size: 0.95rem;
         }
-        .pulse-clock {
-            margin-left: 7px;
-            animation: fade-clock 1.2s infinite;
-            font-size: 20px;
-            vertical-align: middle;
-        }
-        @keyframes fade-clock {
-            0% { opacity: 1; }
-            50% { opacity: 0.3; }
-            100% { opacity: 1; }
-        }
         @media (max-width: 900px) {
-            .main-header, .welcome-block, .progress-block, .modules-grid, .quick-actions {
+            .main-header, .welcome-progress, .modules-board, .quick-actions {
                 padding-left: 10px;
                 padding-right: 10px;
             }
-            .modules-grid {
+            .modules-board {
                 grid-template-columns: 1fr;
+            }
+            .welcome-progress {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 18px;
             }
         }
     </style>
 </head>
 <body>
     <header class="main-header">
-        <div class="logo">AI Курс</div>
-        <div class="user-profile">
+        <div class="logo-block">
+            <span class="logo">AI Курс</span>
+            <span class="slogan">Учись. Применяй. Вдохновляйся.</span>
+        </div>
+        <div class="user-menu">
             <div class="avatar" id="user-avatar"><span id="avatar-fallback">U</span></div>
             <span class="user-name" id="user-name-text">Загрузка...</span>
         </div>
     </header>
-    <section class="welcome-block">
-        <h1 id="welcome-title">Добро пожаловать!</h1>
-        <p>Погрузитесь в мир искусственного интеллекта и прокачайте свои навыки!</p>
-    </section>
-    <section class="progress-block">
-        <div class="progress-bar"><div class="progress" id="progress-bar-inner" style="width: 0%"></div></div>
-        <span id="progress-text">0 из 0 модулей завершено</span>
+    <section class="welcome-progress">
+        <div class="welcome">
+            <h1 id="welcome-title">Добро пожаловать!</h1>
+            <p>Твой путь в ИИ только начинается.</p>
+        </div>
+        <div class="radial-progress">
+            <svg id="progress-svg" viewBox="0 0 100 100">
+                <circle cx="50" cy="50" r="45" fill="none" stroke="#FFE0A3" stroke-width="10"/>
+                <circle id="progress-circle" cx="50" cy="50" r="45" fill="none" stroke="#FF7A00" stroke-width="10" stroke-linecap="round" stroke-dasharray="282.743" stroke-dashoffset="282.743"/>
+            </svg>
+            <span class="progress-text" id="progress-percent">0%</span>
+        </div>
         <button class="continue-btn" id="continue-btn" style="display:none;">Продолжить обучение</button>
     </section>
-    <section class="modules-grid" id="modules-container">
+    <section class="modules-board" id="modules-container">
         <!-- Модули рендерятся динамически -->
     </section>
     <section class="quick-actions">
-        <button class="action-btn" id="ai-assistant-btn">🤖 ИИ-Ассистент <span class="pulse-clock">🕒</span></button>
-        <button class="action-btn" id="help-btn">📩 Создать обращение</button>
-        <button class="action-btn" id="support-btn">💬 Техподдержка</button>
+        <button class="action-btn" id="ai-assistant-btn">🤖 ИИ-Ассистент</button>
+        <button class="action-btn" id="help-btn">📩 Вопрос</button>
+        <button class="action-btn" id="support-btn">💬 Поддержка</button>
     </section>
     <footer class="main-footer">
         <span>© 2024 AI Курс</span>
@@ -282,7 +293,6 @@
     </footer>
     <script>
     // --- JS-логика для Telegram, Firebase и динамического рендера ---
-    // Конфиг Firebase
     const firebaseConfig = {
         apiKey: "AIzaSyCMos6Y7C-krTLuKCI4VJG-TFLo6QI--k8",
         authDomain: "vrot-x-7a48f.firebaseapp.com",
@@ -299,7 +309,6 @@
         username: null,
         isPaid: false,
         dbRef: null,
-        isLoaded: false,
         modules: [
             { id: 0, icon: "💡", title: "Введение в ИИ", desc: "Основы, история, примеры", isDemo: true },
             { id: 1, icon: "🧠", title: "Основы ChatGPT", desc: "Как работает, примеры, сценарии" },
@@ -307,7 +316,6 @@
             { id: 3, icon: "👑", title: "ChatGPT MASTER", desc: "Экспертные подходы и автоматизация" }
         ]
     };
-    // --- Telegram интеграция и инициализация ---
     document.addEventListener('DOMContentLoaded', async () => {
         if (window.Telegram?.WebApp) {
             Telegram.WebApp.ready();
@@ -375,26 +383,43 @@
         let completed = 0;
         state.modules.forEach((module, idx) => {
             const isLocked = !module.isDemo && !state.isPaid;
-            if (!isLocked) completed++;
-            const card = document.createElement('div');
-            card.className = 'module-card ' + (isLocked ? 'locked' : 'unlocked');
-            card.innerHTML = `
-                <div class="module-icon">${module.icon}</div>
-                <div class="module-title">${module.title}</div>
-                <div class="module-desc">${module.desc}</div>
-                <button class="start-btn" ${isLocked ? 'disabled' : ''}>${isLocked ? 'Заблокировано' : 'Начать'}</button>
+            let statusClass = '';
+            let statusIcon = '';
+            if (isLocked) {
+                statusClass = 'locked';
+                statusIcon = '🔒';
+            } else if (idx === 0 || state.isPaid) {
+                statusClass = 'current';
+                statusIcon = '▶️';
+            } else {
+                statusClass = 'done';
+                statusIcon = '✓';
+            }
+            const tile = document.createElement('div');
+            tile.className = 'module-tile ' + (isLocked ? 'locked' : 'unlocked');
+            tile.innerHTML = `
+                <div class="icon">${module.icon}</div>
+                <div class="title">${module.title}</div>
+                <div class="desc">${module.desc}</div>
+                <div class="status ${statusClass}">${statusIcon}</div>
             `;
-            card.querySelector('.start-btn').onclick = () => {
+            tile.onclick = () => {
                 if (!isLocked) alert(`Открываем модуль: ${module.title}`);
             };
-            container.appendChild(card);
+            container.appendChild(tile);
         });
     }
     function updateProgress() {
         const total = state.modules.length;
         const unlocked = state.modules.filter(m => m.isDemo || state.isPaid).length;
-        document.getElementById('progress-bar-inner').style.width = `${Math.round(unlocked/total*100)}%`;
-        document.getElementById('progress-text').textContent = `${unlocked} из ${total} модулей открыто`;
+        const percent = Math.round(unlocked/total*100);
+        document.getElementById('progress-percent').textContent = percent + '%';
+        // Круговой прогресс
+        const circle = document.getElementById('progress-circle');
+        const radius = 45;
+        const circumference = 2 * Math.PI * radius;
+        circle.style.strokeDasharray = circumference;
+        circle.style.strokeDashoffset = circumference - (percent/100)*circumference;
         const btn = document.getElementById('continue-btn');
         if (unlocked < total) {
             btn.style.display = '';
