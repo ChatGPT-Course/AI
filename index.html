@@ -911,12 +911,6 @@
             }
         }
 
-        function checkAllLoaded() {
-            if (state.userId && state.isLoaded) {
-                hideLoadingScreen();
-            }
-        }
-
         async function initTestMode() {
             // Для тестирования без Telegram
             document.getElementById('user-name-text').textContent = 'Тестовый пользователь';
@@ -934,6 +928,12 @@
             } catch (error) {
                 console.error('Ошибка при обновлении UI в тестовом режиме:', error);
                 hideLoadingScreen(); // Ensure loading screen is hidden even if there's an error
+            }
+        }
+
+        function checkAllLoaded() {
+            if (state.userId && state.isLoaded) {
+                hideLoadingScreen();
             }
         }
 
