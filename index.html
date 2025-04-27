@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="ru">
 <head>
@@ -41,7 +42,6 @@
             overflow-x: hidden;
         }
 
-        /* Фоновые элементы */
         body::before {
             content: "";
             position: fixed;
@@ -57,7 +57,6 @@
             pointer-events: none;
         }
 
-        /* Кнопка поддержки */
         .support-container {
             position: fixed;
             bottom: 20px;
@@ -167,7 +166,6 @@
             font-size: 20px;
         }
 
-        /* Остальные стили остаются без изменений */
         .loading-screen {
             position: fixed;
             top: 0;
@@ -391,7 +389,6 @@
             color: var(--primary);
         }
 
-        /* Модальные окна */
         .modal-overlay {
             position: fixed;
             top: 0;
@@ -484,6 +481,37 @@
         .modal-btn-secondary:hover {
             background: rgba(255, 122, 0, 0.1);
         }
+
+        /* Кнопка чата в левом нижнем углу */
+        .chat-container-fab {
+            position: fixed;
+            bottom: 20px;
+            left: 20px;
+            z-index: 101;
+            display: flex;
+            flex-direction: column;
+            align-items: flex-start;
+        }
+        .chat-fab-btn {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            background: var(--primary);
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+            box-shadow: 0 4px 12px rgba(255, 122, 0, 0.3);
+            cursor: pointer;
+            transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            border: none;
+            user-select: none;
+        }
+        .chat-fab-btn:hover {
+            background: var(--primary-light);
+            transform: scale(1.1);
+        }
     </style>
 </head>
 <body>
@@ -516,18 +544,13 @@
             </div>
         </div>
 
-        <!-- Разделительная линия -->
         <hr class="divider">
 
-        <!-- Секция модулей -->
         <div class="section-title">Модули курса</div>
-
-        <!-- Модули курса -->
         <div class="modules-grid" id="modules-container">
             <!-- Заполнится динамически -->
         </div>
 
-        <!-- Заключительная разделительная линия -->
         <hr class="divider">
 
         <!-- Контейнер поддержки -->
@@ -545,7 +568,14 @@
             <button class="support-btn" id="supportBtn">🛟</button>
         </div>
 
-        <!-- Модальное окно блокировки -->
+        <!-- КНОПКА ЧАТА В ЛЕВОМ НИЖНЕМ УГЛУ -->
+        <div class="chat-container-fab">
+            <button class="chat-fab-btn" id="openChatBtn" title="Перейти в чат">
+                💬
+            </button>
+        </div>
+
+        <!-- Модальные окна (оставьте без изменений) -->
         <div class="modal-overlay" id="lock-modal">
             <div class="modal-content">
                 <button class="close-modal" id="close-lock-modal">×</button>
@@ -555,8 +585,6 @@
                 <button class="modal-btn" id="to-payment-btn">Получить полный доступ</button>
             </div>
         </div>
-
-        <!-- Модальное окно справки -->
         <div class="modal-overlay" id="help-modal">
             <div class="modal-content">
                 <button class="close-modal" id="close-help-modal">×</button>
@@ -565,8 +593,6 @@
                 <button class="modal-btn" id="help-payment-btn" style="display: none;">Получить полный доступ</button>
             </div>
         </div>
-
-        <!-- Модальное окно подтверждения связи с поддержкой -->
         <div class="modal-overlay" id="contact-modal">
             <div class="modal-content">
                 <button class="close-modal" id="close-contact-modal">×</button>
@@ -594,17 +620,14 @@
             appId: "1:622297225288:web:5df6a5b02ffddedd96e07d"
         };
 
-        // Конфигурация Puzzle Bot API
         const puzzleBotConfig = {
             apiToken: 'Xer726MfatevnjQzPJaP4TfPSd7dd1HN',
             commandName: 'Помощь'
         };
 
-        // Инициализация Firebase
         const app = firebase.initializeApp(firebaseConfig);
         const database = firebase.database();
 
-        // Состояние приложения
         const state = {
             userId: null,
             username: null,
@@ -613,7 +636,6 @@
             isLoaded: false
         };
 
-        // Инициализация кнопки поддержки
         function initSupportButton() {
             const supportBtn = document.getElementById('supportBtn');
             const supportOptions = document.getElementById('supportOptions');
@@ -622,7 +644,6 @@
             supportBtn.addEventListener('click', () => {
                 supportBtn.classList.toggle('active');
                 supportOptions.classList.toggle('active');
-                
                 if (supportBtn.classList.contains('active')) {
                     supportBtn.innerHTML = '×';
                 } else {
@@ -630,7 +651,6 @@
                 }
             });
 
-            // Обработчик кнопки "Написать в поддержку"
             contactSupportBtn.addEventListener('click', () => {
                 document.getElementById('contact-modal').style.display = 'flex';
                 supportBtn.classList.remove('active');
@@ -639,9 +659,7 @@
             });
         }
 
-        // Надежная функция закрытия WebApp
         function closeMiniApp() {
-            // 1. Основной способ через Telegram WebApp API
             if (window.Telegram && Telegram.WebApp && Telegram.WebApp.close) {
                 try {
                     Telegram.WebApp.close();
@@ -650,8 +668,6 @@
                     console.error("Ошибка при закрытии через Telegram API:", e);
                 }
             }
-
-            // 2. Резервный способ через редирект
             try {
                 window.location.href = "https://t.me";
                 setTimeout(() => {
@@ -666,25 +682,20 @@
             }
         }
 
-        // Отправка команды без ожидания ответа
         function sendHelpCommand() {
             if (!state.userId) return;
-
             const url = new URL('https://api.puzzlebot.top/');
             url.searchParams.append('token', puzzleBotConfig.apiToken);
             url.searchParams.append('method', 'sendCommand');
             url.searchParams.append('command_name', puzzleBotConfig.commandName);
             url.searchParams.append('tg_chat_id', state.userId);
-
-            // Отправляем запрос без ожидания ответа
             fetch(url.toString(), {
                 method: 'GET',
                 headers: {'Accept': 'application/json'},
-                keepalive: true // Гарантирует отправку даже при закрытии страницы
-            }).catch(() => {}); // Игнорируем ошибки
+                keepalive: true
+            }).catch(() => {});
         }
 
-        // Функция для сохранения ID в cookie
         function setCookie(name, value, days) {
             let expires = "";
             if (days) {
@@ -695,7 +706,6 @@
             document.cookie = name + "=" + (value || "") + expires + "; path=/";
         }
 
-        // Функция для получения ID из cookie
         function getCookie(name) {
             const nameEQ = name + "=";
             const ca = document.cookie.split(';');
@@ -707,7 +717,6 @@
             return null;
         }
 
-        // Функция для скрытия экрана загрузки
         function hideLoadingScreen() {
             const loadingScreen = document.getElementById('loading-screen');
             loadingScreen.style.opacity = '0';
@@ -717,20 +726,16 @@
             }, 500);
         }
 
-        // Функция для инициализации промокодов
         async function initPromoCodes() {
             return new Promise((resolve) => {
                 const promoCodesRef = database.ref('promo');
-                
                 promoCodesRef.once('value').then((snapshot) => {
                     if (!snapshot.exists()) {
-                        // Создаем структуру промокодов
                         const defaultPromoCodes = {
                             TEST1: { activation: 0, price: 0 },
                             TEST2: { activation: 0, price: 0 },
                             TEST3: { activation: 0, price: 0 }
                         };
-                        
                         promoCodesRef.set(defaultPromoCodes)
                             .then(() => {
                                 console.log('Промокоды инициализированы');
@@ -750,24 +755,18 @@
             });
         }
 
-        // Основная функция
         document.addEventListener('DOMContentLoaded', async () => {
-            // Показываем экран загрузки
             const loadingScreen = document.getElementById('loading-screen');
             loadingScreen.style.display = 'flex';
-            
-            // Инициализируем модальные окна
             initModals();
             initSupportButton();
 
-            // Убираем стандартную заставку Telegram
             if (window.Telegram?.WebApp) {
                 Telegram.WebApp.ready();
                 Telegram.WebApp.expand();
                 Telegram.WebApp.enableClosingConfirmation();
             }
 
-            // Инициализируем промокоды
             await initPromoCodes();
 
             if (window.Telegram?.WebApp) {
@@ -776,48 +775,41 @@
                 await initTestMode();
             }
 
-            // Помечаем, что загрузка завершена
             state.isLoaded = true;
             hideLoadingScreen();
+
+            // Обработчик для кнопки чата
+            const openChatBtn = document.getElementById('openChatBtn');
+            if (openChatBtn) {
+                openChatBtn.addEventListener('click', function() {
+                    window.location.href = 'chat.html';
+                });
+            }
         });
 
         function initModals() {
-            // Модальное окно блокировки
             document.getElementById('close-lock-modal').addEventListener('click', () => {
                 document.getElementById('lock-modal').style.display = 'none';
             });
-
             document.getElementById('to-payment-btn').addEventListener('click', () => {
                 window.location.href = "oplata.html";
             });
-
-            // Модальное окно справки
             document.getElementById('access-help').addEventListener('click', showHelpModal);
             document.getElementById('close-help-modal').addEventListener('click', () => {
                 document.getElementById('help-modal').style.display = 'none';
             });
-
             document.getElementById('help-payment-btn').addEventListener('click', () => {
                 window.location.href = "oplata.html";
             });
-
-            // Модальное окно подтверждения связи с поддержкой
             document.getElementById('close-contact-modal').addEventListener('click', () => {
                 document.getElementById('contact-modal').style.display = 'none';
             });
-
             document.getElementById('cancel-contact-btn').addEventListener('click', () => {
                 document.getElementById('contact-modal').style.display = 'none';
             });
-
             document.getElementById('confirm-contact-btn').addEventListener('click', () => {
-                // Отправляем команду боту
                 sendHelpCommand();
-                
-                // Закрываем мини-приложение
                 closeMiniApp();
-                
-                // Дополнительная попытка закрытия через 500мс
                 setTimeout(closeMiniApp, 500);
             });
         }
@@ -827,7 +819,6 @@
             const titleElement = document.getElementById('help-modal-title');
             const textElement = document.getElementById('help-modal-text');
             const paymentBtn = document.getElementById('help-payment-btn');
-
             if (state.isPaid) {
                 titleElement.textContent = "Полный доступ";
                 textElement.textContent = "Полная версия курса без ограничений.";
@@ -837,7 +828,6 @@
                 textElement.textContent = "Ограниченная версия курса, позволяет получить небольшой материал для ознакомления курса. Для получения всех услуг - приобретите курс полностью.";
                 paymentBtn.style.display = 'block';
             }
-
             helpModal.style.display = 'flex';
         }
 
@@ -846,18 +836,10 @@
             const user = tg.initDataUnsafe.user;
             state.userId = user.id.toString();
             state.username = user.username || null;
-            
-            // Сохраняем ID пользователя в cookie
             setCookie('tg_user_id', state.userId, 30);
-            
-            // Устанавливаем данные пользователя
             document.getElementById('user-name-text').textContent = 
                 [user.first_name, user.last_name].filter(Boolean).join(' ') || 'Пользователь';
-            
-            // Добавляем ID пользователя
             document.getElementById('user-id').textContent = `(${state.userId})`;
-            
-            // Аватар
             const avatarElement = document.getElementById('user-avatar');
             if (user.photo_url) {
                 const img = new Image();
@@ -877,8 +859,6 @@
                 document.getElementById('avatar-fallback').textContent = fallback;
                 checkAllLoaded();
             }
-
-            // Инициализируем слушатель изменений в БД
             await initDatabaseListener();
         }
 
@@ -889,38 +869,29 @@
         }
 
         async function initTestMode() {
-            // Для тестирования без Telegram
             document.getElementById('user-name-text').textContent = 'Тестовый пользователь';
             state.userId = getCookie('tg_user_id') || "test-user";
             state.username = "test_user";
             document.getElementById('user-id').textContent = `(${state.userId})`;
             document.getElementById('avatar-fallback').textContent = 'T';
-            
             const urlParams = new URLSearchParams(window.location.search);
             state.isPaid = urlParams.get('oplata') === '1';
-            
             await updateUI();
         }
 
         async function initDatabaseListener() {
             return new Promise((resolve) => {
                 state.dbRef = database.ref('users/' + state.userId);
-                
-                // Обработчик изменений
                 state.dbRef.on('value', (snapshot) => {
                     const userData = snapshot.val();
                     if (userData) {
                         state.isPaid = userData.oplata === 1;
-                        
-                        // Если username отсутствует в БД, сохраняем его
                         if (!userData.username && state.username) {
                             state.dbRef.update({ username: state.username });
                         }
                     }
                     updateUI().then(resolve);
                 });
-
-                // Создаем запись пользователя если не существует
                 state.dbRef.once('value').then((snapshot) => {
                     if (!snapshot.exists()) {
                         state.dbRef.set({
@@ -937,7 +908,6 @@
 
         async function updateUI() {
             return new Promise((resolve) => {
-                // Обновляем статус доступа
                 const statusElement = document.getElementById('access-status');
                 if (state.isPaid) {
                     statusElement.textContent = "Полный доступ";
@@ -946,8 +916,6 @@
                     statusElement.textContent = "Демо просмотр";
                     statusElement.style.color = "#666";
                 }
-
-                // Рендерим модули
                 renderModules(false);
                 resolve();
             });
@@ -960,7 +928,6 @@
                 { id: 2, title: "<b>ChatGPT</b><br><b>PRO</b>" },
                 { id: 3, title: "<b>ChatGPT</b><br><b>MASTER</b>" }
             ];
-
             let html = '';
             modules.forEach((module, index) => {
                 const isLocked = !module.isDemo && !state.isPaid;
@@ -987,7 +954,6 @@
             alert(`Открываем модуль ${moduleId}`);
         }
 
-        // Глобальные функции для обработки событий
         window.handleModuleClick = handleModuleClick;
     </script>
 </body>
