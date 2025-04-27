@@ -789,14 +789,13 @@
             await initPromoCodes();
 
             if (window.Telegram?.WebApp) {
-                await initTelegramApp();
+                initTelegramApp(); // Load in background
             } else {
-                await initTestMode();
+                initTestMode(); // Load in background
             }
 
-            // Помечаем, что загрузка завершена
-            state.isLoaded = true;
-            hideLoadingScreen();
+            // Закрываем экран загрузки через 1 секунду
+            setTimeout(hideLoadingScreen, 1000);
         });
 
         function initModals() {
