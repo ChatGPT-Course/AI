@@ -69,6 +69,18 @@
             z-index: 100;
         }
 
+        .support-btn,
+        .support-option {
+            outline: none !important;
+            box-shadow: none !important;
+            -webkit-tap-highlight-color: transparent;
+        }
+        .support-btn:focus, .support-btn:active, .support-btn:focus-visible, .support-btn:focus-within,
+        .support-option:focus, .support-option:active, .support-option:focus-visible, .support-option:focus-within {
+            outline: none !important;
+            box-shadow: none !important;
+        }
+
         .support-btn {
             width: 50px;
             height: 50px;
@@ -81,7 +93,6 @@
             font-size: 24px;
             box-shadow: 0 4px 12px rgba(255, 122, 0, 0.3);
             cursor: pointer;
-            transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
             position: relative;
             z-index: 2;
             border: none;
@@ -125,7 +136,6 @@
             gap: 10px;
             box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
             cursor: pointer;
-            transition: all 0.2s;
             transform: translateX(20px);
             opacity: 0;
             border: none;
@@ -533,7 +543,6 @@
         <!-- Контейнер поддержки -->
         <div class="support-container">
             <div class="support-options" id="supportOptions">
-                <div style="text-align:center; font-weight:600; font-size:15px; color:var(--primary); margin-bottom:2px;">ИИ-Ассистент</div>
                 <a href="chat.html" class="support-option" style="margin-bottom: 5px;">
                     <span class="support-icon">🤖</span>
                     ИИ-Ассистент
