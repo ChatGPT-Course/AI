@@ -83,10 +83,11 @@
             top: 56px;
             right: 16px;
             min-width: 260px;
-            background: #fff;
-            border-radius: 12px;
-            box-shadow: 0 4px 16px rgba(0,0,0,0.12);
-            padding: 20px 18px 12px 18px;
+            background: linear-gradient(135deg, #fffbe6 0%, #f7faff 100%);
+            border-radius: 16px;
+            box-shadow: 0 6px 24px rgba(80, 120, 200, 0.13), 0 1.5px 6px rgba(255, 165, 0, 0.08);
+            border: 1.5px solid #ffe0a3;
+            padding: 18px 18px 14px 18px;
             z-index: 1002;
             font-size: 1rem;
             color: var(--text);
@@ -96,22 +97,29 @@
             display: flex;
             align-items: center;
             gap: 10px;
-            font-size: 1.08rem;
-            margin-bottom: 8px;
+            font-size: 0.98rem;
+            margin-bottom: 10px;
+            font-weight: 500;
+            white-space: nowrap;
         }
         .popover-access .access-sticker {
-            font-size: 1.5rem;
-        }
-        .popover-access .access-dates {
-            font-size: 0.92rem;
-            color: var(--text-light);
-            margin-top: 6px;
+            width: 28px;
+            height: 28px;
             display: flex;
             align-items: center;
-            gap: 6px;
+            justify-content: center;
         }
-        .popover-access .access-calendar {
-            font-size: 1.1rem;
+        .popover-access .access-dates {
+            font-size: 0.93rem;
+            color: var(--text-light);
+            margin-top: 0px;
+            margin-bottom: 2px;
+            line-height: 1.3;
+        }
+        .popover-access .access-dates .access-label {
+            color: var(--accent);
+            font-weight: 500;
+            margin-right: 4px;
         }
         .popover-access .access-close {
             position: absolute;
@@ -376,19 +384,23 @@
             const today = new Date();
             today.setHours(0,0,0,0);
             let mainText = '';
-            let sticker = '';
+            let stickerSVG = '';
             if (today.getTime() === dateEnd.getTime()) {
-                mainText = 'ИИ-Ассистент доступен <b>последний день</b>';
-                sticker = '⏳';
+                mainText = 'ИИ-Ассистент активен <b>последний день</b>';
+                stickerSVG = `<svg width="28" height="28" viewBox="0 0 28 28"><ellipse cx="14" cy="14" rx="13" ry="13" fill="#ffe0a3"/><ellipse cx="14" cy="14" rx="11" ry="11" fill="#fff"/><rect x="13" y="7" width="2" height="8" rx="1" fill="#FFA500"/><rect x="13" y="14" width="6" height="2" rx="1" fill="#FFA500"/><ellipse cx="14" cy="14" rx="11" ry="11" fill="none" stroke="#FFA500" stroke-width="1.5"/></svg>`;
             } else {
                 const left = daysLeft(dateEnd);
-                mainText = `ИИ-Ассистент доступен еще <b>${left}</b> ${left === 1 ? 'день' : (left >= 2 && left <= 4 ? 'дня' : 'дней')}`;
-                sticker = left > 1 ? '🕒' : '⏳';
+                mainText = `ИИ-Ассистент активен еще <b>${left}</b> ${left === 1 ? 'день' : (left >= 2 && left <= 4 ? 'дня' : 'дней')}`;
+                stickerSVG = `<svg width="28" height="28" viewBox="0 0 28 28"><ellipse cx="14" cy="14" rx="13" ry="13" fill="#d6eaff"/><ellipse cx="14" cy="14" rx="11" ry="11" fill="#fff"/><path d="M14 8 v6 l4 2" stroke="#4CC9F0" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" fill="none"/><ellipse cx="14" cy="14" rx="11" ry="11" fill="none" stroke="#4CC9F0" stroke-width="1.5"/></svg>`;
             }
             popover.innerHTML = `
                 <button class='access-close' onclick='document.getElementById("access-popover").style.display="none"'>&times;</button>
-                <div class='access-main'><span class='access-sticker'>${sticker}</span> <span>${mainText}</span></div>
-                <div class='access-dates'><span class='access-calendar'>📅</span> <span>с <b>${formatDateDMY(dateStart)}</b> по <b>${formatDateDMY(dateEnd)}</b> включительно</span></div>
+                <div class='access-main'>
+                    <span class='access-sticker'>${stickerSVG}</span>
+                    <span style="font-size:0.97rem; font-weight:500; white-space:nowrap;">${mainText}</span>
+                </div>
+                <div class='access-dates'><span class='access-label'>Доступ открыт:</span> ${formatDateDMY(dateStart)}</div>
+                <div class='access-dates'><span class='access-label'>Закрытие:</span> ${formatDateDMY(dateEnd)}</div>
             `;
             // Позиционируем popover под кнопкой справа
             popover.style.display = 'block';
