@@ -167,7 +167,8 @@
             user-select: none;
         }
         .module-card:focus,
-        .module-card:active {
+        .module-card:active,
+        .module-card:focus-visible {
             outline: none !important;
             box-shadow: 0 4px 16px rgba(255, 165, 0, 0.13);
             background: #FFF3E0;
@@ -978,6 +979,7 @@
         document.querySelectorAll('.module-card').forEach(card => {
             card.addEventListener('mousedown', e => card.blur());
             card.addEventListener('mouseup', e => card.blur());
+            card.addEventListener('focus', e => card.blur());
         });
     </script>
 </body>
