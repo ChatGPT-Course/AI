@@ -127,15 +127,43 @@
         }
 
         .support-option {
+            padding: 12px 20px;
+            border-radius: 30px;
             background: linear-gradient(90deg, #FFF9E3 0%, #FFE0A3 50%, #FFD07A 100%);
             color: #333;
+            font-weight: 500;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+            cursor: pointer;
+            transform: translateX(20px);
+            opacity: 0;
+            border: none;
+            text-decoration: none;
             margin-bottom: 10px;
         }
         .support-options .support-option:last-child {
             margin-bottom: 0;
         }
+        .support-options.active .support-option {
+            transform: translateX(0);
+            opacity: 1;
+        }
         .support-option:hover {
+            transform: translateX(0) scale(1.05);
+            box-shadow: 0 6px 16px rgba(0, 0, 0, 0.15);
             background: linear-gradient(90deg, #FFE0A3 0%, #FFD07A 100%);
+        }
+        .support-option.disabled {
+            background: var(--disabled);
+            color: #888;
+            cursor: not-allowed;
+        }
+        .support-option.disabled:hover {
+            transform: translateX(0) !important;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+            background: var(--disabled);
         }
         .pulse-clock {
             margin-left: 7px;
@@ -519,7 +547,7 @@
         <!-- Контейнер поддержки -->
         <div class="support-container">
             <div class="support-options" id="supportOptions">
-                <a href="chat.html" class="support-option" style="margin-bottom: 10px;">
+                <a href="chat.html" class="support-option">
                     <span class="support-icon">🤖</span>
                     ИИ-Ассистент
                     <span class="pulse-clock">🕒</span>
