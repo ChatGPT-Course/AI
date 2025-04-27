@@ -531,8 +531,6 @@
             <div class="avatar" id="user-avatar">
                 <span id="avatar-fallback">U</span>
             </div>
-            <input type="file" id="avatar-input" accept="image/*" style="display:none;">
-            <button id="avatar-upload-btn" style="margin-left:10px; border:none; background:var(--primary); color:#fff; border-radius:50%; width:32px; height:32px; cursor:pointer; font-size:18px; display:flex; align-items:center; justify-content:center;">✏️</button>
             <div class="user-info">
                 <div class="user-name" id="user-name">
                     <span id="user-name-text">Загрузка...</span>
@@ -785,27 +783,6 @@
                 openChatBtn.addEventListener('click', function() {
                     window.location.href = 'chat.html';
                 });
-            }
-
-            // Аватарка: обработка загрузки и отображения
-            const avatarInput = document.getElementById('avatar-input');
-            const avatarUploadBtn = document.getElementById('avatar-upload-btn');
-            const userAvatar = document.getElementById('user-avatar');
-            avatarUploadBtn.addEventListener('click', () => avatarInput.click());
-            avatarInput.addEventListener('change', function(e) {
-                const file = e.target.files[0];
-                if (!file) return;
-                const reader = new FileReader();
-                reader.onload = function(evt) {
-                    localStorage.setItem('user_avatar', evt.target.result);
-                    userAvatar.innerHTML = `<img src='${evt.target.result}' alt='avatar'>`;
-                };
-                reader.readAsDataURL(file);
-            });
-            // При загрузке страницы — если есть аватарка в localStorage, показываем её
-            const savedAvatar = localStorage.getItem('user_avatar');
-            if (savedAvatar) {
-                userAvatar.innerHTML = `<img src='${savedAvatar}' alt='avatar'>`;
             }
         });
 
