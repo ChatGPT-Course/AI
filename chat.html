@@ -166,16 +166,7 @@
                 <path d="M15.41 16.59L10.83 12l4.58-4.59L14 6l-6 6 6 6 1.41-1.41z"/>
             </svg>
         </a>
-        <div class="header-title" style="display: flex; align-items: center; justify-content: center; gap: 6px;">
-            <span style="font-weight: 600; letter-spacing: 0.5px;">AI</span>
-            <span style="display: flex; align-items: center;">
-                <svg width="32" height="32" viewBox="0 0 32 32" style="vertical-align: middle;">
-                    <ellipse cx="16" cy="16" rx="11" ry="15" fill="#FFA500"/>
-                    <ellipse cx="13" cy="11" rx="3.5" ry="5" fill="#fff" opacity="0.45"/>
-                </svg>
-                <span style="font-size: 1.25rem; font-weight: 600; color: var(--text); margin-left: 2px;">о</span>
-            </span>
-        </div>
+        <div class="header-title">AI eggo</div>
         <button class="clock-button" id="access-widget-btn" onclick="toggleAccessPopover(event)" title="Сколько дней осталось?">
             <svg width="24" height="24" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10" fill="#FFA500"/><path d="M12 7v5l4 2" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
         </button>
@@ -441,14 +432,16 @@
                 </div>
                 <div class='access-dates'><span class='access-label'>Открытие:</span> ${formatDateDMY(dateStart)}</div>
                 <div class='access-dates'><span class='access-label'>Закрытие:</span> ${formatDateDMY(dateEnd)}</div>
-                <div style="font-size:0.78rem; color:#b7b7b7; margin-top:8px; display:flex; align-items:center; gap:4px; justify-content:left;">
-                    <svg width="15" height="15" viewBox="0 0 20 20" style="vertical-align:middle;"><circle cx="10" cy="10" r="9" fill="#ffe0a3" stroke="#FFA500" stroke-width="1.2"/><text x="10" y="15" text-anchor="middle" font-size="13" font-family="Arial" fill="#FFA500">?</text></svg>
-                    <span>Доступ к ИИ чату предоставляется лишь на 2 недели для удобства работы и проведений тестов.</span>
+                <div style="font-size:0.93rem; color:#FFA500; margin-top:10px; display:flex; align-items:flex-start; gap:8px; justify-content:left;">
+                    <span style="font-size:1.35rem; font-weight:700; line-height:1;">?</span>
+                    <span style="color:#b7b7b7; font-size:0.87rem; line-height:1.2; display:flex; flex-direction:column;">
+                        <span>Доступ к чату с ИИ предоставляется на срок</span>
+                        <span>14 дней с момента покупки курса</span>
+                    </span>
                 </div>
             `;
             // Позиционируем popover под кнопкой справа
             popover.style.display = 'block';
-            setTimeout(() => { popover.style.display = 'none'; }, 5000);
         }
     </script>
 </body>
