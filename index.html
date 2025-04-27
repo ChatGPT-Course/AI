@@ -127,51 +127,26 @@
         }
 
         .support-option {
-            padding: 12px 20px;
-            border-radius: 30px;
-            background: linear-gradient(90deg, #FFD700 0%, #FFB300 100%);
+            background: linear-gradient(90deg, #FFF9E3 0%, #FFE0A3 50%, #FFD07A 100%);
             color: #333;
-            font-weight: 500;
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-            cursor: pointer;
-            transform: translateX(20px);
-            opacity: 0;
-            border: none;
-            text-decoration: none;
+            margin-bottom: 10px;
         }
-
-        .support-options.active .support-option {
-            transform: translateX(0);
-            opacity: 1;
+        .support-options .support-option:last-child {
+            margin-bottom: 0;
         }
-
-        .support-option:nth-child(1) {
-            transition-delay: 0.1s;
-        }
-
-        .support-option:nth-child(2) {
-            transition-delay: 0.2s;
-        }
-
         .support-option:hover {
-            transform: translateX(0) scale(1.05);
-            box-shadow: 0 6px 16px rgba(0, 0, 0, 0.15);
-            background: linear-gradient(90deg, #FFB300 0%, #FFD700 100%);
+            background: linear-gradient(90deg, #FFE0A3 0%, #FFD07A 100%);
         }
-
-        .support-option.disabled {
-            background: var(--disabled);
-            color: #888;
-            cursor: not-allowed;
+        .pulse-clock {
+            margin-left: 7px;
+            animation: fade-clock 1.2s infinite;
+            font-size: 20px;
+            vertical-align: middle;
         }
-
-        .support-option.disabled:hover {
-            transform: translateX(0) !important;
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-            background: var(--disabled);
+        @keyframes fade-clock {
+            0% { opacity: 1; }
+            50% { opacity: 0.3; }
+            100% { opacity: 1; }
         }
 
         .support-icon {
@@ -495,19 +470,6 @@
         .modal-btn-secondary:hover {
             background: rgba(255, 122, 0, 0.1);
         }
-
-        .pulse-clock {
-            margin-left: 7px;
-            animation: pulse-clock 1.2s infinite;
-            font-size: 20px;
-            vertical-align: middle;
-        }
-
-        @keyframes pulse-clock {
-            0% { opacity: 1; transform: scale(1); }
-            50% { opacity: 0.5; transform: scale(1.25); }
-            100% { opacity: 1; transform: scale(1); }
-        }
     </style>
 </head>
 <body>
@@ -557,10 +519,10 @@
         <!-- Контейнер поддержки -->
         <div class="support-container">
             <div class="support-options" id="supportOptions">
-                <a href="chat.html" class="support-option" style="margin-bottom: 5px;">
+                <a href="chat.html" class="support-option" style="margin-bottom: 10px;">
                     <span class="support-icon">🤖</span>
                     ИИ-Ассистент
-                    <span class="pulse-clock">⏰</span>
+                    <span class="pulse-clock">🕒</span>
                 </a>
                 <a href="help.html" class="support-option">
                     <span class="support-icon">📩</span>
