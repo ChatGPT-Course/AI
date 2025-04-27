@@ -503,6 +503,15 @@
         :focus-visible {
             outline: none !important;
         }
+
+        /* Убираем outline и тень при наведении и нажатии */
+        a:hover, button:hover, input:hover, textarea:hover, select:hover, 
+        .module-card:hover, .support-btn:hover, .support-option:hover,
+        a:active, button:active, input:active, textarea:active, select:active, 
+        .module-card:active, .support-btn:active, .support-option:active {
+            outline: none !important;
+            box-shadow: none !important;
+        }
     </style>
 </head>
 <body>
