@@ -17,6 +17,7 @@
       background: linear-gradient(90deg, #ffb347 0%, #ffcc80 100%);
       padding: 16px 24px;
       border-bottom: 1px solid #ffe0b2;
+      position: relative;
     }
     .avatar {
       width: 48px;
@@ -24,34 +25,90 @@
       border-radius: 50%;
       object-fit: cover;
       margin-right: 16px;
-      border: 2px solid #fff;
       background: #eee;
+      border: none;
     }
     .user-info {
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
       flex: 1;
     }
     .user-info span {
-      display: block;
-      font-size: 16px;
-      font-weight: 500;
+      font-size: 17px;
+      font-weight: 600;
+      color: #333;
+      line-height: 1.2;
     }
     .user-info small {
       color: #7c6f57;
-      font-size: 13px;
+      font-size: 14px;
+      line-height: 1.2;
     }
-    .edit-btn {
+    .menu-btn {
+      width: 40px;
+      height: 40px;
       background: #fff3e0;
       border: none;
-      border-radius: 6px;
-      padding: 6px 12px;
+      border-radius: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
       cursor: pointer;
-      font-size: 14px;
       margin-left: 12px;
-      color: #ff9800;
       transition: background 0.2s;
+      box-shadow: 0 1px 4px #ffe0b2;
     }
-    .edit-btn:hover {
+    .menu-btn:hover {
       background: #ffe0b2;
+    }
+    .menu-icon {
+      width: 22px;
+      height: 22px;
+      display: block;
+    }
+    .side-menu {
+      position: fixed;
+      top: 0;
+      right: -260px;
+      width: 260px;
+      height: 100vh;
+      background: #fffbe9;
+      box-shadow: -2px 0 16px #ffe0b2;
+      transition: right 0.3s cubic-bezier(.4,0,.2,1);
+      z-index: 1001;
+      display: flex;
+      flex-direction: column;
+      padding: 32px 20px 0 20px;
+    }
+    .side-menu.open {
+      right: 0;
+    }
+    .side-menu .close-btn {
+      align-self: flex-end;
+      background: none;
+      border: none;
+      font-size: 28px;
+      color: #ff9800;
+      cursor: pointer;
+      margin-bottom: 24px;
+    }
+    .side-menu .support-btn {
+      background: linear-gradient(90deg, #ff9800 0%, #ffb347 100%);
+      color: #fff;
+      border: none;
+      border-radius: 10px;
+      font-size: 18px;
+      font-weight: 500;
+      padding: 14px 0;
+      margin-bottom: 24px;
+      cursor: pointer;
+      box-shadow: 0 2px 8px #ffe0b2;
+      transition: background 0.2s;
+      width: 100%;
+    }
+    .side-menu .support-btn:hover {
+      background: #ffa726;
     }
     .container {
       max-width: 480px;
@@ -60,16 +117,6 @@
       border-radius: 18px;
       box-shadow: 0 2px 12px #ffe0b2;
       padding: 28px 20px 40px 20px;
-    }
-    .welcome {
-      font-size: 2rem;
-      font-weight: bold;
-      color: #ff9800;
-      margin-bottom: 8px;
-    }
-    .desc {
-      font-size: 1.1rem;
-      margin-bottom: 18px;
     }
     .progress-bar {
       background: #ffe0b2;
@@ -148,6 +195,31 @@
     .module-btn:hover {
       background: #ffa726;
     }
+    /* Кнопка AI */
+    .ai-btn {
+      position: fixed;
+      right: 24px;
+      bottom: 24px;
+      width: 64px;
+      height: 64px;
+      background: linear-gradient(90deg, #ff9800 0%, #ffb347 100%);
+      color: #fff;
+      border: none;
+      border-radius: 50%;
+      font-size: 1.3rem;
+      font-weight: 700;
+      box-shadow: 0 2px 12px #ffe0b2;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      z-index: 1002;
+      transition: background 0.2s;
+      letter-spacing: 1px;
+    }
+    .ai-btn:hover {
+      background: #ffa726;
+    }
     @media (max-width: 600px) {
       .container {
         margin: 12px;
@@ -155,6 +227,18 @@
       }
       .header {
         padding: 10px 8px;
+      }
+      .ai-btn {
+        right: 12px;
+        bottom: 12px;
+        width: 54px;
+        height: 54px;
+        font-size: 1.1rem;
+      }
+      .side-menu {
+        width: 90vw;
+        min-width: 180px;
+        max-width: 320px;
       }
     }
   </style>
@@ -166,11 +250,19 @@
       <span id="userName">Имя пользователя</span>
       <small>ID: <span id="userId">-</span></small>
     </div>
-    <button class="edit-btn" onclick="editUser()">Изменить</button>
+    <button class="menu-btn" id="menuBtn" aria-label="Меню">
+      <svg class="menu-icon" viewBox="0 0 24 24">
+        <rect y="5" width="24" height="3" rx="1.5" fill="#ff9800"/>
+        <rect y="10.5" width="24" height="3" rx="1.5" fill="#ff9800"/>
+        <rect y="16" width="24" height="3" rx="1.5" fill="#ff9800"/>
+      </svg>
+    </button>
+  </div>
+  <div class="side-menu" id="sideMenu">
+    <button class="close-btn" id="closeMenuBtn" aria-label="Закрыть меню">×</button>
+    <button class="support-btn">Тех поддержка</button>
   </div>
   <div class="container">
-    <div class="welcome" id="welcomeText">Добро пожаловать!</div>
-    <div class="desc">Погрузитесь в мир искусственного интеллекта и прокачайте свои навыки!</div>
     <div class="progress-bar"><div class="progress" id="progressBar"></div></div>
     <div class="modules-count" id="modulesCount">1 из 4 модулей открыто</div>
     <button class="main-btn">Продолжить обучение</button>
@@ -192,6 +284,7 @@
     </div>
     <!-- Добавь еще модули по аналогии -->
   </div>
+  <a href="chat.html" class="ai-btn">AI</a>
   <script>
     // Cookie helpers
     function setCookie(name, value, days = 365) {
@@ -211,21 +304,23 @@
       document.getElementById('userAvatar').src = avatar;
       document.getElementById('userName').textContent = name;
       document.getElementById('userId').textContent = id;
-      document.getElementById('welcomeText').textContent = `Добро пожаловать, ${name}!`;
     }
-    // Edit user info
-    function editUser() {
-      const name = prompt('Введите имя:', getCookie('tg_user_name') || '');
-      if (!name) return;
-      const id = prompt('Введите Telegram ID:', getCookie('tg_user_id') || '');
-      if (!id) return;
-      const avatar = prompt('Вставьте ссылку на аватарку:', getCookie('tg_user_avatar') || '');
-      if (!avatar) return;
-      setCookie('tg_user_name', name);
-      setCookie('tg_user_id', id);
-      setCookie('tg_user_avatar', avatar);
-      loadUser();
-    }
+    // Side menu logic
+    const menuBtn = document.getElementById('menuBtn');
+    const sideMenu = document.getElementById('sideMenu');
+    const closeMenuBtn = document.getElementById('closeMenuBtn');
+    menuBtn.addEventListener('click', () => {
+      sideMenu.classList.add('open');
+    });
+    closeMenuBtn.addEventListener('click', () => {
+      sideMenu.classList.remove('open');
+    });
+    // Закрытие по клику вне меню
+    document.addEventListener('click', function(e) {
+      if (sideMenu.classList.contains('open') && !sideMenu.contains(e.target) && e.target !== menuBtn && !menuBtn.contains(e.target)) {
+        sideMenu.classList.remove('open');
+      }
+    });
     // Init
     loadUser();
   </script>
