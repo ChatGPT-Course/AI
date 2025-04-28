@@ -58,6 +58,10 @@
       margin-left: 12px;
       transition: background 0.2s;
       box-shadow: 0 1px 4px #ffe0b2;
+      position: absolute;
+      right: 24px;
+      top: 50%;
+      transform: translateY(-50%);
     }
     .menu-btn:hover {
       background: #ffe0b2;
@@ -109,6 +113,22 @@
     }
     .side-menu .support-btn:hover {
       background: #ffa726;
+    }
+    .overlay {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100vw;
+      height: 100vh;
+      background: rgba(0,0,0,0.35);
+      z-index: 1000;
+      transition: opacity 0.3s;
+      opacity: 0;
+    }
+    .overlay.active {
+      display: block;
+      opacity: 1;
     }
     .container {
       max-width: 480px;
@@ -240,6 +260,9 @@
         min-width: 180px;
         max-width: 320px;
       }
+      .menu-btn {
+        right: 8px;
+      }
     }
   </style>
 </head>
@@ -258,6 +281,7 @@
       </svg>
     </button>
   </div>
+  <div class="overlay" id="overlay"></div>
   <div class="side-menu" id="sideMenu">
     <button class="close-btn" id="closeMenuBtn" aria-label="Закрыть меню">×</button>
     <button class="support-btn">Тех поддержка</button>
@@ -309,16 +333,28 @@
     const menuBtn = document.getElementById('menuBtn');
     const sideMenu = document.getElementById('sideMenu');
     const closeMenuBtn = document.getElementById('closeMenuBtn');
-    menuBtn.addEventListener('click', () => {
+    const overlay = document.getElementById('overlay');
+    function openMenu() {
       sideMenu.classList.add('open');
-    });
-    closeMenuBtn.addEventListener('click', () => {
+      overlay.classList.add('active');
+    }
+    function closeMenu() {
       sideMenu.classList.remove('open');
+      overlay.classList.remove('active');
+    }
+    menuBtn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      openMenu();
     });
+    closeMenuBtn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      closeMenu();
+    });
+    overlay.addEventListener('click', closeMenu);
     // Закрытие по клику вне меню
     document.addEventListener('click', function(e) {
       if (sideMenu.classList.contains('open') && !sideMenu.contains(e.target) && e.target !== menuBtn && !menuBtn.contains(e.target)) {
-        sideMenu.classList.remove('open');
+        closeMenu();
       }
     });
     // Init
