@@ -4,10 +4,11 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Основы ИИ — Онлайн курс</title>
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700&display=swap" rel="stylesheet">
   <style>
     body {
       margin: 0;
-      font-family: 'Segoe UI', Arial, sans-serif;
+      font-family: 'Montserrat', 'Segoe UI', Arial, sans-serif;
       background: #fffbe9;
       color: #333;
     }
@@ -205,7 +206,7 @@
       position: fixed;
       right: 24px;
       bottom: 24px;
-      min-width: 110px;
+      min-width: 120px;
       height: 56px;
       background: linear-gradient(90deg, #ff9800 0%, #ffb347 100%);
       color: #fff;
@@ -223,6 +224,7 @@
       letter-spacing: 1px;
       gap: 10px;
       padding: 0 24px;
+      text-decoration: none;
     }
     .ai-btn:hover {
       background: #ffa726;
@@ -232,6 +234,12 @@
       height: 24px;
       fill: #fff;
       margin-right: 2px;
+    }
+    .ai-btn span {
+      text-decoration: none;
+      font-weight: 700;
+      font-size: 1.15rem;
+      color: #fff;
     }
     @media (max-width: 600px) {
       .container {
@@ -262,6 +270,8 @@
     }
   </style>
   <script src="https://telegram.org/js/telegram-web-app.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.6.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.6.0/firebase-database-compat.js"></script>
 </head>
 <body>
   <div class="header">
@@ -286,29 +296,33 @@
     <div class="progress-bar"><div class="progress" id="progressBar"></div></div>
     <div class="modules-count" id="modulesCount">1 из 4 модулей открыто</div>
     <button class="main-btn">Продолжить обучение</button>
-    <div class="module">
-      <div class="module-icon">💡</div>
-      <div class="module-content">
-        <div class="module-title">Введение в ИИ</div>
-        <div class="module-desc">Основы, история, примеры</div>
-        <button class="module-btn">Начать</button>
-      </div>
-    </div>
-    <div class="module" style="opacity:0.5;">
-      <div class="module-icon">🧠</div>
-      <div class="module-content">
-        <div class="module-title">Основы ChatGPT</div>
-        <div class="module-desc">Как работает, примеры, сценарии</div>
-        <button class="module-btn" disabled>Закрыто</button>
-      </div>
-    </div>
-    <!-- Добавь еще модули по аналогии -->
+    <div id="modules-list"></div>
   </div>
   <a href="chat.html" class="ai-btn">
-    <svg viewBox="0 0 24 24"><path d="M2 21l21-9-21-9v7l15 2-15 2z"/></svg>
-    AI
+    <svg viewBox="0 0 24 24"><path d="M4 4h16v2H4zm0 4h10v2H4zm0 4h16v2H4zm0 4h10v2H4z"/></svg>
+    <span>AI</span>
   </a>
   <script>
+    // Firebase config
+    const firebaseConfig = {
+      apiKey: "AIzaSyCMos6Y7C-krTLuKCI4VJG-TFLo6QI--k8",
+      authDomain: "vrot-x-7a48f.firebaseapp.com",
+      databaseURL: "https://vrot-x-7a48f-default-rtdb.firebaseio.com",
+      projectId: "vrot-x-7a48f",
+      storageBucket: "vrot-x-7a48f.appspot.com",
+      messagingSenderId: "622297225288",
+      appId: "1:622297225288:web:5df6a5b02ffddedd96e07d"
+    };
+    const app = firebase.initializeApp(firebaseConfig);
+    const database = firebase.database();
+    // App state
+    const state = {
+      userId: null,
+      username: null,
+      isPaid: false,
+      dbRef: null,
+      isLoaded: false
+    };
     // Cookie helpers (fallback)
     function setCookie(name, value, days = 365) {
       const d = new Date();
@@ -321,21 +335,94 @@
     }
     // Load user from Telegram Mini App or fallback
     function loadUser() {
-      let avatar, name, id;
+      let avatar, name, id, username;
       if (window.Telegram && window.Telegram.WebApp && window.Telegram.WebApp.initDataUnsafe && window.Telegram.WebApp.initDataUnsafe.user) {
         const user = window.Telegram.WebApp.initDataUnsafe.user;
         name = user.first_name || '';
         if (user.last_name) name += ' ' + user.last_name;
         id = user.id || '-';
+        username = user.username || null;
         avatar = user.photo_url || 'https://ui-avatars.com/api/?name=' + encodeURIComponent(name) + '&background=ffb347&color=fff';
+        state.userId = id.toString();
+        state.username = username;
+        // Save to cookie
+        setCookie('tg_user_id', state.userId, 30);
+        if (user.photo_url) setCookie('tg_user_avatar', user.photo_url, 30);
       } else {
         avatar = getCookie('tg_user_avatar') || 'https://ui-avatars.com/api/?name=User&background=ffb347&color=fff';
         name = getCookie('tg_user_name') || 'Имя пользователя';
         id = getCookie('tg_user_id') || '-';
+        state.userId = id;
+        state.username = null;
       }
       document.getElementById('userAvatar').src = avatar;
       document.getElementById('userName').textContent = name;
       document.getElementById('userId').textContent = id;
+    }
+    // Firebase logic
+    async function initDatabaseListener() {
+      return new Promise((resolve) => {
+        state.dbRef = database.ref('users/' + state.userId);
+        state.dbRef.on('value', (snapshot) => {
+          const userData = snapshot.val();
+          if (userData) {
+            state.isPaid = userData.oplata === 1;
+            if (!userData.username && state.username) {
+              state.dbRef.update({ username: state.username });
+            }
+          }
+          updateUI().then(resolve);
+        });
+        state.dbRef.once('value').then((snapshot) => {
+          if (!snapshot.exists()) {
+            state.dbRef.set({
+              name: document.getElementById('userName').textContent,
+              username: state.username,
+              oplata: 0,
+              date_oplata: "-",
+              date_expired: "-"
+            });
+          }
+        });
+      });
+    }
+    async function updateUI() {
+      return new Promise((resolve) => {
+        // Обновляем статус доступа
+        const modulesCount = document.getElementById('modulesCount');
+        if (state.isPaid) {
+          modulesCount.textContent = "4 из 4 модулей открыто";
+          document.getElementById('progressBar').style.width = '100%';
+        } else {
+          modulesCount.textContent = "1 из 4 модулей открыто";
+          document.getElementById('progressBar').style.width = '25%';
+        }
+        renderModules();
+        resolve();
+      });
+    }
+    function renderModules() {
+      const modules = [
+        { id: 0, title: "Введение в ИИ", desc: "Основы, история, примеры", isDemo: true },
+        { id: 1, title: "Основы ChatGPT", desc: "Как работает, примеры, сценарии" },
+        { id: 2, title: "ChatGPT PRO", desc: "Продвинутые техники" },
+        { id: 3, title: "ChatGPT MASTER", desc: "Экспертные сценарии" }
+      ];
+      let html = '';
+      modules.forEach((module, idx) => {
+        const isLocked = !module.isDemo && !state.isPaid;
+        html += `
+          <div class="module${isLocked ? ' locked' : ''}" style="opacity:${isLocked ? 0.5 : 1};">
+            <div class="module-icon">${idx === 0 ? '💡' : idx === 1 ? '🧠' : idx === 2 ? '🚀' : '🏆'}</div>
+            <div class="module-content">
+              <div class="module-title">${module.title}</div>
+              <div class="module-desc">${module.desc}</div>
+              <button class="module-btn" ${isLocked ? 'disabled' : ''}>${isLocked ? 'Закрыто' : 'Начать'}</button>
+            </div>
+          </div>
+        `;
+      });
+      document.getElementById('modules-list').innerHTML = html;
     }
     // FAB support button logic
     const menuBtn = document.getElementById('menuBtn');
@@ -362,7 +449,10 @@
       }
     });
     // Init
-    loadUser();
+    (async function(){
+      loadUser();
+      await initDatabaseListener();
+    })();
   </script>
 </body>
 </html>
