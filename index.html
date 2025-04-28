@@ -3,144 +3,127 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Основы ИИ — Карточки и боковое меню</title>
+  <title>Основы ИИ — Волны и орнамент</title>
   <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;700&display=swap" rel="stylesheet">
   <style>
     body {
       margin: 0;
       font-family: 'Montserrat', Arial, sans-serif;
-      background: #fff8e1;
-      color: #23272f;
+      background: #fffbe7;
+      color: #3e2723;
       min-height: 100vh;
-      display: flex;
+      position: relative;
+      overflow-x: hidden;
     }
-    .side-menu {
-      width: 90px;
-      background: linear-gradient(180deg, #ffb347 0%, #fffbe7 100%);
-      box-shadow: 2px 0 12px #ffe0b2;
+    .wave {
+      position: absolute;
+      top: 0; left: 0; width: 100vw; height: 180px;
+      z-index: 0;
+    }
+    .header {
+      position: relative;
+      z-index: 2;
       display: flex;
-      flex-direction: column;
       align-items: center;
-      padding: 32px 0 0 0;
-      position: fixed;
-      top: 0; left: 0; bottom: 0;
-      z-index: 10;
+      justify-content: center;
+      padding: 48px 0 24px 0;
+      background: none;
     }
-    .side-menu .logo {
-      font-size: 2.2rem;
+    .header .avatar {
+      width: 70px;
+      height: 70px;
+      border-radius: 50%;
+      object-fit: cover;
+      border: 5px solid #ffb347;
+      background: #fff;
+      margin-right: 28px;
+      box-shadow: 0 2px 16px #ffe0b2;
+    }
+    .header .info span {
+      font-size: 2rem;
       font-weight: 900;
       color: #ff9800;
-      margin-bottom: 40px;
+      letter-spacing: 1px;
     }
-    .side-menu nav {
-      display: flex;
-      flex-direction: column;
-      gap: 32px;
-      flex: 1;
-    }
-    .side-menu a {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      color: #ff9800;
-      text-decoration: none;
-      font-weight: 700;
-      font-size: 1.1rem;
-      transition: color 0.18s;
-    }
-    .side-menu a:hover {
-      color: #ffb347;
-    }
-    .main-content {
-      margin-left: 110px;
-      width: 100%;
-      padding: 0;
-      min-height: 100vh;
-      background: #fff8e1;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-    }
-    .profile {
-      display: flex;
-      align-items: center;
-      margin: 48px 0 32px 0;
-      gap: 18px;
-    }
-    .profile .avatar {
-      width: 64px;
-      height: 64px;
-      border-radius: 50%;
-      background: #fff3e0;
-      border: 4px solid #ffb347;
-      box-shadow: 0 2px 12px #ffe0b2;
-      object-fit: cover;
-    }
-    .profile .info span {
-      font-size: 1.3rem;
-      font-weight: 700;
-      color: #ff9800;
-    }
-    .profile .info small {
+    .header .info small {
       color: #bfa46b;
-      font-size: 1rem;
+      font-size: 1.1rem;
     }
-    .cards {
+    .ornament {
+      width: 100vw;
+      text-align: center;
+      margin: 0 0 32px 0;
+      z-index: 2;
+      position: relative;
+    }
+    .ornament svg {
+      width: 220px;
+      height: 32px;
+      fill: #ffb347;
+      opacity: 0.7;
+    }
+    .modules-list {
       display: flex;
-      flex-wrap: wrap;
-      gap: 36px;
-      justify-content: center;
-      margin-bottom: 48px;
+      flex-direction: column;
+      gap: 40px;
+      align-items: center;
+      margin: 0 auto;
+      max-width: 700px;
+      padding: 36px 0 36px 0;
+      z-index: 2;
+      position: relative;
     }
-    .card {
+    .module-card {
       background: #fff;
-      border-radius: 32px;
+      border-radius: 32px 32px 32px 12px;
       box-shadow: 0 8px 32px #ffe0b2, 0 1.5px 8px #ffb347;
-      border: 2.5px solid #ffb347;
+      border: 3px dashed #ffb347;
       padding: 36px 32px 32px 32px;
       min-width: 260px;
-      max-width: 320px;
+      max-width: 420px;
       display: flex;
       flex-direction: column;
       align-items: flex-start;
       position: relative;
       transition: box-shadow 0.18s, border 0.18s, transform 0.10s;
     }
-    .card.locked {
+    .module-card.locked {
       opacity: 0.5;
       filter: grayscale(0.5);
     }
-    .card .number {
+    .module-number {
       position: absolute;
-      top: -28px;
+      top: -32px;
       left: 24px;
-      background: #ffb347;
-      color: #fff;
-      font-size: 2.2rem;
+      background: #fffbe7;
+      color: #ff9800;
+      font-size: 2.5rem;
       font-weight: 900;
       border-radius: 50%;
-      width: 56px;
-      height: 56px;
+      width: 64px;
+      height: 64px;
       display: flex;
       align-items: center;
       justify-content: center;
       box-shadow: 0 2px 12px #ffe0b2;
-      border: 3px solid #fff8e1;
+      border: 4px solid #ffb347;
+      font-family: 'Georgia', serif;
     }
-    .card .title {
-      font-size: 1.25rem;
+    .module-title {
+      font-size: 1.35rem;
       font-weight: 800;
       color: #ff9800;
       margin-bottom: 10px;
       margin-top: 36px;
+      font-family: 'Georgia', serif;
     }
-    .card .desc {
+    .module-desc {
       font-size: 1.08rem;
       color: #bfa46b;
       margin-bottom: 18px;
       font-weight: 500;
     }
-    .card .btn {
+    .module-btn {
       background: linear-gradient(90deg, #ffb347 0%, #ffcc80 100%);
       border: none;
       border-radius: 18px;
@@ -154,68 +137,61 @@
       margin-top: 4px;
       transition: background 0.18s, box-shadow 0.18s, transform 0.10s;
     }
-    .card .btn:disabled {
+    .module-btn:disabled {
       background: #e0e0e0;
       color: #bdbdbd;
       cursor: not-allowed;
       box-shadow: none;
     }
-    .card .btn:not(:disabled):hover {
+    .module-btn:not(:disabled):hover {
       background: #ffa726;
       transform: scale(1.04);
     }
-    @media (max-width: 900px) {
-      .cards { flex-direction: column; align-items: center; }
-      .main-content { margin-left: 0; }
-      .side-menu { position: static; width: 100vw; flex-direction: row; height: 80px; box-shadow: 0 2px 12px #ffe0b2; }
-      .side-menu nav { flex-direction: row; gap: 24px; }
-      .side-menu .logo { margin-bottom: 0; margin-right: 32px; }
+    @media (max-width: 700px) {
+      .modules-list { padding: 12px 0 12px 0; }
+      .module-card { padding: 16px 10px; }
+      .module-number { font-size: 2rem; width: 40px; height: 40px; }
+      .header { flex-direction: column; gap: 12px; padding: 24px 0 12px 0; }
     }
   </style>
 </head>
 <body>
-  <aside class="side-menu">
-    <div class="logo">🤖</div>
-    <nav>
-      <a href="#modules">Модули</a>
-      <a href="#profile">Профиль</a>
-      <a href="#support">Поддержка</a>
-    </nav>
-  </aside>
-  <main class="main-content">
-    <div class="profile">
-      <img src="https://ui-avatars.com/api/?name=User&background=ffb347&color=fff" alt="avatar" class="avatar">
-      <div class="info">
-        <span>Имя пользователя</span><br>
-        <small>ID: -</small>
-      </div>
+  <svg class="wave" viewBox="0 0 1440 180" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M0,80 C360,180 1080,0 1440,100 L1440,0 L0,0 Z" fill="#ffb347" fill-opacity="0.18"/></svg>
+  <div class="header">
+    <img src="https://ui-avatars.com/api/?name=User&background=ffb347&color=fff" alt="avatar" class="avatar">
+    <div class="info">
+      <span>Имя пользователя</span><br>
+      <small>ID: -</small>
     </div>
-    <div class="cards">
-      <div class="card">
-        <div class="number">1</div>
-        <div class="title">Введение в ИИ</div>
-        <div class="desc">Основы, история, примеры</div>
-        <button class="btn">Начать</button>
-      </div>
-      <div class="card locked">
-        <div class="number">2</div>
-        <div class="title">Основы ChatGPT</div>
-        <div class="desc">Как работает, примеры, сценарии</div>
-        <button class="btn" disabled>Закрыто</button>
-      </div>
-      <div class="card locked">
-        <div class="number">3</div>
-        <div class="title">ChatGPT PRO</div>
-        <div class="desc">Продвинутые техники</div>
-        <button class="btn" disabled>Закрыто</button>
-      </div>
-      <div class="card locked">
-        <div class="number">4</div>
-        <div class="title">ChatGPT MASTER</div>
-        <div class="desc">Экспертные сценарии</div>
-        <button class="btn" disabled>Закрыто</button>
-      </div>
+  </div>
+  <div class="ornament">
+    <svg viewBox="0 0 220 32"><path d="M10,16 Q30,2 50,16 T90,16 T130,16 T170,16 T210,16" stroke="#ffb347" stroke-width="3" fill="none"/><circle cx="10" cy="16" r="4"/><circle cx="210" cy="16" r="4"/></svg>
+  </div>
+  <div class="modules-list">
+    <div class="module-card">
+      <div class="module-number">1</div>
+      <div class="module-title">Введение в ИИ</div>
+      <div class="module-desc">Основы, история, примеры</div>
+      <button class="module-btn">Начать</button>
     </div>
-  </main>
+    <div class="module-card locked">
+      <div class="module-number">2</div>
+      <div class="module-title">Основы ChatGPT</div>
+      <div class="module-desc">Как работает, примеры, сценарии</div>
+      <button class="module-btn" disabled>Закрыто</button>
+    </div>
+    <div class="module-card locked">
+      <div class="module-number">3</div>
+      <div class="module-title">ChatGPT PRO</div>
+      <div class="module-desc">Продвинутые техники</div>
+      <button class="module-btn" disabled>Закрыто</button>
+    </div>
+    <div class="module-card locked">
+      <div class="module-number">4</div>
+      <div class="module-title">ChatGPT MASTER</div>
+      <div class="module-desc">Экспертные сценарии</div>
+      <button class="module-btn" disabled>Закрыто</button>
+    </div>
+  </div>
 </body>
 </html>
