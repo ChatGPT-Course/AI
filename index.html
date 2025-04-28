@@ -3,73 +3,84 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Основы ИИ — Тёмная тема</title>
+  <title>Основы ИИ — Классика с орнаментом</title>
   <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;700&display=swap" rel="stylesheet">
   <style>
     body {
       margin: 0;
       font-family: 'Montserrat', Arial, sans-serif;
-      background: linear-gradient(135deg, #23243a 0%, #1a1b2b 100%);
-      color: #f8fafc;
+      background: #f9f6f2 url('https://www.transparenttextures.com/patterns/arabesque.png');
+      color: #3e2723;
     }
     .header {
       display: flex;
       align-items: center;
-      background: linear-gradient(90deg, #0fffc1 0%, #3a7bd5 100%);
-      padding: 18px 32px;
-      border-bottom: 2px solid #0fffc1;
+      background: #fff8e1;
+      border-bottom: 3px solid #d7b98c;
+      padding: 22px 36px;
+      box-shadow: 0 2px 12px #d7b98c33;
       position: sticky;
       top: 0;
       z-index: 100;
-      box-shadow: 0 2px 12px rgba(10, 255, 193, 0.10);
+      border-radius: 0 0 32px 32px;
+      border-top: 8px solid #bfa46b;
+      background-image: url('https://www.transparenttextures.com/patterns/arabesque.png');
     }
     .avatar {
-      width: 52px;
-      height: 52px;
+      width: 56px;
+      height: 56px;
       border-radius: 50%;
       object-fit: cover;
-      margin-right: 18px;
-      background: #222;
-      border: 2px solid #0fffc1;
-      box-shadow: 0 1px 6px #0fffc1;
+      margin-right: 22px;
+      background: #eee;
+      border: 3px solid #bfa46b;
+      box-shadow: 0 1px 8px #d7b98c;
     }
     .user-info span {
-      font-size: 18px;
+      font-size: 20px;
       font-weight: 700;
-      color: #fff;
-      text-shadow: 0 1px 8px #0fffc1;
+      color: #7c6f57;
     }
     .user-info small {
-      color: #0fffc1;
-      font-size: 15px;
+      color: #bfa46b;
+      font-size: 16px;
     }
     .container {
-      max-width: 540px;
-      margin: 56px auto 0 auto;
-      background: rgba(34,36,58,0.98);
-      border-radius: 24px;
-      box-shadow: 0 8px 32px rgba(10, 255, 193, 0.10), 0 1.5px 8px #0fffc1;
-      padding: 40px 28px 44px 28px;
-      border: 2px solid #0fffc1;
+      max-width: 600px;
+      margin: 64px auto 0 auto;
+      background: #fffbe7 url('https://www.transparenttextures.com/patterns/arabesque.png');
+      border-radius: 32px;
+      box-shadow: 0 8px 32px #d7b98c33, 0 1.5px 8px #ffe0b2;
+      padding: 48px 36px 52px 36px;
+      border: 3px solid #bfa46b;
+      position: relative;
+      overflow: hidden;
+    }
+    .container:before {
+      content: '';
+      position: absolute;
+      top: 0; left: 0; right: 0; height: 18px;
+      background: url('https://www.transparenttextures.com/patterns/arabesque.png');
+      opacity: 0.25;
     }
     .modules-list {
       display: flex;
       flex-direction: column;
-      gap: 32px;
+      gap: 36px;
       margin: 0 auto;
       max-width: 700px;
-      padding: 32px 0 32px 0;
+      padding: 36px 0 36px 0;
     }
     .module-card {
       display: flex;
       align-items: center;
-      background: linear-gradient(90deg, #23243a 0%, #3a7bd5 100%);
-      border-radius: 20px;
-      box-shadow: 0 4px 24px rgba(10, 255, 193, 0.10), 0 1.5px 8px #0fffc1;
-      border: 2px solid #0fffc1;
-      padding: 28px 32px;
+      background: #fff8e1 url('https://www.transparenttextures.com/patterns/arabesque.png');
+      border-radius: 24px;
+      box-shadow: 0 4px 24px #d7b98c33, 0 1.5px 8px #ffe0b2;
+      border: 2.5px solid #bfa46b;
+      padding: 32px 36px;
       position: relative;
-      min-height: 110px;
+      min-height: 120px;
       cursor: pointer;
       overflow: hidden;
       transition: box-shadow 0.18s, border 0.18s, transform 0.10s;
@@ -80,13 +91,14 @@
       filter: grayscale(0.5);
     }
     .module-number {
-      font-size: 3.5rem;
+      font-size: 3.8rem;
       font-weight: 900;
-      color: #0fffc1;
-      margin-right: 32px;
+      color: #bfa46b;
+      margin-right: 36px;
       flex-shrink: 0;
       line-height: 1;
-      text-shadow: 0 2px 12px #0fffc1;
+      text-shadow: 0 2px 12px #ffe0b2;
+      font-family: 'Georgia', serif;
     }
     .module-info {
       display: flex;
@@ -94,49 +106,49 @@
       align-items: flex-start;
     }
     .module-title {
-      font-size: 1.35rem;
+      font-size: 1.45rem;
       font-weight: 800;
-      color: #fff;
-      margin-bottom: 6px;
+      color: #7c6f57;
+      margin-bottom: 8px;
       letter-spacing: 0.5px;
-      text-shadow: 0 1px 8px #3a7bd5;
+      font-family: 'Georgia', serif;
     }
     .module-desc {
-      font-size: 1.08rem;
-      color: #0fffc1;
-      margin-bottom: 14px;
+      font-size: 1.12rem;
+      color: #bfa46b;
+      margin-bottom: 16px;
       font-weight: 500;
     }
     .module-btn {
-      background: linear-gradient(90deg, #0fffc1 0%, #3a7bd5 100%);
+      background: linear-gradient(90deg, #bfa46b 0%, #ffe0b2 100%);
       border: none;
-      border-radius: 10px;
-      color: #23243a;
-      font-size: 1.08rem;
+      border-radius: 12px;
+      color: #fff;
+      font-size: 1.12rem;
       font-weight: 700;
-      padding: 10px 28px;
+      padding: 12px 32px;
       cursor: pointer;
-      box-shadow: 0 1px 6px #0fffc1;
+      box-shadow: 0 1px 8px #d7b98c;
       outline: none;
-      margin-top: 4px;
-      transition: background 0.18s, box-shadow 0.18s, transform 0.10s;
+      margin-top: 6px;
+      font-family: 'Montserrat', Arial, sans-serif;
     }
     .module-btn:disabled {
-      background: #23243a;
-      color: #3a7bd5;
+      background: #e0e0e0;
+      color: #bdbdbd;
       cursor: not-allowed;
       box-shadow: none;
     }
     .module-btn:not(:disabled):hover {
-      background: #0fffc1;
-      color: #23243a;
+      background: #bfa46b;
+      color: #fffbe7;
       transform: scale(1.04);
     }
   </style>
 </head>
 <body>
   <div class="header">
-    <img src="https://ui-avatars.com/api/?name=User&background=0fffc1&color=23243a" alt="avatar" class="avatar">
+    <img src="https://ui-avatars.com/api/?name=User&background=bfa46b&color=fff" alt="avatar" class="avatar">
     <div class="user-info">
       <span>Имя пользователя</span>
       <small>ID: -</small>
