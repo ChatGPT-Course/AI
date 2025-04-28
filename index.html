@@ -9,8 +9,8 @@
     body {
       margin: 0;
       font-family: 'Montserrat', 'Segoe UI', Arial, sans-serif;
-      background: linear-gradient(135deg, #fffbe9 0%, #f5f7fa 100%);
-      color: #222;
+      background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+      color: #23272f;
     }
     button, .main-btn, .module-btn, .ai-btn, .menu-btn, .support-fab {
       outline: none !important;
@@ -26,21 +26,22 @@
       display: flex;
       align-items: center;
       background: linear-gradient(90deg, #ffb347 0%, #ffcc80 100%);
-      padding: 16px 24px;
-      border-bottom: 1px solid #ffe0b2;
+      padding: 18px 32px;
+      border-bottom: 1.5px solid #ffe0b2;
       position: sticky;
       top: 0;
       z-index: 100;
-      box-shadow: 0 2px 8px rgba(255, 184, 71, 0.12);
+      box-shadow: 0 2px 12px rgba(255, 184, 71, 0.10);
     }
     .avatar {
-      width: 48px;
-      height: 48px;
+      width: 52px;
+      height: 52px;
       border-radius: 50%;
       object-fit: cover;
-      margin-right: 16px;
+      margin-right: 18px;
       background: #eee;
       border: none;
+      box-shadow: 0 1px 6px #ffe0b2;
     }
     .user-info {
       display: flex;
@@ -49,31 +50,29 @@
       flex: 1;
     }
     .user-info span {
-      font-size: 17px;
-      font-weight: 600;
-      color: #333;
-      line-height: 1.2;
+      font-size: 18px;
+      font-weight: 700;
+      color: #23272f;
     }
     .user-info small {
       color: #7c6f57;
-      font-size: 14px;
-      line-height: 1.2;
+      font-size: 15px;
     }
     .menu-btn {
-      width: 40px;
-      height: 40px;
+      width: 44px;
+      height: 44px;
       background: #fff3e0;
       border: none;
-      border-radius: 10px;
+      border-radius: 12px;
       display: flex;
       align-items: center;
       justify-content: center;
       cursor: pointer;
-      margin-left: 12px;
-      transition: background 0.2s;
-      box-shadow: 0 1px 4px #ffe0b2;
+      margin-left: 16px;
+      transition: background 0.18s, box-shadow 0.18s;
+      box-shadow: 0 1px 6px #ffe0b2;
       position: absolute;
-      right: 24px;
+      right: 32px;
       top: 50%;
       transform: translateY(-50%);
       z-index: 10;
@@ -88,17 +87,17 @@
     }
     .support-fab {
       position: absolute;
-      right: 24px;
-      top: 64px;
-      min-width: 170px;
+      right: 32px;
+      top: 72px;
+      min-width: 180px;
       background: linear-gradient(90deg, #2196f3 0%, #64b5f6 100%);
       color: #fff;
       border: none;
-      border-radius: 12px;
-      font-size: 16px;
-      font-weight: 500;
-      padding: 12px 22px;
-      box-shadow: 0 2px 12px #b3e5fc;
+      border-radius: 14px;
+      font-size: 17px;
+      font-weight: 600;
+      padding: 14px 26px;
+      box-shadow: 0 2px 16px #b3e5fc;
       cursor: pointer;
       opacity: 0;
       pointer-events: none;
@@ -107,7 +106,7 @@
       z-index: 9;
       display: flex;
       align-items: center;
-      gap: 10px;
+      gap: 12px;
     }
     .support-fab.show {
       opacity: 1;
@@ -115,65 +114,77 @@
       transform: translateY(0) scale(1);
     }
     .support-fab svg {
-      width: 20px;
-      height: 20px;
+      width: 22px;
+      height: 22px;
       fill: #fff;
     }
     .container {
-      max-width: 520px;
-      margin: 48px auto 0 auto;
-      background: #fff;
-      border-radius: 22px;
-      box-shadow: 0 4px 24px #ffe0b2;
-      padding: 36px 24px 40px 24px;
+      max-width: 540px;
+      margin: 56px auto 0 auto;
+      background: rgba(255,255,255,0.98);
+      border-radius: 24px;
+      box-shadow: 0 8px 32px rgba(80, 80, 80, 0.10), 0 1.5px 8px #ffe0b2;
+      padding: 40px 28px 44px 28px;
+      border: 1.5px solid #f3e9d7;
     }
     .module {
-      background: #f8f9fa;
-      border-radius: 16px;
-      padding: 22px 20px;
-      margin-bottom: 22px;
+      background: #fff;
+      border-radius: 18px;
+      padding: 26px 24px;
+      margin-bottom: 26px;
       display: flex;
       align-items: center;
-      box-shadow: 0 2px 8px #ffe0b2;
-      border: 1px solid #f0e6d2;
-      transition: box-shadow 0.2s, border 0.2s;
+      box-shadow: 0 2px 16px rgba(255, 184, 71, 0.10);
+      border: 1.5px solid #f3e9d7;
+      transition: box-shadow 0.22s, border 0.22s, transform 0.12s;
+      position: relative;
+      overflow: hidden;
     }
     .module:hover {
-      box-shadow: 0 6px 24px #ffe0b2;
+      box-shadow: 0 8px 32px rgba(255, 184, 71, 0.18);
       border: 1.5px solid #ffb347;
+      transform: translateY(-2px) scale(1.012);
     }
     .module-icon {
-      font-size: 2.2rem;
-      margin-right: 20px;
+      font-size: 2.5rem;
+      margin-right: 24px;
+      filter: drop-shadow(0 2px 6px #ffe0b2);
     }
     .module-title {
-      font-size: 1.18rem;
+      font-size: 1.22rem;
       font-weight: 700;
       color: #ff9800;
-      margin-bottom: 4px;
+      margin-bottom: 6px;
+      letter-spacing: 0.01em;
     }
     .module-desc {
-      font-size: 1.01rem;
+      font-size: 1.07rem;
       color: #7c6f57;
-      margin-bottom: 8px;
+      margin-bottom: 10px;
+      opacity: 0.92;
     }
     .module-btn {
       background: linear-gradient(90deg, #ffb347 0%, #ffcc80 100%);
       border: none;
-      border-radius: 8px;
+      border-radius: 10px;
       color: #fff;
-      font-size: 15px;
+      font-size: 16px;
       font-weight: 600;
-      padding: 8px 22px;
+      padding: 10px 28px;
       cursor: pointer;
-      transition: background 0.2s, box-shadow 0.2s;
-      box-shadow: 0 1px 4px #ffe0b2;
+      transition: background 0.18s, box-shadow 0.18s, transform 0.10s;
+      box-shadow: 0 1px 6px #ffe0b2;
+      outline: none;
     }
     .module-btn:disabled {
       background: #e0e0e0;
       color: #bdbdbd;
       cursor: not-allowed;
       box-shadow: none;
+    }
+    .module-btn:not(:disabled):hover {
+      background: #ffa726;
+      transform: scale(1.04);
     }
     /* Кнопка AI */
     .ai-btn {
@@ -202,6 +213,7 @@
     }
     .ai-btn:hover {
       background: #ffa726;
+      transform: scale(1.04);
     }
     .ai-btn svg {
       width: 24px;
@@ -319,22 +331,6 @@
     </button>
   </div>
   <div class="container">
-    <!-- Пример блока сообщений AI -->
-    <div class="chat-container">
-      <div class="message ai">
-        <div class="avatar">🤖</div>
-        <div class="bubble">Здравствуйте! Я ваш AI-ассистент. Чем могу помочь?</div>
-      </div>
-      <div class="message user">
-        <img class="avatar" src="https://ui-avatars.com/api/?name=User&background=ffb347&color=fff" alt="User">
-        <div class="bubble">Расскажи про основы искусственного интеллекта.</div>
-      </div>
-      <div class="message ai">
-        <div class="avatar">🤖</div>
-        <div class="bubble">Искусственный интеллект — это область информатики, занимающаяся созданием систем, способных выполнять задачи, требующие человеческого интеллекта.</div>
-      </div>
-    </div>
-    <!-- Конец блока сообщений AI -->
     <div id="modules-list"></div>
   </div>
   <a href="chat.html" class="ai-btn">
