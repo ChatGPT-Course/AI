@@ -3,139 +3,124 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Основы ИИ — Волны и орнамент</title>
+  <title>Основы ИИ — Современный минимализм</title>
   <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;700&display=swap" rel="stylesheet">
   <style>
     body {
       margin: 0;
       font-family: 'Montserrat', Arial, sans-serif;
-      background: #fffbe7;
-      color: #3e2723;
-      min-height: 100vh;
-      position: relative;
-      overflow-x: hidden;
-    }
-    .wave {
-      position: absolute;
-      top: 0; left: 0; width: 100vw; height: 180px;
-      z-index: 0;
+      background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+      color: #23272f;
     }
     .header {
-      position: relative;
-      z-index: 2;
       display: flex;
       align-items: center;
-      justify-content: center;
-      padding: 48px 0 24px 0;
-      background: none;
+      background: linear-gradient(90deg, #ffb347 0%, #ffcc80 100%);
+      padding: 18px 32px;
+      border-bottom: 1.5px solid #ffe0b2;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      box-shadow: 0 2px 12px rgba(255, 184, 71, 0.10);
     }
-    .header .avatar {
-      width: 70px;
-      height: 70px;
+    .avatar {
+      width: 52px;
+      height: 52px;
       border-radius: 50%;
       object-fit: cover;
-      border: 5px solid #ffb347;
-      background: #fff;
-      margin-right: 28px;
-      box-shadow: 0 2px 16px #ffe0b2;
+      margin-right: 18px;
+      background: #eee;
+      border: none;
+      box-shadow: 0 1px 6px #ffe0b2;
     }
-    .header .info span {
-      font-size: 2rem;
-      font-weight: 900;
-      color: #ff9800;
-      letter-spacing: 1px;
+    .user-info {
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      flex: 1;
     }
-    .header .info small {
-      color: #bfa46b;
-      font-size: 1.1rem;
+    .user-info span {
+      font-size: 18px;
+      font-weight: 700;
+      color: #23272f;
     }
-    .ornament {
-      width: 100vw;
-      text-align: center;
-      margin: 0 0 32px 0;
-      z-index: 2;
-      position: relative;
+    .user-info small {
+      color: #7c6f57;
+      font-size: 15px;
     }
-    .ornament svg {
-      width: 220px;
-      height: 32px;
-      fill: #ffb347;
-      opacity: 0.7;
+    .container {
+      max-width: 540px;
+      margin: 56px auto 0 auto;
+      background: rgba(255,255,255,0.98);
+      border-radius: 24px;
+      box-shadow: 0 8px 32px rgba(80, 80, 80, 0.10), 0 1.5px 8px #ffe0b2;
+      padding: 40px 28px 44px 28px;
+      border: 1.5px solid #f3e9d7;
     }
     .modules-list {
       display: flex;
       flex-direction: column;
-      gap: 40px;
-      align-items: center;
+      gap: 32px;
       margin: 0 auto;
       max-width: 700px;
-      padding: 36px 0 36px 0;
-      z-index: 2;
-      position: relative;
+      padding: 32px 0 32px 0;
     }
     .module-card {
-      background: #fff;
-      border-radius: 32px 32px 32px 12px;
-      box-shadow: 0 8px 32px #ffe0b2, 0 1.5px 8px #ffb347;
-      border: 3px dashed #ffb347;
-      padding: 36px 32px 32px 32px;
-      min-width: 260px;
-      max-width: 420px;
+      display: flex;
+      align-items: center;
+      background: linear-gradient(90deg, #fffbe7 0%, #e3f2fd 100%);
+      border-radius: 20px;
+      box-shadow: 0 4px 24px rgba(255, 184, 71, 0.10), 0 1.5px 8px #ffe0b2;
+      border: 1.5px solid #f3e9d7;
+      padding: 28px 32px;
+      position: relative;
+      min-height: 110px;
+      cursor: pointer;
+      overflow: hidden;
+    }
+    .module-card.locked {
+      opacity: 0.6;
+      pointer-events: none;
+    }
+    .module-number {
+      font-size: 3.5rem;
+      font-weight: 900;
+      color: #ffb347;
+      margin-right: 32px;
+      flex-shrink: 0;
+      line-height: 1;
+      text-shadow: 0 2px 12px #ffe0b2;
+    }
+    .module-info {
       display: flex;
       flex-direction: column;
       align-items: flex-start;
-      position: relative;
-      transition: box-shadow 0.18s, border 0.18s, transform 0.10s;
-    }
-    .module-card.locked {
-      opacity: 0.5;
-      filter: grayscale(0.5);
-    }
-    .module-number {
-      position: absolute;
-      top: -32px;
-      left: 24px;
-      background: #fffbe7;
-      color: #ff9800;
-      font-size: 2.5rem;
-      font-weight: 900;
-      border-radius: 50%;
-      width: 64px;
-      height: 64px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      box-shadow: 0 2px 12px #ffe0b2;
-      border: 4px solid #ffb347;
-      font-family: 'Georgia', serif;
     }
     .module-title {
       font-size: 1.35rem;
       font-weight: 800;
-      color: #ff9800;
-      margin-bottom: 10px;
-      margin-top: 36px;
-      font-family: 'Georgia', serif;
+      color: #23272f;
+      margin-bottom: 6px;
+      letter-spacing: 0.5px;
     }
     .module-desc {
       font-size: 1.08rem;
-      color: #bfa46b;
-      margin-bottom: 18px;
+      color: #7c6f57;
+      margin-bottom: 14px;
       font-weight: 500;
     }
     .module-btn {
       background: linear-gradient(90deg, #ffb347 0%, #ffcc80 100%);
       border: none;
-      border-radius: 18px;
+      border-radius: 10px;
       color: #fff;
       font-size: 1.08rem;
       font-weight: 700;
-      padding: 10px 32px;
+      padding: 10px 28px;
       cursor: pointer;
       box-shadow: 0 1px 6px #ffe0b2;
       outline: none;
       margin-top: 4px;
-      transition: background 0.18s, box-shadow 0.18s, transform 0.10s;
     }
     .module-btn:disabled {
       background: #e0e0e0;
@@ -147,50 +132,530 @@
       background: #ffa726;
       transform: scale(1.04);
     }
-    @media (max-width: 700px) {
-      .modules-list { padding: 12px 0 12px 0; }
-      .module-card { padding: 16px 10px; }
-      .module-number { font-size: 2rem; width: 40px; height: 40px; }
-      .header { flex-direction: column; gap: 12px; padding: 24px 0 12px 0; }
+  </style>
+</head>
+<body>
+  <div class="header">
+    <img src="https://ui-avatars.com/api/?name=User&background=ffb347&color=fff" alt="avatar" class="avatar">
+    <div class="user-info">
+      <span>Имя пользователя</span>
+      <small>ID: -</small>
+    </div>
+  </div>
+  <div class="container">
+    <div class="modules-list">
+      <div class="module-card">
+        <div class="module-number">1</div>
+        <div class="module-info">
+          <div class="module-title">Введение в ИИ</div>
+          <div class="module-desc">Основы, история, примеры</div>
+          <button class="module-btn">Начать</button>
+        </div>
+      </div>
+      <div class="module-card locked">
+        <div class="module-number">2</div>
+        <div class="module-info">
+          <div class="module-title">Основы ChatGPT</div>
+          <div class="module-desc">Как работает, примеры, сценарии</div>
+          <button class="module-btn" disabled>Закрыто</button>
+        </div>
+      </div>
+      <div class="module-card locked">
+        <div class="module-number">3</div>
+        <div class="module-info">
+          <div class="module-title">ChatGPT PRO</div>
+          <div class="module-desc">Продвинутые техники</div>
+          <button class="module-btn" disabled>Закрыто</button>
+        </div>
+      </div>
+      <div class="module-card locked">
+        <div class="module-number">4</div>
+        <div class="module-info">
+          <div class="module-title">ChatGPT MASTER</div>
+          <div class="module-desc">Экспертные сценарии</div>
+          <button class="module-btn" disabled>Закрыто</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</body>
+</html>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Основы ИИ — Тёмная тема</title>
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;700&display=swap" rel="stylesheet">
+  <style>
+    body {
+      margin: 0;
+      font-family: 'Montserrat', Arial, sans-serif;
+      background: linear-gradient(135deg, #23243a 0%, #1a1b2b 100%);
+      color: #f8fafc;
+    }
+    .header {
+      display: flex;
+      align-items: center;
+      background: linear-gradient(90deg, #0fffc1 0%, #3a7bd5 100%);
+      padding: 18px 32px;
+      border-bottom: 2px solid #0fffc1;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      box-shadow: 0 2px 12px rgba(10, 255, 193, 0.10);
+    }
+    .avatar {
+      width: 52px;
+      height: 52px;
+      border-radius: 50%;
+      object-fit: cover;
+      margin-right: 18px;
+      background: #222;
+      border: 2px solid #0fffc1;
+      box-shadow: 0 1px 6px #0fffc1;
+    }
+    .user-info span {
+      font-size: 18px;
+      font-weight: 700;
+      color: #fff;
+      text-shadow: 0 1px 8px #0fffc1;
+    }
+    .user-info small {
+      color: #0fffc1;
+      font-size: 15px;
+    }
+    .container {
+      max-width: 540px;
+      margin: 56px auto 0 auto;
+      background: rgba(34,36,58,0.98);
+      border-radius: 24px;
+      box-shadow: 0 8px 32px rgba(10, 255, 193, 0.10), 0 1.5px 8px #0fffc1;
+      padding: 40px 28px 44px 28px;
+      border: 2px solid #0fffc1;
+    }
+    .modules-list {
+      display: flex;
+      flex-direction: column;
+      gap: 32px;
+      margin: 0 auto;
+      max-width: 700px;
+      padding: 32px 0 32px 0;
+    }
+    .module-card {
+      display: flex;
+      align-items: center;
+      background: linear-gradient(90deg, #23243a 0%, #3a7bd5 100%);
+      border-radius: 20px;
+      box-shadow: 0 4px 24px rgba(10, 255, 193, 0.10), 0 1.5px 8px #0fffc1;
+      border: 2px solid #0fffc1;
+      padding: 28px 32px;
+      position: relative;
+      min-height: 110px;
+      cursor: pointer;
+      overflow: hidden;
+      transition: box-shadow 0.18s, border 0.18s, transform 0.10s;
+    }
+    .module-card.locked {
+      opacity: 0.5;
+      pointer-events: none;
+      filter: grayscale(0.5);
+    }
+    .module-number {
+      font-size: 3.5rem;
+      font-weight: 900;
+      color: #0fffc1;
+      margin-right: 32px;
+      flex-shrink: 0;
+      line-height: 1;
+      text-shadow: 0 2px 12px #0fffc1;
+    }
+    .module-info {
+      display: flex;
+      flex-direction: column;
+      align-items: flex-start;
+    }
+    .module-title {
+      font-size: 1.35rem;
+      font-weight: 800;
+      color: #fff;
+      margin-bottom: 6px;
+      letter-spacing: 0.5px;
+      text-shadow: 0 1px 8px #3a7bd5;
+    }
+    .module-desc {
+      font-size: 1.08rem;
+      color: #0fffc1;
+      margin-bottom: 14px;
+      font-weight: 500;
+    }
+    .module-btn {
+      background: linear-gradient(90deg, #0fffc1 0%, #3a7bd5 100%);
+      border: none;
+      border-radius: 10px;
+      color: #23243a;
+      font-size: 1.08rem;
+      font-weight: 700;
+      padding: 10px 28px;
+      cursor: pointer;
+      box-shadow: 0 1px 6px #0fffc1;
+      outline: none;
+      margin-top: 4px;
+      transition: background 0.18s, box-shadow 0.18s, transform 0.10s;
+    }
+    .module-btn:disabled {
+      background: #23243a;
+      color: #3a7bd5;
+      cursor: not-allowed;
+      box-shadow: none;
+    }
+    .module-btn:not(:disabled):hover {
+      background: #0fffc1;
+      color: #23243a;
+      transform: scale(1.04);
     }
   </style>
 </head>
 <body>
-  <svg class="wave" viewBox="0 0 1440 180" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M0,80 C360,180 1080,0 1440,100 L1440,0 L0,0 Z" fill="#ffb347" fill-opacity="0.18"/></svg>
   <div class="header">
-    <img src="https://ui-avatars.com/api/?name=User&background=ffb347&color=fff" alt="avatar" class="avatar">
-    <div class="info">
-      <span>Имя пользователя</span><br>
+    <img src="https://ui-avatars.com/api/?name=User&background=0fffc1&color=23243a" alt="avatar" class="avatar">
+    <div class="user-info">
+      <span>Имя пользователя</span>
       <small>ID: -</small>
     </div>
   </div>
-  <div class="ornament">
-    <svg viewBox="0 0 220 32"><path d="M10,16 Q30,2 50,16 T90,16 T130,16 T170,16 T210,16" stroke="#ffb347" stroke-width="3" fill="none"/><circle cx="10" cy="16" r="4"/><circle cx="210" cy="16" r="4"/></svg>
+  <div class="container">
+    <div class="modules-list">
+      <div class="module-card">
+        <div class="module-number">1</div>
+        <div class="module-info">
+          <div class="module-title">Введение в ИИ</div>
+          <div class="module-desc">Основы, история, примеры</div>
+          <button class="module-btn">Начать</button>
+        </div>
+      </div>
+      <div class="module-card locked">
+        <div class="module-number">2</div>
+        <div class="module-info">
+          <div class="module-title">Основы ChatGPT</div>
+          <div class="module-desc">Как работает, примеры, сценарии</div>
+          <button class="module-btn" disabled>Закрыто</button>
+        </div>
+      </div>
+      <div class="module-card locked">
+        <div class="module-number">3</div>
+        <div class="module-info">
+          <div class="module-title">ChatGPT PRO</div>
+          <div class="module-desc">Продвинутые техники</div>
+          <button class="module-btn" disabled>Закрыто</button>
+        </div>
+      </div>
+      <div class="module-card locked">
+        <div class="module-number">4</div>
+        <div class="module-info">
+          <div class="module-title">ChatGPT MASTER</div>
+          <div class="module-desc">Экспертные сценарии</div>
+          <button class="module-btn" disabled>Закрыто</button>
+        </div>
+      </div>
+    </div>
   </div>
-  <div class="modules-list">
-    <div class="module-card">
-      <div class="module-number">1</div>
-      <div class="module-title">Введение в ИИ</div>
-      <div class="module-desc">Основы, история, примеры</div>
-      <button class="module-btn">Начать</button>
+</body>
+</html>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Основы ИИ — Классика с орнаментом</title>
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;700&display=swap" rel="stylesheet">
+  <style>
+    body {
+      margin: 0;
+      font-family: 'Montserrat', Arial, sans-serif;
+      background: #f9f6f2 url('https://www.transparenttextures.com/patterns/arabesque.png');
+      color: #3e2723;
+    }
+    .header {
+      display: flex;
+      align-items: center;
+      background: #fff8e1;
+      border-bottom: 3px solid #d7b98c;
+      padding: 22px 36px;
+      box-shadow: 0 2px 12px #d7b98c33;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      border-radius: 0 0 32px 32px;
+      border-top: 8px solid #bfa46b;
+      background-image: url('https://www.transparenttextures.com/patterns/arabesque.png');
+    }
+    .avatar {
+      width: 56px;
+      height: 56px;
+      border-radius: 50%;
+      object-fit: cover;
+      margin-right: 22px;
+      background: #eee;
+      border: 3px solid #bfa46b;
+      box-shadow: 0 1px 8px #d7b98c;
+    }
+    .user-info span {
+      font-size: 20px;
+      font-weight: 700;
+      color: #7c6f57;
+    }
+    .user-info small {
+      color: #bfa46b;
+      font-size: 16px;
+    }
+    .container {
+      max-width: 600px;
+      margin: 64px auto 0 auto;
+      background: #fffbe7 url('https://www.transparenttextures.com/patterns/arabesque.png');
+      border-radius: 32px;
+      box-shadow: 0 8px 32px #d7b98c33, 0 1.5px 8px #ffe0b2;
+      padding: 48px 36px 52px 36px;
+      border: 3px solid #bfa46b;
+      position: relative;
+      overflow: hidden;
+    }
+    .container:before {
+      content: '';
+      position: absolute;
+      top: 0; left: 0; right: 0; height: 18px;
+      background: url('https://www.transparenttextures.com/patterns/arabesque.png');
+      opacity: 0.25;
+    }
+    .modules-list {
+      display: flex;
+      flex-direction: column;
+      gap: 36px;
+      margin: 0 auto;
+      max-width: 700px;
+      padding: 36px 0 36px 0;
+    }
+    .module-card {
+      display: flex;
+      align-items: center;
+      background: #fff8e1 url('https://www.transparenttextures.com/patterns/arabesque.png');
+      border-radius: 24px;
+      box-shadow: 0 4px 24px #d7b98c33, 0 1.5px 8px #ffe0b2;
+      border: 2.5px solid #bfa46b;
+      padding: 32px 36px;
+      position: relative;
+      min-height: 120px;
+      cursor: pointer;
+      overflow: hidden;
+      transition: box-shadow 0.18s, border 0.18s, transform 0.10s;
+    }
+    .module-card.locked {
+      opacity: 0.5;
+      pointer-events: none;
+      filter: grayscale(0.5);
+    }
+    .module-number {
+      font-size: 3.8rem;
+      font-weight: 900;
+      color: #bfa46b;
+      margin-right: 36px;
+      flex-shrink: 0;
+      line-height: 1;
+      text-shadow: 0 2px 12px #ffe0b2;
+      font-family: 'Georgia', serif;
+    }
+    .module-info {
+      display: flex;
+      flex-direction: column;
+      align-items: flex-start;
+    }
+    .module-title {
+      font-size: 1.45rem;
+      font-weight: 800;
+      color: #7c6f57;
+      margin-bottom: 8px;
+      letter-spacing: 0.5px;
+      font-family: 'Georgia', serif;
+    }
+    .module-desc {
+      font-size: 1.12rem;
+      color: #bfa46b;
+      margin-bottom: 16px;
+      font-weight: 500;
+    }
+    .module-btn {
+      background: linear-gradient(90deg, #bfa46b 0%, #ffe0b2 100%);
+      border: none;
+      border-radius: 12px;
+      color: #fff;
+      font-size: 1.12rem;
+      font-weight: 700;
+      padding: 12px 32px;
+      cursor: pointer;
+      box-shadow: 0 1px 8px #d7b98c;
+      outline: none;
+      margin-top: 6px;
+      font-family: 'Montserrat', Arial, sans-serif;
+    }
+    .module-btn:disabled {
+      background: #e0e0e0;
+      color: #bdbdbd;
+      cursor: not-allowed;
+      box-shadow: none;
+    }
+    .module-btn:not(:disabled):hover {
+      background: #bfa46b;
+      color: #fffbe7;
+      transform: scale(1.04);
+    }
+  </style>
+</head>
+<body>
+  <div class="header">
+    <img src="https://ui-avatars.com/api/?name=User&background=bfa46b&color=fff" alt="avatar" class="avatar">
+    <div class="user-info">
+      <span>Имя пользователя</span>
+      <small>ID: -</small>
     </div>
-    <div class="module-card locked">
-      <div class="module-number">2</div>
-      <div class="module-title">Основы ChatGPT</div>
-      <div class="module-desc">Как работает, примеры, сценарии</div>
-      <button class="module-btn" disabled>Закрыто</button>
-    </div>
-    <div class="module-card locked">
-      <div class="module-number">3</div>
-      <div class="module-title">ChatGPT PRO</div>
-      <div class="module-desc">Продвинутые техники</div>
-      <button class="module-btn" disabled>Закрыто</button>
-    </div>
-    <div class="module-card locked">
-      <div class="module-number">4</div>
-      <div class="module-title">ChatGPT MASTER</div>
-      <div class="module-desc">Экспертные сценарии</div>
-      <button class="module-btn" disabled>Закрыто</button>
+  </div>
+  <div class="container">
+    <div class="modules-list">
+      <div class="module-card">
+        <div class="module-number">1</div>
+        <div class="module-info">
+          <div class="module-title">Введение в ИИ</div>
+          <div class="module-desc">Основы, история, примеры</div>
+          <button class="module-btn">Начать</button>
+        </div>
+      </div>
+      <div class="module-card locked">
+        <div class="module-number">2</div>
+        <div class="module-info">
+          <div class="module-title">Основы ChatGPT</div>
+          <div class="module-desc">Как работает, примеры, сценарии</div>
+          <button class="module-btn" disabled>Закрыто</button>
+        </div>
+      </div>
+      <div class="module-card locked">
+        <div class="module-number">3</div>
+        <div class="module-info">
+          <div class="module-title">ChatGPT PRO</div>
+          <div class="module-desc">Продвинутые техники</div>
+          <button class="module-btn" disabled>Закрыто</button>
+        </div>
+      </div>
+      <div class="module-card locked">
+        <div class="module-number">4</div>
+        <div class="module-info">
+          <div class="module-title">ChatGPT MASTER</div>
+          <div class="module-desc">Экспертные сценарии</div>
+          <button class="module-btn" disabled>Закрыто</button>
+        </div>
+      </div>
     </div>
   </div>
 </body>
