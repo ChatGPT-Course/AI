@@ -9,8 +9,8 @@
     body {
       margin: 0;
       font-family: 'Montserrat', 'Segoe UI', Arial, sans-serif;
-      background: #fffbe9;
-      color: #333;
+      background: linear-gradient(135deg, #fffbe9 0%, #f5f7fa 100%);
+      color: #222;
     }
     button, .main-btn, .module-btn, .ai-btn, .menu-btn, .support-fab {
       outline: none !important;
@@ -28,7 +28,10 @@
       background: linear-gradient(90deg, #ffb347 0%, #ffcc80 100%);
       padding: 16px 24px;
       border-bottom: 1px solid #ffe0b2;
-      position: relative;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      box-shadow: 0 2px 8px rgba(255, 184, 71, 0.12);
     }
     .avatar {
       width: 48px;
@@ -117,75 +120,42 @@
       fill: #fff;
     }
     .container {
-      max-width: 480px;
-      margin: 32px auto;
+      max-width: 520px;
+      margin: 48px auto 0 auto;
       background: #fff;
-      border-radius: 18px;
-      box-shadow: 0 2px 12px #ffe0b2;
-      padding: 28px 20px 40px 20px;
-    }
-    .progress-bar {
-      background: #ffe0b2;
-      border-radius: 8px;
-      height: 10px;
-      margin-bottom: 10px;
-      overflow: hidden;
-    }
-    .progress {
-      background: #ff9800;
-      height: 100%;
-      width: 25%; /* 1 из 4 */
-      transition: width 0.4s;
-    }
-    .modules-count {
-      margin-bottom: 18px;
-      color: #7c6f57;
-      font-size: 15px;
-    }
-    .main-btn {
-      display: block;
-      width: 100%;
-      background: linear-gradient(90deg, #ff9800 0%, #ffb347 100%);
-      color: #fff;
-      border: none;
-      border-radius: 10px;
-      font-size: 18px;
-      font-weight: 500;
-      padding: 14px 0;
-      margin-bottom: 24px;
-      cursor: pointer;
-      box-shadow: 0 2px 8px #ffe0b2;
-      transition: background 0.2s;
-    }
-    .main-btn:hover {
-      background: #ffa726;
+      border-radius: 22px;
+      box-shadow: 0 4px 24px #ffe0b2;
+      padding: 36px 24px 40px 24px;
     }
     .module {
-      background: #fffbe9;
-      border-radius: 12px;
-      padding: 18px 16px;
-      margin-bottom: 18px;
+      background: #f8f9fa;
+      border-radius: 16px;
+      padding: 22px 20px;
+      margin-bottom: 22px;
       display: flex;
       align-items: center;
-      box-shadow: 0 1px 4px #ffe0b2;
+      box-shadow: 0 2px 8px #ffe0b2;
+      border: 1px solid #f0e6d2;
+      transition: box-shadow 0.2s, border 0.2s;
+    }
+    .module:hover {
+      box-shadow: 0 6px 24px #ffe0b2;
+      border: 1.5px solid #ffb347;
     }
     .module-icon {
-      font-size: 2rem;
-      margin-right: 16px;
-    }
-    .module-content {
-      flex: 1;
+      font-size: 2.2rem;
+      margin-right: 20px;
     }
     .module-title {
-      font-size: 1.1rem;
-      font-weight: 600;
+      font-size: 1.18rem;
+      font-weight: 700;
       color: #ff9800;
-      margin-bottom: 2px;
+      margin-bottom: 4px;
     }
     .module-desc {
-      font-size: 0.98rem;
+      font-size: 1.01rem;
       color: #7c6f57;
-      margin-bottom: 6px;
+      margin-bottom: 8px;
     }
     .module-btn {
       background: linear-gradient(90deg, #ffb347 0%, #ffcc80 100%);
@@ -193,19 +163,23 @@
       border-radius: 8px;
       color: #fff;
       font-size: 15px;
-      font-weight: 500;
-      padding: 7px 18px;
+      font-weight: 600;
+      padding: 8px 22px;
       cursor: pointer;
-      transition: background 0.2s;
+      transition: background 0.2s, box-shadow 0.2s;
+      box-shadow: 0 1px 4px #ffe0b2;
     }
-    .module-btn:hover {
-      background: #ffa726;
+    .module-btn:disabled {
+      background: #e0e0e0;
+      color: #bdbdbd;
+      cursor: not-allowed;
+      box-shadow: none;
     }
     /* Кнопка AI */
     .ai-btn {
       position: fixed;
-      right: 24px;
-      bottom: 24px;
+      right: 32px;
+      bottom: 32px;
       min-width: 120px;
       height: 56px;
       background: linear-gradient(90deg, #ff9800 0%, #ffb347 100%);
@@ -240,6 +214,58 @@
       font-weight: 700;
       font-size: 1.15rem;
       color: #fff;
+    }
+    /* Сообщения AI */
+    .chat-container {
+      background: #f5f7fa;
+      border-radius: 18px;
+      padding: 24px 18px;
+      margin-top: 32px;
+      box-shadow: 0 2px 12px #ffe0b2;
+    }
+    .message {
+      display: flex;
+      align-items: flex-start;
+      margin-bottom: 18px;
+    }
+    .message.ai .bubble {
+      background: linear-gradient(90deg, #e3f2fd 0%, #fffde7 100%);
+      color: #222;
+      border-radius: 16px 16px 16px 6px;
+      padding: 14px 18px;
+      font-size: 1.05rem;
+      box-shadow: 0 1px 4px #b3e5fc;
+      margin-left: 10px;
+      position: relative;
+    }
+    .message.user .bubble {
+      background: #fff3e0;
+      color: #333;
+      border-radius: 16px 16px 6px 16px;
+      padding: 14px 18px;
+      font-size: 1.05rem;
+      box-shadow: 0 1px 4px #ffe0b2;
+      margin-right: 10px;
+      position: relative;
+    }
+    .message .avatar {
+      width: 36px;
+      height: 36px;
+      border-radius: 50%;
+      object-fit: cover;
+      background: #eee;
+      border: none;
+      margin-top: 2px;
+    }
+    .message.ai .avatar {
+      background: #e3f2fd;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.5rem;
+    }
+    .message.user .avatar {
+      background: #fff3e0;
     }
     @media (max-width: 600px) {
       .container {
@@ -293,9 +319,22 @@
     </button>
   </div>
   <div class="container">
-    <div class="progress-bar"><div class="progress" id="progressBar"></div></div>
-    <div class="modules-count" id="modulesCount">1 из 4 модулей открыто</div>
-    <button class="main-btn">Продолжить обучение</button>
+    <!-- Пример блока сообщений AI -->
+    <div class="chat-container">
+      <div class="message ai">
+        <div class="avatar">🤖</div>
+        <div class="bubble">Здравствуйте! Я ваш AI-ассистент. Чем могу помочь?</div>
+      </div>
+      <div class="message user">
+        <img class="avatar" src="https://ui-avatars.com/api/?name=User&background=ffb347&color=fff" alt="User">
+        <div class="bubble">Расскажи про основы искусственного интеллекта.</div>
+      </div>
+      <div class="message ai">
+        <div class="avatar">🤖</div>
+        <div class="bubble">Искусственный интеллект — это область информатики, занимающаяся созданием систем, способных выполнять задачи, требующие человеческого интеллекта.</div>
+      </div>
+    </div>
+    <!-- Конец блока сообщений AI -->
     <div id="modules-list"></div>
   </div>
   <a href="chat.html" class="ai-btn">
@@ -388,15 +427,6 @@
     }
     async function updateUI() {
       return new Promise((resolve) => {
-        // Обновляем статус доступа
-        const modulesCount = document.getElementById('modulesCount');
-        if (state.isPaid) {
-          modulesCount.textContent = "4 из 4 модулей открыто";
-          document.getElementById('progressBar').style.width = '100%';
-        } else {
-          modulesCount.textContent = "1 из 4 модулей открыто";
-          document.getElementById('progressBar').style.width = '25%';
-        }
         renderModules();
         resolve();
       });
