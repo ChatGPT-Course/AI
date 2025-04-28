@@ -71,65 +71,6 @@
       height: 22px;
       display: block;
     }
-    .side-menu {
-      position: fixed;
-      top: 0;
-      right: -260px;
-      width: 260px;
-      height: 100vh;
-      background: #fffbe9;
-      box-shadow: -2px 0 16px #ffe0b2;
-      transition: right 0.3s cubic-bezier(.4,0,.2,1);
-      z-index: 1001;
-      display: flex;
-      flex-direction: column;
-      padding: 32px 20px 0 20px;
-    }
-    .side-menu.open {
-      right: 0;
-    }
-    .side-menu .close-btn {
-      align-self: flex-end;
-      background: none;
-      border: none;
-      font-size: 28px;
-      color: #ff9800;
-      cursor: pointer;
-      margin-bottom: 24px;
-    }
-    .side-menu .support-btn {
-      background: linear-gradient(90deg, #ff9800 0%, #ffb347 100%);
-      color: #fff;
-      border: none;
-      border-radius: 10px;
-      font-size: 18px;
-      font-weight: 500;
-      padding: 14px 0;
-      margin-bottom: 24px;
-      cursor: pointer;
-      box-shadow: 0 2px 8px #ffe0b2;
-      transition: background 0.2s;
-      width: 100%;
-    }
-    .side-menu .support-btn:hover {
-      background: #ffa726;
-    }
-    .overlay {
-      display: none;
-      position: fixed;
-      top: 0;
-      left: 0;
-      width: 100vw;
-      height: 100vh;
-      background: rgba(0,0,0,0.35);
-      z-index: 1000;
-      transition: opacity 0.3s;
-      opacity: 0;
-    }
-    .overlay.active {
-      display: block;
-      opacity: 1;
-    }
     .container {
       max-width: 480px;
       margin: 32px auto;
@@ -255,16 +196,12 @@
         height: 54px;
         font-size: 1.1rem;
       }
-      .side-menu {
-        width: 90vw;
-        min-width: 180px;
-        max-width: 320px;
-      }
       .menu-btn {
         right: 8px;
       }
     }
   </style>
+  <script src="https://telegram.org/js/telegram-web-app.js"></script>
 </head>
 <body>
   <div class="header">
@@ -280,11 +217,6 @@
         <rect y="16" width="24" height="3" rx="1.5" fill="#ff9800"/>
       </svg>
     </button>
-  </div>
-  <div class="overlay" id="overlay"></div>
-  <div class="side-menu" id="sideMenu">
-    <button class="close-btn" id="closeMenuBtn" aria-label="Закрыть меню">×</button>
-    <button class="support-btn">Тех поддержка</button>
   </div>
   <div class="container">
     <div class="progress-bar"><div class="progress" id="progressBar"></div></div>
@@ -310,7 +242,7 @@
   </div>
   <a href="chat.html" class="ai-btn">AI</a>
   <script>
-    // Cookie helpers
+    // Cookie helpers (fallback)
     function setCookie(name, value, days = 365) {
       const d = new Date();
       d.setTime(d.getTime() + (days*24*60*60*1000));
@@ -320,43 +252,24 @@
       const v = document.cookie.match('(^|;) ?' + name + '=([^;]*)(;|$)');
       return v ? decodeURIComponent(v[2]) : null;
     }
-    // Load user from cookies
+    // Load user from Telegram Mini App or fallback
     function loadUser() {
-      const avatar = getCookie('tg_user_avatar') || 'https://ui-avatars.com/api/?name=User&background=ffb347&color=fff';
-      const name = getCookie('tg_user_name') || 'Имя пользователя';
-      const id = getCookie('tg_user_id') || '-';
+      let avatar, name, id;
+      if (window.Telegram && window.Telegram.WebApp && window.Telegram.WebApp.initDataUnsafe && window.Telegram.WebApp.initDataUnsafe.user) {
+        const user = window.Telegram.WebApp.initDataUnsafe.user;
+        name = user.first_name || '';
+        if (user.last_name) name += ' ' + user.last_name;
+        id = user.id || '-';
+        avatar = user.photo_url || 'https://ui-avatars.com/api/?name=' + encodeURIComponent(name) + '&background=ffb347&color=fff';
+      } else {
+        avatar = getCookie('tg_user_avatar') || 'https://ui-avatars.com/api/?name=User&background=ffb347&color=fff';
+        name = getCookie('tg_user_name') || 'Имя пользователя';
+        id = getCookie('tg_user_id') || '-';
+      }
       document.getElementById('userAvatar').src = avatar;
       document.getElementById('userName').textContent = name;
       document.getElementById('userId').textContent = id;
     }
-    // Side menu logic
-    const menuBtn = document.getElementById('menuBtn');
-    const sideMenu = document.getElementById('sideMenu');
-    const closeMenuBtn = document.getElementById('closeMenuBtn');
-    const overlay = document.getElementById('overlay');
-    function openMenu() {
-      sideMenu.classList.add('open');
-      overlay.classList.add('active');
-    }
-    function closeMenu() {
-      sideMenu.classList.remove('open');
-      overlay.classList.remove('active');
-    }
-    menuBtn.addEventListener('click', (e) => {
-      e.stopPropagation();
-      openMenu();
-    });
-    closeMenuBtn.addEventListener('click', (e) => {
-      e.stopPropagation();
-      closeMenu();
-    });
-    overlay.addEventListener('click', closeMenu);
-    // Закрытие по клику вне меню
-    document.addEventListener('click', function(e) {
-      if (sideMenu.classList.contains('open') && !sideMenu.contains(e.target) && e.target !== menuBtn && !menuBtn.contains(e.target)) {
-        closeMenu();
-      }
-    });
     // Init
     loadUser();
   </script>
