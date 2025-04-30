@@ -11,103 +11,94 @@
     :root {
       --primary: #FF7A00;
       --primary-light: #FF9E40;
-      --background: #f0f0f5;
-      --white: #FFFFFF;
-      --shadow-light: #ffffff;
-      --shadow-dark: rgba(163, 177, 198, 0.6);
-      --text-primary: #333333;
-      --text-secondary: #666666;
+      --accent: #FFD700;
+      --background: #FFFFFF;
+      --surface: #F8F9FA;
+      --text: #2C3E50;
+      --text-secondary: #6C757D;
+      --border: #E9ECEF;
     }
 
     * {
       margin: 0;
       padding: 0;
       box-sizing: border-box;
-      font-family: 'Segoe UI', Arial, sans-serif;
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
     }
 
     body {
       background: var(--background);
-      color: var(--text-primary);
+      color: var(--text);
       min-height: 100vh;
-      padding: 20px 0;
-    }
-
-    /* Неоморфный эффект */
-    .neumorphic {
-      border-radius: 20px;
-      background: var(--background);
-      box-shadow: 8px 8px 16px var(--shadow-dark),
-                  -8px -8px 16px var(--shadow-light);
-    }
-
-    .neumorphic-inset {
-      border-radius: 20px;
-      background: var(--background);
-      box-shadow: inset 5px 5px 10px var(--shadow-dark),
-                  inset -5px -5px 10px var(--shadow-light);
+      line-height: 1.5;
     }
 
     /* Экран загрузки */
     .loading-screen {
       position: fixed;
-      top: 0;
-      left: 0;
-      right: 0;
-      bottom: 0;
+      inset: 0;
       background: var(--background);
       display: flex;
       flex-direction: column;
       align-items: center;
       justify-content: center;
       z-index: 1000;
-      transition: opacity 0.5s ease;
+      transition: 0.3s ease;
     }
 
-    .loading-text {
-      font-size: 24px;
-      font-weight: 600;
-      color: var(--primary);
-      margin-bottom: 30px;
+    .loading-progress {
+      width: 200px;
+      height: 4px;
+      background: var(--border);
+      border-radius: 2px;
+      overflow: hidden;
+      position: relative;
     }
 
-    .loading-spinner {
-      width: 80px;
-      height: 80px;
-      border-radius: 50%;
-      border: 6px solid var(--background);
-      border-top-color: var(--primary);
-      animation: spin 1s linear infinite;
-      box-shadow: 5px 5px 10px var(--shadow-dark),
-                  -5px -5px 10px var(--shadow-light);
+    .loading-progress::after {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      height: 100%;
+      width: 30%;
+      background: var(--primary);
+      animation: loading 1s infinite ease-in-out;
     }
 
-    @keyframes spin {
-      to { transform: rotate(360deg); }
+    @keyframes loading {
+      0% { transform: translateX(-100%); }
+      100% { transform: translateX(400%); }
     }
 
     #app-content {
       opacity: 0;
-      transition: opacity 0.5s ease;
-      max-width: 1200px;
-      margin: 0 auto;
+      transition: 0.3s ease;
     }
 
     .header {
-      padding: 25px;
-      margin: 0 20px 30px 20px;
+      background: var(--surface);
+      border-bottom: 1px solid var(--border);
+      padding: 1.5rem;
+      position: sticky;
+      top: 0;
+      z-index: 10;
+    }
+
+    .header-content {
+      max-width: 1200px;
+      margin: 0 auto;
       display: flex;
       align-items: center;
-      gap: 20px;
+      gap: 1.5rem;
     }
 
     .avatar {
-      width: 80px;
-      height: 80px;
-      border-radius: 50%;
+      width: 56px;
+      height: 56px;
+      border-radius: 16px;
       overflow: hidden;
-      box-shadow: 5px 5px 10px var(--shadow-dark),
-                  -5px -5px 10px var(--shadow-light);
+      background: var(--primary);
       position: relative;
     }
 
@@ -123,10 +114,10 @@
       display: flex;
       align-items: center;
       justify-content: center;
-      font-size: 32px;
-      font-weight: bold;
-      color: var(--primary);
-      background: linear-gradient(145deg, #ffffff, #e6e6e6);
+      font-size: 24px;
+      font-weight: 600;
+      color: white;
+      background: linear-gradient(135deg, var(--primary), var(--primary-light));
     }
 
     .user-info {
@@ -134,56 +125,85 @@
     }
 
     .user-name {
-      font-size: 24px;
+      font-size: 1.25rem;
       font-weight: 600;
-      color: var(--text-primary);
-      margin-bottom: 8px;
+      color: var(--text);
+      margin-bottom: 0.25rem;
     }
 
     .user-id {
-      font-size: 16px;
+      font-size: 0.875rem;
       color: var(--text-secondary);
-      font-weight: 500;
+    }
+
+    .main-content {
+      max-width: 1200px;
+      margin: 2rem auto;
+      padding: 0 1.5rem;
     }
 
     .modules-grid {
       display: grid;
       grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-      gap: 30px;
-      padding: 0 20px;
+      gap: 1.5rem;
     }
 
     .module {
-      padding: 25px;
-      transition: all 0.3s ease;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 1.5rem;
+      transition: 0.2s ease;
       cursor: pointer;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .module::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 4px;
+      height: 100%;
+      background: var(--primary);
+      opacity: 0;
+      transition: 0.2s ease;
     }
 
     .module:hover {
-      transform: translateY(-5px);
+      transform: translateY(-4px);
+      border-color: var(--primary);
     }
 
-    .module:active {
-      transform: translateY(0);
-      box-shadow: inset 5px 5px 10px var(--shadow-dark),
-                  inset -5px -5px 10px var(--shadow-light);
+    .module:hover::before {
+      opacity: 1;
     }
 
     .module.locked {
-      opacity: 0.8;
+      opacity: 0.7;
       cursor: not-allowed;
+    }
+
+    .module.locked:hover {
+      transform: none;
+      border-color: var(--border);
+    }
+
+    .module.locked::before {
+      display: none;
     }
 
     .module-label {
       display: inline-block;
-      padding: 8px 16px;
-      border-radius: 15px;
-      font-size: 14px;
-      font-weight: 600;
+      padding: 0.25rem 0.75rem;
+      background: var(--surface);
+      border: 1px solid var(--primary);
+      border-radius: 20px;
+      font-size: 0.875rem;
+      font-weight: 500;
       color: var(--primary);
-      margin-bottom: 20px;
-      box-shadow: 3px 3px 6px var(--shadow-dark),
-                  -3px -3px 6px var(--shadow-light);
+      margin-bottom: 1rem;
     }
 
     .module-content {
@@ -191,107 +211,107 @@
     }
 
     .module-title {
-      font-size: 22px;
+      font-size: 1.25rem;
       font-weight: 600;
-      color: var(--text-primary);
-      margin-bottom: 12px;
+      color: var(--text);
+      margin-bottom: 0.5rem;
     }
 
     .module-desc {
-      font-size: 15px;
+      font-size: 0.875rem;
       color: var(--text-secondary);
-      line-height: 1.5;
-      margin-bottom: 25px;
+      margin-bottom: 1.5rem;
+      line-height: 1.6;
     }
 
     .module-btn {
       width: 100%;
-      padding: 15px;
+      padding: 0.75rem;
       border: none;
-      border-radius: 15px;
-      font-size: 16px;
-      font-weight: 600;
-      color: var(--white);
+      border-radius: 8px;
       background: var(--primary);
+      color: white;
+      font-size: 0.875rem;
+      font-weight: 600;
       cursor: pointer;
-      transition: all 0.3s ease;
-      box-shadow: 5px 5px 10px var(--shadow-dark),
-                  -5px -5px 10px var(--shadow-light);
+      transition: 0.2s ease;
     }
 
     .module-btn:hover {
       background: var(--primary-light);
     }
 
-    .module-btn:active {
-      box-shadow: inset 3px 3px 6px var(--shadow-dark),
-                  inset -3px -3px 6px var(--shadow-light);
-    }
-
     .module.locked .module-btn {
-      background: #cccccc;
+      background: var(--border);
+      color: var(--text-secondary);
       cursor: not-allowed;
     }
 
     .lock-icon {
       position: absolute;
-      top: -15px;
-      right: 0;
-      font-size: 24px;
+      top: 1rem;
+      right: 1rem;
+      font-size: 1.25rem;
       color: var(--text-secondary);
     }
 
     @media (max-width: 768px) {
-      body {
-        padding: 10px 0;
+      .header {
+        padding: 1rem;
       }
 
-      .header {
-        padding: 20px;
-        margin: 0 10px 20px 10px;
+      .header-content {
+        gap: 1rem;
       }
 
       .avatar {
-        width: 60px;
-        height: 60px;
+        width: 48px;
+        height: 48px;
+        border-radius: 12px;
       }
 
       .user-name {
-        font-size: 20px;
+        font-size: 1.125rem;
+      }
+
+      .main-content {
+        margin: 1rem auto;
+        padding: 0 1rem;
       }
 
       .modules-grid {
-        grid-template-columns: 1fr;
-        gap: 20px;
-        padding: 0 10px;
+        gap: 1rem;
       }
 
       .module {
-        padding: 20px;
+        padding: 1.25rem;
       }
     }
   </style>
 </head>
 <body>
   <div class="loading-screen" id="loading-screen">
-    <div class="loading-text">Загрузка</div>
-    <div class="loading-spinner"></div>
+    <div class="loading-progress"></div>
   </div>
 
   <div id="app-content">
-    <div class="header neumorphic">
-      <div class="avatar">
-        <div class="avatar-fallback" id="avatar-fallback">U</div>
+    <header class="header">
+      <div class="header-content">
+        <div class="avatar">
+          <div class="avatar-fallback" id="avatar-fallback">U</div>
+        </div>
+        <div class="user-info">
+          <div class="user-name" id="userName">Загрузка...</div>
+          <div class="user-id" id="userId">ID: загрузка...</div>
+        </div>
       </div>
-      <div class="user-info">
-        <div class="user-name" id="userName">Загрузка...</div>
-        <div class="user-id" id="userId">ID: загрузка...</div>
-      </div>
-    </div>
+    </header>
 
-    <div class="modules-grid" id="modules-container">
-      <!-- Модули будут добавлены динамически -->
-    </div>
+    <main class="main-content">
+      <div class="modules-grid" id="modules-container">
+        <!-- Модули будут добавлены динамически -->
+      </div>
+    </main>
   </div>
 
   <script>
@@ -326,7 +346,7 @@
       setTimeout(() => {
         loadingScreen.style.display = 'none';
         document.getElementById('app-content').style.opacity = '1';
-      }, 500);
+      }, 300);
     }
 
     // Основная функция
@@ -426,7 +446,7 @@
       modules.forEach(module => {
         const isLocked = module.id !== 0 && !state.isPaid;
         html += `
-          <div class="module neumorphic ${isLocked ? 'locked' : ''}" onclick="handleModuleClick(${module.id}, ${isLocked})">
+          <div class="module ${isLocked ? 'locked' : ''}" onclick="handleModuleClick(${module.id}, ${isLocked})">
             <div class="module-label">Модуль ${module.id}</div>
             ${isLocked ? '<div class="lock-icon">🔒</div>' : ''}
             <div class="module-content">
