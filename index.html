@@ -372,6 +372,14 @@
         <div class="user-name" id="userName">Загрузка...</div>
         <div class="user-id" id="userId">ID: загрузка...</div>
       </div>
+      <button class="menu-button" id="menuButton">
+        <span></span>
+        <span></span>
+        <span></span>
+      </button>
+      <div class="menu-content" id="menuContent">
+        <button id="supportButton">Тех. поддержка</button>
+      </div>
     </div>
 
     <div class="content">
@@ -379,6 +387,10 @@
         <!-- Модули будут добавлены динамически -->
       </div>
     </div>
+
+    <a href="chat.html" class="chat-widget">
+      <span>💬</span>
+    </a>
   </div>
 
   <script>
@@ -539,6 +551,28 @@
 
     // Глобальная функция для обработки кликов по модулям
     window.handleModuleClick = handleModuleClick;
+
+    // Обработка меню
+    const menuButton = document.getElementById('menuButton');
+    const menuContent = document.getElementById('menuContent');
+
+    menuButton.addEventListener('click', () => {
+      menuButton.classList.toggle('active');
+      menuContent.classList.toggle('active');
+    });
+
+    // Закрытие меню при клике вне его
+    document.addEventListener('click', (e) => {
+      if (!menuButton.contains(e.target) && !menuContent.contains(e.target)) {
+        menuButton.classList.remove('active');
+        menuContent.classList.remove('active');
+      }
+    });
+
+    // Обработка клика по кнопке тех. поддержки
+    document.getElementById('supportButton').addEventListener('click', () => {
+      window.location.href = 'chat.html';
+    });
   </script>
 </body>
 </html>
