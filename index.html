@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Puzzle Bot - Категории пользователя</title>
     <style>
+        /* Стили остаются такими же */
         body {
             font-family: Arial, sans-serif;
             display: flex;
@@ -68,6 +69,11 @@
             color: #d35400;
             font-weight: bold;
         }
+        #loading {
+            display: none;
+            margin: 10px 0;
+            color: #3498db;
+        }
     </style>
 </head>
 <body>
@@ -94,6 +100,7 @@
         </div>
         
         <button id="getButton">Получить категории</button>
+        <div id="loading">Идет запрос к API...</div>
         
         <h2>Результат:</h2>
         <div id="console">Ожидание запроса...</div>
@@ -107,6 +114,7 @@
         const userInfoElement = document.getElementById('userInfo');
         const manualUserIdGroup = document.getElementById('manualUserIdGroup');
         const userIdInput = document.getElementById('userId');
+        const loadingElement = document.getElementById('loading');
         
         let tgUserId = null;
         let tgUserData = null;
@@ -119,7 +127,6 @@
                 const webApp = Telegram.WebApp;
                 
                 try {
-                    // Пытаемся получить данные пользователя
                     tgUserData = webApp.initDataUnsafe?.user;
                     tgUserId = tgUserData?.id;
                     
@@ -132,7 +139,6 @@
                             Username: @${tgUserData.username || 'не указано'}
                         `;
                         
-                        // Показываем основную часть интерфейса
                         webApp.expand();
                         webApp.enableClosingConfirmation();
                     } else {
@@ -164,11 +170,26 @@
             consoleElement.scrollTop = consoleElement.scrollHeight;
         }
         
+        async function fetchWithTimeout(url, options = {}, timeout = 8000) {
+            const controller = new AbortController();
+            const id = setTimeout(() => controller.abort(), timeout);
+            
+            try {
+                const response = await fetch(url, {
+                    ...options,
+                    signal: controller.signal
+                });
+                clearTimeout(id);
+                return response;
+            } catch (error) {
+                clearTimeout(id);
+                throw error;
+            }
+        }
+        
         async function getCategories() {
             const apiKey = apiKeyInput.value.trim();
             const chatId = chatIdInput.value.trim();
-            
-            // Получаем user_id - либо из Telegram, либо ручной ввод
             const userId = tgUserId || userIdInput.value.trim();
             
             if (!apiKey) {
@@ -186,19 +207,30 @@
                 return;
             }
             
+            // Показываем индикатор загрузки
+            loadingElement.style.display = 'block';
+            getButton.disabled = true;
+            
             log(`Запрос категорий для пользователя ID: ${userId}...`);
             
             try {
-                // 1. Получаем статус пользователя с категориями
+                // 1. Получаем статус пользователя
                 const statusUrl = `https://api.puzzlebot.top/?token=${apiKey}&method=getUserInChatStatus&user_id=${userId}&chat_id=${chatId}&page=1`;
                 log(`Отправка запроса: ${statusUrl}`);
                 
-                const statusResponse = await fetch(statusUrl);
+                const statusResponse = await fetchWithTimeout(statusUrl, {
+                    method: 'GET',
+                    headers: {
+                        'Accept': 'application/json'
+                    }
+                });
+                
                 if (!statusResponse.ok) {
                     throw new Error(`HTTP ошибка! Статус: ${statusResponse.status}`);
                 }
                 
                 const statusData = await statusResponse.json();
+                
                 if (statusData.code !== 0) {
                     throw new Error(`API ошибка: ${statusData.message || 'неизвестная ошибка'}`);
                 }
@@ -211,11 +243,17 @@
                     categories: statusData.data.categories || []
                 }, null, 2));
                 
-                // 2. Получаем список всех категорий чата
+                // 2. Получаем список категорий чата
                 const categoriesUrl = `https://api.puzzlebot.top/?token=${apiKey}&method=getChatCategories&tg_chat_id=${chatId}`;
                 log(`\nЗапрос списка категорий чата: ${categoriesUrl}`);
                 
-                const categoriesResponse = await fetch(categoriesUrl);
+                const categoriesResponse = await fetchWithTimeout(categoriesUrl, {
+                    method: 'GET',
+                    headers: {
+                        'Accept': 'application/json'
+                    }
+                });
+                
                 const categoriesData = await categoriesResponse.json();
                 
                 if (categoriesData.code !== 0) {
@@ -246,8 +284,19 @@
                 }
                 
             } catch (error) {
-                log(`\nОшибка при запросе: ${error.message}`);
-                console.error(error);
+                if (error.name === 'AbortError') {
+                    log('\nОшибка: Превышено время ожидания ответа от сервера (8 сек)');
+                    log('Проверьте:');
+                    log('1. Доступность API puzzlebot.top');
+                    log('2. Правильность API ключа и параметров');
+                    log('3. Интернет-соединение');
+                } else {
+                    log(`\nОшибка при запросе: ${error.message}`);
+                }
+                console.error('Ошибка:', error);
+            } finally {
+                loadingElement.style.display = 'none';
+                getButton.disabled = false;
             }
         }
         
