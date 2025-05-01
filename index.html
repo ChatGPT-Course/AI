@@ -1,55 +1,596 @@
 <!DOCTYPE html>
-<html>
+<html lang="ru">
 <head>
-    <meta charset="UTF-8">
-    <title>PuzzleBot Mini App</title>
-    <style>
-        body {
-            padding: 20px;
-            font-family: Arial;
-            background: #ffffff;
-            color: #000000;
-            text-align: center;
-        }
-        #message {
-            color: red;
-            margin-top: 20px;
-        }
-    </style>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Основы ИИ — Онлайн курс</title>
+  <script src="https://telegram.org/js/telegram-web-app.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
+  <style>
+    :root {
+      --primary: #FF7A00;
+      --primary-light: #FF9E40;
+      --white: #FFFFFF;
+      --dark: #333333;
+      --gray: #F5F5F5;
+      --graphite: #4A4A4A;
+    }
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      -webkit-tap-highlight-color: transparent;
+      outline: none;
+    }
+
+    body {
+      margin: 0;
+      font-family: 'Segoe UI', Arial, sans-serif;
+      background: linear-gradient(135deg, #FFF3E0 0%, #FFFFFF 100%);
+      color: var(--dark);
+      min-height: 100vh;
+    }
+
+    /* Экран загрузки */
+    .loading-screen {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: linear-gradient(135deg, var(--white) 0%, #FFF3E0 100%);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      z-index: 1000;
+      transition: opacity 0.5s ease;
+    }
+
+    .loading-text {
+      font-size: 20px;
+      font-weight: 500;
+      margin-bottom: 20px;
+      color: var(--primary);
+    }
+
+    .loading-balls {
+      display: flex;
+      gap: 12px;
+    }
+
+    .loading-ball {
+      width: 16px;
+      height: 16px;
+      border-radius: 50%;
+      animation: bounce 1s infinite ease-in-out;
+    }
+
+    .loading-ball:nth-child(1) {
+      background: var(--primary);
+      animation-delay: 0s;
+    }
+
+    .loading-ball:nth-child(2) {
+      background: var(--primary-light);
+      animation-delay: 0.2s;
+    }
+
+    .loading-ball:nth-child(3) {
+      background: #AAAAAA;
+      animation-delay: 0.4s;
+    }
+
+    @keyframes bounce {
+      0%, 100% { transform: translateY(0); }
+      50% { transform: translateY(-10px); }
+    }
+
+    #app-content {
+      opacity: 0;
+      transition: opacity 0.5s ease;
+    }
+
+    .header {
+      display: flex;
+      align-items: center;
+      background: var(--graphite);
+      padding: 20px;
+      box-shadow: 0 4px 16px rgba(0, 0, 0, 0.2);
+      width: 100%;
+      margin-bottom: 20px;
+      position: relative;
+      color: var(--white);
+    }
+
+    .avatar {
+      width: 64px;
+      height: 64px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, var(--primary) 0%, var(--primary-light) 100%);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: white;
+      font-weight: bold;
+      margin-right: 20px;
+      overflow: hidden;
+      flex-shrink: 0;
+    }
+
+    .avatar img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+
+    .user-info {
+      flex: 1;
+    }
+
+    .user-name {
+      font-size: 20px;
+      font-weight: 600;
+      color: var(--white);
+      margin-bottom: 4px;
+      line-height: 1.2;
+    }
+
+    .user-id {
+      font-size: 14px;
+      color: #DDD;
+    }
+
+    .content {
+      padding: 0 20px 20px;
+      max-width: 1200px;
+      margin: 0 auto;
+    }
+
+    .modules-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 20px;
+    }
+
+    .module {
+      background: var(--white);
+      border-radius: 16px;
+      padding: 24px;
+      box-shadow: 0 4px 16px rgba(255, 122, 0, 0.1);
+      transition: all 0.3s ease;
+      position: relative;
+      cursor: pointer;
+      margin-top: 30px;
+    }
+
+    .module:hover {
+      transform: translateY(-5px);
+    }
+
+    .module.locked {
+      opacity: 0.7;
+      cursor: not-allowed;
+    }
+
+    .module-label {
+      position: absolute;
+      top: -20px;
+      left: 0;
+      background: var(--primary);
+      color: white;
+      padding: 8px 16px;
+      border-radius: 8px;
+      font-size: 16px;
+      font-weight: 500;
+      z-index: 2;
+    }
+
+    .module-content {
+      position: relative;
+    }
+
+    .module-title {
+      font-size: 20px;
+      font-weight: 600;
+      margin-bottom: 8px;
+      color: var(--dark);
+    }
+
+    .module-desc {
+      font-size: 14px;
+      color: #666;
+      margin-bottom: 20px;
+      line-height: 1.4;
+    }
+
+    .module-btn {
+      background: var(--primary);
+      color: white;
+      border: none;
+      padding: 12px 24px;
+      border-radius: 8px;
+      font-weight: 600;
+      cursor: pointer;
+      width: 100%;
+      transition: background 0.2s;
+    }
+
+    .module-btn:hover {
+      background: var(--primary-light);
+    }
+
+    .module.locked .module-btn {
+      background: #ccc;
+      cursor: not-allowed;
+    }
+
+    .lock-icon {
+      position: absolute;
+      top: 16px;
+      right: 16px;
+      font-size: 20px;
+    }
+
+    /* Menu Button Styles */
+    .menu-button {
+      position: absolute;
+      right: 20px;
+      top: 50%;
+      transform: translateY(-50%);
+      width: 40px;
+      height: 40px;
+      background: transparent;
+      border: 2px solid var(--white);
+      border-radius: 8px;
+      cursor: pointer;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      gap: 6px;
+      z-index: 100;
+      padding: 8px;
+    }
+
+    .menu-button span {
+      display: block;
+      width: 24px;
+      height: 2px;
+      background: var(--white);
+      transition: all 0.3s ease;
+    }
+
+    .menu-button.active span:nth-child(1) {
+      transform: rotate(45deg) translate(6px, 6px);
+    }
+
+    .menu-button.active span:nth-child(2) {
+      opacity: 0;
+    }
+
+    .menu-button.active span:nth-child(3) {
+      transform: rotate(-45deg) translate(6px, -6px);
+    }
+
+    /* Menu Content */
+    .menu-content {
+      position: absolute;
+      top: 80px;
+      right: 20px;
+      background: var(--white);
+      padding: 10px;
+      border-radius: 8px;
+      box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
+      display: none;
+      z-index: 99;
+      opacity: 0;
+      transform: translateY(-10px);
+      transition: opacity 0.3s ease, transform 0.3s ease;
+    }
+
+    .menu-content.active {
+      display: block;
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    .menu-content button {
+      background: linear-gradient(135deg, #FFF3E0 0%, #FFFFFF 100%);
+      border: none;
+      padding: 12px 24px;
+      width: 100%;
+      text-align: left;
+      cursor: pointer;
+      color: var(--dark);
+      font-size: 16px;
+      transition: background 0.2s;
+      border-radius: 20px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .menu-content button:hover {
+      background: var(--gray);
+    }
+
+    /* Chat Widget */
+    .chat-widget {
+      position: fixed;
+      bottom: 30px;
+      right: 30px;
+      width: 60px;
+      height: 60px;
+      background: var(--primary);
+      border-radius: 50%;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      box-shadow: 0 4px 16px rgba(255, 122, 0, 0.2);
+      transition: transform 0.3s ease;
+      z-index: 1000;
+      text-decoration: none;
+      padding: 8px;
+      gap: 2px;
+    }
+
+    .chat-widget:hover {
+      transform: scale(1.1);
+    }
+
+    .chat-widget .ai-text {
+      color: var(--white);
+      font-size: 14px;
+      font-weight: bold;
+      line-height: 1;
+    }
+
+    .chat-widget .chat-icon {
+      font-size: 18px;
+      color: var(--white);
+      line-height: 1;
+    }
+
+    @media (max-width: 600px) {
+      .header {
+        padding: 15px;
+      }
+      
+      .avatar {
+        width: 48px;
+        height: 48px;
+        margin-right: 15px;
+      }
+
+      .user-name {
+        font-size: 18px;
+      }
+
+      .content {
+        padding: 0 15px 15px;
+      }
+
+      .modules-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+  </style>
 </head>
 <body>
-    <h1>PuzzleBot Categories</h1>
-    <div id="content"></div>
-    <div id="message"></div>
+  <div class="loading-screen" id="loading-screen">
+    <div class="loading-text">Загрузка</div>
+    <div class="loading-balls">
+      <div class="loading-ball"></div>
+      <div class="loading-ball"></div>
+      <div class="loading-ball"></div>
+    </div>
+  </div>
 
-    <script>
-        function showMessage(text) {
-            document.getElementById('message').textContent = text;
-        }
+  <div id="app-content">
+    <div class="header">
+      <div class="avatar" id="userAvatar">
+        <span id="avatar-fallback">U</span>
+      </div>
+      <div class="user-info">
+        <div class="user-name" id="userName">Загрузка...</div>
+        <div class="user-id" id="userId">ID: загрузка...</div>
+      </div>
+      <button class="menu-button" id="menuButton">
+        <span></span>
+        <span></span>
+        <span></span>
+      </button>
+      <div class="menu-content" id="menuContent">
+        <button id="supportButton">Тех. поддержка 🛠️</button>
+      </div>
+    </div>
 
-        // Проверка платформы
-        if (window.Telegram?.WebApp) {
-            // Режим Telegram WebApp
-            const webApp = Telegram.WebApp;
-            webApp.ready();
-            webApp.expand();
+    <div class="content">
+      <div class="modules-grid" id="modules-container">
+        <!-- Модули будут добавлены динамически -->
+      </div>
+    </div>
 
-            // Пользовательские данные
-            const user = webApp.initDataUnsafe.user;
-            if (user) {
-                document.getElementById('content').innerHTML = `
-                    <p>ID: ${user.id}</p>
-                    <p>Имя: ${user.first_name || 'не указано'}</p>
-                    <p>Username: @${user.username || 'не указан'}</p>
-                `;
-            } else {
-                showMessage("Данные пользователя не получены.");
-            }
+    <a href="chat.html" class="chat-widget">
+      <span class="ai-text">AI</span>
+      <span class="chat-icon">💬</span>
+    </a>
+  </div>
 
-        } else {
-            // Режим веб-браузера
-            showMessage("Откройте приложение через Telegram-клиент (iOS/Android/Desktop).");
-        }
-    </script>
+  <script>
+    // Конфигурация Firebase
+    const firebaseConfig = {
+      apiKey: "AIzaSyCMos6Y7C-krTLuKCI4VJG-TFLo6QI--k8",
+      authDomain: "vrot-x-7a48f.firebaseapp.com",
+      databaseURL: "https://vrot-x-7a48f-default-rtdb.firebaseio.com",
+      projectId: "vrot-x-7a48f",
+      storageBucket: "vrot-x-7a48f.firebasestorage.app",
+      messagingSenderId: "622297225288",
+      appId: "1:622297225288:web:5df6a5b02ffddedd96e07d"
+    };
+
+    // Инициализация Firebase
+    firebase.initializeApp(firebaseConfig);
+    const database = firebase.database();
+
+    // Состояние приложения
+    const state = {
+      userId: null,
+      username: null,
+      isPaid: false,
+      isLoaded: false
+    };
+
+    // Функция для скрытия экрана загрузки
+    function hideLoadingScreen() {
+      const loadingScreen = document.getElementById('loading-screen');
+      loadingScreen.style.opacity = '0';
+      setTimeout(() => {
+        loadingScreen.style.display = 'none';
+        document.getElementById('app-content').style.opacity = '1';
+      }, 500);
+    }
+
+    // Функция проверки статуса оплаты
+    async function checkPaymentStatus() {
+      if (!state.userId) return;
+
+      try {
+        const snapshot = await database.ref(`users/${state.userId}/paid`).once('value');
+        state.isPaid = snapshot.val() === true;
+        updateUI();
+      } catch (error) {
+        console.error('Ошибка при проверке статуса оплаты:', error);
+      }
+    }
+
+    // Основная функция
+    document.addEventListener('DOMContentLoaded', async () => {
+      // Показываем экран загрузки
+      document.getElementById('loading-screen').style.display = 'flex';
+      document.getElementById('app-content').style.opacity = '0';
+
+      if (window.Telegram?.WebApp) {
+        await initTelegramApp();
+      } else {
+        await initTestMode();
+      }
+
+      // Запускаем периодическую проверку статуса
+      await checkPaymentStatus();
+      setInterval(checkPaymentStatus, 5000);
+    });
+
+    async function initTelegramApp() {
+      // Убираем стандартную заставку Telegram
+      if (window.Telegram?.WebApp) {
+        Telegram.WebApp.ready();
+        Telegram.WebApp.expand();
+      }
+
+      const tg = window.Telegram.WebApp;
+      const user = tg.initDataUnsafe.user;
+      
+      state.userId = user.id.toString();
+      state.username = user.username || null;
+
+      // Устанавливаем данные пользователя из Telegram
+      document.getElementById('userName').textContent = 
+        [user.first_name, user.last_name].filter(Boolean).join(' ') || 'Пользователь';
+      document.getElementById('userId').textContent = `ID: ${state.userId}`;
+
+      // Устанавливаем аватар
+      const avatarElement = document.getElementById('userAvatar');
+      if (user.photo_url) {
+        const img = new Image();
+        img.src = user.photo_url;
+        img.onload = () => {
+          avatarElement.innerHTML = '';
+          avatarElement.appendChild(img);
+        };
+      } else {
+        const fallback = user.first_name?.charAt(0).toUpperCase() || 'U';
+        document.getElementById('avatar-fallback').textContent = fallback;
+      }
+
+      state.isLoaded = true;
+      // Отображаем модули сразу, даже если статус еще не получен
+      updateUI();
+      hideLoadingScreen();
+    }
+
+    async function initTestMode() {
+      state.userId = "test-user";
+      document.getElementById('userName').textContent = 'Тестовый пользователь';
+      document.getElementById('userId').textContent = 'ID: test-user';
+      document.getElementById('avatar-fallback').textContent = 'T';
+      state.isLoaded = true;
+      // Отображаем модули сразу, даже если статус еще не получен
+      updateUI();
+      hideLoadingScreen();
+    }
+
+    function updateUI() {
+      const modules = [
+        { id: 0, title: "Введение в ИИ", desc: "Основы, история, примеры использования искусственного интеллекта" },
+        { id: 1, title: "Основы ChatGPT", desc: "Базовые принципы работы с ChatGPT, ключевые концепции" },
+        { id: 2, title: "ChatGPT PRO", desc: "Продвинутые техники и методы работы с ChatGPT" },
+        { id: 3, title: "ChatGPT MASTER", desc: "Экспертный уровень использования ChatGPT" }
+      ];
+
+      let html = '';
+      modules.forEach(module => {
+        const isLocked = module.id !== 0 && !state.isPaid;
+        html += `
+          <div class="module ${isLocked ? 'locked' : ''}" onclick="handleModuleClick(${module.id}, ${isLocked})">
+            <div class="module-label">Модуль ${module.id} - ${module.title}</div>
+            <div class="module-content">
+              <div class="module-desc">${module.desc}</div>
+              <button class="module-btn">${isLocked ? 'Закрыто' : 'Начать'}</button>
+            </div>
+          </div>
+        `;
+      });
+      document.getElementById('modules-container').innerHTML = html;
+    }
+
+    function handleModuleClick(moduleId, isLocked) {
+      if (isLocked) {
+        alert('Для доступа к этому модулю необходимо приобрести полную версию курса');
+        return;
+      }
+      // Здесь логика открытия модуля
+      alert(`Открываем модуль ${moduleId}`);
+    }
+
+    // Глобальная функция для обработки кликов по модулям
+    window.handleModuleClick = handleModuleClick;
+
+    // Обработка меню
+    const menuButton = document.getElementById('menuButton');
+    const menuContent = document.getElementById('menuContent');
+
+    menuButton.addEventListener('click', () => {
+      menuButton.classList.toggle('active');
+      menuContent.classList.toggle('active');
+    });
+
+    // Закрытие меню при клике вне его
+    document.addEventListener('click', (e) => {
+      if (!menuButton.contains(e.target) && !menuContent.contains(e.target)) {
+        menuButton.classList.remove('active');
+        menuContent.classList.remove('active');
+      }
+    });
+
+    // Обработка клика по кнопке тех. поддержки
+    document.getElementById('supportButton').addEventListener('click', () => {
+      window.location.href = 'chat.html';
+    });
+  </script>
 </body>
 </html>
