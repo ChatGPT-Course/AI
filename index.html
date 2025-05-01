@@ -570,9 +570,9 @@
         logToConsole(`URL: ${url}`, 'info');
 
         const response = await fetch(url, {
-          method: 'POST',
+          method: 'GET',
           headers: {
-            'Content-Type': 'application/x-www-form-urlencoded'
+            'Accept': 'application/json'
           }
         });
 
