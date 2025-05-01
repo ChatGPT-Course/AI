@@ -524,13 +524,10 @@
       try {
         const url = 'https://api.puzzlebot.top/?token=i5vkuteSbTI65FSFoLahqgpEmpkQUbZJ&method=getUserInChatStatus&user_id=1515638372&chat_id=7533493609&page=1';
         
-        log('Отправляем запрос к API...', 'info');
-        log(url, 'info', true);
-
         const response = await fetch(url, {
           method: 'POST',
           headers: {
-            'Content-Type': 'application/json'
+            'Content-Type': 'application/x-www-form-urlencoded'
           }
         });
 
@@ -540,22 +537,16 @@
 
         const data = await response.json();
         
-        // Выводим все данные в консоль
-        console.log('Полученные данные:', data);
-        log('Полученные данные: ' + JSON.stringify(data, null, 2), 'success');
+        // Выводим данные в точно таком же формате, как в браузере
+        console.log(JSON.stringify(data));
         
-        // Выводим отдельные поля для удобства
-        if (data.code === 0 && data.data) {
-          console.log('ID пользователя:', data.data.user_id);
-          console.log('Имя:', data.data.first_name);
-          console.log('Фамилия:', data.data.last_name);
-          console.log('Username:', data.data.username);
-          console.log('Категории:', data.data.categories);
+        // Дополнительно выводим категории отдельно для удобства
+        if (data.code === 0 && data.data && data.data.categories) {
+          console.log('Категории пользователя:', data.data.categories);
         }
 
       } catch (error) {
         console.error('Ошибка при запросе:', error);
-        log('Ошибка при запросе к API: ' + error.message, 'error');
       }
     }
 
@@ -651,51 +642,3 @@
       modules.forEach(module => {
         const isLocked = module.id !== 0 && !state.isPaid;
         html += `
-          <div class="module ${isLocked ? 'locked' : ''}" onclick="handleModuleClick(${module.id}, ${isLocked})">
-            <div class="module-label">Модуль ${module.id} - ${module.title}</div>
-            <div class="module-content">
-              <div class="module-desc">${module.desc}</div>
-              <button class="module-btn">${isLocked ? 'Закрыто' : 'Начать'}</button>
-            </div>
-          </div>
-        `;
-      });
-      document.getElementById('modules-container').innerHTML = html;
-    }
-
-    function handleModuleClick(moduleId, isLocked) {
-      if (isLocked) {
-        alert('Для доступа к этому модулю необходимо приобрести полную версию курса');
-        return;
-      }
-      // Здесь логика открытия модуля
-      alert(`Открываем модуль ${moduleId}`);
-    }
-
-    // Глобальная функция для обработки кликов по модулям
-    window.handleModuleClick = handleModuleClick;
-
-    // Обработка меню
-    const menuButton = document.getElementById('menuButton');
-    const menuContent = document.getElementById('menuContent');
-
-    menuButton.addEventListener('click', () => {
-      menuButton.classList.toggle('active');
-      menuContent.classList.toggle('active');
-    });
-
-    // Закрытие меню при клике вне его
-    document.addEventListener('click', (e) => {
-      if (!menuButton.contains(e.target) && !menuContent.contains(e.target)) {
-        menuButton.classList.remove('active');
-        menuContent.classList.remove('active');
-      }
-    });
-
-    // Обработка клика по кнопке тех. поддержки
-    document.getElementById('supportButton').addEventListener('click', () => {
-      window.location.href = 'chat.html';
-    });
-  </script>
-</body>
-</html>
