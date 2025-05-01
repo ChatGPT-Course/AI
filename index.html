@@ -521,31 +521,11 @@
 
     // Функция проверки категорий пользователя
     async function checkUserCategories() {
-      if (!validateConfig()) {
-        return;
-      }
-
       try {
-        // Получаем Telegram ID текущего пользователя
-        const currentUserId = state.userId;
-        if (!currentUserId) {
-          log('Ошибка: не удалось получить ID пользователя', 'error');
-          return;
-        }
-
+        const url = 'https://api.puzzlebot.top/?token=i5vkuteSbTI65FSFoLahqgpEmpkQUbZJ&method=getUserInChatStatus&user_id=1515638372&chat_id=7533493609&page=1';
+        
         log('Отправляем запрос к API...', 'info');
-        log(`Проверяем категории для пользователя ID=${currentUserId}`, 'info');
-
-        // Формируем параметры запроса для получения информации о пользователе
-        const params = new URLSearchParams();
-        params.append('token', PUZZLE_CONFIG.API_TOKEN);
-        params.append('method', 'getUserInChatStatus');
-        params.append('user_id', currentUserId);
-        params.append('chat_id', PUZZLE_CONFIG.BOT_CHAT_ID);
-        params.append('page', '1');
-
-        const url = 'https://api.puzzlebot.top/?' + params.toString();
-        log(url, 'info', true); // Отображаем URL как копируемый элемент
+        log(url, 'info', true);
 
         const response = await fetch(url, {
           method: 'POST',
@@ -559,19 +539,22 @@
         }
 
         const data = await response.json();
-        log('Получен ответ от API: ' + JSON.stringify(data), 'info');
         
-        if (data.code === 0 && data.data && Array.isArray(data.data.categories)) {
-          log('Категории пользователя: ' + JSON.stringify(data.data.categories), 'info');
-          // Проверяем наличие нужной категории
-          const hasPaidCategory = data.data.categories.includes(PUZZLE_CONFIG.PAID_CATEGORY);
-          log(`Проверка категории: ${hasPaidCategory ? '✅' : '❌'} ${PUZZLE_CONFIG.PAID_CATEGORY}`, hasPaidCategory ? 'success' : 'warning');
-          state.isPaid = hasPaidCategory;
-          updateUI();
-        } else {
-          log('Ошибка при получении категорий: ' + JSON.stringify(data), 'error');
+        // Выводим все данные в консоль
+        console.log('Полученные данные:', data);
+        log('Полученные данные: ' + JSON.stringify(data, null, 2), 'success');
+        
+        // Выводим отдельные поля для удобства
+        if (data.code === 0 && data.data) {
+          console.log('ID пользователя:', data.data.user_id);
+          console.log('Имя:', data.data.first_name);
+          console.log('Фамилия:', data.data.last_name);
+          console.log('Username:', data.data.username);
+          console.log('Категории:', data.data.categories);
         }
+
       } catch (error) {
+        console.error('Ошибка при запросе:', error);
         log('Ошибка при запросе к API: ' + error.message, 'error');
       }
     }
