@@ -443,6 +443,22 @@
       isLoaded: false
     };
 
+    // Функция для логирования
+    function log(message, type = 'info') {
+      const logContainer = document.getElementById('debug-log');
+      const entry = document.createElement('div');
+      entry.className = `debug-log-entry ${type}`;
+      const time = new Date().toLocaleTimeString();
+      entry.textContent = `[${time}] ${message}`;
+      logContainer.appendChild(entry);
+      // Прокручиваем к последнему сообщению
+      logContainer.scrollTop = logContainer.scrollHeight;
+      // Ограничиваем количество сообщений
+      while (logContainer.children.length > 50) {
+        logContainer.removeChild(logContainer.firstChild);
+      }
+    }
+
     // Функция для скрытия экрана загрузки
     function hideLoadingScreen() {
       const loadingScreen = document.getElementById('loading-screen');
@@ -463,12 +479,12 @@
         // Получаем Telegram ID текущего пользователя
         const currentUserId = state.userId;
         if (!currentUserId) {
-          console.error('Ошибка: не удалось получить ID пользователя');
+          log('Ошибка: не удалось получить ID пользователя', 'error');
           return;
         }
 
-        console.log('Отправляем запрос к API...');
-        console.log(`Проверяем категории для пользователя ID=${currentUserId}`);
+        log('Отправляем запрос к API...', 'info');
+        log(`Проверяем категории для пользователя ID=${currentUserId}`, 'info');
 
         // Формируем параметры запроса для получения информации о пользователе
         const params = new URLSearchParams();
@@ -478,7 +494,7 @@
         params.append('chat_id', PUZZLE_CONFIG.BOT_CHAT_ID);
 
         const url = 'https://api.puzzlebot.top/?' + params.toString();
-        console.log('URL запроса: ' + url);
+        log('URL запроса: ' + url, 'info');
 
         const response = await fetch(url, {
           method: 'POST',
@@ -492,31 +508,31 @@
         }
 
         const data = await response.json();
-        console.log('Получен ответ от API:', data);
+        log('Получен ответ от API: ' + JSON.stringify(data), 'info');
         
         if (data.code === 0 && data.data && Array.isArray(data.data.categories)) {
-          console.log('Категории пользователя:', data.data.categories);
+          log('Категории пользователя: ' + JSON.stringify(data.data.categories), 'info');
           // Проверяем наличие нужной категории
           const hasPaidCategory = data.data.categories.includes(PUZZLE_CONFIG.PAID_CATEGORY);
-          console.log(`Проверка категории: ${hasPaidCategory ? '✅' : '❌'} ${PUZZLE_CONFIG.PAID_CATEGORY}`);
+          log(`Проверка категории: ${hasPaidCategory ? '✅' : '❌'} ${PUZZLE_CONFIG.PAID_CATEGORY}`, hasPaidCategory ? 'success' : 'warning');
           state.isPaid = hasPaidCategory;
           updateUI();
         } else {
-          console.error('Ошибка при получении категорий:', data);
+          log('Ошибка при получении категорий: ' + JSON.stringify(data), 'error');
         }
       } catch (error) {
-        console.error('Ошибка при запросе к API:', error);
+        log('Ошибка при запросе к API: ' + error.message, 'error');
       }
     }
 
     // Проверка конфигурации
     function validateConfig() {
       if (!PUZZLE_CONFIG.API_TOKEN) {
-        console.error('Ошибка: не указан API токен!');
+        log('Ошибка: не указан API токен!', 'error');
         return false;
       }
       if (!PUZZLE_CONFIG.BOT_CHAT_ID) {
-        console.error('Ошибка: не указан ID бота!');
+        log('Ошибка: не указан ID бота!', 'error');
         return false;
       }
       return true;
@@ -645,6 +661,25 @@
     // Обработка клика по кнопке тех. поддержки
     document.getElementById('supportButton').addEventListener('click', () => {
       window.location.href = 'chat.html';
+    });
+
+    // Добавляем элемент для логов внизу страницы
+    document.addEventListener('DOMContentLoaded', () => {
+      const logContainer = document.createElement('div');
+      logContainer.id = 'debug-log';
+      logContainer.style.position = 'fixed';
+      logContainer.style.bottom = '0';
+      logContainer.style.left = '0';
+      logContainer.style.right = '0';
+      logContainer.style.maxHeight = '200px';
+      logContainer.style.background = 'rgba(0, 0, 0, 0.8)';
+      logContainer.style.color = '#fff';
+      logContainer.style.fontFamily = 'monospace';
+      logContainer.style.fontSize = '12px';
+      logContainer.style.padding = '10px';
+      logContainer.style.overflowY = 'auto';
+      logContainer.style.zIndex = '1000';
+      document.body.appendChild(logContainer);
     });
   </script>
 </body>
