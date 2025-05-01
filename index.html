@@ -460,8 +460,11 @@
   <script>
     // Конфигурация Puzzle Bot
     const PUZZLE_CONFIG = {
-      // API токен бота (получить в настройках бота -> интеграции)
+      // API токен из Puzzle Bot (Настройки -> Интеграции)
       API_TOKEN: 'i5vkuteSbTI65FSFoLahqgpEmpkQUbZJ',
+
+      // ID бота
+      BOT_CHAT_ID: '7533493609',
 
       // Название категории, которая открывает доступ
       PAID_CATEGORY: 'ОТКРЫТОТЕСТ',
@@ -511,28 +514,21 @@
       }
 
       try {
-        // Получаем Telegram ID текущего пользователя
-        const currentUserId = state.userId;
-        if (!currentUserId) {
-          log('Ошибка: не удалось получить ID пользователя', 'error');
-          return;
-        }
-
         log('Отправляем запрос к API...', 'info');
-        log(`Проверяем категории для пользователя ID=${currentUserId}`, 'info');
+        log(`Конфигурация: Bot ID=${PUZZLE_CONFIG.BOT_CHAT_ID}, Категория=${PUZZLE_CONFIG.PAID_CATEGORY}`, 'info');
 
-        // Формируем параметры запроса
+        // Формируем параметры запроса в точности как в документации
         const params = new URLSearchParams();
         params.append('token', PUZZLE_CONFIG.API_TOKEN);
-        params.append('method', 'getUserCategories'); // Изменили метод на правильный
-        params.append('user_id', currentUserId); // Передаем ID пользователя вместо ID бота
+        params.append('method', 'getChatCategories');
+        params.append('tg_chat_id', PUZZLE_CONFIG.BOT_CHAT_ID);
 
-        const response = await fetch('https://api.puzzlebot.top/', {
+        log('URL запроса: https://api.puzzlebot.top/?' + params.toString(), 'info');
+
+        const response = await fetch('https://api.puzzlebot.top/?' + params.toString(), {
           method: 'POST',
-          body: params,
           headers: {
-            'Content-Type': 'application/x-www-form-urlencoded',
-            'Accept': 'application/json'
+            'Content-Type': 'application/x-www-form-urlencoded'
           }
         });
 
@@ -544,11 +540,13 @@
         log('Получен ответ от API: ' + JSON.stringify(data), 'info');
         
         if (data.code === 0 && Array.isArray(data.data)) {
-          log('Категории пользователя: ' + JSON.stringify(data.data), 'info');
+          log('Список категорий: ' + JSON.stringify(data.data), 'info');
           // Проверяем наличие нужной категории
+          // Формат данных согласно документации: [id, name, is_main]
           const hasPaidCategory = data.data.some(category => {
-            const matches = category === PUZZLE_CONFIG.PAID_CATEGORY; // Изменили проверку, так как формат ответа другой
-            log(`Проверка категории: ${category} ${matches ? '✅' : '❌'} ${PUZZLE_CONFIG.PAID_CATEGORY}`, matches ? 'success' : 'warning');
+            const categoryName = category[1]; // Берем name из массива [id, name, is_main]
+            const matches = categoryName === PUZZLE_CONFIG.PAID_CATEGORY;
+            log(`Проверка категории: ${categoryName} ${matches ? '✅' : '❌'} ${PUZZLE_CONFIG.PAID_CATEGORY}`, matches ? 'success' : 'warning');
             return matches;
           });
           
@@ -563,7 +561,7 @@
         // Добавляем дополнительную информацию об ошибке
         if (error instanceof TypeError) {
           log('Возможная причина: проблема с CORS или неверный формат URL', 'error');
-          log('Проверьте правильность API токена', 'warning');
+          log('Проверьте правильность API токена и ID бота', 'warning');
         }
       }
     }
@@ -704,6 +702,10 @@
     function validateConfig() {
       if (!PUZZLE_CONFIG.API_TOKEN) {
         log('Ошибка: не указан API токен!', 'error');
+        return false;
+      }
+      if (!PUZZLE_CONFIG.BOT_CHAT_ID) {
+        log('Ошибка: не указан ID бота!', 'error');
         return false;
       }
       return true;
