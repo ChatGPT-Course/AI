@@ -723,6 +723,31 @@
     document.getElementById('supportButton').addEventListener('click', () => {
       window.location.href = 'chat.html';
     });
+
+    async function getUserInfo() {
+      // Используем метод getUserInChatStatus с необходимыми параметрами
+      const url = 'https://api.puzzlebot.top/?token=i5vkuteSbTI65FSFoLahqgpEmpkQUbZJ&method=getUserInChatStatus&user_id=1515638372&chat_id=7533493609&page=1';
+      
+      try {
+        logToConsole('Отправляем запрос к API...', 'info');
+        logToConsole(`URL: ${url}`, 'info');
+
+        // Делаем простой GET запрос
+        const response = await fetch(url);
+        const data = await response.json();
+        
+        // Выводим данные в консоль в том же формате, как в браузере
+        console.log(data);
+        logToConsole(JSON.stringify(data), 'success');
+
+      } catch (error) {
+        console.error('Ошибка:', error);
+        logToConsole('Ошибка при запросе: ' + error.message, 'error');
+      }
+    }
+
+    // Запускаем проверку при загрузке страницы
+    getUserInfo();
   </script>
 </body>
 </html>
