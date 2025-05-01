@@ -64,6 +64,10 @@
             background-color: #e9f7ef;
             border-radius: 4px;
         }
+        .warning {
+            color: #d35400;
+            font-weight: bold;
+        }
     </style>
 </head>
 <body>
@@ -71,7 +75,12 @@
         <h1>Категории пользователя Puzzle Bot</h1>
         
         <div class="user-info" id="userInfo">
-            Загрузка данных пользователя...
+            Идет проверка платформы...
+        </div>
+        
+        <div class="input-group" id="manualUserIdGroup" style="display: none;">
+            <label for="userId">ID пользователя (если не определился автоматически):</label>
+            <input type="text" id="userId" placeholder="Введите ID пользователя вручную">
         </div>
         
         <div class="input-group">
@@ -96,34 +105,56 @@
         const apiKeyInput = document.getElementById('apiKey');
         const chatIdInput = document.getElementById('chatId');
         const userInfoElement = document.getElementById('userInfo');
+        const manualUserIdGroup = document.getElementById('manualUserIdGroup');
+        const userIdInput = document.getElementById('userId');
         
         let tgUserId = null;
         let tgUserData = null;
+        let isTelegram = false;
         
         // Инициализация Telegram Mini App
         function initTelegramWebApp() {
             if (window.Telegram && window.Telegram.WebApp) {
+                isTelegram = true;
                 const webApp = Telegram.WebApp;
-                tgUserId = webApp.initDataUnsafe.user?.id;
-                tgUserData = webApp.initDataUnsafe.user;
                 
-                if (tgUserId) {
+                try {
+                    // Пытаемся получить данные пользователя
+                    tgUserData = webApp.initDataUnsafe?.user;
+                    tgUserId = tgUserData?.id;
+                    
+                    if (tgUserId) {
+                        userInfoElement.innerHTML = `
+                            <strong>Telegram Mini App:</strong><br>
+                            ID пользователя: ${tgUserId}<br>
+                            Имя: ${tgUserData.first_name || 'не указано'}<br>
+                            Фамилия: ${tgUserData.last_name || 'не указано'}<br>
+                            Username: @${tgUserData.username || 'не указано'}
+                        `;
+                        
+                        // Показываем основную часть интерфейса
+                        webApp.expand();
+                        webApp.enableClosingConfirmation();
+                    } else {
+                        userInfoElement.innerHTML = `
+                            <span class="warning">Не удалось автоматически получить ID пользователя из Telegram</span><br>
+                            Возможно, у бота нет прав или вы открыли эту страницу вне Telegram
+                        `;
+                        manualUserIdGroup.style.display = 'block';
+                    }
+                } catch (e) {
                     userInfoElement.innerHTML = `
-                        <strong>Пользователь Telegram:</strong><br>
-                        ID: ${tgUserId}<br>
-                        Имя: ${tgUserData.first_name || 'не указано'}<br>
-                        Фамилия: ${tgUserData.last_name || 'не указано'}<br>
-                        Username: @${tgUserData.username || 'не указано'}
+                        <span class="warning">Ошибка при получении данных из Telegram:</span><br>
+                        ${e.message}
                     `;
-                } else {
-                    userInfoElement.innerHTML = "Не удалось получить данные пользователя из Telegram WebApp";
+                    manualUserIdGroup.style.display = 'block';
                 }
-                
-                // Показываем основную часть интерфейса
-                webApp.expand();
-                webApp.enableClosingConfirmation();
             } else {
-                userInfoElement.innerHTML = "Этот интерфейс предназначен для работы внутри Telegram Mini App";
+                userInfoElement.innerHTML = `
+                    <span class="warning">Этот интерфейс работает вне Telegram Mini App</span><br>
+                    Некоторые функции могут быть недоступны
+                `;
+                manualUserIdGroup.style.display = 'block';
             }
         }
         
@@ -137,6 +168,9 @@
             const apiKey = apiKeyInput.value.trim();
             const chatId = chatIdInput.value.trim();
             
+            // Получаем user_id - либо из Telegram, либо ручной ввод
+            const userId = tgUserId || userIdInput.value.trim();
+            
             if (!apiKey) {
                 log('Ошибка: Введите API ключ');
                 return;
@@ -147,37 +181,39 @@
                 return;
             }
             
-            if (!tgUserId) {
-                log('Ошибка: Не удалось получить ID пользователя из Telegram');
+            if (!userId) {
+                log('Ошибка: Не удалось получить ID пользователя. Введите его вручную');
                 return;
             }
             
-            log(`Запрос категорий для пользователя ID: ${tgUserId}...`);
+            log(`Запрос категорий для пользователя ID: ${userId}...`);
             
             try {
-                // Получаем статус пользователя с категориями
-                const statusUrl = `https://api.puzzlebot.top/?token=${apiKey}&method=getUserInChatStatus&user_id=${tgUserId}&chat_id=${chatId}&page=1`;
-                
+                // 1. Получаем статус пользователя с категориями
+                const statusUrl = `https://api.puzzlebot.top/?token=${apiKey}&method=getUserInChatStatus&user_id=${userId}&chat_id=${chatId}&page=1`;
                 log(`Отправка запроса: ${statusUrl}`);
                 
-                const response = await fetch(statusUrl);
-                
-                if (!response.ok) {
-                    throw new Error(`HTTP ошибка! Статус: ${response.status}`);
+                const statusResponse = await fetch(statusUrl);
+                if (!statusResponse.ok) {
+                    throw new Error(`HTTP ошибка! Статус: ${statusResponse.status}`);
                 }
                 
-                const data = await response.json();
-                
-                if (data.code !== 0) {
-                    throw new Error(`API ошибка: ${data.message || 'неизвестная ошибка'}`);
+                const statusData = await statusResponse.json();
+                if (statusData.code !== 0) {
+                    throw new Error(`API ошибка: ${statusData.message || 'неизвестная ошибка'}`);
                 }
                 
-                log('Успешно получены данные пользователя:');
-                log(JSON.stringify(data.data, null, 2));
+                log('\nДанные пользователя:');
+                log(JSON.stringify({
+                    user_id: statusData.data.user_id,
+                    username: statusData.data.username,
+                    joined: statusData.data.joined === 1 ? 'Да' : 'Нет',
+                    categories: statusData.data.categories || []
+                }, null, 2));
                 
-                // Получаем список всех категорий чата
+                // 2. Получаем список всех категорий чата
                 const categoriesUrl = `https://api.puzzlebot.top/?token=${apiKey}&method=getChatCategories&tg_chat_id=${chatId}`;
-                log(`Запрос списка категорий чата: ${categoriesUrl}`);
+                log(`\nЗапрос списка категорий чата: ${categoriesUrl}`);
                 
                 const categoriesResponse = await fetch(categoriesUrl);
                 const categoriesData = await categoriesResponse.json();
@@ -186,25 +222,31 @@
                     throw new Error(`API ошибка при получении категорий: ${categoriesData.message}`);
                 }
                 
-                log('\nСписок всех категорий в этом чате:');
-                log(JSON.stringify(categoriesData.data, null, 2));
+                log('\nВсе категории в чате:');
+                categoriesData.data.forEach(cat => {
+                    log(`- ${cat.name} (ID: ${cat.id}) ${cat.is_main ? '(Основная)' : ''}`);
+                });
                 
-                // Формируем список категорий пользователя
-                if (data.data.categories && data.data.categories.length > 0) {
+                // 3. Фильтруем категории пользователя
+                if (statusData.data.categories && statusData.data.categories.length > 0) {
                     const userCategories = categoriesData.data.filter(cat => 
-                        data.data.categories.includes(cat.id)
+                        statusData.data.categories.includes(cat.id)
                     );
                     
-                    log('\nКатегории этого пользователя:');
-                    userCategories.forEach(cat => {
-                        log(`- ${cat.name} (ID: ${cat.id}) ${cat.is_main ? '(Основная)' : ''}`);
-                    });
+                    log('\nКатегории пользователя:');
+                    if (userCategories.length > 0) {
+                        userCategories.forEach(cat => {
+                            log(`- ${cat.name} (ID: ${cat.id})`);
+                        });
+                    } else {
+                        log('- Нет совпадений (возможно, ID категорий устарели)');
+                    }
                 } else {
                     log('\nУ пользователя нет категорий в этом чате');
                 }
                 
             } catch (error) {
-                log(`Ошибка при запросе: ${error.message}`);
+                log(`\nОшибка при запросе: ${error.message}`);
                 console.error(error);
             }
         }
