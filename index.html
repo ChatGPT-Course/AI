@@ -2,17 +2,13 @@
 <html>
 <head>
     <meta charset="UTF-8">
-    <title>API Test</title>
+    <title>PuzzleBot API Test</title>
     <style>
-        body {
-            padding: 20px;
-            font-family: Arial;
-            background: #f0f2f5;
-        }
-        #log {
-            background: #1e1e1e;
-            color: #00ff00;
-            padding: 15px;
+        body { padding: 20px; font-family: Arial; }
+        #log { 
+            background: #1e1e1e; 
+            color: #00ff00; 
+            padding: 15px; 
             margin-top: 15px;
             border-radius: 8px;
             white-space: pre-wrap;
@@ -27,42 +23,99 @@
             border-radius: 8px;
             cursor: pointer;
             width: 100%;
+            margin-bottom: 10px;
         }
     </style>
 </head>
 <body>
-    <button onclick="testApiRequest()">Тест API запроса</button>
-    <div id="log">Нажмите кнопку для отправки запроса...</div>
+    <button onclick="testDirectRequest()">1. Прямой запрос</button>
+    <button onclick="testJsonpRequest()">2. JSONP запрос</button>
+    <button onclick="testTelegramApi()">3. Через Telegram API</button>
+    <div id="log">Выберите метод запроса...</div>
 
     <script>
-        async function testApiRequest() {
-            const log = document.getElementById('log');
-            log.textContent = "Отправляю запрос...";
+        const API_URL = 'https://api.puzzlebot.top/';
+        const API_KEY = 'i5vkuteSbTI65FSFoLahqgpEmpkQUbZJ';
+        const USER_ID = '1515638372';
+        const CHAT_ID = '7533493609';
+        const log = document.getElementById('log');
+        
+        function addLog(message) {
+            const now = new Date().toLocaleTimeString();
+            log.innerHTML += `[${now}] ${message}\n`;
+            log.scrollTop = log.scrollHeight;
+        }
+
+        // 1. Прямой запрос (для тестирования CORS)
+        async function testDirectRequest() {
+            log.textContent = '';
+            addLog('Отправляю прямой запрос...');
+            
+            const url = `${API_URL}?token=${API_KEY}&method=getUserInChatStatus&user_id=${USER_ID}&chat_id=${CHAT_ID}&page=1&_=${Date.now()}`;
+            addLog(`URL: ${url}`);
             
             try {
-                // Ваш тестовый URL
-                const url = 'https://api.puzzlebot.top/?token=i5vkuteSbTI65FSFoLahqgpEmpkQUbZJ&method=getUserInChatStatus&user_id=1515638372&chat_id=7533493609&page=1';
+                const response = await fetch(url, {
+                    mode: 'no-cors',
+                    headers: {
+                        'Accept': 'application/json'
+                    }
+                });
                 
-                log.textContent += "\n\nURL: " + url;
-                
-                // Отправка запроса
-                const response = await fetch(url);
-                
-                log.textContent += "\n\nСтатус ответа: " + response.status;
-                
-                // Парсим ответ
-                const data = await response.json();
-                
-                log.textContent += "\n\nОтвет API:\n" + JSON.stringify(data, null, 2);
-                
+                // Для mode: 'no-cors' мы не получим доступ к ответу
+                addLog('Запрос отправлен (но ответ недоступен из-за CORS)');
+                addLog('Проверьте результат в Network вкладке DevTools');
             } catch (error) {
-                log.textContent += "\n\nОшибка: " + error.message;
-                log.textContent += "\n\nПроверьте:\n1. Интернет соединение\n2. Правильность URL\n3. CORS политики";
+                addLog(`Ошибка: ${error.message}`);
             }
         }
 
-        // Автоматически расширяем Mini App
+        // 2. JSONP запрос (если API поддерживает)
+        function testJsonpRequest() {
+            log.textContent = '';
+            addLog('Пытаюсь использовать JSONP...');
+            
+            const callbackName = 'jsonp_cb_' + Date.now();
+            const url = `${API_URL}?token=${API_KEY}&method=getUserInChatStatus&user_id=${USER_ID}&chat_id=${CHAT_ID}&page=1&callback=${callbackName}`;
+            
+            window[callbackName] = function(data) {
+                addLog('JSONP ответ получен:');
+                addLog(JSON.stringify(data, null, 2));
+                delete window[callbackName];
+            };
+            
+            const script = document.createElement('script');
+            script.src = url;
+            script.onerror = () => {
+                addLog('JSONP не поддерживается API');
+                document.body.removeChild(script);
+            };
+            
+            document.body.appendChild(script);
+            addLog(`Отправлен JSONP запрос: ${url}`);
+        }
+
+        // 3. Через Telegram Bot API (если доступно)
+        function testTelegramApi() {
+            log.textContent = '';
+            addLog('Пытаюсь использовать Telegram WebApp API...');
+            
+            if (!window.Telegram?.WebApp) {
+                addLog('Telegram WebApp не обнаружен');
+                return;
+            }
+            
+            const tg = Telegram.WebApp;
+            tg.expand();
+            
+            // Здесь можно попробовать отправить запрос через Bot API
+            addLog('Попробуйте использовать window.Telegram.WebApp.sendData()');
+            addLog('Или свяжитесь с поддержкой PuzzleBot для CORS');
+        }
+
+        // Автоматическая инициализация
         if (window.Telegram?.WebApp) {
+            Telegram.WebApp.ready();
             Telegram.WebApp.expand();
         }
     </script>
