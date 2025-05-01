@@ -5,6 +5,8 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Основы ИИ — Онлайн курс</title>
   <script src="https://telegram.org/js/telegram-web-app.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
   <style>
     :root {
       --primary: #FF7A00;
@@ -379,24 +381,6 @@
   </style>
 </head>
 <body>
-  <div id="debug-log" style="position: fixed; bottom: 0; left: 0; right: 0; max-height: 200px; background: rgba(0, 0, 0, 0.8); color: #fff; font-family: monospace; font-size: 12px; padding: 10px; overflow-y: auto; z-index: 1000;"></div>
-  <style>
-    .debug-log-entry { margin: 4px 0; padding: 4px; border-bottom: 1px solid rgba(255,255,255,0.2); }
-    .debug-log-entry.error { color: #ff6b6b; }
-    .debug-log-entry.success { color: #69db7c; }
-    .debug-log-entry.warning { color: #ffd43b; }
-    .api-url { 
-      background: rgba(255,255,255,0.1); 
-      padding: 8px; 
-      margin: 4px 0;
-      border-radius: 4px;
-      word-break: break-all;
-      cursor: pointer;
-    }
-    .api-url:hover {
-      background: rgba(255,255,255,0.2);
-    }
-  </style>
   <div class="loading-screen" id="loading-screen">
     <div class="loading-text">Загрузка</div>
     <div class="loading-balls">
@@ -435,58 +419,23 @@
       <span class="ai-text">AI</span>
       <span class="chat-icon">💬</span>
     </a>
-
-    <!-- Консоль для логов -->
-    <div id="api-console" style="position: fixed; bottom: 0; left: 0; right: 0; height: 200px; background: rgba(0, 0, 0, 0.9); color: #fff; font-family: monospace; font-size: 14px; padding: 10px; overflow-y: auto; z-index: 999;">
-      <div style="border-bottom: 1px solid #444; padding-bottom: 5px; margin-bottom: 5px;">
-        <span style="color: #00ff00;">API Console</span>
-        <span style="float: right; cursor: pointer; padding: 0 5px;" onclick="document.getElementById('api-console').style.display='none'">✕</span>
-      </div>
-      <div id="api-console-content"></div>
-    </div>
   </div>
 
   <script>
-    // Функция для логирования
-    function log(message, type = 'info', isUrl = false) {
-      const logContainer = document.getElementById('debug-log');
-      const entry = document.createElement('div');
-      entry.className = `debug-log-entry ${type}`;
-      const time = new Date().toLocaleTimeString();
-
-      if (isUrl) {
-        entry.innerHTML = `[${time}] API URL (нажмите чтобы скопировать):<br><div class="api-url">${message}</div>`;
-        entry.querySelector('.api-url').addEventListener('click', () => {
-          navigator.clipboard.writeText(message).then(() => {
-            log('✅ URL скопирован в буфер обмена', 'success');
-          });
-        });
-      } else {
-        entry.textContent = `[${time}] ${message}`;
-      }
-
-      logContainer.appendChild(entry);
-      logContainer.scrollTop = logContainer.scrollHeight;
-
-      while (logContainer.children.length > 50) {
-        logContainer.removeChild(logContainer.firstChild);
-      }
-    }
-
-    // Конфигурация Puzzle Bot
-    const PUZZLE_CONFIG = {
-      // API токен из Puzzle Bot (Настройки -> Интеграции)
-      API_TOKEN: 'i5vkuteSbTI65FSFoLahqgpEmpkQUbZJ',
-
-      // ID бота
-      BOT_CHAT_ID: '7533493609',
-
-      // Название категории, которая открывает доступ
-      PAID_CATEGORY: 'ТЕСТ',
-
-      // Интервал проверки в миллисекундах
-      CHECK_INTERVAL: 5000  // 5 секунд
+    // Конфигурация Firebase
+    const firebaseConfig = {
+      apiKey: "AIzaSyCMos6Y7C-krTLuKCI4VJG-TFLo6QI--k8",
+      authDomain: "vrot-x-7a48f.firebaseapp.com",
+      databaseURL: "https://vrot-x-7a48f-default-rtdb.firebaseio.com",
+      projectId: "vrot-x-7a48f",
+      storageBucket: "vrot-x-7a48f.firebasestorage.app",
+      messagingSenderId: "622297225288",
+      appId: "1:622297225288:web:5df6a5b02ffddedd96e07d"
     };
+
+    // Инициализация Firebase
+    firebase.initializeApp(firebaseConfig);
+    const database = firebase.database();
 
     // Состояние приложения
     const state = {
@@ -495,46 +444,6 @@
       isPaid: false,
       isLoaded: false
     };
-
-    // Добавляем элемент для логов внизу страницы
-    document.addEventListener('DOMContentLoaded', () => {
-      const logContainer = document.createElement('div');
-      logContainer.id = 'debug-log';
-      logContainer.style.position = 'fixed';
-      logContainer.style.bottom = '0';
-      logContainer.style.left = '0';
-      logContainer.style.right = '0';
-      logContainer.style.maxHeight = '200px';
-      logContainer.style.background = 'rgba(0, 0, 0, 0.8)';
-      logContainer.style.color = '#fff';
-      logContainer.style.fontFamily = 'monospace';
-      logContainer.style.fontSize = '12px';
-      logContainer.style.padding = '10px';
-      logContainer.style.overflowY = 'auto';
-      logContainer.style.zIndex = '1000';
-      document.body.appendChild(logContainer);
-
-      // Добавляем стили для URL
-      const style = document.createElement('style');
-      style.textContent = `
-        .debug-log-entry { margin: 4px 0; padding: 4px; border-bottom: 1px solid rgba(255,255,255,0.2); }
-        .debug-log-entry.error { color: #ff6b6b; }
-        .debug-log-entry.success { color: #69db7c; }
-        .debug-log-entry.warning { color: #ffd43b; }
-        .api-url { 
-          background: rgba(255,255,255,0.1); 
-          padding: 8px; 
-          margin: 4px 0;
-          border-radius: 4px;
-          word-break: break-all;
-          cursor: pointer;
-        }
-        .api-url:hover {
-          background: rgba(255,255,255,0.2);
-        }
-      `;
-      document.head.appendChild(style);
-    });
 
     // Функция для скрытия экрана загрузки
     function hideLoadingScreen() {
@@ -546,57 +455,17 @@
       }, 500);
     }
 
-    // Функция для логирования в консоль
-    function logToConsole(message, type = 'info') {
-      const consoleContent = document.getElementById('api-console-content');
-      const entry = document.createElement('div');
-      entry.style.marginBottom = '5px';
-      entry.style.borderLeft = '3px solid ' + (type === 'error' ? '#ff4444' : type === 'success' ? '#00ff00' : '#ffffff');
-      entry.style.paddingLeft = '10px';
-      
-      const time = new Date().toLocaleTimeString();
-      entry.innerHTML = `<span style="color: #888;">[${time}]</span> ${message}`;
-      
-      consoleContent.appendChild(entry);
-      consoleContent.scrollTop = consoleContent.scrollHeight;
-    }
+    // Функция проверки статуса оплаты
+    async function checkPaymentStatus() {
+      if (!state.userId) return;
 
-    // Обновляем функцию checkUserCategories
-    async function checkUserCategories() {
-      const url = 'https://api.puzzlebot.top/?token=i5vkuteSbTI65FSFoLahqgpEmpkQUbZJ&method=getChatCategories&tg_chat_id=7533493609';
-      
       try {
-        logToConsole('Отправляем запрос к API...', 'info');
-        logToConsole(`URL: ${url}`, 'info');
-
-        // Делаем простой GET запрос
-        const response = await fetch(url);
-        const data = await response.json();
-        
-        // Выводим точно такой же ответ, как в браузере
-        console.log(data);
-        logToConsole(JSON.stringify(data), 'success');
-
+        const snapshot = await database.ref(`users/${state.userId}/paid`).once('value');
+        state.isPaid = snapshot.val() === true;
+        updateUI();
       } catch (error) {
-        console.error('Ошибка:', error);
-        logToConsole('Ошибка при запросе: ' + error.message, 'error');
+        console.error('Ошибка при проверке статуса оплаты:', error);
       }
-    }
-
-    // Запускаем проверку при загрузке страницы
-    checkUserCategories();
-
-    // Проверка конфигурации
-    function validateConfig() {
-      if (!PUZZLE_CONFIG.API_TOKEN) {
-        log('Ошибка: не указан API токен!', 'error');
-        return false;
-      }
-      if (!PUZZLE_CONFIG.BOT_CHAT_ID) {
-        log('Ошибка: не указан ID бота!', 'error');
-        return false;
-      }
-      return true;
     }
 
     // Основная функция
@@ -611,9 +480,9 @@
         await initTestMode();
       }
 
-      // Запускаем периодическую проверку категорий
-      await checkUserCategories();
-      setInterval(checkUserCategories, PUZZLE_CONFIG.CHECK_INTERVAL);
+      // Запускаем периодическую проверку статуса
+      await checkPaymentStatus();
+      setInterval(checkPaymentStatus, 5000);
     });
 
     async function initTelegramApp() {
@@ -666,7 +535,6 @@
     }
 
     function updateUI() {
-      console.log('Обновление UI, статус оплаты:', state.isPaid); // Добавляем логи для отладки
       const modules = [
         { id: 0, title: "Введение в ИИ", desc: "Основы, история, примеры использования искусственного интеллекта" },
         { id: 1, title: "Основы ChatGPT", desc: "Базовые принципы работы с ChatGPT, ключевые концепции" },
@@ -723,31 +591,6 @@
     document.getElementById('supportButton').addEventListener('click', () => {
       window.location.href = 'chat.html';
     });
-
-    async function getUserInfo() {
-      // Используем метод getUserInChatStatus с необходимыми параметрами
-      const url = 'https://api.puzzlebot.top/?token=i5vkuteSbTI65FSFoLahqgpEmpkQUbZJ&method=getUserInChatStatus&user_id=1515638372&chat_id=7533493609&page=1';
-      
-      try {
-        logToConsole('Отправляем запрос к API...', 'info');
-        logToConsole(`URL: ${url}`, 'info');
-
-        // Делаем простой GET запрос
-        const response = await fetch(url);
-        const data = await response.json();
-        
-        // Выводим данные в консоль в том же формате, как в браузере
-        console.log(data);
-        logToConsole(JSON.stringify(data), 'success');
-
-      } catch (error) {
-        console.error('Ошибка:', error);
-        logToConsole('Ошибка при запросе: ' + error.message, 'error');
-      }
-    }
-
-    // Запускаем проверку при загрузке страницы
-    getUserInfo();
   </script>
 </body>
 </html>
