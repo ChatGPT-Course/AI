@@ -5,43 +5,76 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Курс по ИИ - Модуль 0</title>
     <style>
+        :root {
+            --primary-color: #4361ee;
+            --secondary-color: #3f37c9;
+            --accent-color: #4895ef;
+            --danger-color: #f72585;
+            --success-color: #4cc9f0;
+            --warning-color: #f8961e;
+            --light-color: #f8f9fa;
+            --dark-color: #212529;
+        }
+        
         body {
-            font-family: Arial, sans-serif;
-            line-height: 1.6;
-            color: #333;
-            max-width: 800px;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.8;
+            color: var(--dark-color);
+            max-width: 900px;
             margin: 0 auto;
             padding: 20px;
-            background-color: #f9f9f9;
-            position: relative;
+            background-color: #f5f7ff;
         }
         
         #progress-container {
+            width: 60%;
+            margin: 30px auto;
+            position: relative;
+        }
+        
+        #progress-label {
+            text-align: center;
+            margin-bottom: 8px;
+            font-size: 14px;
+            color: var(--primary-color);
+            font-weight: 600;
+        }
+        
+        #progress-bar-bg {
             width: 100%;
+            height: 12px;
             background-color: #e0e0e0;
-            border-radius: 5px;
-            margin-bottom: 30px;
+            border-radius: 10px;
+            overflow: hidden;
+            box-shadow: inset 0 1px 3px rgba(0,0,0,0.1);
         }
         
         #progress-bar {
-            height: 10px;
-            background-color: #4CAF50;
-            border-radius: 5px;
+            height: 100%;
+            background: linear-gradient(90deg, var(--primary-color), var(--accent-color));
+            border-radius: 10px;
             width: 0%;
-            transition: width 0.5s ease;
+            transition: width 0.6s cubic-bezier(0.4, 0, 0.2, 1);
         }
         
         #exit-btn {
             position: absolute;
             top: 20px;
-            right: 20px;
-            background-color: #f44336;
-            color: white;
-            border: none;
+            left: 20px;
+            background-color: transparent;
+            color: var(--danger-color);
+            border: 2px solid var(--danger-color);
             padding: 8px 16px;
-            border-radius: 4px;
+            border-radius: 30px;
             cursor: pointer;
             font-size: 14px;
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+        
+        #exit-btn:hover {
+            background-color: var(--danger-color);
+            color: white;
         }
         
         #exit-modal {
@@ -55,48 +88,70 @@
             z-index: 100;
             justify-content: center;
             align-items: center;
+            backdrop-filter: blur(3px);
         }
         
         #exit-modal-content {
             background-color: white;
-            padding: 20px;
-            border-radius: 8px;
+            padding: 30px;
+            border-radius: 16px;
             max-width: 500px;
             text-align: center;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+            animation: modalFadeIn 0.3s ease;
+        }
+        
+        @keyframes modalFadeIn {
+            from { opacity: 0; transform: translateY(-20px); }
+            to { opacity: 1; transform: translateY(0); }
         }
         
         #exit-modal-buttons {
-            margin-top: 20px;
+            margin-top: 25px;
+            display: flex;
+            justify-content: center;
+            gap: 15px;
         }
         
         .modal-btn {
-            padding: 8px 16px;
-            margin: 0 10px;
+            padding: 10px 24px;
             border: none;
-            border-radius: 4px;
+            border-radius: 30px;
             cursor: pointer;
+            font-weight: 600;
+            transition: all 0.3s ease;
         }
         
         #confirm-exit {
-            background-color: #f44336;
+            background-color: var(--danger-color);
             color: white;
+        }
+        
+        #confirm-exit:hover {
+            background-color: #d3166a;
+            transform: translateY(-2px);
         }
         
         #cancel-exit {
-            background-color: #4CAF50;
-            color: white;
+            background-color: var(--light-color);
+            color: var(--dark-color);
+            border: 1px solid #ddd;
+        }
+        
+        #cancel-exit:hover {
+            background-color: #e9ecef;
+            transform: translateY(-2px);
         }
         
         #content {
-            margin-bottom: 60px;
-            width: 40%;
-            margin-left: 10%;
+            margin-bottom: 80px;
+            width: 100%;
         }
         
         .hidden {
             opacity: 0;
-            transform: translateY(20px);
-            transition: opacity 0.5s ease, transform 0.5s ease;
+            transform: translateY(30px);
+            transition: all 0.6s cubic-bezier(0.4, 0, 0.2, 1);
         }
         
         .visible {
@@ -106,46 +161,86 @@
         
         #continue-btn {
             position: fixed;
-            bottom: 20px;
+            bottom: 30px;
             left: 50%;
             transform: translateX(-50%);
-            background-color: #FF8C00;
+            background: linear-gradient(135deg, var(--primary-color), var(--accent-color));
             color: white;
             border: none;
-            padding: 12px 30px;
-            font-size: 16px;
+            padding: 16px 40px;
+            font-size: 18px;
             border-radius: 50px;
             cursor: pointer;
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-            transition: background-color 0.3s;
+            box-shadow: 0 6px 15px rgba(67, 97, 238, 0.3);
+            transition: all 0.3s ease;
+            font-weight: 600;
+            z-index: 10;
         }
         
         #continue-btn:hover {
-            background-color: #FF7000;
+            transform: translateX(-50%) translateY(-3px);
+            box-shadow: 0 10px 20px rgba(67, 97, 238, 0.4);
         }
         
         .step {
-            margin-bottom: 30px;
+            margin-bottom: 40px;
             counter-increment: step-counter;
+            background: white;
+            padding: 30px;
+            border-radius: 16px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.05);
+            position: relative;
+            overflow: hidden;
         }
         
         .step::before {
-            content: counter(step-counter) ". ";
+            content: counter(step-counter);
+            position: absolute;
+            top: 10px;
+            left: 10px;
+            font-size: 60px;
             font-weight: bold;
-            color: #FF8C00;
+            color: rgba(67, 97, 238, 0.1);
+            z-index: 0;
+        }
+        
+        .step-content {
+            position: relative;
+            z-index: 1;
+        }
+        
+        h1 {
+            color: var(--primary-color);
+            margin-bottom: 30px;
+            font-size: 2.2rem;
+            text-align: center;
+        }
+        
+        .step:first-child {
+            animation: fadeIn 1s ease;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
         }
     </style>
 </head>
 <body>
+    <button id="exit-btn">Выход</button>
+    
     <div id="progress-container">
-        <div id="progress-bar"></div>
+        <div id="progress-label">Прогресс изучения: <span id="progress-percent">0</span>%</div>
+        <div id="progress-bar-bg">
+            <div id="progress-bar"></div>
+        </div>
     </div>
     
-    <button id="exit-btn">Выход</button>
+    <h1>Модуль 0: Введение в Искусственный Интеллект</h1>
     
     <div id="exit-modal">
         <div id="exit-modal-content">
-            <h3>Подтверждение выхода</h3>
+            <h3 style="color: var(--danger-color); margin-top: 0;">Подтверждение выхода</h3>
             <p>Выход в незаконченном уроке приведет к потере прогресса. После перезахода вы начнете изучать материал сначала.</p>
             <div id="exit-modal-buttons">
                 <button id="confirm-exit" class="modal-btn">Все равно выйти</button>
@@ -155,16 +250,56 @@
     </div>
     
     <div id="content">
-        <div class="step visible">Добро пожаловать в Модуль 0 курса по Искусственному Интеллекту! В этом вводном модуле мы познакомимся с основными концепциями, которые помогут вам лучше понять последующие темы. Искусственный интеллект - это одна из самых быстроразвивающихся областей современной науки и технологий.</div>
-        <div class="step hidden">ИИ уже сейчас используется во многих сферах нашей жизни: от рекомендательных систем в интернет-магазинах до сложных медицинских диагностических систем. В этом курсе мы рассмотрим как теоретические основы ИИ, так и практические примеры его применения.</div>
-        <div class="step hidden">Прежде чем перейти к техническим деталям, важно понять философские и этические аспекты ИИ. Как мы определяем интеллект? Каковы границы возможностей машинного обучения? Эти вопросы остаются предметом активных дискуссий среди специалистов.</div>
-        <div class="step hidden">История ИИ насчитывает уже несколько десятилетий. Первые работы в этой области появились в середине XX века, но только в последние 10-15 лет мы наблюдаем настоящий прорыв, связанный с развитием вычислительных мощностей и появлением новых алгоритмов.</div>
-        <div class="step hidden">Основные направления ИИ включают машинное обучение, нейронные сети, компьютерное зрение, обработку естественного языка и робототехнику. В этом курсе мы уделим внимание каждому из этих направлений, начиная с базовых концепций.</div>
-        <div class="step hidden">Машинное обучение - это подраздел ИИ, который позволяет компьютерам обучаться на данных без явного программирования. Алгоритмы машинного обучения могут находить закономерности в данных и делать прогнозы на их основе.</div>
-        <div class="step hidden">Нейронные сети вдохновлены биологическими нейронами человеческого мозга. Они состоят из множества соединенных между собой узлов (нейронов), которые обрабатывают информацию слоями, постепенно извлекая все более сложные признаки.</div>
-        <div class="step hidden">Обработка естественного языка (NLP) позволяет компьютерам понимать, интерпретировать и генерировать человеческую речь. Это направление лежит в основе голосовых помощников, чат-ботов и систем машинного перевода.</div>
-        <div class="step hidden">Компьютерное зрение дает машинам способность "видеть" и понимать визуальную информацию. Применения варьируются от распознавания лиц до анализа медицинских изображений и автономного вождения.</div>
-        <div class="step hidden">Робототехника объединяет ИИ с механическими системами, создавая машины, способные взаимодействовать с физическим миром. Современные роботы могут выполнять сложные задачи в промышленности, медицине и даже в домашних условиях.</div>
+        <div class="step visible">
+            <div class="step-content">
+                Добро пожаловать в Модуль 0 курса по Искусственному Интеллекту! Этот вводный модуль создан, чтобы помочь вам сформировать фундаментальное понимание ключевых концепций ИИ. Мы рассмотрим историю развития искусственного интеллекта, основные направления исследований и практические применения этой трансформационной технологии в современном мире.
+            </div>
+        </div>
+        <div class="step hidden">
+            <div class="step-content">
+                Искусственный интеллект уже стал неотъемлемой частью нашей повседневной жизни. От персонализированных рекомендаций в потоковых сервисах до систем автоматического перевода и голосовых помощников - ИИ окружает нас повсюду. В этом модуле мы исследуем, как различные технологии ИИ работают на практике и какие возможности они открывают для бизнеса, науки и общества в целом.
+            </div>
+        </div>
+        <div class="step hidden">
+            <div class="step-content">
+                Прежде чем погружаться в технические детали, важно понять философские основы ИИ. Что вообще означает "искусственный интеллект"? Как мы определяем интеллект у машин? Эти вопросы вызывают оживленные дискуссии среди исследователей. Мы рассмотрим различные подходы к определению ИИ и обсудим текущие ограничения технологий.
+            </div>
+        </div>
+        <div class="step hidden">
+            <div class="step-content">
+                История искусственного интеллекта насчитывает более 70 лет. От работ Алана Тьюринга до современных глубоких нейронных сетей - путь развития ИИ был полон как впечатляющих прорывов, так и периодов "зимы ИИ", когда интерес и финансирование резко сокращались. Понимание этой истории поможет вам лучше оценить современное состояние области.
+            </div>
+        </div>
+        <div class="step hidden">
+            <div class="step-content">
+                Основные направления исследований в ИИ включают машинное обучение, нейронные сети, компьютерное зрение, обработку естественного языка и робототехнику. Каждое из этих направлений решает уникальный набор задач и использует свои методы. В этом курсе мы последовательно изучим каждое из них, начиная с базовых концепций.
+            </div>
+        </div>
+        <div class="step hidden">
+            <div class="step-content">
+                Машинное обучение - это сердце современного ИИ. В отличие от традиционного программирования, где правила явно кодируются разработчиком, алгоритмы машинного обучения автоматически находят закономерности в данных. Мы рассмотрим три основных парадигмы: обучение с учителем, без учителя и с подкреплением.
+            </div>
+        </div>
+        <div class="step hidden">
+            <div class="step-content">
+                Нейронные сети вдохновлены биологической структурой человеческого мозга. Эти модели состоят из множества соединенных "нейронов", организованных в слои. Глубокое обучение (подраздел нейронных сетей) произвело революцию в ИИ, достигнув человеческого уровня в таких задачах, как распознавание изображений и обработка языка.
+            </div>
+        </div>
+        <div class="step hidden">
+            <div class="step-content">
+                Обработка естественного языка (NLP) позволяет компьютерам понимать, интерпретировать и генерировать человеческую речь. От чат-ботов до систем автоматического перевода - NLP технологии становятся все более совершенными. Мы рассмотрим, как алгоритмы анализируют текст и какие вызовы стоят перед этой областью.
+            </div>
+        </div>
+        <div class="step hidden">
+            <div class="step-content">
+                Компьютерное зрение дает машинам способность "видеть" и понимать визуальную информацию. Применения варьируются от медицинской диагностики до автономных транспортных средств. Мы изучим, как алгоритмы извлекают признаки из изображений и видео, и как они могут "понимать" визуальный контекст.
+            </div>
+        </div>
+        <div class="step hidden">
+            <div class="step-content">
+                Робототехника объединяет ИИ с механическими системами, создавая машины, способные взаимодействовать с физическим миром. Современные роботы могут выполнять сложные задачи в промышленности, медицине и даже в домашних условиях. В заключительной части модуля мы обсудим будущее ИИ и этические вопросы, связанные с его развитием.
+            </div>
+        </div>
     </div>
     
     <button id="continue-btn">Продолжить</button>
@@ -175,43 +310,44 @@
             const btn = document.getElementById('continue-btn');
             const hiddenSteps = document.querySelectorAll('.hidden');
             const progressBar = document.getElementById('progress-bar');
+            const progressPercent = document.getElementById('progress-percent');
             const exitBtn = document.getElementById('exit-btn');
             const exitModal = document.getElementById('exit-modal');
             const confirmExit = document.getElementById('confirm-exit');
             const cancelExit = document.getElementById('cancel-exit');
             
             let currentStep = 0;
-            const totalSteps = hiddenSteps.length + 1; // +1 для начального видимого шага
+            const totalSteps = hiddenSteps.length + 1;
             
             function updateProgress() {
                 const progress = ((currentStep + 1) / totalSteps) * 100;
                 progressBar.style.width = progress + '%';
+                progressPercent.textContent = Math.round(progress);
             }
             
             updateProgress();
             
             btn.addEventListener('click', function() {
                 if (currentStep < hiddenSteps.length) {
-                    // Показываем следующий шаг
                     hiddenSteps[currentStep].classList.add('visible');
-                    
-                    // Прокручиваем страницу к последнему видимому элементу
-                    hiddenSteps[currentStep].scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+                    hiddenSteps[currentStep].scrollIntoView({ 
+                        behavior: 'smooth', 
+                        block: 'center' 
+                    });
                     
                     currentStep++;
                     updateProgress();
                     
-                    // Если это последний шаг, меняем текст кнопки
                     if (currentStep === hiddenSteps.length) {
                         btn.textContent = 'Завершить модуль';
                     }
                 } else {
                     // Здесь можно добавить переход к следующему модулю
                     alert('Поздравляем! Вы успешно завершили вводный модуль!');
+                    btn.textContent = 'Перейти к следующему модулю';
                 }
             });
             
-            // Обработчики для кнопки выхода
             exitBtn.addEventListener('click', function() {
                 exitModal.style.display = 'flex';
             });
@@ -221,9 +357,8 @@
             });
             
             confirmExit.addEventListener('click', function() {
-                // Здесь можно добавить логику сброса прогресса
                 alert('Ваш прогресс сброшен. При следующем входе вы начнете сначала.');
-                window.location.href = '#'; // Замените на реальный URL выхода
+                window.location.href = '#';
             });
         });
     </script>
