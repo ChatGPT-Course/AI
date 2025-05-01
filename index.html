@@ -642,3 +642,51 @@
       modules.forEach(module => {
         const isLocked = module.id !== 0 && !state.isPaid;
         html += `
+          <div class="module ${isLocked ? 'locked' : ''}" onclick="handleModuleClick(${module.id}, ${isLocked})">
+            <div class="module-label">Модуль ${module.id} - ${module.title}</div>
+            <div class="module-content">
+              <div class="module-desc">${module.desc}</div>
+              <button class="module-btn">${isLocked ? 'Закрыто' : 'Начать'}</button>
+            </div>
+          </div>
+        `;
+      });
+      document.getElementById('modules-container').innerHTML = html;
+    }
+
+    function handleModuleClick(moduleId, isLocked) {
+      if (isLocked) {
+        alert('Для доступа к этому модулю необходимо приобрести полную версию курса');
+        return;
+      }
+      // Здесь логика открытия модуля
+      alert(`Открываем модуль ${moduleId}`);
+    }
+
+    // Глобальная функция для обработки кликов по модулям
+    window.handleModuleClick = handleModuleClick;
+
+    // Обработка меню
+    const menuButton = document.getElementById('menuButton');
+    const menuContent = document.getElementById('menuContent');
+
+    menuButton.addEventListener('click', () => {
+      menuButton.classList.toggle('active');
+      menuContent.classList.toggle('active');
+    });
+
+    // Закрытие меню при клике вне его
+    document.addEventListener('click', (e) => {
+      if (!menuButton.contains(e.target) && !menuContent.contains(e.target)) {
+        menuButton.classList.remove('active');
+        menuContent.classList.remove('active');
+      }
+    });
+
+    // Обработка клика по кнопке тех. поддержки
+    document.getElementById('supportButton').addEventListener('click', () => {
+      window.location.href = 'chat.html';
+    });
+  </script>
+</body>
+</html>
