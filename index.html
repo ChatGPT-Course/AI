@@ -2,7 +2,7 @@
 <html>
 <head>
     <meta charset="UTF-8">
-    <title>PuzzleBot Categories</title>
+    <title>PuzzleBot User Data</title>
     <style>
         body {
             padding: 20px;
@@ -29,78 +29,113 @@
     </style>
 </head>
 <body>
-    <button onclick="getCategories()">Получить мои категории</button>
-    <div id="result">Результат появится здесь...</div>
+    <button onclick="initializeApp()">Инициализировать приложение</button>
+    <div id="result">Статус: Ожидание инициализации...</div>
 
     <script>
         const API_KEY = 'i5vkuteSbTI65FSFoLahqgpEmpkQUbZJ';
         const CHAT_ID = '7533493609';
 
-        // Основная функция
-        async function getCategories() {
+        // Основные функции
+        function log(message) {
             const resultDiv = document.getElementById('result');
-            resultDiv.textContent = "⌛ Запрос отправляется...";
+            resultDiv.textContent += `\n${new Date().toLocaleTimeString()}: ${message}`;
+        }
 
+        function getTelegramUser() {
             try {
-                // Получаем данные пользователя из Telegram
-                const tgUser = window.Telegram?.WebApp?.initDataUnsafe?.user;
-                if (!tgUser?.id) throw new Error("Не удалось получить данные пользователя");
-
-                // Формируем URL запроса
-                const url = new URL('https://api.puzzlebot.top/');
-                url.searchParams.append('token', API_KEY);
-                url.searchParams.append('method', 'getUserInChatStatus');
-                url.searchParams.append('user_id', tgUser.id);
-                url.searchParams.append('chat_id', CHAT_ID);
-                url.searchParams.append('page', '1');
-                url.searchParams.append('ts', Date.now()); // Для избежания кеширования
-
-                // Отправляем запрос через Telegram WebView
-                const response = await fetch(url, {
-                    headers: {
-                        'Telegram-WebApp-Version': window.Telegram?.WebApp?.version || 'unknown'
-                    }
-                });
-
-                // Обработка ответа
-                if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
-                const data = await response.json();
-
-                // Форматируем результат
-                resultDiv.textContent = JSON.stringify(data, null, 2);
-                
-                // Отправляем результат в Telegram
-                if (window.Telegram?.WebApp) {
-                    Telegram.WebApp.sendData(JSON.stringify({
-                        status: 'success',
-                        data: data
-                    }));
+                if (!window.Telegram?.WebApp) {
+                    throw new Error("Telegram WebApp API не доступен");
                 }
+
+                const webApp = Telegram.WebApp;
+                
+                // Проверка инициализации
+                if (!webApp.initDataUnsafe) {
+                    throw new Error("Данные инициализации не получены");
+                }
+
+                // Получаем пользовательские данные
+                const user = webApp.initDataUnsafe.user;
+                
+                if (!user) {
+                    throw new Error("Данные пользователя отсутствуют в initDataUnsafe");
+                }
+
+                if (!user.id) {
+                    throw new Error("User ID не найден");
+                }
+
+                return user;
 
             } catch (error) {
-                resultDiv.textContent = `❌ Ошибка: ${error.message}`;
-                console.error('Error details:', error);
-                
-                // Отправляем ошибку в Telegram
-                if (window.Telegram?.WebApp) {
-                    Telegram.WebApp.showAlert(error.message);
-                }
+                log(`Ошибка: ${error.message}`);
+                return null;
             }
         }
 
-        // Инициализация Telegram WebApp
-        if (window.Telegram?.WebApp) {
-            Telegram.WebApp.ready();
-            Telegram.WebApp.expand();
-            
-            // Автоматический запуск при открытии
-            setTimeout(getCategories, 500);
-            
-            // Настройка основной кнопки
-            Telegram.WebApp.MainButton
-                .setText('Обновить данные')
-                .onClick(getCategories)
-                .show();
+        async function getCategories() {
+            const user = getTelegramUser();
+            if (!user) return;
+
+            try {
+                const url = new URL('https://api.puzzlebot.top/');
+                url.searchParams.append('token', API_KEY);
+                url.searchParams.append('method', 'getUserInChatStatus');
+                url.searchParams.append('user_id', user.id);
+                url.searchParams.append('chat_id', CHAT_ID);
+                url.searchParams.append('page', '1');
+
+                const response = await fetch(url);
+                const data = await response.json();
+                
+                log("Ответ API получен:");
+                log(JSON.stringify(data, null, 2));
+
+            } catch (error) {
+                log(`Ошибка запроса: ${error.message}`);
+            }
+        }
+
+        function initializeApp() {
+            const resultDiv = document.getElementById('result');
+            resultDiv.textContent = "Инициализация...\n";
+
+            if (window.Telegram?.WebApp) {
+                const webApp = Telegram.WebApp;
+                
+                // Версия WebApp
+                log(`Версия WebApp: ${webApp.version || 'неизвестна'}`);
+                
+                // Параметры инициализации
+                log(`Init data: ${JSON.stringify(webApp.initData)}`);
+                log(`Init data unsafe: ${JSON.stringify(webApp.initDataUnsafe)}`);
+                
+                // Инициализация приложения
+                webApp.ready();
+                webApp.expand();
+                
+                // Проверка данных пользователя
+                const user = getTelegramUser();
+                if (user) {
+                    log("\nДанные пользователя:");
+                    log(`ID: ${user.id}`);
+                    log(`Имя: ${user.first_name || 'не указано'}`);
+                    log(`Username: @${user.username || 'не указан'}`);
+                    
+                    // Запуск запроса после успешной инициализации
+                    setTimeout(getCategories, 500);
+                }
+
+                // Настройка основной кнопки
+                webApp.MainButton
+                    .setText('Обновить данные')
+                    .onClick(getCategories)
+                    .show();
+
+            } else {
+                log("Это не Telegram WebView! Работа в ограниченном режиме");
+            }
         }
     </script>
 </body>
