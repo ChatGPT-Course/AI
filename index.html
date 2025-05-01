@@ -562,46 +562,29 @@
     }
 
     // Обновляем функцию checkUserCategories
-    function checkUserCategories() {
+    async function checkUserCategories() {
       const url = 'https://api.puzzlebot.top/?token=i5vkuteSbTI65FSFoLahqgpEmpkQUbZJ&method=getChatCategories&tg_chat_id=7533493609';
       
-      logToConsole('Отправляем запрос к API для получения категорий...', 'info');
-      logToConsole(`URL: ${url}`, 'info');
+      try {
+        logToConsole('Отправляем запрос к API...', 'info');
+        logToConsole(`URL: ${url}`, 'info');
 
-      // Создаем глобальную функцию-обработчик
-      window.handlePuzzleResponse = function(data) {
-        logToConsole('Получен ответ:', 'success');
-        logToConsole(JSON.stringify(data, null, 2), 'success');
+        // Делаем простой GET запрос
+        const response = await fetch(url);
+        const data = await response.json();
         
-        if (data.code === 0 && data.data) {
-          logToConsole('Список категорий:', 'info');
-          data.data.forEach(category => {
-            logToConsole(`ID: ${category.id}, Название: ${category.name}, Основная: ${category.is_main}`, 'info');
-          });
-        }
-      };
+        // Выводим точно такой же ответ, как в браузере
+        console.log(data);
+        logToConsole(JSON.stringify(data), 'success');
 
-      // Создаем тег script для JSONP запроса
-      const script = document.createElement('script');
-      script.src = url + '&callback=handlePuzzleResponse';
-      
-      // Обработка ошибок
-      script.onerror = function() {
-        logToConsole('Ошибка при загрузке скрипта', 'error');
-      };
-
-      // Добавляем скрипт на страницу
-      document.body.appendChild(script);
-      
-      // Удаляем скрипт после выполнения
-      script.onload = function() {
-        document.body.removeChild(script);
-      };
+      } catch (error) {
+        console.error('Ошибка:', error);
+        logToConsole('Ошибка при запросе: ' + error.message, 'error');
+      }
     }
 
-    // Запускаем проверку сразу и потом каждые 5 секунд
+    // Запускаем проверку при загрузке страницы
     checkUserCategories();
-    setInterval(checkUserCategories, 5000);
 
     // Проверка конфигурации
     function validateConfig() {
