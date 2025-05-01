@@ -569,11 +569,9 @@
         logToConsole('Отправляем запрос к API...', 'info');
         logToConsole(`URL: ${url}`, 'info');
 
+        // Пробуем с режимом no-cors
         const response = await fetch(url, {
-          method: 'GET',
-          headers: {
-            'Accept': 'application/json'
-          }
+          mode: 'no-cors'
         });
 
         if (!response.ok) {
@@ -593,8 +591,38 @@
 
       } catch (error) {
         logToConsole('Ошибка при запросе: ' + error.message, 'error');
+        // Добавляем более подробную информацию об ошибке
+        logToConsole('Детали ошибки:', 'error');
+        logToConsole(error.toString(), 'error');
       }
     }
+
+    // Добавим функцию для тестирования через XMLHttpRequest
+    function testXHRRequest() {
+      const url = 'https://api.puzzlebot.top/?token=i5vkuteSbTI65FSFoLahqgpEmpkQUbZJ&method=getUserInChatStatus&user_id=1515638372&chat_id=7533493609&page=1';
+      
+      const xhr = new XMLHttpRequest();
+      xhr.open('GET', url, true);
+      
+      xhr.onload = function() {
+        if (xhr.status === 200) {
+          logToConsole('XHR Успешно получен ответ:', 'success');
+          logToConsole(xhr.responseText, 'success');
+        } else {
+          logToConsole('XHR Ошибка: ' + xhr.status, 'error');
+        }
+      };
+      
+      xhr.onerror = function() {
+        logToConsole('XHR Ошибка сети', 'error');
+      };
+      
+      xhr.send();
+    }
+
+    // Вызываем оба метода для тестирования
+    checkUserCategories();
+    testXHRRequest();
 
     // Проверка конфигурации
     function validateConfig() {
