@@ -443,17 +443,67 @@
       isLoaded: false
     };
 
+    // Добавляем элемент для логов внизу страницы
+    document.addEventListener('DOMContentLoaded', () => {
+      const logContainer = document.createElement('div');
+      logContainer.id = 'debug-log';
+      logContainer.style.position = 'fixed';
+      logContainer.style.bottom = '0';
+      logContainer.style.left = '0';
+      logContainer.style.right = '0';
+      logContainer.style.maxHeight = '200px';
+      logContainer.style.background = 'rgba(0, 0, 0, 0.8)';
+      logContainer.style.color = '#fff';
+      logContainer.style.fontFamily = 'monospace';
+      logContainer.style.fontSize = '12px';
+      logContainer.style.padding = '10px';
+      logContainer.style.overflowY = 'auto';
+      logContainer.style.zIndex = '1000';
+      document.body.appendChild(logContainer);
+
+      // Добавляем стили для URL
+      const style = document.createElement('style');
+      style.textContent = `
+        .debug-log-entry { margin: 4px 0; padding: 4px; border-bottom: 1px solid rgba(255,255,255,0.2); }
+        .debug-log-entry.error { color: #ff6b6b; }
+        .debug-log-entry.success { color: #69db7c; }
+        .debug-log-entry.warning { color: #ffd43b; }
+        .api-url { 
+          background: rgba(255,255,255,0.1); 
+          padding: 8px; 
+          margin: 4px 0;
+          border-radius: 4px;
+          word-break: break-all;
+          cursor: pointer;
+        }
+        .api-url:hover {
+          background: rgba(255,255,255,0.2);
+        }
+      `;
+      document.head.appendChild(style);
+    });
+
     // Функция для логирования
-    function log(message, type = 'info') {
+    function log(message, type = 'info', isUrl = false) {
       const logContainer = document.getElementById('debug-log');
       const entry = document.createElement('div');
       entry.className = `debug-log-entry ${type}`;
       const time = new Date().toLocaleTimeString();
-      entry.textContent = `[${time}] ${message}`;
+
+      if (isUrl) {
+        entry.innerHTML = `[${time}] API URL (нажмите чтобы скопировать):<br><div class="api-url">${message}</div>`;
+        entry.querySelector('.api-url').addEventListener('click', () => {
+          navigator.clipboard.writeText(message).then(() => {
+            log('✅ URL скопирован в буфер обмена', 'success');
+          });
+        });
+      } else {
+        entry.textContent = `[${time}] ${message}`;
+      }
+
       logContainer.appendChild(entry);
-      // Прокручиваем к последнему сообщению
       logContainer.scrollTop = logContainer.scrollHeight;
-      // Ограничиваем количество сообщений
+
       while (logContainer.children.length > 50) {
         logContainer.removeChild(logContainer.firstChild);
       }
@@ -492,9 +542,10 @@
         params.append('method', 'getUserInChatStatus');
         params.append('user_id', currentUserId);
         params.append('chat_id', PUZZLE_CONFIG.BOT_CHAT_ID);
+        params.append('page', '1');
 
         const url = 'https://api.puzzlebot.top/?' + params.toString();
-        log('URL запроса: ' + url, 'info');
+        log(url, 'info', true); // Отображаем URL как копируемый элемент
 
         const response = await fetch(url, {
           method: 'POST',
@@ -661,25 +712,6 @@
     // Обработка клика по кнопке тех. поддержки
     document.getElementById('supportButton').addEventListener('click', () => {
       window.location.href = 'chat.html';
-    });
-
-    // Добавляем элемент для логов внизу страницы
-    document.addEventListener('DOMContentLoaded', () => {
-      const logContainer = document.createElement('div');
-      logContainer.id = 'debug-log';
-      logContainer.style.position = 'fixed';
-      logContainer.style.bottom = '0';
-      logContainer.style.left = '0';
-      logContainer.style.right = '0';
-      logContainer.style.maxHeight = '200px';
-      logContainer.style.background = 'rgba(0, 0, 0, 0.8)';
-      logContainer.style.color = '#fff';
-      logContainer.style.fontFamily = 'monospace';
-      logContainer.style.fontSize = '12px';
-      logContainer.style.padding = '10px';
-      logContainer.style.overflowY = 'auto';
-      logContainer.style.zIndex = '1000';
-      document.body.appendChild(logContainer);
     });
   </script>
 </body>
