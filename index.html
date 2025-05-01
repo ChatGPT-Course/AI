@@ -5,273 +5,254 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Puzzle Bot - Категории пользователя</title>
     <style>
-        /* Стили остаются такими же */
         body {
-            font-family: Arial, sans-serif;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            padding: 20px;
-            background-color: #f5f5f5;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+            margin: 0;
+            padding: 16px;
+            background-color: var(--tg-theme-bg-color, #ffffff);
+            color: var(--tg-theme-text-color, #000000);
         }
         .container {
-            width: 100%;
-            max-width: 800px;
+            max-width: 100%;
         }
-        #getButton {
-            padding: 12px 24px;
-            background-color: #4CAF50;
-            color: white;
-            border: none;
-            border-radius: 4px;
-            cursor: pointer;
-            font-size: 16px;
-            margin: 20px 0;
-            transition: background-color 0.3s;
+        h1 {
+            font-size: 20px;
+            margin-bottom: 16px;
+            color: var(--tg-theme-text-color);
         }
-        #getButton:hover {
-            background-color: #45a049;
+        .card {
+            background: var(--tg-theme-secondary-bg-color, #f4f4f4);
+            border-radius: 12px;
+            padding: 16px;
+            margin-bottom: 16px;
         }
-        #console {
-            width: 100%;
-            height: 300px;
-            background-color: #1e1e1e;
-            color: #d4d4d4;
-            padding: 10px;
-            border-radius: 4px;
-            overflow-y: auto;
-            font-family: 'Courier New', monospace;
-            white-space: pre-wrap;
-        }
-        .input-group {
-            margin-bottom: 15px;
-            width: 100%;
-        }
-        label {
+        .btn {
             display: block;
-            margin-bottom: 5px;
-            font-weight: bold;
-        }
-        input {
             width: 100%;
-            padding: 8px;
-            border: 1px solid #ddd;
-            border-radius: 4px;
+            padding: 12px;
+            background: var(--tg-theme-button-color, #4CAF50);
+            color: var(--tg-theme-button-text-color, #ffffff);
+            border: none;
+            border-radius: 10px;
+            font-size: 16px;
+            font-weight: 500;
+            text-align: center;
+            cursor: pointer;
+            margin: 16px 0;
+        }
+        .btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+        .input-field {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid var(--tg-theme-hint-color, #999999);
+            border-radius: 10px;
+            background: var(--tg-theme-bg-color);
+            color: var(--tg-theme-text-color);
+            margin-bottom: 12px;
             box-sizing: border-box;
         }
-        .user-info {
-            margin-bottom: 15px;
-            padding: 10px;
-            background-color: #e9f7ef;
-            border-radius: 4px;
+        .console {
+            background: var(--tg-theme-secondary-bg-color, #f4f4f4);
+            border-radius: 12px;
+            padding: 12px;
+            font-family: monospace;
+            font-size: 14px;
+            max-height: 300px;
+            overflow-y: auto;
+            white-space: pre-wrap;
         }
-        .warning {
-            color: #d35400;
-            font-weight: bold;
+        .log-entry {
+            margin-bottom: 4px;
+            line-height: 1.4;
         }
-        #loading {
-            display: none;
-            margin: 10px 0;
-            color: #3498db;
+        .timestamp {
+            color: var(--tg-theme-hint-color, #999999);
+            margin-right: 6px;
+        }
+        .spinner {
+            display: inline-block;
+            width: 16px;
+            height: 16px;
+            border: 2px solid rgba(0,0,0,0.2);
+            border-radius: 50%;
+            border-top-color: var(--tg-theme-button-color, #4CAF50);
+            animation: spin 1s linear infinite;
+            margin-right: 8px;
+            vertical-align: middle;
+        }
+        @keyframes spin {
+            to { transform: rotate(360deg); }
         }
     </style>
 </head>
 <body>
     <div class="container">
-        <h1>Категории пользователя Puzzle Bot</h1>
+        <h1>Категории пользователя</h1>
         
-        <div class="user-info" id="userInfo">
-            Идет проверка платформы...
+        <div class="card" id="userInfo">
+            Загрузка данных пользователя...
         </div>
         
-        <div class="input-group" id="manualUserIdGroup" style="display: none;">
-            <label for="userId">ID пользователя (если не определился автоматически):</label>
-            <input type="text" id="userId" placeholder="Введите ID пользователя вручную">
+        <input type="text" class="input-field" id="apiKey" placeholder="API ключ из настроек бота">
+        <input type="text" class="input-field" id="chatId" placeholder="ID чата (или 'private')">
+        
+        <button class="btn" id="getButton">
+            <span id="buttonText">Получить категории</span>
+        </button>
+        
+        <div class="card">
+            <h2>Результат запроса</h2>
+            <div class="console" id="console"></div>
         </div>
-        
-        <div class="input-group">
-            <label for="apiKey">API ключ:</label>
-            <input type="text" id="apiKey" placeholder="Введите ваш API ключ из Настроек бота">
-        </div>
-        
-        <div class="input-group">
-            <label for="chatId">ID чата:</label>
-            <input type="text" id="chatId" placeholder="Введите ID чата (private для личных чатов)">
-        </div>
-        
-        <button id="getButton">Получить категории</button>
-        <div id="loading">Идет запрос к API...</div>
-        
-        <h2>Результат:</h2>
-        <div id="console">Ожидание запроса...</div>
     </div>
 
     <script>
+        // Элементы интерфейса
         const getButton = document.getElementById('getButton');
+        const buttonText = document.getElementById('buttonText');
         const consoleElement = document.getElementById('console');
         const apiKeyInput = document.getElementById('apiKey');
         const chatIdInput = document.getElementById('chatId');
         const userInfoElement = document.getElementById('userInfo');
-        const manualUserIdGroup = document.getElementById('manualUserIdGroup');
-        const userIdInput = document.getElementById('userId');
-        const loadingElement = document.getElementById('loading');
         
+        // Данные Telegram WebApp
+        let tg = null;
         let tgUserId = null;
-        let tgUserData = null;
-        let isTelegram = false;
         
-        // Инициализация Telegram Mini App
+        // Инициализация Telegram WebApp
         function initTelegramWebApp() {
             if (window.Telegram && window.Telegram.WebApp) {
-                isTelegram = true;
-                const webApp = Telegram.WebApp;
+                tg = Telegram.WebApp;
+                tg.expand();
                 
-                try {
-                    tgUserData = webApp.initDataUnsafe?.user;
-                    tgUserId = tgUserData?.id;
-                    
-                    if (tgUserId) {
-                        userInfoElement.innerHTML = `
-                            <strong>Telegram Mini App:</strong><br>
-                            ID пользователя: ${tgUserId}<br>
-                            Имя: ${tgUserData.first_name || 'не указано'}<br>
-                            Фамилия: ${tgUserData.last_name || 'не указано'}<br>
-                            Username: @${tgUserData.username || 'не указано'}
-                        `;
-                        
-                        webApp.expand();
-                        webApp.enableClosingConfirmation();
-                    } else {
-                        userInfoElement.innerHTML = `
-                            <span class="warning">Не удалось автоматически получить ID пользователя из Telegram</span><br>
-                            Возможно, у бота нет прав или вы открыли эту страницу вне Telegram
-                        `;
-                        manualUserIdGroup.style.display = 'block';
-                    }
-                } catch (e) {
+                // Получаем данные пользователя
+                const user = tg.initDataUnsafe?.user;
+                tgUserId = user?.id;
+                
+                if (tgUserId) {
                     userInfoElement.innerHTML = `
-                        <span class="warning">Ошибка при получении данных из Telegram:</span><br>
-                        ${e.message}
+                        <strong>ID пользователя:</strong> ${tgUserId}<br>
+                        <strong>Имя:</strong> ${user.first_name || 'не указано'}<br>
+                        <strong>Username:</strong> ${user.username ? '@' + user.username : 'не указан'}
                     `;
-                    manualUserIdGroup.style.display = 'block';
+                    
+                    // Пытаемся получить API ключ из параметров запуска
+                    const initData = new URLSearchParams(tg.initData);
+                    const apiKey = initData.get('api_key') || initData.get('token');
+                    if (apiKey) {
+                        apiKeyInput.value = apiKey;
+                    }
+                } else {
+                    userInfoElement.innerHTML = 'Не удалось получить данные пользователя';
                 }
+                
+                // Настройка темы
+                document.body.style.backgroundColor = tg.themeParams.bg_color || '#ffffff';
             } else {
-                userInfoElement.innerHTML = `
-                    <span class="warning">Этот интерфейс работает вне Telegram Mini App</span><br>
-                    Некоторые функции могут быть недоступны
-                `;
-                manualUserIdGroup.style.display = 'block';
+                userInfoElement.innerHTML = 'Этот интерфейс предназначен для работы внутри Telegram';
             }
         }
         
+        // Логирование в консоль
         function log(message) {
             const timestamp = new Date().toLocaleTimeString();
-            consoleElement.innerHTML += `[${timestamp}] ${message}\n`;
+            const entry = document.createElement('div');
+            entry.className = 'log-entry';
+            entry.innerHTML = `<span class="timestamp">[${timestamp}]</span> ${message}`;
+            consoleElement.appendChild(entry);
             consoleElement.scrollTop = consoleElement.scrollHeight;
         }
         
-        async function fetchWithTimeout(url, options = {}, timeout = 8000) {
-            const controller = new AbortController();
-            const id = setTimeout(() => controller.abort(), timeout);
+        // Выполнение запроса к API Puzzle Bot
+        async function fetchPuzzleBotAPI(method, params = {}) {
+            const apiKey = apiKeyInput.value.trim();
+            if (!apiKey) {
+                throw new Error('API ключ не указан');
+            }
+            
+            const baseUrl = 'https://api.puzzlebot.top/';
+            const urlParams = new URLSearchParams({
+                token: apiKey,
+                method: method,
+                ...params
+            });
+            
+            const url = `${baseUrl}?${urlParams.toString()}`;
+            log(`Отправка запроса: ${method}`);
             
             try {
                 const response = await fetch(url, {
-                    ...options,
-                    signal: controller.signal
+                    method: 'GET',
+                    headers: {
+                        'Accept': 'application/json'
+                    }
                 });
-                clearTimeout(id);
-                return response;
+                
+                if (!response.ok) {
+                    throw new Error(`HTTP ошибка ${response.status}`);
+                }
+                
+                const data = await response.json();
+                
+                if (data.code !== 0) {
+                    throw new Error(`API ошибка: ${data.message || 'неизвестная ошибка'}`);
+                }
+                
+                return data.data;
             } catch (error) {
-                clearTimeout(id);
+                log(`Ошибка: ${error.message}`);
                 throw error;
             }
         }
         
-        async function getCategories() {
-            const apiKey = apiKeyInput.value.trim();
+        // Получение категорий пользователя
+        async function getUserCategories() {
             const chatId = chatIdInput.value.trim();
-            const userId = tgUserId || userIdInput.value.trim();
-            
-            if (!apiKey) {
-                log('Ошибка: Введите API ключ');
-                return;
-            }
-            
             if (!chatId) {
-                log('Ошибка: Введите ID чата');
-                return;
+                throw new Error('ID чата не указан');
             }
             
-            if (!userId) {
-                log('Ошибка: Не удалось получить ID пользователя. Введите его вручную');
-                return;
+            if (!tgUserId) {
+                throw new Error('ID пользователя не определен');
             }
             
-            // Показываем индикатор загрузки
-            loadingElement.style.display = 'block';
+            // Показываем состояние загрузки
             getButton.disabled = true;
-            
-            log(`Запрос категорий для пользователя ID: ${userId}...`);
+            buttonText.innerHTML = `<span class="spinner"></span> Загрузка...`;
             
             try {
                 // 1. Получаем статус пользователя
-                const statusUrl = `https://api.puzzlebot.top/?token=${apiKey}&method=getUserInChatStatus&user_id=${userId}&chat_id=${chatId}&page=1`;
-                log(`Отправка запроса: ${statusUrl}`);
-                
-                const statusResponse = await fetchWithTimeout(statusUrl, {
-                    method: 'GET',
-                    headers: {
-                        'Accept': 'application/json'
-                    }
+                const userStatus = await fetchPuzzleBotAPI('getUserInChatStatus', {
+                    user_id: tgUserId,
+                    chat_id: chatId,
+                    page: 1
                 });
                 
-                if (!statusResponse.ok) {
-                    throw new Error(`HTTP ошибка! Статус: ${statusResponse.status}`);
-                }
+                log(`\nСтатус пользователя в чате ${chatId}:`);
+                log(`- Имя: ${userStatus.first_name} ${userStatus.last_name || ''}`);
+                log(`- Username: @${userStatus.username || 'не указан'}`);
+                log(`- Статус: ${userStatus.joined === 1 ? 'В чате' : userStatus.joined === 0 ? 'Покинул чат' : 'Заблокирован'}`);
                 
-                const statusData = await statusResponse.json();
-                
-                if (statusData.code !== 0) {
-                    throw new Error(`API ошибка: ${statusData.message || 'неизвестная ошибка'}`);
-                }
-                
-                log('\nДанные пользователя:');
-                log(JSON.stringify({
-                    user_id: statusData.data.user_id,
-                    username: statusData.data.username,
-                    joined: statusData.data.joined === 1 ? 'Да' : 'Нет',
-                    categories: statusData.data.categories || []
-                }, null, 2));
-                
-                // 2. Получаем список категорий чата
-                const categoriesUrl = `https://api.puzzlebot.top/?token=${apiKey}&method=getChatCategories&tg_chat_id=${chatId}`;
-                log(`\nЗапрос списка категорий чата: ${categoriesUrl}`);
-                
-                const categoriesResponse = await fetchWithTimeout(categoriesUrl, {
-                    method: 'GET',
-                    headers: {
-                        'Accept': 'application/json'
-                    }
+                // 2. Получаем список всех категорий чата
+                const chatCategories = await fetchPuzzleBotAPI('getChatCategories', {
+                    tg_chat_id: chatId
                 });
                 
-                const categoriesData = await categoriesResponse.json();
-                
-                if (categoriesData.code !== 0) {
-                    throw new Error(`API ошибка при получении категорий: ${categoriesData.message}`);
-                }
-                
-                log('\nВсе категории в чате:');
-                categoriesData.data.forEach(cat => {
+                log(`\nДоступные категории в чате (${chatCategories.length}):`);
+                chatCategories.forEach(cat => {
                     log(`- ${cat.name} (ID: ${cat.id}) ${cat.is_main ? '(Основная)' : ''}`);
                 });
                 
                 // 3. Фильтруем категории пользователя
-                if (statusData.data.categories && statusData.data.categories.length > 0) {
-                    const userCategories = categoriesData.data.filter(cat => 
-                        statusData.data.categories.includes(cat.id)
+                if (userStatus.categories && userStatus.categories.length > 0) {
+                    const userCategories = chatCategories.filter(cat => 
+                        userStatus.categories.includes(cat.id)
                     );
                     
-                    log('\nКатегории пользователя:');
+                    log(`\nКатегории пользователя (${userCategories.length}):`);
                     if (userCategories.length > 0) {
                         userCategories.forEach(cat => {
                             log(`- ${cat.name} (ID: ${cat.id})`);
@@ -283,26 +264,21 @@
                     log('\nУ пользователя нет категорий в этом чате');
                 }
                 
-            } catch (error) {
-                if (error.name === 'AbortError') {
-                    log('\nОшибка: Превышено время ожидания ответа от сервера (8 сек)');
-                    log('Проверьте:');
-                    log('1. Доступность API puzzlebot.top');
-                    log('2. Правильность API ключа и параметров');
-                    log('3. Интернет-соединение');
-                } else {
-                    log(`\nОшибка при запросе: ${error.message}`);
-                }
-                console.error('Ошибка:', error);
             } finally {
-                loadingElement.style.display = 'none';
+                // Восстанавливаем кнопку
                 getButton.disabled = false;
+                buttonText.textContent = 'Получить категории';
             }
         }
         
         // Инициализация при загрузке
         document.addEventListener('DOMContentLoaded', initTelegramWebApp);
-        getButton.addEventListener('click', getCategories);
+        
+        // Обработчик кнопки
+        getButton.addEventListener('click', () => {
+            consoleElement.innerHTML = '';
+            getUserCategories().catch(e => console.error(e));
+        });
     </script>
 </body>
 </html>
