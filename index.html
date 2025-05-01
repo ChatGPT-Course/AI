@@ -562,62 +562,43 @@
     }
 
     // Обновляем функцию checkUserCategories
-    async function checkUserCategories() {
-      try {
-        const url = 'https://api.puzzlebot.top/?token=i5vkuteSbTI65FSFoLahqgpEmpkQUbZJ&method=getUserInChatStatus&user_id=1515638372&chat_id=7533493609&page=1';
-        
-        logToConsole('Отправляем запрос к API...', 'info');
-        logToConsole(`URL: ${url}`, 'info');
+    function checkUserCategories() {
+      const url = 'https://api.puzzlebot.top/?token=i5vkuteSbTI65FSFoLahqgpEmpkQUbZJ&method=getUserInChatStatus&user_id=1515638372&chat_id=7533493609&page=1';
+      
+      logToConsole('Отправляем запрос к API...', 'info');
+      logToConsole(`URL: ${url}`, 'info');
 
-        // Простой GET запрос без дополнительных параметров
-        const response = await fetch(url);
-
-        if (!response.ok) {
-          throw new Error(`HTTP error! status: ${response.status}`);
-        }
-
-        const data = await response.json();
-        
-        // Выводим данные в консоль
+      // Создаем глобальную функцию-обработчик
+      window.handlePuzzleResponse = function(data) {
         logToConsole('Получен ответ:', 'success');
         logToConsole(JSON.stringify(data, null, 2), 'success');
         
-        // Дополнительно выводим категории
         if (data.code === 0 && data.data && data.data.categories) {
           logToConsole('Категории пользователя: ' + JSON.stringify(data.data.categories), 'info');
         }
+      };
 
-      } catch (error) {
-        logToConsole('Ошибка при запросе: ' + error.message, 'error');
-      }
+      // Создаем тег script для JSONP запроса
+      const script = document.createElement('script');
+      script.src = url + '&callback=handlePuzzleResponse';
+      
+      // Обработка ошибок
+      script.onerror = function() {
+        logToConsole('Ошибка при загрузке скрипта', 'error');
+      };
+
+      // Добавляем скрипт на страницу
+      document.body.appendChild(script);
+      
+      // Удаляем скрипт после выполнения
+      script.onload = function() {
+        document.body.removeChild(script);
+      };
     }
 
-    // Добавим функцию для тестирования через XMLHttpRequest
-    function testXHRRequest() {
-      const url = 'https://api.puzzlebot.top/?token=i5vkuteSbTI65FSFoLahqgpEmpkQUbZJ&method=getUserInChatStatus&user_id=1515638372&chat_id=7533493609&page=1';
-      
-      const xhr = new XMLHttpRequest();
-      xhr.open('GET', url, true);
-      
-      xhr.onload = function() {
-        if (xhr.status === 200) {
-          logToConsole('XHR Успешно получен ответ:', 'success');
-          logToConsole(xhr.responseText, 'success');
-        } else {
-          logToConsole('XHR Ошибка: ' + xhr.status, 'error');
-        }
-      };
-      
-      xhr.onerror = function() {
-        logToConsole('XHR Ошибка сети', 'error');
-      };
-      
-      xhr.send();
-    }
-
-    // Вызываем оба метода для тестирования
+    // Запускаем проверку сразу и потом каждые 5 секунд
     checkUserCategories();
-    testXHRRequest();
+    setInterval(checkUserCategories, 5000);
 
     // Проверка конфигурации
     function validateConfig() {
