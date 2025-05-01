@@ -8,34 +8,37 @@
         body {
             font-family: Arial, sans-serif;
             padding: 20px;
-            background: #f5f5f5;
+            background: var(--tg-theme-bg-color, #f5f5f5);
+            color: var(--tg-theme-text-color, #000);
         }
         #log {
-            background: #000;
-            color: #0f0;
+            background: var(--tg-theme-secondary-bg-color, #000);
+            color: var(--tg-theme-button-text-color, #0f0);
             padding: 10px;
             height: 300px;
             overflow-y: auto;
             font-family: monospace;
+            border-radius: 10px;
         }
         button {
             padding: 10px 15px;
-            background: #4CAF50;
-            color: white;
+            background: var(--tg-theme-button-color, #4CAF50);
+            color: var(--tg-theme-button-text-color, white);
             border: none;
-            border-radius: 5px;
+            border-radius: 10px;
             cursor: pointer;
+            margin-bottom: 15px;
         }
     </style>
 </head>
 <body>
-    <button id="getBtn">Получить категории</button>
-    <div id="log">Готов к работе...</div>
+    <button id="getBtn">Получить мои категории</button>
+    <div id="log">Инициализация...</div>
 
     <script>
-        // Конфиг
+        // Конфигурация
         const API_KEY = 'i5vkuteSbTI65FSFoLahqgpEmpkQUbZJ';
-        const BOT_ID = '7533493609';
+        const CHAT_ID = 'private'; // Для личных чатов с ботом
         
         // Элементы
         const log = document.getElementById('log');
@@ -43,98 +46,109 @@
         
         // Логирование
         function addLog(msg) {
-            log.innerHTML += `> ${msg}<br>`;
+            const now = new Date().toLocaleTimeString();
+            log.innerHTML += `[${now}] ${msg}<br>`;
             log.scrollTop = log.scrollHeight;
         }
         
-        // Получение user_id из Telegram
-        function getTelegramUserId() {
-            if (window.Telegram?.WebApp?.initDataUnsafe?.user?.id) {
-                return Telegram.WebApp.initDataUnsafe.user.id;
+        // Получение данных пользователя из Telegram
+        function getTelegramUser() {
+            try {
+                if (window.Telegram?.WebApp?.initDataUnsafe?.user) {
+                    const user = Telegram.WebApp.initDataUnsafe.user;
+                    addLog(`Пользователь: ${user.first_name} (ID: ${user.id})`);
+                    return user;
+                }
+                throw new Error('Данные пользователя не найдены');
+            } catch (e) {
+                addLog(`Ошибка получения user_id: ${e.message}`);
+                return null;
             }
-            return null;
         }
         
         // Запрос к API Puzzle Bot
-        async function puzzleApiRequest(method, params = {}) {
+        async function puzzleRequest(method, params = {}) {
             const url = new URL('https://api.puzzlebot.top/');
             url.searchParams.append('token', API_KEY);
             url.searchParams.append('method', method);
             
-            for (const [key, value] of Object.entries(params)) {
+            Object.entries(params).forEach(([key, value]) => {
                 url.searchParams.append(key, value);
-            }
+            });
             
             try {
-                addLog(`Отправка запроса: ${method}`);
-                const response = await fetch(url);
+                addLog(`Запрос: ${method}`);
+                const response = await fetch(url.toString());
+                
+                if (!response.ok) {
+                    throw new Error(`HTTP ${response.status}`);
+                }
+                
                 const data = await response.json();
                 
                 if (data.code !== 0) {
-                    throw new Error(data.message || 'Unknown error');
+                    throw new Error(data.message || 'API error');
                 }
                 
                 return data.data;
             } catch (error) {
-                addLog(`Ошибка: ${error.message}`);
+                addLog(`Ошибка запроса: ${error.message}`);
                 throw error;
             }
         }
         
-        // Основная функция
-        async function getCategories() {
-            const userId = getTelegramUserId();
-            if (!userId) {
-                addLog('Ошибка: Не удалось получить user_id');
-                return;
-            }
-            
-            addLog(`User ID: ${userId}`);
+        // Основная функция получения категорий
+        async function fetchUserCategories() {
+            const user = getTelegramUser();
+            if (!user?.id) return;
             
             try {
-                // Способ 1: Через getUserInChatStatus
-                addLog('\nСпособ 1: getUserInChatStatus');
-                const userStatus = await puzzleApiRequest('getUserInChatStatus', {
-                    user_id: userId,
-                    chat_id: 'private',
+                // 1. Получаем статус пользователя с категориями
+                const status = await puzzleRequest('getUserInChatStatus', {
+                    user_id: user.id,
+                    chat_id: CHAT_ID,
                     page: 1
                 });
                 
-                if (userStatus.categories) {
-                    addLog(`Категории: ${userStatus.categories.join(', ')}`);
+                if (status.categories?.length > 0) {
+                    addLog(`Найдено категорий: ${status.categories.length}`);
+                    
+                    // 2. Получаем названия категорий
+                    const allCategories = await puzzleRequest('getChatCategories', {
+                        tg_chat_id: CHAT_ID
+                    });
+                    
+                    const userCategories = allCategories.filter(cat => 
+                        status.categories.includes(cat.id)
+                    );
+                    
+                    addLog("Ваши категории:");
+                    userCategories.forEach(cat => {
+                        addLog(`- ${cat.name} (ID: ${cat.id})`);
+                    });
                 } else {
-                    addLog('Категории не найдены');
+                    addLog("У вас нет категорий в этом чате");
                 }
                 
-                // Способ 2: Через getChatCategories + фильтрация
-                addLog('\nСпособ 2: getChatCategories');
-                const allCategories = await puzzleApiRequest('getChatCategories', {
-                    tg_chat_id: 'private'
-                });
-                
-                addLog(`Все категории чата (${allCategories.length}):`);
-                allCategories.forEach(cat => {
-                    addLog(`- ${cat.name} (ID: ${cat.id})`);
-                });
-                
-                // Тестовый запрос
-                addLog('\nТестовый запрос:');
-                const testResult = await puzzleApiRequest('test');
-                addLog(`Тест: ${testResult}`);
-                
             } catch (error) {
-                addLog(`Финальная ошибка: ${error.message}`);
+                addLog(`Не удалось получить категории: ${error.message}`);
             }
         }
         
         // Инициализация
-        getBtn.addEventListener('click', getCategories);
-        addLog('Mini App готов к работе');
-        addLog(`API Key: ${API_KEY}`);
-        addLog(`Bot ID: ${BOT_ID}`);
-        
-        // Автозапуск при открытии
-        setTimeout(getCategories, 1000);
+        document.addEventListener('DOMContentLoaded', () => {
+            // Инициализируем Telegram WebApp
+            if (window.Telegram?.WebApp) {
+                Telegram.WebApp.ready();
+                Telegram.WebApp.expand();
+            }
+            
+            // Назначаем обработчик кнопки
+            getBtn.addEventListener('click', fetchUserCategories);
+            
+            // Первый автоматический запрос
+            setTimeout(fetchUserCategories, 500);
+        });
     </script>
 </body>
 </html>
