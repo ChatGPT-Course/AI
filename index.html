@@ -2,121 +2,105 @@
 <html>
 <head>
     <meta charset="UTF-8">
-    <title>PuzzleBot API Test</title>
+    <title>PuzzleBot Categories</title>
     <style>
-        body { padding: 20px; font-family: Arial; }
-        #log { 
-            background: #1e1e1e; 
-            color: #00ff00; 
-            padding: 15px; 
-            margin-top: 15px;
-            border-radius: 8px;
+        body {
+            padding: 20px;
+            font-family: Arial;
+            background: var(--tg-theme-bg-color, #ffffff);
+            color: var(--tg-theme-text-color, #000000);
+        }
+        #result {
             white-space: pre-wrap;
-            max-height: 300px;
-            overflow-y: auto;
+            padding: 15px;
+            background: var(--tg-theme-secondary-bg-color, #f0f0f0);
+            border-radius: 10px;
+            margin-top: 15px;
         }
         button {
-            background: #0088cc;
-            color: white;
+            background: var(--tg-theme-button-color, #0088cc);
+            color: var(--tg-theme-button-text-color, white);
             border: none;
             padding: 12px;
             border-radius: 8px;
             cursor: pointer;
             width: 100%;
-            margin-bottom: 10px;
         }
     </style>
 </head>
 <body>
-    <button onclick="testDirectRequest()">1. Прямой запрос</button>
-    <button onclick="testJsonpRequest()">2. JSONP запрос</button>
-    <button onclick="testTelegramApi()">3. Через Telegram API</button>
-    <div id="log">Выберите метод запроса...</div>
+    <button onclick="getCategories()">Получить мои категории</button>
+    <div id="result">Результат появится здесь...</div>
 
     <script>
-        const API_URL = 'https://api.puzzlebot.top/';
         const API_KEY = 'i5vkuteSbTI65FSFoLahqgpEmpkQUbZJ';
-        const USER_ID = '1515638372';
         const CHAT_ID = '7533493609';
-        const log = document.getElementById('log');
-        
-        function addLog(message) {
-            const now = new Date().toLocaleTimeString();
-            log.innerHTML += `[${now}] ${message}\n`;
-            log.scrollTop = log.scrollHeight;
-        }
 
-        // 1. Прямой запрос (для тестирования CORS)
-        async function testDirectRequest() {
-            log.textContent = '';
-            addLog('Отправляю прямой запрос...');
-            
-            const url = `${API_URL}?token=${API_KEY}&method=getUserInChatStatus&user_id=${USER_ID}&chat_id=${CHAT_ID}&page=1&_=${Date.now()}`;
-            addLog(`URL: ${url}`);
-            
+        // Основная функция
+        async function getCategories() {
+            const resultDiv = document.getElementById('result');
+            resultDiv.textContent = "⌛ Запрос отправляется...";
+
             try {
+                // Получаем данные пользователя из Telegram
+                const tgUser = window.Telegram?.WebApp?.initDataUnsafe?.user;
+                if (!tgUser?.id) throw new Error("Не удалось получить данные пользователя");
+
+                // Формируем URL запроса
+                const url = new URL('https://api.puzzlebot.top/');
+                url.searchParams.append('token', API_KEY);
+                url.searchParams.append('method', 'getUserInChatStatus');
+                url.searchParams.append('user_id', tgUser.id);
+                url.searchParams.append('chat_id', CHAT_ID);
+                url.searchParams.append('page', '1');
+                url.searchParams.append('ts', Date.now()); // Для избежания кеширования
+
+                // Отправляем запрос через Telegram WebView
                 const response = await fetch(url, {
-                    mode: 'no-cors',
                     headers: {
-                        'Accept': 'application/json'
+                        'Telegram-WebApp-Version': window.Telegram?.WebApp?.version || 'unknown'
                     }
                 });
+
+                // Обработка ответа
+                if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+                const data = await response.json();
+
+                // Форматируем результат
+                resultDiv.textContent = JSON.stringify(data, null, 2);
                 
-                // Для mode: 'no-cors' мы не получим доступ к ответу
-                addLog('Запрос отправлен (но ответ недоступен из-за CORS)');
-                addLog('Проверьте результат в Network вкладке DevTools');
+                // Отправляем результат в Telegram
+                if (window.Telegram?.WebApp) {
+                    Telegram.WebApp.sendData(JSON.stringify({
+                        status: 'success',
+                        data: data
+                    }));
+                }
+
             } catch (error) {
-                addLog(`Ошибка: ${error.message}`);
+                resultDiv.textContent = `❌ Ошибка: ${error.message}`;
+                console.error('Error details:', error);
+                
+                // Отправляем ошибку в Telegram
+                if (window.Telegram?.WebApp) {
+                    Telegram.WebApp.showAlert(error.message);
+                }
             }
         }
 
-        // 2. JSONP запрос (если API поддерживает)
-        function testJsonpRequest() {
-            log.textContent = '';
-            addLog('Пытаюсь использовать JSONP...');
-            
-            const callbackName = 'jsonp_cb_' + Date.now();
-            const url = `${API_URL}?token=${API_KEY}&method=getUserInChatStatus&user_id=${USER_ID}&chat_id=${CHAT_ID}&page=1&callback=${callbackName}`;
-            
-            window[callbackName] = function(data) {
-                addLog('JSONP ответ получен:');
-                addLog(JSON.stringify(data, null, 2));
-                delete window[callbackName];
-            };
-            
-            const script = document.createElement('script');
-            script.src = url;
-            script.onerror = () => {
-                addLog('JSONP не поддерживается API');
-                document.body.removeChild(script);
-            };
-            
-            document.body.appendChild(script);
-            addLog(`Отправлен JSONP запрос: ${url}`);
-        }
-
-        // 3. Через Telegram Bot API (если доступно)
-        function testTelegramApi() {
-            log.textContent = '';
-            addLog('Пытаюсь использовать Telegram WebApp API...');
-            
-            if (!window.Telegram?.WebApp) {
-                addLog('Telegram WebApp не обнаружен');
-                return;
-            }
-            
-            const tg = Telegram.WebApp;
-            tg.expand();
-            
-            // Здесь можно попробовать отправить запрос через Bot API
-            addLog('Попробуйте использовать window.Telegram.WebApp.sendData()');
-            addLog('Или свяжитесь с поддержкой PuzzleBot для CORS');
-        }
-
-        // Автоматическая инициализация
+        // Инициализация Telegram WebApp
         if (window.Telegram?.WebApp) {
             Telegram.WebApp.ready();
             Telegram.WebApp.expand();
+            
+            // Автоматический запуск при открытии
+            setTimeout(getCategories, 500);
+            
+            // Настройка основной кнопки
+            Telegram.WebApp.MainButton
+                .setText('Обновить данные')
+                .onClick(getCategories)
+                .show();
         }
     </script>
 </body>
