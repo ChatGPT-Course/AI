@@ -379,6 +379,24 @@
   </style>
 </head>
 <body>
+  <div id="debug-log" style="position: fixed; bottom: 0; left: 0; right: 0; max-height: 200px; background: rgba(0, 0, 0, 0.8); color: #fff; font-family: monospace; font-size: 12px; padding: 10px; overflow-y: auto; z-index: 1000;"></div>
+  <style>
+    .debug-log-entry { margin: 4px 0; padding: 4px; border-bottom: 1px solid rgba(255,255,255,0.2); }
+    .debug-log-entry.error { color: #ff6b6b; }
+    .debug-log-entry.success { color: #69db7c; }
+    .debug-log-entry.warning { color: #ffd43b; }
+    .api-url { 
+      background: rgba(255,255,255,0.1); 
+      padding: 8px; 
+      margin: 4px 0;
+      border-radius: 4px;
+      word-break: break-all;
+      cursor: pointer;
+    }
+    .api-url:hover {
+      background: rgba(255,255,255,0.2);
+    }
+  </style>
   <div class="loading-screen" id="loading-screen">
     <div class="loading-text">Загрузка</div>
     <div class="loading-balls">
@@ -420,6 +438,32 @@
   </div>
 
   <script>
+    // Функция для логирования
+    function log(message, type = 'info', isUrl = false) {
+      const logContainer = document.getElementById('debug-log');
+      const entry = document.createElement('div');
+      entry.className = `debug-log-entry ${type}`;
+      const time = new Date().toLocaleTimeString();
+
+      if (isUrl) {
+        entry.innerHTML = `[${time}] API URL (нажмите чтобы скопировать):<br><div class="api-url">${message}</div>`;
+        entry.querySelector('.api-url').addEventListener('click', () => {
+          navigator.clipboard.writeText(message).then(() => {
+            log('✅ URL скопирован в буфер обмена', 'success');
+          });
+        });
+      } else {
+        entry.textContent = `[${time}] ${message}`;
+      }
+
+      logContainer.appendChild(entry);
+      logContainer.scrollTop = logContainer.scrollHeight;
+
+      while (logContainer.children.length > 50) {
+        logContainer.removeChild(logContainer.firstChild);
+      }
+    }
+
     // Конфигурация Puzzle Bot
     const PUZZLE_CONFIG = {
       // API токен из Puzzle Bot (Настройки -> Интеграции)
@@ -482,32 +526,6 @@
       `;
       document.head.appendChild(style);
     });
-
-    // Функция для логирования
-    function log(message, type = 'info', isUrl = false) {
-      const logContainer = document.getElementById('debug-log');
-      const entry = document.createElement('div');
-      entry.className = `debug-log-entry ${type}`;
-      const time = new Date().toLocaleTimeString();
-
-      if (isUrl) {
-        entry.innerHTML = `[${time}] API URL (нажмите чтобы скопировать):<br><div class="api-url">${message}</div>`;
-        entry.querySelector('.api-url').addEventListener('click', () => {
-          navigator.clipboard.writeText(message).then(() => {
-            log('✅ URL скопирован в буфер обмена', 'success');
-          });
-        });
-      } else {
-        entry.textContent = `[${time}] ${message}`;
-      }
-
-      logContainer.appendChild(entry);
-      logContainer.scrollTop = logContainer.scrollHeight;
-
-      while (logContainer.children.length > 50) {
-        logContainer.removeChild(logContainer.firstChild);
-      }
-    }
 
     // Функция для скрытия экрана загрузки
     function hideLoadingScreen() {
