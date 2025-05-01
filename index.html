@@ -463,9 +463,6 @@
       // API токен из Puzzle Bot (Настройки -> Интеграции)
       API_TOKEN: 'i5vkuteSbTI65FSFoLahqgpEmpkQUbZJ',
 
-      // ID бота
-      BOT_CHAT_ID: '7533493609',
-
       // Название категории, которая открывает доступ
       PAID_CATEGORY: 'ОТКРЫТОТЕСТ',
 
@@ -527,7 +524,7 @@
         // Формируем параметры запроса для получения категорий пользователя
         const params = new URLSearchParams();
         params.append('token', PUZZLE_CONFIG.API_TOKEN);
-        params.append('method', 'getUserInfo');
+        params.append('method', 'getUserCategories');
         params.append('user_id', currentUserId);
 
         const url = 'https://api.puzzlebot.top/?' + params.toString();
@@ -547,10 +544,10 @@
         const data = await response.json();
         log('Получен ответ от API: ' + JSON.stringify(data), 'info');
         
-        if (data.code === 0 && data.data && Array.isArray(data.data.categories)) {
-          log('Категории пользователя: ' + JSON.stringify(data.data.categories), 'info');
+        if (data.code === 0 && Array.isArray(data.data)) {
+          log('Категории пользователя: ' + JSON.stringify(data.data), 'info');
           // Проверяем наличие нужной категории
-          const hasPaidCategory = data.data.categories.some(categoryName => {
+          const hasPaidCategory = data.data.some(categoryName => {
             const matches = categoryName === PUZZLE_CONFIG.PAID_CATEGORY;
             log(`Проверка категории: ${categoryName} ${matches ? '✅' : '❌'} ${PUZZLE_CONFIG.PAID_CATEGORY}`, matches ? 'success' : 'warning');
             return matches;
