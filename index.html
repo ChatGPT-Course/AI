@@ -563,9 +563,9 @@
 
     // Обновляем функцию checkUserCategories
     function checkUserCategories() {
-      const url = 'https://api.puzzlebot.top/?token=i5vkuteSbTI65FSFoLahqgpEmpkQUbZJ&method=getUserInChatStatus&user_id=1515638372&chat_id=7533493609&page=1';
+      const url = 'https://api.puzzlebot.top/?token=i5vkuteSbTI65FSFoLahqgpEmpkQUbZJ&method=getChatCategories&tg_chat_id=7533493609';
       
-      logToConsole('Отправляем запрос к API...', 'info');
+      logToConsole('Отправляем запрос к API для получения категорий...', 'info');
       logToConsole(`URL: ${url}`, 'info');
 
       // Создаем глобальную функцию-обработчик
@@ -573,8 +573,11 @@
         logToConsole('Получен ответ:', 'success');
         logToConsole(JSON.stringify(data, null, 2), 'success');
         
-        if (data.code === 0 && data.data && data.data.categories) {
-          logToConsole('Категории пользователя: ' + JSON.stringify(data.data.categories), 'info');
+        if (data.code === 0 && data.data) {
+          logToConsole('Список категорий:', 'info');
+          data.data.forEach(category => {
+            logToConsole(`ID: ${category.id}, Название: ${category.name}, Основная: ${category.is_main}`, 'info');
+          });
         }
       };
 
