@@ -460,18 +460,16 @@
             date_oplata: '-'
           });
           console.log('Создан новый пользователь:', user.id);
+          state.isPaid = false; // Новый пользователь, оплаты нет
+        } else {
+          // Получаем данные существующего пользователя
+          const userData = snapshot.val();
+          state.isPaid = userData.oplata === 1;
+          console.log('Статус оплаты пользователя:', state.isPaid);
         }
         
-        // Получаем актуальные данные пользователя
-        const userData = (await userRef.once('value')).val();
-        state.isPaid = userData.oplata === 1;
+        // Обновляем UI один раз после проверки
         updateUI();
-        
-        // Подписываемся на изменения статуса оплаты
-        userRef.child('oplata').on('value', (snapshot) => {
-          state.isPaid = snapshot.val() === 1;
-          updateUI();
-        });
       } catch (error) {
         console.error('Ошибка при работе с базой данных:', error);
       }
