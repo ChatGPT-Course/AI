@@ -569,10 +569,8 @@
         logToConsole('Отправляем запрос к API...', 'info');
         logToConsole(`URL: ${url}`, 'info');
 
-        // Пробуем с режимом no-cors
-        const response = await fetch(url, {
-          mode: 'no-cors'
-        });
+        // Простой GET запрос без дополнительных параметров
+        const response = await fetch(url);
 
         if (!response.ok) {
           throw new Error(`HTTP error! status: ${response.status}`);
@@ -591,9 +589,6 @@
 
       } catch (error) {
         logToConsole('Ошибка при запросе: ' + error.message, 'error');
-        // Добавляем более подробную информацию об ошибке
-        logToConsole('Детали ошибки:', 'error');
-        logToConsole(error.toString(), 'error');
       }
     }
 
