@@ -2,140 +2,53 @@
 <html>
 <head>
     <meta charset="UTF-8">
-    <title>PuzzleBot User Data</title>
+    <title>PuzzleBot Mini App</title>
     <style>
         body {
             padding: 20px;
             font-family: Arial;
-            background: var(--tg-theme-bg-color, #ffffff);
-            color: var(--tg-theme-text-color, #000000);
+            background: #ffffff;
+            color: #000000;
+            text-align: center;
         }
-        #result {
-            white-space: pre-wrap;
-            padding: 15px;
-            background: var(--tg-theme-secondary-bg-color, #f0f0f0);
-            border-radius: 10px;
-            margin-top: 15px;
-        }
-        button {
-            background: var(--tg-theme-button-color, #0088cc);
-            color: var(--tg-theme-button-text-color, white);
-            border: none;
-            padding: 12px;
-            border-radius: 8px;
-            cursor: pointer;
-            width: 100%;
+        #message {
+            color: red;
+            margin-top: 20px;
         }
     </style>
 </head>
 <body>
-    <button onclick="initializeApp()">Инициализировать приложение</button>
-    <div id="result">Статус: Ожидание инициализации...</div>
+    <h1>PuzzleBot Categories</h1>
+    <div id="content"></div>
+    <div id="message"></div>
 
     <script>
-        const API_KEY = 'i5vkuteSbTI65FSFoLahqgpEmpkQUbZJ';
-        const CHAT_ID = '7533493609';
-
-        // Основные функции
-        function log(message) {
-            const resultDiv = document.getElementById('result');
-            resultDiv.textContent += `\n${new Date().toLocaleTimeString()}: ${message}`;
+        function showMessage(text) {
+            document.getElementById('message').textContent = text;
         }
 
-        function getTelegramUser() {
-            try {
-                if (!window.Telegram?.WebApp) {
-                    throw new Error("Telegram WebApp API не доступен");
-                }
+        // Проверка платформы
+        if (window.Telegram?.WebApp) {
+            // Режим Telegram WebApp
+            const webApp = Telegram.WebApp;
+            webApp.ready();
+            webApp.expand();
 
-                const webApp = Telegram.WebApp;
-                
-                // Проверка инициализации
-                if (!webApp.initDataUnsafe) {
-                    throw new Error("Данные инициализации не получены");
-                }
-
-                // Получаем пользовательские данные
-                const user = webApp.initDataUnsafe.user;
-                
-                if (!user) {
-                    throw new Error("Данные пользователя отсутствуют в initDataUnsafe");
-                }
-
-                if (!user.id) {
-                    throw new Error("User ID не найден");
-                }
-
-                return user;
-
-            } catch (error) {
-                log(`Ошибка: ${error.message}`);
-                return null;
-            }
-        }
-
-        async function getCategories() {
-            const user = getTelegramUser();
-            if (!user) return;
-
-            try {
-                const url = new URL('https://api.puzzlebot.top/');
-                url.searchParams.append('token', API_KEY);
-                url.searchParams.append('method', 'getUserInChatStatus');
-                url.searchParams.append('user_id', user.id);
-                url.searchParams.append('chat_id', CHAT_ID);
-                url.searchParams.append('page', '1');
-
-                const response = await fetch(url);
-                const data = await response.json();
-                
-                log("Ответ API получен:");
-                log(JSON.stringify(data, null, 2));
-
-            } catch (error) {
-                log(`Ошибка запроса: ${error.message}`);
-            }
-        }
-
-        function initializeApp() {
-            const resultDiv = document.getElementById('result');
-            resultDiv.textContent = "Инициализация...\n";
-
-            if (window.Telegram?.WebApp) {
-                const webApp = Telegram.WebApp;
-                
-                // Версия WebApp
-                log(`Версия WebApp: ${webApp.version || 'неизвестна'}`);
-                
-                // Параметры инициализации
-                log(`Init data: ${JSON.stringify(webApp.initData)}`);
-                log(`Init data unsafe: ${JSON.stringify(webApp.initDataUnsafe)}`);
-                
-                // Инициализация приложения
-                webApp.ready();
-                webApp.expand();
-                
-                // Проверка данных пользователя
-                const user = getTelegramUser();
-                if (user) {
-                    log("\nДанные пользователя:");
-                    log(`ID: ${user.id}`);
-                    log(`Имя: ${user.first_name || 'не указано'}`);
-                    log(`Username: @${user.username || 'не указан'}`);
-                    
-                    // Запуск запроса после успешной инициализации
-                    setTimeout(getCategories, 500);
-                }
-
-                // Настройка основной кнопки
-                webApp.MainButton
-                    .setText('Обновить данные')
-                    .onClick(getCategories)
-                    .show();
-
+            // Пользовательские данные
+            const user = webApp.initDataUnsafe.user;
+            if (user) {
+                document.getElementById('content').innerHTML = `
+                    <p>ID: ${user.id}</p>
+                    <p>Имя: ${user.first_name || 'не указано'}</p>
+                    <p>Username: @${user.username || 'не указан'}</p>
+                `;
             } else {
-                log("Это не Telegram WebView! Работа в ограниченном режиме");
+                showMessage("Данные пользователя не получены.");
             }
+
+        } else {
+            // Режим веб-браузера
+            showMessage("Откройте приложение через Telegram-клиент (iOS/Android/Desktop).");
         }
     </script>
 </body>
