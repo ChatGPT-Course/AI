@@ -445,6 +445,38 @@
       isLoaded: false
     };
 
+    // Функция для проверки и создания пользователя в Firebase
+    async function checkAndCreateUser(user) {
+      try {
+        const userRef = database.ref(`users/${user.id}`);
+        const snapshot = await userRef.once('value');
+        
+        if (!snapshot.exists()) {
+          // Создаем нового пользователя
+          await userRef.set({
+            name: [user.first_name, user.last_name].filter(Boolean).join(' '),
+            username: user.username || '',
+            oplata: 0,
+            date_oplata: '-'
+          });
+          console.log('Создан новый пользователь:', user.id);
+        }
+        
+        // Получаем актуальные данные пользователя
+        const userData = (await userRef.once('value')).val();
+        state.isPaid = userData.oplata === 1;
+        updateUI();
+        
+        // Подписываемся на изменения статуса оплаты
+        userRef.child('oplata').on('value', (snapshot) => {
+          state.isPaid = snapshot.val() === 1;
+          updateUI();
+        });
+      } catch (error) {
+        console.error('Ошибка при работе с базой данных:', error);
+      }
+    }
+
     // Функция для скрытия экрана загрузки
     function hideLoadingScreen() {
       const loadingScreen = document.getElementById('loading-screen');
@@ -453,19 +485,6 @@
         loadingScreen.style.display = 'none';
         document.getElementById('app-content').style.opacity = '1';
       }, 500);
-    }
-
-    // Функция проверки статуса оплаты
-    async function checkPaymentStatus() {
-      if (!state.userId) return;
-
-      try {
-        const snapshot = await database.ref(`users/${state.userId}/paid`).once('value');
-        state.isPaid = snapshot.val() === true;
-        updateUI();
-      } catch (error) {
-        console.error('Ошибка при проверке статуса оплаты:', error);
-      }
     }
 
     // Основная функция
@@ -479,10 +498,6 @@
       } else {
         await initTestMode();
       }
-
-      // Запускаем периодическую проверку статуса
-      await checkPaymentStatus();
-      setInterval(checkPaymentStatus, 5000);
     });
 
     async function initTelegramApp() {
@@ -517,36 +532,46 @@
         document.getElementById('avatar-fallback').textContent = fallback;
       }
 
+      // Проверяем и создаем пользователя в Firebase
+      await checkAndCreateUser(user);
+      
       state.isLoaded = true;
-      // Отображаем модули сразу, даже если статус еще не получен
-      updateUI();
       hideLoadingScreen();
     }
 
     async function initTestMode() {
-      state.userId = "test-user";
+      const testUser = {
+        id: "test-user",
+        first_name: "Тестовый",
+        last_name: "Пользователь",
+        username: "test"
+      };
+      
+      state.userId = testUser.id;
       document.getElementById('userName').textContent = 'Тестовый пользователь';
       document.getElementById('userId').textContent = 'ID: test-user';
       document.getElementById('avatar-fallback').textContent = 'T';
+      
+      // Проверяем и создаем тестового пользователя в Firebase
+      await checkAndCreateUser(testUser);
+      
       state.isLoaded = true;
-      // Отображаем модули сразу, даже если статус еще не получен
-      updateUI();
       hideLoadingScreen();
     }
 
     function updateUI() {
       const modules = [
-        { id: 0, title: "Введение в ИИ", desc: "Основы, история, примеры использования искусственного интеллекта" },
-        { id: 1, title: "Основы ChatGPT", desc: "Базовые принципы работы с ChatGPT, ключевые концепции" },
-        { id: 2, title: "ChatGPT PRO", desc: "Продвинутые техники и методы работы с ChatGPT" },
-        { id: 3, title: "ChatGPT MASTER", desc: "Экспертный уровень использования ChatGPT" }
+        { id: 0, title: "Введение в ИИ", desc: "Основы, история, примеры использования искусственного интеллекта", link: "M0.html" },
+        { id: 1, title: "Основы ChatGPT", desc: "Базовые принципы работы с ChatGPT, ключевые концепции", link: "M1.html" },
+        { id: 2, title: "ChatGPT PRO", desc: "Продвинутые техники и методы работы с ChatGPT", link: "M2.html" },
+        { id: 3, title: "ChatGPT MASTER", desc: "Экспертный уровень использования ChatGPT", link: "M3.html" }
       ];
 
       let html = '';
       modules.forEach(module => {
         const isLocked = module.id !== 0 && !state.isPaid;
         html += `
-          <div class="module ${isLocked ? 'locked' : ''}" onclick="handleModuleClick(${module.id}, ${isLocked})">
+          <div class="module ${isLocked ? 'locked' : ''}" onclick="handleModuleClick('${module.link}', ${isLocked})">
             <div class="module-label">Модуль ${module.id} - ${module.title}</div>
             <div class="module-content">
               <div class="module-desc">${module.desc}</div>
@@ -558,13 +583,13 @@
       document.getElementById('modules-container').innerHTML = html;
     }
 
-    function handleModuleClick(moduleId, isLocked) {
+    function handleModuleClick(link, isLocked) {
       if (isLocked) {
         alert('Для доступа к этому модулю необходимо приобрести полную версию курса');
         return;
       }
-      // Здесь логика открытия модуля
-      alert(`Открываем модуль ${moduleId}`);
+      // Переходим на страницу модуля
+      window.location.href = link;
     }
 
     // Глобальная функция для обработки кликов по модулям
