@@ -1,714 +1,217 @@
 <!DOCTYPE html>
 <html lang="ru">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Основы ИИ — Онлайн курс</title>
-  <script src="https://telegram.org/js/telegram-web-app.js"></script>
-  <style>
-    :root {
-      --primary: #FF7A00;
-      --primary-light: #FF9E40;
-      --white: #FFFFFF;
-      --dark: #333333;
-      --gray: #F5F5F5;
-      --graphite: #4A4A4A;
-    }
-
-    * {
-      margin: 0;
-      padding: 0;
-      box-sizing: border-box;
-      -webkit-tap-highlight-color: transparent;
-      outline: none;
-    }
-
-    body {
-      margin: 0;
-      font-family: 'Segoe UI', Arial, sans-serif;
-      background: linear-gradient(135deg, #FFF3E0 0%, #FFFFFF 100%);
-      color: var(--dark);
-      min-height: 100vh;
-    }
-
-    /* Экран загрузки */
-    .loading-screen {
-      position: fixed;
-      top: 0;
-      left: 0;
-      right: 0;
-      bottom: 0;
-      background: linear-gradient(135deg, var(--white) 0%, #FFF3E0 100%);
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      z-index: 1000;
-      transition: opacity 0.5s ease;
-    }
-
-    .loading-text {
-      font-size: 20px;
-      font-weight: 500;
-      margin-bottom: 20px;
-      color: var(--primary);
-    }
-
-    .loading-balls {
-      display: flex;
-      gap: 12px;
-    }
-
-    .loading-ball {
-      width: 16px;
-      height: 16px;
-      border-radius: 50%;
-      animation: bounce 1s infinite ease-in-out;
-    }
-
-    .loading-ball:nth-child(1) {
-      background: var(--primary);
-      animation-delay: 0s;
-    }
-
-    .loading-ball:nth-child(2) {
-      background: var(--primary-light);
-      animation-delay: 0.2s;
-    }
-
-    .loading-ball:nth-child(3) {
-      background: #AAAAAA;
-      animation-delay: 0.4s;
-    }
-
-    @keyframes bounce {
-      0%, 100% { transform: translateY(0); }
-      50% { transform: translateY(-10px); }
-    }
-
-    #app-content {
-      opacity: 0;
-      transition: opacity 0.5s ease;
-    }
-
-    .header {
-      display: flex;
-      align-items: center;
-      background: var(--graphite);
-      padding: 20px;
-      box-shadow: 0 4px 16px rgba(0, 0, 0, 0.2);
-      width: 100%;
-      margin-bottom: 20px;
-      position: relative;
-      color: var(--white);
-    }
-
-    .avatar {
-      width: 64px;
-      height: 64px;
-      border-radius: 50%;
-      background: linear-gradient(135deg, var(--primary) 0%, var(--primary-light) 100%);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      color: white;
-      font-weight: bold;
-      margin-right: 20px;
-      overflow: hidden;
-      flex-shrink: 0;
-    }
-
-    .avatar img {
-      width: 100%;
-      height: 100%;
-      object-fit: cover;
-    }
-
-    .user-info {
-      flex: 1;
-    }
-
-    .user-name {
-      font-size: 20px;
-      font-weight: 600;
-      color: var(--white);
-      margin-bottom: 4px;
-      line-height: 1.2;
-    }
-
-    .user-id {
-      font-size: 14px;
-      color: #DDD;
-    }
-
-    .content {
-      padding: 0 20px 20px;
-      max-width: 1200px;
-      margin: 0 auto;
-    }
-
-    .modules-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-      gap: 20px;
-    }
-
-    .module {
-      background: var(--white);
-      border-radius: 16px;
-      padding: 24px;
-      box-shadow: 0 4px 16px rgba(255, 122, 0, 0.1);
-      transition: all 0.3s ease;
-      position: relative;
-      cursor: pointer;
-      margin-top: 30px;
-    }
-
-    .module:hover {
-      transform: translateY(-5px);
-    }
-
-    .module.locked {
-      opacity: 0.7;
-      cursor: not-allowed;
-    }
-
-    .module-label {
-      position: absolute;
-      top: -20px;
-      left: 0;
-      background: var(--primary);
-      color: white;
-      padding: 8px 16px;
-      border-radius: 8px;
-      font-size: 16px;
-      font-weight: 500;
-      z-index: 2;
-    }
-
-    .module-content {
-      position: relative;
-    }
-
-    .module-title {
-      font-size: 20px;
-      font-weight: 600;
-      margin-bottom: 8px;
-      color: var(--dark);
-    }
-
-    .module-desc {
-      font-size: 14px;
-      color: #666;
-      margin-bottom: 20px;
-      line-height: 1.4;
-    }
-
-    .module-btn {
-      background: var(--primary);
-      color: white;
-      border: none;
-      padding: 12px 24px;
-      border-radius: 8px;
-      font-weight: 600;
-      cursor: pointer;
-      width: 100%;
-      transition: background 0.2s;
-    }
-
-    .module-btn:hover {
-      background: var(--primary-light);
-    }
-
-    .module.locked .module-btn {
-      background: #ccc;
-      cursor: not-allowed;
-    }
-
-    .lock-icon {
-      position: absolute;
-      top: 16px;
-      right: 16px;
-      font-size: 20px;
-    }
-
-    /* Menu Button Styles */
-    .menu-button {
-      position: absolute;
-      right: 20px;
-      top: 50%;
-      transform: translateY(-50%);
-      width: 40px;
-      height: 40px;
-      background: transparent;
-      border: 2px solid var(--white);
-      border-radius: 8px;
-      cursor: pointer;
-      display: flex;
-      flex-direction: column;
-      justify-content: center;
-      gap: 6px;
-      z-index: 100;
-      padding: 8px;
-    }
-
-    .menu-button span {
-      display: block;
-      width: 24px;
-      height: 2px;
-      background: var(--white);
-      transition: all 0.3s ease;
-    }
-
-    .menu-button.active span:nth-child(1) {
-      transform: rotate(45deg) translate(6px, 6px);
-    }
-
-    .menu-button.active span:nth-child(2) {
-      opacity: 0;
-    }
-
-    .menu-button.active span:nth-child(3) {
-      transform: rotate(-45deg) translate(6px, -6px);
-    }
-
-    /* Menu Content */
-    .menu-content {
-      position: absolute;
-      top: 80px;
-      right: 20px;
-      background: var(--white);
-      padding: 10px;
-      border-radius: 8px;
-      box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
-      display: none;
-      z-index: 99;
-      opacity: 0;
-      transform: translateY(-10px);
-      transition: opacity 0.3s ease, transform 0.3s ease;
-    }
-
-    .menu-content.active {
-      display: block;
-      opacity: 1;
-      transform: translateY(0);
-    }
-
-    .menu-content button {
-      background: linear-gradient(135deg, #FFF3E0 0%, #FFFFFF 100%);
-      border: none;
-      padding: 12px 24px;
-      width: 100%;
-      text-align: left;
-      cursor: pointer;
-      color: var(--dark);
-      font-size: 16px;
-      transition: background 0.2s;
-      border-radius: 20px;
-      display: flex;
-      align-items: center;
-      gap: 8px;
-    }
-
-    .menu-content button:hover {
-      background: var(--gray);
-    }
-
-    /* Chat Widget */
-    .chat-widget {
-      position: fixed;
-      bottom: 30px;
-      right: 30px;
-      width: 60px;
-      height: 60px;
-      background: var(--primary);
-      border-radius: 50%;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      cursor: pointer;
-      box-shadow: 0 4px 16px rgba(255, 122, 0, 0.2);
-      transition: transform 0.3s ease;
-      z-index: 1000;
-      text-decoration: none;
-      padding: 8px;
-      gap: 2px;
-    }
-
-    .chat-widget:hover {
-      transform: scale(1.1);
-    }
-
-    .chat-widget .ai-text {
-      color: var(--white);
-      font-size: 14px;
-      font-weight: bold;
-      line-height: 1;
-    }
-
-    .chat-widget .chat-icon {
-      font-size: 18px;
-      color: var(--white);
-      line-height: 1;
-    }
-
-    @media (max-width: 600px) {
-      .header {
-        padding: 15px;
-      }
-      
-      .avatar {
-        width: 48px;
-        height: 48px;
-        margin-right: 15px;
-      }
-
-      .user-name {
-        font-size: 18px;
-      }
-
-      .content {
-        padding: 0 15px 15px;
-      }
-
-      .modules-grid {
-        grid-template-columns: 1fr;
-      }
-    }
-
-    /* Стили для логов */
-    .debug-log {
-      position: fixed;
-      bottom: 100px;
-      left: 20px;
-      right: 20px;
-      max-height: 200px;
-      background: rgba(0, 0, 0, 0.8);
-      color: #fff;
-      font-family: monospace;
-      font-size: 12px;
-      padding: 10px;
-      border-radius: 8px;
-      overflow-y: auto;
-      z-index: 1000;
-    }
-
-    .debug-log-entry {
-      margin: 4px 0;
-      padding: 4px;
-      border-bottom: 1px solid rgba(255, 255, 255, 0.2);
-    }
-
-    .debug-log-entry.error {
-      color: #ff6b6b;
-    }
-
-    .debug-log-entry.success {
-      color: #69db7c;
-    }
-
-    .debug-log-entry.warning {
-      color: #ffd43b;
-    }
-  </style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Puzzle Bot - Категории пользователя</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        .container {
+            width: 100%;
+            max-width: 800px;
+        }
+        #getButton {
+            padding: 12px 24px;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 16px;
+            margin: 20px 0;
+            transition: background-color 0.3s;
+        }
+        #getButton:hover {
+            background-color: #45a049;
+        }
+        #console {
+            width: 100%;
+            height: 300px;
+            background-color: #1e1e1e;
+            color: #d4d4d4;
+            padding: 10px;
+            border-radius: 4px;
+            overflow-y: auto;
+            font-family: 'Courier New', monospace;
+            white-space: pre-wrap;
+        }
+        .input-group {
+            margin-bottom: 15px;
+            width: 100%;
+        }
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+        }
+        input {
+            width: 100%;
+            padding: 8px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            box-sizing: border-box;
+        }
+        .user-info {
+            margin-bottom: 15px;
+            padding: 10px;
+            background-color: #e9f7ef;
+            border-radius: 4px;
+        }
+    </style>
 </head>
 <body>
-  <div class="loading-screen" id="loading-screen">
-    <div class="loading-text">Загрузка</div>
-    <div class="loading-balls">
-      <div class="loading-ball"></div>
-      <div class="loading-ball"></div>
-      <div class="loading-ball"></div>
-    </div>
-  </div>
-
-  <div id="app-content">
-    <div class="header">
-      <div class="avatar" id="userAvatar">
-        <span id="avatar-fallback">U</span>
-      </div>
-      <div class="user-info">
-        <div class="user-name" id="userName">Загрузка...</div>
-        <div class="user-id" id="userId">ID: загрузка...</div>
-      </div>
-      <button class="menu-button" id="menuButton">
-        <span></span>
-        <span></span>
-        <span></span>
-      </button>
-      <div class="menu-content" id="menuContent">
-        <button id="supportButton">Тех. поддержка 🛠️</button>
-      </div>
-    </div>
-
-    <div class="content">
-      <div class="modules-grid" id="modules-container">
-        <!-- Модули будут добавлены динамически -->
-      </div>
-    </div>
-
-    <a href="chat.html" class="chat-widget">
-      <span class="ai-text">AI</span>
-      <span class="chat-icon">💬</span>
-    </a>
-  </div>
-
-  <!-- Добавляем элемент для логов -->
-  <div class="debug-log" id="debug-log"></div>
-
-  <script>
-    // Конфигурация Puzzle Bot
-    const PUZZLE_CONFIG = {
-      // API токен из Puzzle Bot (Настройки -> Интеграции)
-      API_TOKEN: 'i5vkuteSbTI65FSFoLahqgpEmpkQUbZJ',
-
-      // Название категории, которая открывает доступ
-      PAID_CATEGORY: 'ОТКРЫТОТЕСТ',
-
-      // Интервал проверки в миллисекундах
-      CHECK_INTERVAL: 5000  // 5 секунд
-    };
-
-    // Состояние приложения
-    const state = {
-      userId: null,
-      username: null,
-      isPaid: false,
-      isLoaded: false
-    };
-
-    // Функция для скрытия экрана загрузки
-    function hideLoadingScreen() {
-      const loadingScreen = document.getElementById('loading-screen');
-      loadingScreen.style.opacity = '0';
-      setTimeout(() => {
-        loadingScreen.style.display = 'none';
-        document.getElementById('app-content').style.opacity = '1';
-      }, 500);
-    }
-
-    // Функция для логирования
-    function log(message, type = 'info') {
-      const logContainer = document.getElementById('debug-log');
-      const entry = document.createElement('div');
-      entry.className = `debug-log-entry ${type}`;
-      const time = new Date().toLocaleTimeString();
-      entry.textContent = `[${time}] ${message}`;
-      logContainer.appendChild(entry);
-      // Прокручиваем к последнему сообщению
-      logContainer.scrollTop = logContainer.scrollHeight;
-      // Ограничиваем количество сообщений
-      while (logContainer.children.length > 50) {
-        logContainer.removeChild(logContainer.firstChild);
-      }
-    }
-
-    // Функция проверки категорий пользователя
-    async function checkUserCategories() {
-      if (!validateConfig()) {
-        return;
-      }
-
-      try {
-        // Получаем Telegram ID текущего пользователя
-        const currentUserId = state.userId;
-        if (!currentUserId) {
-          log('Ошибка: не удалось получить ID пользователя', 'error');
-          return;
-        }
-
-        log('Отправляем запрос к API...', 'info');
-        log(`Проверяем категории для пользователя ID=${currentUserId}`, 'info');
-
-        // Формируем параметры запроса для получения категорий пользователя
-        const params = new URLSearchParams();
-        params.append('token', PUZZLE_CONFIG.API_TOKEN);
-        params.append('method', 'getUserCategories');
-        params.append('user_id', currentUserId);
-
-        const url = 'https://api.puzzlebot.top/?' + params.toString();
-        log('URL запроса: ' + url, 'info');
-
-        const response = await fetch(url, {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/x-www-form-urlencoded'
-          }
-        });
-
-        if (!response.ok) {
-          throw new Error(`HTTP error! status: ${response.status}`);
-        }
-
-        const data = await response.json();
-        log('Получен ответ от API: ' + JSON.stringify(data), 'info');
+    <div class="container">
+        <h1>Категории пользователя Puzzle Bot</h1>
         
-        if (data.code === 0 && Array.isArray(data.data)) {
-          log('Категории пользователя: ' + JSON.stringify(data.data), 'info');
-          // Проверяем наличие нужной категории
-          const hasPaidCategory = data.data.some(categoryName => {
-            const matches = categoryName === PUZZLE_CONFIG.PAID_CATEGORY;
-            log(`Проверка категории: ${categoryName} ${matches ? '✅' : '❌'} ${PUZZLE_CONFIG.PAID_CATEGORY}`, matches ? 'success' : 'warning');
-            return matches;
-          });
-          
-          log(`Статус доступа: ${hasPaidCategory ? 'ОТКРЫТ ✅' : 'ЗАКРЫТ ❌'}`, hasPaidCategory ? 'success' : 'warning');
-          state.isPaid = hasPaidCategory;
-          updateUI();
-        } else {
-          log('Ошибка при получении категорий: ' + JSON.stringify(data), 'error');
+        <div class="user-info" id="userInfo">
+            Загрузка данных пользователя...
+        </div>
+        
+        <div class="input-group">
+            <label for="apiKey">API ключ:</label>
+            <input type="text" id="apiKey" placeholder="Введите ваш API ключ из Настроек бота">
+        </div>
+        
+        <div class="input-group">
+            <label for="chatId">ID чата:</label>
+            <input type="text" id="chatId" placeholder="Введите ID чата (private для личных чатов)">
+        </div>
+        
+        <button id="getButton">Получить категории</button>
+        
+        <h2>Результат:</h2>
+        <div id="console">Ожидание запроса...</div>
+    </div>
+
+    <script>
+        const getButton = document.getElementById('getButton');
+        const consoleElement = document.getElementById('console');
+        const apiKeyInput = document.getElementById('apiKey');
+        const chatIdInput = document.getElementById('chatId');
+        const userInfoElement = document.getElementById('userInfo');
+        
+        let tgUserId = null;
+        let tgUserData = null;
+        
+        // Инициализация Telegram Mini App
+        function initTelegramWebApp() {
+            if (window.Telegram && window.Telegram.WebApp) {
+                const webApp = Telegram.WebApp;
+                tgUserId = webApp.initDataUnsafe.user?.id;
+                tgUserData = webApp.initDataUnsafe.user;
+                
+                if (tgUserId) {
+                    userInfoElement.innerHTML = `
+                        <strong>Пользователь Telegram:</strong><br>
+                        ID: ${tgUserId}<br>
+                        Имя: ${tgUserData.first_name || 'не указано'}<br>
+                        Фамилия: ${tgUserData.last_name || 'не указано'}<br>
+                        Username: @${tgUserData.username || 'не указано'}
+                    `;
+                } else {
+                    userInfoElement.innerHTML = "Не удалось получить данные пользователя из Telegram WebApp";
+                }
+                
+                // Показываем основную часть интерфейса
+                webApp.expand();
+                webApp.enableClosingConfirmation();
+            } else {
+                userInfoElement.innerHTML = "Этот интерфейс предназначен для работы внутри Telegram Mini App";
+            }
         }
-      } catch (error) {
-        log('Ошибка при запросе к API: ' + error.message, 'error');
-        // Добавляем дополнительную информацию об ошибке
-        if (error instanceof TypeError) {
-          log('Возможная причина: проблема с CORS или неверный формат URL', 'error');
-          log('Проверьте правильность API токена', 'warning');
+        
+        function log(message) {
+            const timestamp = new Date().toLocaleTimeString();
+            consoleElement.innerHTML += `[${timestamp}] ${message}\n`;
+            consoleElement.scrollTop = consoleElement.scrollHeight;
         }
-      }
-    }
-
-    // Основная функция
-    document.addEventListener('DOMContentLoaded', async () => {
-      // Показываем экран загрузки
-      document.getElementById('loading-screen').style.display = 'flex';
-      document.getElementById('app-content').style.opacity = '0';
-
-      if (window.Telegram?.WebApp) {
-        await initTelegramApp();
-      } else {
-        await initTestMode();
-      }
-
-      // Запускаем периодическую проверку категорий
-      await checkUserCategories();
-      setInterval(checkUserCategories, PUZZLE_CONFIG.CHECK_INTERVAL);
-    });
-
-    async function initTelegramApp() {
-      // Убираем стандартную заставку Telegram
-      if (window.Telegram?.WebApp) {
-        Telegram.WebApp.ready();
-        Telegram.WebApp.expand();
-      }
-
-      const tg = window.Telegram.WebApp;
-      const user = tg.initDataUnsafe.user;
-      
-      state.userId = user.id.toString();
-      state.username = user.username || null;
-
-      // Устанавливаем данные пользователя из Telegram
-      document.getElementById('userName').textContent = 
-        [user.first_name, user.last_name].filter(Boolean).join(' ') || 'Пользователь';
-      document.getElementById('userId').textContent = `ID: ${state.userId}`;
-
-      // Устанавливаем аватар
-      const avatarElement = document.getElementById('userAvatar');
-      if (user.photo_url) {
-        const img = new Image();
-        img.src = user.photo_url;
-        img.onload = () => {
-          avatarElement.innerHTML = '';
-          avatarElement.appendChild(img);
-        };
-      } else {
-        const fallback = user.first_name?.charAt(0).toUpperCase() || 'U';
-        document.getElementById('avatar-fallback').textContent = fallback;
-      }
-
-      state.isLoaded = true;
-      // Отображаем модули сразу, даже если статус еще не получен
-      updateUI();
-      hideLoadingScreen();
-    }
-
-    async function initTestMode() {
-      state.userId = "test-user";
-      document.getElementById('userName').textContent = 'Тестовый пользователь';
-      document.getElementById('userId').textContent = 'ID: test-user';
-      document.getElementById('avatar-fallback').textContent = 'T';
-      state.isLoaded = true;
-      // Отображаем модули сразу, даже если статус еще не получен
-      updateUI();
-      hideLoadingScreen();
-    }
-
-    function updateUI() {
-      log(`Обновление интерфейса. Статус оплаты: ${state.isPaid ? 'ОПЛАЧЕНО ✅' : 'НЕ ОПЛАЧЕНО ❌'}`, state.isPaid ? 'success' : 'warning');
-      const modulesContainer = document.getElementById('modules-container');
-      if (!modulesContainer) {
-        log('Ошибка: не найден контейнер для модулей!', 'error');
-        return;
-      }
-
-      const modules = [
-        { id: 0, title: "Введение в ИИ", desc: "Основы, история, примеры использования искусственного интеллекта" },
-        { id: 1, title: "Основы ChatGPT", desc: "Базовые принципы работы с ChatGPT, ключевые концепции" },
-        { id: 2, title: "ChatGPT PRO", desc: "Продвинутые техники и методы работы с ChatGPT" },
-        { id: 3, title: "ChatGPT MASTER", desc: "Экспертный уровень использования ChatGPT" }
-      ];
-
-      let html = '';
-      modules.forEach(module => {
-        const isLocked = module.id !== 0 && !state.isPaid;
-        log(`Модуль ${module.id}: ${isLocked ? 'ЗАКРЫТ 🔒' : 'ОТКРЫТ 🔓'}`, isLocked ? 'warning' : 'success');
-        html += `
-          <div class="module ${isLocked ? 'locked' : ''}" onclick="handleModuleClick(${module.id}, ${isLocked})">
-            <div class="module-label">Модуль ${module.id} - ${module.title}</div>
-            <div class="module-content">
-              <div class="module-desc">${module.desc}</div>
-              <button class="module-btn">${isLocked ? 'Закрыто' : 'Начать'}</button>
-            </div>
-          </div>
-        `;
-      });
-      modulesContainer.innerHTML = html;
-    }
-
-    function handleModuleClick(moduleId, isLocked) {
-      if (isLocked) {
-        alert('Для доступа к этому модулю необходимо приобрести полную версию курса');
-        return;
-      }
-      // Здесь логика открытия модуля
-      alert(`Открываем модуль ${moduleId}`);
-    }
-
-    // Глобальная функция для обработки кликов по модулям
-    window.handleModuleClick = handleModuleClick;
-
-    // Обработка меню
-    const menuButton = document.getElementById('menuButton');
-    const menuContent = document.getElementById('menuContent');
-
-    menuButton.addEventListener('click', () => {
-      menuButton.classList.toggle('active');
-      menuContent.classList.toggle('active');
-    });
-
-    // Закрытие меню при клике вне его
-    document.addEventListener('click', (e) => {
-      if (!menuButton.contains(e.target) && !menuContent.contains(e.target)) {
-        menuButton.classList.remove('active');
-        menuContent.classList.remove('active');
-      }
-    });
-
-    // Обработка клика по кнопке тех. поддержки
-    document.getElementById('supportButton').addEventListener('click', () => {
-      window.location.href = 'chat.html';
-    });
-
-    // Проверка конфигурации
-    function validateConfig() {
-      if (!PUZZLE_CONFIG.API_TOKEN) {
-        log('Ошибка: не указан API токен!', 'error');
-        return false;
-      }
-      return true;
-    }
-  </script>
+        
+        async function getCategories() {
+            const apiKey = apiKeyInput.value.trim();
+            const chatId = chatIdInput.value.trim();
+            
+            if (!apiKey) {
+                log('Ошибка: Введите API ключ');
+                return;
+            }
+            
+            if (!chatId) {
+                log('Ошибка: Введите ID чата');
+                return;
+            }
+            
+            if (!tgUserId) {
+                log('Ошибка: Не удалось получить ID пользователя из Telegram');
+                return;
+            }
+            
+            log(`Запрос категорий для пользователя ID: ${tgUserId}...`);
+            
+            try {
+                // Получаем статус пользователя с категориями
+                const statusUrl = `https://api.puzzlebot.top/?token=${apiKey}&method=getUserInChatStatus&user_id=${tgUserId}&chat_id=${chatId}&page=1`;
+                
+                log(`Отправка запроса: ${statusUrl}`);
+                
+                const response = await fetch(statusUrl);
+                
+                if (!response.ok) {
+                    throw new Error(`HTTP ошибка! Статус: ${response.status}`);
+                }
+                
+                const data = await response.json();
+                
+                if (data.code !== 0) {
+                    throw new Error(`API ошибка: ${data.message || 'неизвестная ошибка'}`);
+                }
+                
+                log('Успешно получены данные пользователя:');
+                log(JSON.stringify(data.data, null, 2));
+                
+                // Получаем список всех категорий чата
+                const categoriesUrl = `https://api.puzzlebot.top/?token=${apiKey}&method=getChatCategories&tg_chat_id=${chatId}`;
+                log(`Запрос списка категорий чата: ${categoriesUrl}`);
+                
+                const categoriesResponse = await fetch(categoriesUrl);
+                const categoriesData = await categoriesResponse.json();
+                
+                if (categoriesData.code !== 0) {
+                    throw new Error(`API ошибка при получении категорий: ${categoriesData.message}`);
+                }
+                
+                log('\nСписок всех категорий в этом чате:');
+                log(JSON.stringify(categoriesData.data, null, 2));
+                
+                // Формируем список категорий пользователя
+                if (data.data.categories && data.data.categories.length > 0) {
+                    const userCategories = categoriesData.data.filter(cat => 
+                        data.data.categories.includes(cat.id)
+                    );
+                    
+                    log('\nКатегории этого пользователя:');
+                    userCategories.forEach(cat => {
+                        log(`- ${cat.name} (ID: ${cat.id}) ${cat.is_main ? '(Основная)' : ''}`);
+                    });
+                } else {
+                    log('\nУ пользователя нет категорий в этом чате');
+                }
+                
+            } catch (error) {
+                log(`Ошибка при запросе: ${error.message}`);
+                console.error(error);
+            }
+        }
+        
+        // Инициализация при загрузке
+        document.addEventListener('DOMContentLoaded', initTelegramWebApp);
+        getButton.addEventListener('click', getCategories);
+    </script>
 </body>
 </html>
