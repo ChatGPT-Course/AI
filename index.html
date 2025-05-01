@@ -3,161 +3,133 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Puzzle Bot Categories</title>
+    <title>Puzzle Bot Debug</title>
     <style>
-        body {
-            font-family: Arial, sans-serif;
-            padding: 20px;
-            background: var(--tg-theme-bg-color, #f5f5f5);
-            color: var(--tg-theme-text-color, #000);
+        body { padding: 20px; font-family: Arial; }
+        #log { 
+            background: #1a1a1a; 
+            color: #00ff00; 
+            padding: 15px; 
+            margin-top: 15px; 
+            border-radius: 5px; 
+            max-height: 300px; 
+            overflow-y: auto; 
         }
-        #log {
-            background: var(--tg-theme-secondary-bg-color, #000);
-            color: var(--tg-theme-button-text-color, #0f0);
-            padding: 10px;
-            height: 300px;
-            overflow-y: auto;
-            font-family: monospace;
-            border-radius: 10px;
-            margin-top: 15px;
-        }
-        button {
-            padding: 10px 15px;
-            background: var(--tg-theme-button-color, #4CAF50);
-            color: var(--tg-theme-button-text-color, white);
-            border: none;
-            border-radius: 10px;
-            cursor: pointer;
-            margin: 10px 0;
-        }
-        input {
-            width: 100%;
-            padding: 10px;
-            margin: 10px 0;
-            border: 1px solid #ccc;
-            border-radius: 5px;
-            box-sizing: border-box;
-        }
-        .hidden {
-            display: none;
+        input, button { 
+            padding: 10px; 
+            margin: 5px; 
+            width: 100%; 
+            box-sizing: border-box; 
         }
     </style>
 </head>
 <body>
-    <div id="autoUserIdInfo"></div>
-    <input type="number" id="manualUserId" placeholder="Введите ID пользователя вручную" class="hidden">
-    <button id="getBtn">Получить категории</button>
-    <div id="log">Готов к работе...</div>
+    <input type="text" id="userId" placeholder="User ID (автоопределение в Telegram)">
+    <button onclick="fetchData()">Проверить запрос</button>
+    <div id="log">Журнал запросов:</div>
 
     <script>
-        // Конфигурация
         const API_KEY = 'i5vkuteSbTI65FSFoLahqgpEmpkQUbZJ';
         const CHAT_ID = 'private';
-        
-        // Элементы
-        const log = document.getElementById('log');
-        const getBtn = document.getElementById('getBtn');
-        const manualUserIdInput = document.getElementById('manualUserId');
-        const autoUserIdInfo = document.getElementById('autoUserIdInfo');
-        
-        // Логирование
-        function addLog(msg) {
-            const now = new Date().toLocaleTimeString();
-            log.innerHTML += `[${now}] ${msg}<br>`;
-            log.scrollTop = log.scrollHeight;
-        }
-        
-        // Получение UserID
-        function getUserId() {
+
+        // Автоматическое определение UserID в Telegram
+        function detectUserId() {
             try {
-                // Автоматическое получение из Telegram
                 const tgUser = window.Telegram?.WebApp?.initDataUnsafe?.user;
                 if (tgUser?.id) {
-                    autoUserIdInfo.innerHTML = `Автоматически определен ID: ${tgUser.id}`;
-                    manualUserIdInput.classList.add('hidden');
+                    document.getElementById('userId').value = tgUser.id;
                     return tgUser.id;
                 }
-            } catch(e) {}
-            
-            // Ручной ввод
-            manualUserIdInput.classList.remove('hidden');
-            const manualId = manualUserIdInput.value.trim();
-            if (!manualId) {
-                addLog('Ошибка: Введите ID пользователя');
-                return null;
+            } catch(e) {
+                log('Ошибка определения UserID из Telegram');
             }
-            return manualId;
+            return null;
         }
-        
-        // Запрос к API
-        async function puzzleRequest(method, params = {}) {
-            const url = new URL('https://api.puzzlebot.top/');
-            url.searchParams.append('token', API_KEY);
-            url.searchParams.append('method', method);
-            
-            Object.entries(params).forEach(([key, value]) => {
-                url.searchParams.append(key, value);
-            });
-            
+
+        // Логирование
+        function log(message) {
+            const now = new Date().toLocaleTimeString();
+            const logElement = document.getElementById('log');
+            logElement.innerHTML += `[${now}] ${message}<br>`;
+            logElement.scrollTop = logElement.scrollHeight;
+        }
+
+        // Проверка базового запроса
+        async function testConnection() {
             try {
-                const response = await fetch(url);
-                if (!response.ok) throw new Error(`HTTP ${response.status}`);
+                const testUrl = `https://api.puzzlebot.top/?token=${API_KEY}&method=test`;
+                const response = await fetch(testUrl);
+                
+                if (!response.ok) {
+                    throw new Error(`HTTP Status: ${response.status}`);
+                }
+                
                 const data = await response.json();
-                if (data.code !== 0) throw new Error(data.message || 'API error');
-                return data.data;
-            } catch (error) {
-                addLog(`Ошибка: ${error.message}`);
+                return data;
+            } catch(error) {
+                log(`Тестовый запрос failed: ${error.message}`);
                 throw error;
             }
         }
-        
+
         // Основная функция
-        async function fetchCategories() {
-            const userId = getUserId();
-            if (!userId) return;
-            
-            addLog(`Запрашиваю категории для ID: ${userId}`);
+        async function fetchData() {
+            log('--- НАЧАЛО ЗАПРОСА ---');
             
             try {
-                // Получаем статус пользователя
-                const status = await puzzleRequest('getUserInChatStatus', {
-                    user_id: userId,
-                    chat_id: CHAT_ID,
-                    page: 1
-                });
-                
-                // Получаем все категории
-                const allCategories = await puzzleRequest('getChatCategories', {
-                    tg_chat_id: CHAT_ID
-                });
-                
-                // Фильтруем категории пользователя
-                const userCategories = allCategories.filter(cat => 
-                    status.categories?.includes(cat.id)
-                );
-                
-                // Вывод результатов
-                if (userCategories.length > 0) {
-                    addLog("Найдены категории:");
-                    userCategories.forEach(cat => {
-                        addLog(`► ${cat.name} (ID: ${cat.id})`);
-                    });
-                } else {
-                    addLog("Категории не найдены");
+                // 1. Проверка подключения
+                const testResult = await testConnection();
+                log(`Тестовый запрос: ${JSON.stringify(testResult)}`);
+
+                // 2. Получение UserID
+                const userId = document.getElementById('userId').value || detectUserId();
+                if (!userId) {
+                    log('Ошибка: UserID не определен');
+                    return;
                 }
+                log(`Используется UserID: ${userId}`);
+
+                // 3. Запрос статуса пользователя
+                const statusUrl = `https://api.puzzlebot.top/?token=${API_KEY}&method=getUserInChatStatus&user_id=${userId}&chat_id=${CHAT_ID}`;
+                log(`Отправка запроса: ${statusUrl}`);
                 
-            } catch (error) {
-                addLog("Не удалось получить данные");
+                const startTime = Date.now();
+                const response = await fetch(statusUrl);
+                const requestTime = Date.now() - startTime;
+                
+                log(`Ответ получен за ${requestTime}ms`);
+                log(`HTTP Status: ${response.status}`);
+                log(`Headers: ${JSON.stringify([...response.headers])}`);
+
+                // 4. Обработка ответа
+                const data = await response.json();
+                log(`Ответ API: ${JSON.stringify(data)}`);
+
+                if (data.code === 0) {
+                    log('Успешный ответ от API');
+                } else {
+                    log(`Ошибка API: ${data.message}`);
+                }
+
+            } catch(error) {
+                log(`Критическая ошибка: ${error.message}`);
+                log('Возможные причины:');
+                log('1. Блокировка CORS');
+                log('2. Неверный API ключ');
+                log('3. Проблемы сети');
+                log('4. Ограничения Telegram WebView');
             }
+            
+            log('--- КОНЕЦ ЗАПРОСА ---');
         }
-        
+
         // Инициализация
         document.addEventListener('DOMContentLoaded', () => {
             if (window.Telegram?.WebApp) {
                 Telegram.WebApp.ready();
                 Telegram.WebApp.expand();
             }
-            getBtn.addEventListener('click', fetchCategories);
+            detectUserId();
         });
     </script>
 </body>
