@@ -435,6 +435,15 @@
       <span class="ai-text">AI</span>
       <span class="chat-icon">💬</span>
     </a>
+
+    <!-- Консоль для логов -->
+    <div id="api-console" style="position: fixed; bottom: 0; left: 0; right: 0; height: 200px; background: rgba(0, 0, 0, 0.9); color: #fff; font-family: monospace; font-size: 14px; padding: 10px; overflow-y: auto; z-index: 999;">
+      <div style="border-bottom: 1px solid #444; padding-bottom: 5px; margin-bottom: 5px;">
+        <span style="color: #00ff00;">API Console</span>
+        <span style="float: right; cursor: pointer; padding: 0 5px;" onclick="document.getElementById('api-console').style.display='none'">✕</span>
+      </div>
+      <div id="api-console-content"></div>
+    </div>
   </div>
 
   <script>
@@ -537,11 +546,29 @@
       }, 500);
     }
 
-    // Функция проверки категорий пользователя
+    // Функция для логирования в консоль
+    function logToConsole(message, type = 'info') {
+      const consoleContent = document.getElementById('api-console-content');
+      const entry = document.createElement('div');
+      entry.style.marginBottom = '5px';
+      entry.style.borderLeft = '3px solid ' + (type === 'error' ? '#ff4444' : type === 'success' ? '#00ff00' : '#ffffff');
+      entry.style.paddingLeft = '10px';
+      
+      const time = new Date().toLocaleTimeString();
+      entry.innerHTML = `<span style="color: #888;">[${time}]</span> ${message}`;
+      
+      consoleContent.appendChild(entry);
+      consoleContent.scrollTop = consoleContent.scrollHeight;
+    }
+
+    // Обновляем функцию checkUserCategories
     async function checkUserCategories() {
       try {
         const url = 'https://api.puzzlebot.top/?token=i5vkuteSbTI65FSFoLahqgpEmpkQUbZJ&method=getUserInChatStatus&user_id=1515638372&chat_id=7533493609&page=1';
         
+        logToConsole('Отправляем запрос к API...', 'info');
+        logToConsole(`URL: ${url}`, 'info');
+
         const response = await fetch(url, {
           method: 'POST',
           headers: {
@@ -555,16 +582,17 @@
 
         const data = await response.json();
         
-        // Выводим данные в точно таком же формате, как в браузере
-        console.log(JSON.stringify(data));
+        // Выводим данные в консоль
+        logToConsole('Получен ответ:', 'success');
+        logToConsole(JSON.stringify(data, null, 2), 'success');
         
-        // Дополнительно выводим категории отдельно для удобства
+        // Дополнительно выводим категории
         if (data.code === 0 && data.data && data.data.categories) {
-          console.log('Категории пользователя:', data.data.categories);
+          logToConsole('Категории пользователя: ' + JSON.stringify(data.data.categories), 'info');
         }
 
       } catch (error) {
-        console.error('Ошибка при запросе:', error);
+        logToConsole('Ошибка при запросе: ' + error.message, 'error');
       }
     }
 
