@@ -58,6 +58,9 @@
             align-items: center;
             padding: 0 32px;
             transition: background 0.3s ease;
+            justify-content: flex-start;
+            padding-left: 12px;
+            padding-right: 0;
         }
         
         #splash-header {
@@ -77,6 +80,9 @@
             align-items: center;
             padding: 0 32px;
             justify-content: space-between;
+            justify-content: flex-start;
+            padding-left: 12px;
+            padding-right: 32px;
         }
         
         #splash-number {
@@ -175,12 +181,14 @@
             display: flex;
             justify-content: flex-end;
             align-items: center;
-            margin-left: 32px;
+            margin-left: auto;
+            margin-right: 0;
+            min-width: 340px;
         }
         
         .progress-flask {
             position: relative;
-            width: 340px;
+            width: 320px;
             height: var(--progress-bar-height);
             background: var(--progress-grey);
             border-radius: var(--progress-bar-height);
@@ -203,25 +211,19 @@
             z-index: 1;
         }
         
-        .progress-checkpoint {
+        .progress-tick {
             position: absolute;
-            top: 50%;
-            transform: translateY(-50%);
-            width: 22px;
-            height: 22px;
-            background: #fff;
-            border-radius: 50%;
-            border: 2px solid var(--progress-grey);
-            display: flex;
-            align-items: center;
-            justify-content: center;
+            top: 2px;
+            width: 3px;
+            height: calc(var(--progress-bar-height) - 4px);
+            background: var(--progress-grey);
+            border-radius: 2px;
             z-index: 2;
-            transition: border-color 0.3s, background 0.3s;
+            transition: background 0.3s;
         }
         
-        .progress-checkpoint.completed {
-            border-color: var(--success-color);
-            background: var(--success-color);
+        .progress-tick.completed {
+            background: linear-gradient(90deg, var(--primary-color), var(--secondary-color));
         }
         
         .progress-checkmark {
@@ -300,15 +302,15 @@
             margin-top: 0;
             font-size: 1.1rem;
             font-weight: bold;
-            text-decoration: underline;
+            text-decoration: none;
             letter-spacing: 0.5px;
         }
         
         #exit-modal-content p {
             color: #222;
             font-size: 1.05rem;
-            font-weight: bold;
-            text-decoration: underline wavy #FF4D4D 1.5px;
+            font-weight: 400;
+            text-decoration: none;
             margin-bottom: 18px;
         }
         
@@ -398,7 +400,8 @@
         }
         
         #continue-btn:active {
-            filter: brightness(0.95);
+            transform: scale(0.96) translateX(-50%);
+            box-shadow: 0 2px 8px rgba(255, 123, 37, 0.18);
         }
         
         #continue-btn[disabled] {
@@ -428,15 +431,17 @@
         }
         
         .step-content {
-            background: #fff;
-            border-radius: 0;
-            box-shadow: none;
-            padding: 0 0 32px 0;
-            font-size: 1.08rem;
+            background: #fffdfa;
+            border-radius: 18px;
+            box-shadow: 0 4px 24px 0 rgba(255, 123, 37, 0.08), 0 1.5px 8px 0 rgba(0,0,0,0.04);
+            padding: 32px 28px 32px 28px;
+            font-size: 1.13rem;
             color: var(--dark-color);
             font-weight: 400;
             text-align: left;
-            transition: background 0.3s ease;
+            margin-bottom: 24px;
+            transition: box-shadow 0.3s, background 0.3s, transform 0.5s cubic-bezier(0.4,0,0.2,1);
+            animation: cardFadeIn 0.7s cubic-bezier(0.4,0,0.2,1);
         }
         
         .step-content strong {
@@ -536,7 +541,7 @@
             <div id="progress-container">
                 <div class="progress-flask">
                     <div class="progress-fill" id="progress-fill"></div>
-                    <!-- Галочки будут добавлены скриптом -->
+                    <!-- Штрихи будут добавлены скриптом -->
                 </div>
             </div>
         </div>
@@ -544,8 +549,8 @@
         <div id="exit-modal">
             <div id="exit-modal-content">
                 <svg class="modal-exit-icon" viewBox="0 0 32 32"><rect x="6" y="4" width="14" height="24" rx="4" fill="#fff" stroke="#FF4D4D" stroke-width="2"/><rect x="12" y="14" width="4" height="4" rx="2" fill="#FF4D4D"/><rect x="20" y="12" width="6" height="8" rx="2" fill="#FF4D4D"/><rect x="6" y="26" width="14" height="2" fill="#FF4D4D"/><rect x="6" y="4" width="14" height="2" fill="#FF4D4D"/></svg>
-                <h3>Подтверждение выхода</h3>
-                <p>Выход в незаконченном уроке приведет к потере прогресса.<br>После перезахода вы начнете изучать материал сначала.</p>
+                <h3>Вы действительно хотите уйти?</h3>
+                <p>Выход в незавершенном уроке утратит прогресс. При перезапуске вы начнете изучение материала сначала!</p>
                 <div id="exit-modal-buttons">
                     <button id="confirm-exit" class="modal-btn">Выйти</button>
                     <button id="cancel-exit" class="modal-btn">Остаться</button>
@@ -628,34 +633,28 @@
             const confirmExit = document.getElementById('confirm-exit');
             const cancelExit = document.getElementById('cancel-exit');
             
-            // Галочки прогресса
-            let checkpoints = [];
-            let currentStep = 0;
-            const totalSteps = steps.length;
-            
-            // Прогресс-бар с чекпоинтами
-            function renderCheckpoints() {
-                // Удалить старые
-                progressFlask.querySelectorAll('.progress-checkpoint').forEach(e => e.remove());
-                checkpoints = [];
+            // Штрихи прогресса
+            let ticks = [];
+            function renderTicks() {
+                progressFlask.querySelectorAll('.progress-tick').forEach(e => e.remove());
+                ticks = [];
                 for (let i = 0; i < totalSteps; i++) {
-                    const cp = document.createElement('div');
-                    cp.className = 'progress-checkpoint';
-                    cp.style.left = (i/(totalSteps-1)*100) + '%';
-                    cp.innerHTML = '<svg class="progress-checkmark" viewBox="0 0 16 16"><polyline points="4,9 7,12 12,5" stroke="#fff" stroke-width="2" fill="none"/></svg>';
-                    progressFlask.appendChild(cp);
-                    checkpoints.push(cp);
+                    const tick = document.createElement('div');
+                    tick.className = 'progress-tick';
+                    tick.style.left = (i/(totalSteps-1)*100) + '%';
+                    progressFlask.appendChild(tick);
+                    ticks.push(tick);
                 }
             }
             function updateProgress() {
                 const progress = (currentStep) / (totalSteps-1) * 100;
                 progressFill.style.width = progress + '%';
-                checkpoints.forEach((cp, i) => {
-                    if (i <= currentStep) cp.classList.add('completed');
-                    else cp.classList.remove('completed');
+                ticks.forEach((tick, i) => {
+                    if (i <= currentStep) tick.classList.add('completed');
+                    else tick.classList.remove('completed');
                 });
             }
-            renderCheckpoints();
+            renderTicks();
             updateProgress();
             
             // Steps динамика
