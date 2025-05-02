@@ -1,568 +1,334 @@
 <!DOCTYPE html>
 <html lang="ru">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Курс по ИИ - Модуль 0</title>
-    <style>
-        :root {
-            --primary-color: #FF7B25; /* Оранжевый */
-            --secondary-color: #FFA837; /* Желто-оранжевый */
-            --accent-color: #FFD166; /* Желтый */
-            --danger-color: #FF4D4D;
-            --success-color: #4CAF50;
-            --light-color: #FFFFFF;
-            --dark-color: #2F2F2F;
-            --bg-color: #FFF9F0; /* Светло-желтый фон */
-            --progress-grey: #e0e0e0;
-            --header-bg: #f4f4f6;
-            --progress-bar-height: 18px;
-        }
-        
-        body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            line-height: 1.8;
-            color: var(--dark-color);
-            margin: 0;
-            padding: 0;
-            background-color: var(--bg-color);
-            overflow-x: hidden;
-        }
-        
-        /* Стили для заставки */
-        #splash-screen {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background-color: var(--bg-color);
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
-            z-index: 1000;
-            transition: transform 0.8s cubic-bezier(0.4, 0, 0.2, 1);
-        }
-        
-        #splash-header {
-            position: fixed;
-            top: 0;
-            left: 0;
-            right: 0;
-            height: 56px;
-            background: var(--header-bg);
-            box-shadow: 0 1px 8px rgba(0,0,0,0.04);
-            z-index: 1001;
-            display: flex;
-            align-items: center;
-            padding: 0 32px;
-            justify-content: flex-start;
-        }
-        
-        #splash-header {
-            justify-content: flex-start;
-        }
-        
-        #header {
-            position: fixed;
-            top: 0;
-            left: 0;
-            right: 0;
-            height: 56px;
-            background: var(--header-bg);
-            box-shadow: 0 1px 8px rgba(0,0,0,0.04);
-            z-index: 1000;
-            display: flex;
-            align-items: center;
-            padding: 0 32px;
-            justify-content: flex-start;
-        }
-        
-        #splash-number {
-            font-size: 120px;
-            font-weight: bold;
-            color: var(--primary-color);
-            margin-bottom: 40px;
-            animation: pulse 2s infinite;
-        }
-        
-        @keyframes pulse {
-            0% { transform: scale(1); opacity: 0.8; }
-            50% { transform: scale(1.1); opacity: 1; }
-            100% { transform: scale(1); opacity: 0.8; }
-        }
-        
-        #splash-title {
-            font-size: 2.5rem;
-            color: var(--primary-color);
-            margin-bottom: 30px;
-            text-align: center;
-            padding: 0 20px;
-        }
-        
-        #start-btn {
-            background: linear-gradient(135deg, var(--success-color), #3e8e41);
-            color: white;
-            border: none;
-            padding: 18px 50px;
-            font-size: 20px;
-            border-radius: 50px;
-            cursor: pointer;
-            box-shadow: 0 6px 15px rgba(62, 142, 65, 0.3);
-            transition: all 0.3s ease;
-            font-weight: 600;
-            margin-bottom: 20px;
-        }
-        
-        #start-btn:hover {
-            transform: translateY(-3px);
-            box-shadow: 0 10px 20px rgba(62, 142, 65, 0.4);
-        }
-        
-        #continue-splash {
-            background: transparent;
-            color: var(--primary-color);
-            border: none;
-            padding: 12px 30px;
-            font-size: 16px;
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            font-weight: 600;
-        }
-        
-        #continue-splash::after {
-            content: "▶";
-            font-size: 14px;
-        }
-        
-        /* Основные стили (появляются после заставки) */
-        #main-content {
-            display: none;
-            padding-top: 72px;
-        }
-        
-        #exit-btn, #exit-btn-splash {
-            background: none;
-            border: none;
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            margin: 0;
-            padding: 0;
-            transition: transform 0.2s ease;
-        }
-        
-        #exit-btn svg, #exit-btn-splash svg {
-            width: 36px;
-            height: 36px;
-            display: block;
-            transition: filter 0.2s ease;
-        }
-        
-        #exit-btn:hover svg, #exit-btn-splash:hover svg {
-            filter: drop-shadow(0 0 4px #ff4d4d88);
-        }
-        
-        .door-icon {
-            display: block;
-        }
-        
-        #exit-modal {
-            display: none;
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background-color: rgba(0,0,0,0.5);
-            z-index: 200;
-            justify-content: center;
-            align-items: center;
-            backdrop-filter: blur(3px);
-        }
-        
-        #exit-modal-content {
-            background-color: #fff;
-            padding: 18px 18px 14px 18px;
-            border-radius: 16px;
-            max-width: 320px;
-            text-align: center;
-            box-shadow: 0 8px 32px rgba(0,0,0,0.18);
-            animation: modalFadeIn 0.3s ease;
-            position: relative;
-        }
-        
-        @keyframes modalFadeIn {
-            from { opacity: 0; transform: translateY(-20px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
-        
-        #exit-modal-content .modal-exit-icon {
-            width: 32px;
-            height: 32px;
-            margin-bottom: 6px;
-        }
-        
-        #exit-modal-content h3 {
-            color: var(--danger-color);
-            margin-top: 0;
-            font-size: 1.1rem;
-            font-weight: bold;
-            text-decoration: none;
-            letter-spacing: 0.5px;
-        }
-        
-        #exit-modal-content p {
-            color: #222;
-            font-size: 1.05rem;
-            font-weight: 400;
-            text-decoration: none;
-            margin-bottom: 18px;
-        }
-        
-        #exit-modal-buttons {
-            margin-top: 25px;
-            display: flex;
-            justify-content: center;
-            gap: 15px;
-        }
-        
-        .modal-btn {
-            padding: 10px 24px;
-            border: none;
-            border-radius: 30px;
-            cursor: pointer;
-            font-weight: 600;
-            transition: all 0.3s ease;
-        }
-        
-        #confirm-exit {
-            background-color: var(--danger-color);
-            color: white;
-        }
-        
-        #confirm-exit:hover {
-            background-color: #d3166a;
-            transform: translateY(-2px);
-        }
-        
-        #cancel-exit {
-            background-color: var(--light-color);
-            color: var(--dark-color);
-            border: 1px solid #ddd;
-        }
-        
-        #cancel-exit:hover {
-            background-color: #e9ecef;
-            transform: translateY(-2px);
-        }
-        
-        #content {
-            max-width: 700px;
-            margin: 0 auto;
-            padding: 0 20px 100px;
-            width: 100%;
-            box-sizing: border-box;
-            display: flex;
-            flex-direction: column;
-            align-items: stretch;
-        }
-        
-        .hidden {
-            opacity: 0;
-            transform: translateY(30px);
-            transition: all 0.6s cubic-bezier(0.4, 0, 0.2, 1);
-            height: 0;
-            overflow: hidden;
-            margin: 0;
-            padding: 0;
-        }
-        
-        .visible {
-            opacity: 1;
-            transform: translateY(0);
-            height: auto;
-            overflow: visible;
-            margin-bottom: 40px;
-        }
-        
-        #continue-btn {
-            position: fixed;
-            bottom: 30px;
-            left: 50%;
-            transform: translateX(-50%);
-            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
-            color: white;
-            border: none;
-            padding: 16px 40px;
-            font-size: 18px;
-            border-radius: 50px;
-            cursor: pointer;
-            box-shadow: 0 6px 15px rgba(255, 123, 37, 0.3);
-            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-            font-weight: 600;
-            z-index: 10;
-            user-select: none;
-        }
-        
-        #continue-btn:active {
-            transform: scale(0.96) translateX(-50%);
-            box-shadow: 0 2px 8px rgba(255, 123, 37, 0.18);
-        }
-        
-        #continue-btn[disabled] {
-            opacity: 0.6;
-            pointer-events: none;
-        }
-        
-        #continue-btn .play-emoji {
-            font-size: 1.3em;
-            margin-right: 2px;
-        }
-        
-        .step {
-            display: none;
-            width: 100%;
-            margin: 0 0 32px 0;
-        }
-        
-        .step.visible {
-            display: block;
-            opacity: 1;
-            transform: translateY(0);
-            height: auto;
-            overflow: visible;
-            margin-bottom: 40px;
-            transition: opacity 0.5s ease, transform 0.5s ease;
-        }
-        
-        .step-content {
-            background: #fffdfa;
-            border-radius: 18px;
-            box-shadow: 0 4px 24px 0 rgba(255, 123, 37, 0.08), 0 1.5px 8px 0 rgba(0,0,0,0.04);
-            padding: 32px 28px 32px 28px;
-            font-size: 1.13rem;
-            color: var(--dark-color);
-            font-weight: 400;
-            text-align: left;
-            margin-bottom: 24px;
-            transition: box-shadow 0.3s, background 0.3s, transform 0.5s cubic-bezier(0.4,0,0.2,1);
-            animation: cardFadeIn 0.7s cubic-bezier(0.4,0,0.2,1);
-        }
-        
-        .step-content strong {
-            font-weight: 600;
-        }
-        
-        h1 {
-            color: var(--primary-color);
-            margin-bottom: 30px;
-            font-size: 2.2rem;
-            text-align: center;
-            padding: 0 20px;
-        }
-        
-        button, .modal-btn {
-            outline: none !important;
-            -webkit-tap-highlight-color: transparent;
-        }
-        button:focus, .modal-btn:focus {
-            outline: none !important;
-            box-shadow: none !important;
-        }
-        
-        /* Splash bottom text */
-        #splash-bottom {
-            position: absolute;
-            bottom: 40px;
-            left: 0;
-            width: 100%;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            gap: 18px;
-        }
-        #splash-module-label {
-            color: var(--primary-color);
-            font-size: 1.2rem;
-            font-weight: 600;
-            letter-spacing: 1px;
-        }
-        
-        /* Hide progress label and percent */
-        #progress-label, #progress-percent {
-            display: none !important;
-        }
-        
-        /* Новая SVG-дверь */
-        .door-icon {
-            display: block;
-        }
-    </style>
+  <meta charset="UTF-8">
+  <title>Подготовительный модуль — ИИ</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    :root {
+      --orange: #FF9800;
+      --yellow: #FFD600;
+      --white: #FFF;
+      --text: #222;
+      --transition: 0.6s cubic-bezier(.77,0,.18,1);
+    }
+    body {
+      margin: 0;
+      min-height: 100vh;
+      font-family: 'Segoe UI', 'Roboto', Arial, sans-serif;
+      background: linear-gradient(135deg, var(--orange) 0%, var(--yellow) 100%);
+      color: var(--text);
+      overflow-x: hidden;
+    }
+    .splash {
+      position: fixed;
+      inset: 0;
+      background: linear-gradient(120deg, var(--orange) 60%, var(--yellow) 100%);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      z-index: 10;
+      transition: opacity var(--transition), visibility var(--transition);
+    }
+    .splash.hide {
+      opacity: 0;
+      visibility: hidden;
+      pointer-events: none;
+    }
+    .splash h1 {
+      font-size: 2.5rem;
+      color: var(--white);
+      margin-bottom: 2rem;
+      letter-spacing: 2px;
+      text-shadow: 0 2px 16px #ff980088;
+      font-weight: 700;
+      animation: fadeIn 1.2s;
+    }
+    .splash button {
+      padding: 1rem 2.5rem;
+      font-size: 1.2rem;
+      background: linear-gradient(90deg, var(--yellow), var(--orange));
+      color: var(--text);
+      border: none;
+      border-radius: 2rem;
+      cursor: pointer;
+      font-weight: 600;
+      box-shadow: 0 4px 24px #ff980055;
+      transition: background 0.3s, transform 0.2s;
+      animation: fadeInUp 1.5s;
+    }
+    .splash button:hover {
+      background: linear-gradient(90deg, var(--orange), var(--yellow));
+      transform: scale(1.05);
+    }
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(-30px);}
+      to { opacity: 1; transform: translateY(0);}
+    }
+    @keyframes fadeInUp {
+      from { opacity: 0; transform: translateY(30px);}
+      to { opacity: 1; transform: translateY(0);}
+    }
+
+    .main-content {
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity var(--transition);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+    .main-content.show {
+      opacity: 1;
+      pointer-events: auto;
+    }
+    .header-bar {
+      display: flex;
+      align-items: center;
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100vw;
+      height: 56px;
+      background: rgba(255,255,255,0.85);
+      z-index: 5;
+      box-shadow: 0 2px 12px #ff980022;
+      padding: 0 0.5rem;
+    }
+    .exit-btn {
+      background: linear-gradient(90deg, var(--orange), var(--yellow));
+      border: none;
+      color: var(--text);
+      font-size: 1.3rem;
+      border-radius: 1.5rem;
+      padding: 0.5rem 1.2rem;
+      margin-right: 1.2rem;
+      cursor: pointer;
+      font-weight: 600;
+      box-shadow: 0 2px 8px #ff980033;
+      transition: background 0.2s, transform 0.2s;
+    }
+    .exit-btn:hover {
+      background: linear-gradient(90deg, var(--yellow), var(--orange));
+      transform: scale(1.07);
+    }
+    .progress-bar {
+      flex: 1;
+      height: 8px;
+      background: #fff3;
+      border-radius: 8px;
+      position: relative;
+      margin-left: 0.5rem;
+      margin-right: 1rem;
+      overflow: visible;
+    }
+    .progress-bar-inner {
+      height: 100%;
+      width: 0;
+      background: linear-gradient(90deg, var(--orange), var(--yellow));
+      border-radius: 8px;
+      transition: width 0.5s cubic-bezier(.77,0,.18,1);
+      z-index: 2;
+      position: absolute;
+      left: 0; top: 0;
+    }
+    .progress-bar-ticks {
+      position: absolute;
+      left: 0; top: 0;
+      width: 100%; height: 100%;
+      z-index: 3;
+      pointer-events: none;
+    }
+    .progress-bar-ticks span {
+      display: block;
+      position: absolute;
+      top: 0; width: 2px; height: 100%;
+      background: #fff8;
+      border-radius: 1px;
+    }
+    .cards-container {
+      margin-top: 72px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      width: 100%;
+      min-height: 60vh;
+      padding-bottom: 6rem;
+    }
+    .card {
+      max-width: 600px;
+      width: 95%;
+      background: rgba(255,255,255,0.96);
+      border-radius: 2rem;
+      box-shadow: 0 8px 32px #ff980033;
+      padding: 2.2rem 1.5rem;
+      font-size: 1.18rem;
+      line-height: 1.7;
+      color: #333;
+      margin-bottom: 1.5rem;
+      opacity: 0;
+      transform: translateY(40px);
+      transition: opacity 0.7s, transform 0.7s;
+      letter-spacing: 0.01em;
+      position: relative;
+    }
+    .card.visible {
+      opacity: 1;
+      transform: translateY(0);
+    }
+    .next-btn {
+      position: fixed;
+      bottom: 2.5rem;
+      left: 50%;
+      transform: translateX(-50%);
+      padding: 1rem 2.5rem;
+      font-size: 1.1rem;
+      background: linear-gradient(90deg, var(--yellow), var(--orange));
+      color: var(--text);
+      border: none;
+      border-radius: 2rem;
+      cursor: pointer;
+      font-weight: 600;
+      box-shadow: 0 4px 24px #ff980055;
+      transition: background 0.3s, transform 0.2s;
+      z-index: 2;
+      opacity: 0;
+      pointer-events: none;
+    }
+    .next-btn.show {
+      opacity: 1;
+      pointer-events: auto;
+      animation: fadeInUp 1s;
+    }
+    @media (max-width: 600px) {
+      .card {
+        padding: 1.2rem 0.7rem;
+        font-size: 1.05rem;
+      }
+      .header-bar {
+        height: 44px;
+      }
+      .exit-btn {
+        font-size: 1rem;
+        padding: 0.4rem 0.9rem;
+      }
+      .next-btn {
+        font-size: 1rem;
+        padding: 0.8rem 1.5rem;
+      }
+    }
+  </style>
 </head>
 <body>
-    <!-- Заставка -->
-    <div id="splash-header" style="position: fixed; top: 0; left: 0; right: 0; height: 56px; background: var(--header-bg); box-shadow: 0 1px 8px rgba(0,0,0,0.04); z-index: 1001; display: flex; align-items: center; padding: 0 32px; justify-content: flex-start;">
-        <button id="exit-btn-splash" title="Выйти" style="margin-left: 0; margin-right: 0; background: none; border: none; cursor: pointer; display: flex; align-items: center; position: absolute; left: 12px; top: 10px;">
-            <svg class="door-icon" viewBox="0 0 48 48"><rect x="10" y="6" width="20" height="36" rx="5" fill="#fff" stroke="#FF4D4D" stroke-width="3"/><rect x="20" y="22" width="8" height="8" rx="4" fill="#FF4D4D"/><rect x="32" y="18" width="10" height="12" rx="3" fill="#FF4D4D"/><rect x="10" y="40" width="20" height="2" fill="#FF4D4D"/><rect x="10" y="6" width="20" height="2" fill="#FF4D4D"/></svg>
-        </button>
+  <div class="splash" id="splash">
+    <h1>Подготовительный модуль<br>Онлайн-курс по ИИ</h1>
+    <button id="startBtn">Начать</button>
+  </div>
+  <div class="main-content" id="mainContent">
+    <div class="header-bar">
+      <button class="exit-btn" id="exitBtn" title="Выйти">⟵</button>
+      <div class="progress-bar">
+        <div class="progress-bar-inner" id="progressBar"></div>
+        <div class="progress-bar-ticks" id="progressBarTicks"></div>
+      </div>
     </div>
-    <div id="splash-screen">
-        <div id="splash-bottom">
-            <div id="splash-module-label">подготовительный модуль</div>
-            <button id="start-btn">Начать изучение</button>
-        </div>
+    <div class="cards-container" id="cardsContainer">
+      <!-- Карточки будут добавляться сюда -->
     </div>
-    
-    <!-- Основной контент (скрыт до нажатия кнопки) -->
-    <div id="main-content" style="display:none;">
-        <div id="header">
-            <button id="exit-btn" title="Выйти">
-                <svg class="door-icon" viewBox="0 0 48 48"><rect x="10" y="6" width="20" height="36" rx="5" fill="#fff" stroke="#FF4D4D" stroke-width="3"/><rect x="20" y="22" width="8" height="8" rx="4" fill="#FF4D4D"/><rect x="32" y="18" width="10" height="12" rx="3" fill="#FF4D4D"/><rect x="10" y="40" width="20" height="2" fill="#FF4D4D"/><rect x="10" y="6" width="20" height="2" fill="#FF4D4D"/></svg>
-            </button>
-        </div>
-        
-        <div id="exit-modal">
-            <div id="exit-modal-content">
-                <svg class="modal-exit-icon" viewBox="0 0 32 32"><rect x="6" y="4" width="14" height="24" rx="4" fill="#fff" stroke="#FF4D4D" stroke-width="2"/><rect x="12" y="14" width="4" height="4" rx="2" fill="#FF4D4D"/><rect x="20" y="12" width="6" height="8" rx="2" fill="#FF4D4D"/><rect x="6" y="26" width="14" height="2" fill="#FF4D4D"/><rect x="6" y="4" width="14" height="2" fill="#FF4D4D"/></svg>
-                <h3>Вы действительно хотите уйти?</h3>
-                <p>Выход в незавершенном уроке утратит прогресс. При перезапуске вы начнете изучение материала сначала!</p>
-                <div id="exit-modal-buttons">
-                    <button id="confirm-exit" class="modal-btn">Выйти</button>
-                    <button id="cancel-exit" class="modal-btn">Остаться</button>
-                </div>
-            </div>
-        </div>
-        
-        <div id="content">
-            <div class="step visible">
-                <div class="step-content">
-                    Добро пожаловать в <strong>Модуль 0</strong> курса по Искусственному Интеллекту! Этот вводный модуль создан, чтобы помочь вам сформировать фундаментальное понимание ключевых концепций ИИ. Мы рассмотрим <strong>историю развития искусственного интеллекта</strong>, основные направления исследований и практические применения этой трансформационной технологии в современном мире.
-                </div>
-            </div>
-            <div class="step">
-                <div class="step-content">
-                    Искусственный интеллект уже стал неотъемлемой частью нашей повседневной жизни. От персонализированных рекомендаций в потоковых сервисах до систем автоматического перевода и голосовых помощников — ИИ окружает нас повсюду. В этом модуле мы исследуем, как различные <strong>технологии ИИ</strong> работают на практике и какие возможности они открывают для бизнеса, науки и общества в целом.
-                </div>
-            </div>
-            <div class="step">
-                <div class="step-content">
-                    Прежде чем погружаться в технические детали, важно понять философские основы ИИ. Что вообще означает <strong>"искусственный интеллект"</strong>? Как мы определяем интеллект у машин? Эти вопросы вызывают оживленные дискуссии среди исследователей. Мы рассмотрим различные подходы к определению ИИ и обсудим текущие ограничения технологий.
-                </div>
-            </div>
-            <div class="step">
-                <div class="step-content">
-                    История искусственного интеллекта насчитывает более 70 лет. От работ Алана Тьюринга до современных глубоких нейронных сетей — путь развития ИИ был полон как впечатляющих прорывов, так и периодов <strong>"зимы ИИ"</strong>, когда интерес и финансирование резко сокращались. Понимание этой истории поможет вам лучше оценить современное состояние области.
-                </div>
-            </div>
-            <div class="step">
-                <div class="step-content">
-                    Основные направления исследований в ИИ включают <strong>машинное обучение</strong>, нейронные сети, компьютерное зрение, обработку естественного языка и робототехнику. Каждое из этих направлений решает уникальный набор задач и использует свои методы. В этом курсе мы последовательно изучим каждое из них, начиная с базовых концепций.
-                </div>
-            </div>
-            <div class="step">
-                <div class="step-content">
-                    Машинное обучение — это сердце современного ИИ. В отличие от традиционного программирования, где правила явно кодируются разработчиком, алгоритмы машинного обучения автоматически находят закономерности в данных. Мы рассмотрим три основных парадигмы: <strong>обучение с учителем</strong>, без учителя и с подкреплением.
-                </div>
-            </div>
-            <div class="step">
-                <div class="step-content">
-                    Нейронные сети вдохновлены биологической структурой человеческого мозга. Эти модели состоят из множества соединенных "нейронов", организованных в слои. <strong>Глубокое обучение</strong> (подраздел нейронных сетей) произвело революцию в ИИ, достигнув человеческого уровня в таких задачах, как распознавание изображений и обработка языка.
-                </div>
-            </div>
-            <div class="step">
-                <div class="step-content">
-                    Обработка естественного языка (NLP) позволяет компьютерам понимать, интерпретировать и генерировать человеческую речь. От чат-ботов до систем автоматического перевода — NLP технологии становятся все более совершенными. Мы рассмотрим, как алгоритмы анализируют текст и какие вызовы стоят перед этой областью.
-                </div>
-            </div>
-            <div class="step">
-                <div class="step-content">
-                    Компьютерное зрение дает машинам способность "видеть" и понимать визуальную информацию. Применения варьируются от медицинской диагностики до автономных транспортных средств. Мы изучим, как алгоритмы извлекают признаки из изображений и видео, и как они могут "понимать" визуальный контекст.
-                </div>
-            </div>
-            <div class="step">
-                <div class="step-content">
-                    Робототехника объединяет ИИ с механическими системами, создавая машины, способные взаимодействовать с физическим миром. Современные роботы могут выполнять сложные задачи в промышленности, медицине и даже в домашних условиях. В заключительной части модуля мы обсудим будущее ИИ и этические вопросы, связанные с его развитием.
-                </div>
-            </div>
-        </div>
-        
-        <button id="continue-btn">Продолжить</button>
-    </div>
-    
-    <script>
-        document.addEventListener('DOMContentLoaded', function() {
-            // Элементы заставки
-            const splashScreen = document.getElementById('splash-screen');
-            const startBtn = document.getElementById('start-btn');
-            const exitBtnSplash = document.getElementById('exit-btn-splash');
-            // Элементы основного контента
-            const mainContent = document.getElementById('main-content');
-            const content = document.getElementById('content');
-            const btn = document.getElementById('continue-btn');
-            const steps = document.querySelectorAll('.step');
-            const exitBtn = document.getElementById('exit-btn');
-            const exitModal = document.getElementById('exit-modal');
-            const confirmExit = document.getElementById('confirm-exit');
-            const cancelExit = document.getElementById('cancel-exit');
-            // Steps динамика
-            let currentStep = 0;
-            const totalSteps = steps.length;
-            steps.forEach((step, i) => {
-                if (i === 0) step.classList.add('visible');
-                else step.classList.remove('visible');
-            });
-            let debounce = false;
-            btn.addEventListener('click', function() {
-                if (debounce) return;
-                debounce = true;
-                setTimeout(() => debounce = false, 500);
-                if (currentStep < totalSteps-1) {
-                    currentStep++;
-                    steps[currentStep].classList.add('visible');
-                    steps[currentStep].scrollIntoView({ behavior: 'smooth', block: 'center' });
-                    if (currentStep === totalSteps-1) {
-                        btn.textContent = 'Завершить модуль';
-                    }
-                } else {
-                    alert('Поздравляем! Вы успешно завершили вводный модуль!');
-                    btn.textContent = 'Перейти к следующему модулю';
-                }
-            });
-            // Splash переход
-            startBtn.addEventListener('click', function() {
-                splashScreen.style.transition = 'transform 0.8s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.8s cubic-bezier(0.4, 0, 0.2, 1)';
-                splashScreen.style.transform = 'translateY(-100%)';
-                splashScreen.style.opacity = '0';
-                setTimeout(function() {
-                    splashScreen.style.display = 'none';
-                    mainContent.style.display = 'block';
-                    mainContent.style.opacity = 0;
-                    mainContent.style.transition = 'opacity 0.8s cubic-bezier(0.4, 0, 0.2, 1)';
-                    setTimeout(function() {
-                        mainContent.style.opacity = 1;
-                        content.style.opacity = 1;
-                    }, 50);
-                }, 800);
-            });
-            // Выход
-            exitBtnSplash.addEventListener('click', function(e) {
-                e.preventDefault();
-                exitModal.style.display = 'flex';
-            });
-            exitBtn.addEventListener('click', function() {
-                exitModal.style.display = 'flex';
-            });
-            cancelExit.addEventListener('click', function() {
-                exitModal.style.display = 'none';
-            });
-            confirmExit.addEventListener('click', function() {
-                window.location.href = 'index.html';
-            });
-        });
-    </script>
+    <button class="next-btn show" id="nextBtn">Далее</button>
+  </div>
+  <script>
+    const splash = document.getElementById('splash');
+    const startBtn = document.getElementById('startBtn');
+    const mainContent = document.getElementById('mainContent');
+    const nextBtn = document.getElementById('nextBtn');
+    const progressBar = document.getElementById('progressBar');
+    const progressBarTicks = document.getElementById('progressBarTicks');
+    const cardsContainer = document.getElementById('cardsContainer');
+    const exitBtn = document.getElementById('exitBtn');
+
+    // Тексты карточек
+    const cards = [
+      `<b>Добро пожаловать в мир Искусственного Интеллекта!</b><br><br>
+      Этот модуль поможет вам понять основы ИИ, его возможности и влияние на современный мир. Готовы начать путешествие в будущее?`,
+      `<b>Что такое ИИ?</b><br><br>
+      Искусственный интеллект — это способность машин анализировать данные, учиться на опыте и принимать решения, имитируя человеческое мышление.`,
+      `<b>Где применяется ИИ?</b><br><br>
+      Сегодня ИИ помогает в медицине, финансах, образовании, творчестве и даже в повседневной жизни — от голосовых помощников до умных рекомендаций.`,
+      `<b>Почему это важно?</b><br><br>
+      Понимание ИИ открывает новые горизонты для развития карьеры, творчества и личной эффективности. Вы сможете использовать современные инструменты для решения сложных задач.`,
+      `<b>Вперёд к знаниям!</b><br><br>
+      Давайте вместе разберёмся, как работает ИИ, и научимся применять его в реальной жизни. Желаем вдохновения и успехов!`
+    ];
+    let currentCard = 0;
+
+    function updateProgressBar() {
+      const percent = ((currentCard + 1) / cards.length) * 100;
+      progressBar.style.width = percent + '%';
+      // Штрихи
+      progressBarTicks.innerHTML = '';
+      for (let i = 1; i < cards.length; i++) {
+        const tick = document.createElement('span');
+        tick.style.left = (i / cards.length * 100) + '%';
+        progressBarTicks.appendChild(tick);
+      }
+    }
+
+    function addCard(idx) {
+      const card = document.createElement('div');
+      card.className = 'card';
+      card.innerHTML = cards[idx];
+      cardsContainer.appendChild(card);
+      setTimeout(() => card.classList.add('visible'), 50);
+      cardsContainer.scrollTo({
+        top: cardsContainer.scrollHeight,
+        behavior: 'smooth'
+      });
+    }
+
+    startBtn.addEventListener('click', () => {
+      splash.classList.add('hide');
+      setTimeout(() => {
+        mainContent.classList.add('show');
+        addCard(0);
+        updateProgressBar();
+        nextBtn.classList.add('show');
+      }, 600);
+    });
+
+    nextBtn.addEventListener('click', () => {
+      if (currentCard < cards.length - 1) {
+        currentCard++;
+        addCard(currentCard);
+        updateProgressBar();
+        if (currentCard === cards.length - 1) {
+          nextBtn.textContent = 'Завершить';
+        }
+      } else {
+        // Завершение
+        nextBtn.classList.remove('show');
+        addCardMsg(`<b>Поздравляем!</b><br><br>Вы успешно завершили подготовительный модуль.<br>Вперёд к новым знаниям!`);
+      }
+    });
+
+    function addCardMsg(html) {
+      const card = document.createElement('div');
+      card.className = 'card visible';
+      card.innerHTML = html;
+      cardsContainer.appendChild(card);
+      cardsContainer.scrollTo({
+        top: cardsContainer.scrollHeight,
+        behavior: 'smooth'
+      });
+    }
+
+    exitBtn.addEventListener('click', () => {
+      window.location.href = '/'; // или любая другая логика выхода
+    });
+
+    // Инициализация прогресс-бара
+    updateProgressBar();
+  </script>
 </body>
 </html>
