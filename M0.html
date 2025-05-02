@@ -630,6 +630,9 @@
             const confirmExit = document.getElementById('confirm-exit');
             const cancelExit = document.getElementById('cancel-exit');
             
+            // --- Исправление: объявляем переменные для прогресса ---
+            let currentStep = 0;
+            const totalSteps = steps.length;
             // Штрихи прогресса
             let ticks = [];
             function renderTicks() {
@@ -679,7 +682,7 @@
                 }
             });
             
-            // Исправленный обработчик для splash перехода
+            // --- Исправленный обработчик для splash перехода ---
             startBtn.addEventListener('click', function() {
                 splashScreen.style.transition = 'transform 0.8s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.8s cubic-bezier(0.4, 0, 0.2, 1)';
                 splashScreen.style.transform = 'translateY(-100%)';
@@ -696,8 +699,9 @@
                 }, 800);
             });
             
-            // Выход
-            exitBtnSplash.addEventListener('click', function() {
+            // --- Исправленный обработчик для кнопки выхода на заставке ---
+            exitBtnSplash.addEventListener('click', function(e) {
+                e.preventDefault();
                 exitModal.style.display = 'flex';
             });
             exitBtn.addEventListener('click', function() {
