@@ -7,29 +7,32 @@
   <style>
     :root {
       --orange: #FF9800;
-      --yellow: #FFD600;
+      --yellow: #FFF9C4;
       --white: #FFF;
       --text: #222;
+      --gray: #F2F2F2;
+      --header-gray: #E0E0E0;
       --transition: 0.6s cubic-bezier(.77,0,.18,1);
     }
     body {
       margin: 0;
       min-height: 100vh;
       font-family: 'Segoe UI', 'Roboto', Arial, sans-serif;
-      background: linear-gradient(135deg, var(--orange) 0%, var(--yellow) 100%);
+      background: linear-gradient(135deg, var(--white) 0%, var(--yellow) 100%);
       color: var(--text);
       overflow-x: hidden;
     }
     .splash {
       position: fixed;
       inset: 0;
-      background: linear-gradient(120deg, var(--orange) 60%, var(--yellow) 100%);
+      background: linear-gradient(120deg, var(--white) 60%, var(--yellow) 100%);
       display: flex;
       flex-direction: column;
       align-items: center;
       justify-content: center;
       z-index: 10;
       transition: opacity var(--transition), visibility var(--transition);
+      padding: 2rem 1rem;
     }
     .splash.hide {
       opacity: 0;
@@ -37,13 +40,16 @@
       pointer-events: none;
     }
     .splash h1 {
-      font-size: 2.5rem;
-      color: var(--white);
+      font-size: 2.1rem;
+      color: var(--orange);
       margin-bottom: 2rem;
-      letter-spacing: 2px;
-      text-shadow: 0 2px 16px #ff980088;
+      letter-spacing: 1px;
+      text-shadow: 0 2px 16px #ff980044;
       font-weight: 700;
       animation: fadeIn 1.2s;
+      text-align: center;
+      word-break: break-word;
+      line-height: 1.2;
     }
     .splash button {
       padding: 1rem 2.5rem;
@@ -70,7 +76,16 @@
       from { opacity: 0; transform: translateY(30px);}
       to { opacity: 1; transform: translateY(0);}
     }
-
+    @media (max-width: 600px) {
+      .splash h1 {
+        font-size: 1.2rem;
+        padding: 0 0.2rem;
+      }
+      .splash button {
+        font-size: 1rem;
+        padding: 0.8rem 1.2rem;
+      }
+    }
     .main-content {
       opacity: 0;
       pointer-events: none;
@@ -91,37 +106,50 @@
       left: 0;
       width: 100vw;
       height: 56px;
-      background: rgba(255,255,255,0.85);
+      background: var(--header-gray);
       z-index: 5;
       box-shadow: 0 2px 12px #ff980022;
       padding: 0 0.5rem;
     }
     .exit-btn {
-      background: linear-gradient(90deg, var(--orange), var(--yellow));
+      background: none;
       border: none;
       color: var(--text);
-      font-size: 1.3rem;
-      border-radius: 1.5rem;
-      padding: 0.5rem 1.2rem;
+      font-size: 2rem;
+      border-radius: 50%;
+      width: 44px;
+      height: 44px;
       margin-right: 1.2rem;
       cursor: pointer;
-      font-weight: 600;
-      box-shadow: 0 2px 8px #ff980033;
+      font-weight: 900;
+      display: flex;
+      align-items: center;
+      justify-content: center;
       transition: background 0.2s, transform 0.2s;
     }
     .exit-btn:hover {
-      background: linear-gradient(90deg, var(--yellow), var(--orange));
+      background: #e0e0e0;
       transform: scale(1.07);
+    }
+    .exit-btn span {
+      font-weight: 900;
+      font-size: 2rem;
+      display: block;
+      line-height: 1;
     }
     .progress-bar {
       flex: 1;
-      height: 8px;
+      height: 16px;
       background: #fff3;
       border-radius: 8px;
       position: relative;
       margin-left: 0.5rem;
       margin-right: 1rem;
       overflow: visible;
+      border: 2px solid #222;
+      display: flex;
+      align-items: flex-end;
+      min-width: 120px;
     }
     .progress-bar-inner {
       height: 100%;
@@ -144,8 +172,26 @@
       display: block;
       position: absolute;
       top: 0; width: 2px; height: 100%;
-      background: #fff8;
+      background: #222;
       border-radius: 1px;
+    }
+    .progress-label {
+      position: absolute;
+      top: -22px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: var(--header-gray);
+      color: #222;
+      font-weight: 700;
+      font-size: 1rem;
+      border-radius: 16px 16px 16px 16px / 12px 12px 12px 12px;
+      padding: 2px 18px 2px 18px;
+      box-shadow: 0 2px 8px #ff980022;
+      z-index: 10;
+      border: 2px solid #222;
+      letter-spacing: 0.04em;
+      text-align: center;
+      pointer-events: none;
     }
     .cards-container {
       margin-top: 72px;
@@ -162,7 +208,7 @@
       background: rgba(255,255,255,0.96);
       border-radius: 2rem;
       box-shadow: 0 8px 32px #ff980033;
-      padding: 2.2rem 1.5rem;
+      padding: 2.2rem 2.2rem;
       font-size: 1.18rem;
       line-height: 1.7;
       color: #333;
@@ -172,6 +218,7 @@
       transition: opacity 0.7s, transform 0.7s;
       letter-spacing: 0.01em;
       position: relative;
+      box-sizing: border-box;
     }
     .card.visible {
       opacity: 1;
@@ -210,8 +257,14 @@
         height: 44px;
       }
       .exit-btn {
-        font-size: 1rem;
-        padding: 0.4rem 0.9rem;
+        font-size: 1.5rem;
+        width: 36px;
+        height: 36px;
+        padding: 0;
+      }
+      .progress-label {
+        font-size: 0.85rem;
+        padding: 2px 10px 2px 10px;
       }
       .next-btn {
         font-size: 1rem;
@@ -227,8 +280,9 @@
   </div>
   <div class="main-content" id="mainContent">
     <div class="header-bar">
-      <button class="exit-btn" id="exitBtn" title="Выйти">⟵</button>
+      <button class="exit-btn" id="exitBtn" title="Выйти"><span>&#8592;</span></button>
       <div class="progress-bar">
+        <div class="progress-label">Прогресс</div>
         <div class="progress-bar-inner" id="progressBar"></div>
         <div class="progress-bar-ticks" id="progressBarTicks"></div>
       </div>
@@ -281,10 +335,9 @@
       card.innerHTML = cards[idx];
       cardsContainer.appendChild(card);
       setTimeout(() => card.classList.add('visible'), 50);
-      cardsContainer.scrollTo({
-        top: cardsContainer.scrollHeight,
-        behavior: 'smooth'
-      });
+      setTimeout(() => {
+        card.scrollIntoView({ behavior: 'smooth', block: 'end' });
+      }, 400);
     }
 
     startBtn.addEventListener('click', () => {
@@ -317,10 +370,9 @@
       card.className = 'card visible';
       card.innerHTML = html;
       cardsContainer.appendChild(card);
-      cardsContainer.scrollTo({
-        top: cardsContainer.scrollHeight,
-        behavior: 'smooth'
-      });
+      setTimeout(() => {
+        card.scrollIntoView({ behavior: 'smooth', block: 'end' });
+      }, 400);
     }
 
     exitBtn.addEventListener('click', () => {
