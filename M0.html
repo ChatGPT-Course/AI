@@ -57,6 +57,26 @@
             display: flex;
             align-items: center;
             padding: 0 32px;
+            transition: background 0.3s ease;
+        }
+        
+        #splash-header {
+            justify-content: flex-start;
+        }
+        
+        #header {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 56px;
+            background: var(--header-bg);
+            box-shadow: 0 1px 8px rgba(0,0,0,0.04);
+            z-index: 1000;
+            display: flex;
+            align-items: center;
+            padding: 0 32px;
+            justify-content: space-between;
         }
         
         #splash-number {
@@ -124,18 +144,30 @@
             padding-top: 72px;
         }
         
-        #header {
-            position: fixed;
-            top: 0;
-            left: 0;
-            right: 0;
-            height: 56px;
-            background: var(--header-bg);
-            box-shadow: 0 1px 8px rgba(0,0,0,0.04);
-            z-index: 1000;
+        #exit-btn, #exit-btn-splash {
+            background: none;
+            border: none;
+            cursor: pointer;
             display: flex;
             align-items: center;
-            padding: 0 32px;
+            margin: 0;
+            padding: 0;
+            transition: transform 0.2s ease;
+        }
+        
+        #exit-btn svg, #exit-btn-splash svg {
+            width: 36px;
+            height: 36px;
+            display: block;
+            transition: filter 0.2s ease;
+        }
+        
+        #exit-btn:hover svg, #exit-btn-splash:hover svg {
+            filter: drop-shadow(0 0 4px #ff4d4d88);
+        }
+        
+        .door-icon {
+            display: block;
         }
         
         #progress-container {
@@ -144,6 +176,58 @@
             justify-content: flex-end;
             align-items: center;
             margin-left: 32px;
+        }
+        
+        .progress-flask {
+            position: relative;
+            width: 340px;
+            height: var(--progress-bar-height);
+            background: var(--progress-grey);
+            border-radius: var(--progress-bar-height);
+            overflow: hidden;
+            margin-left: 0;
+            margin-right: 0;
+            box-shadow: 0 1px 4px rgba(0,0,0,0.03);
+            display: flex;
+            align-items: center;
+        }
+        
+        .progress-fill {
+            position: absolute;
+            left: 0; top: 0; bottom: 0;
+            height: 100%;
+            background: linear-gradient(90deg, var(--primary-color), var(--secondary-color));
+            border-radius: var(--progress-bar-height);
+            width: 0%;
+            transition: width 0.7s cubic-bezier(0.4, 0, 0.2, 1);
+            z-index: 1;
+        }
+        
+        .progress-checkpoint {
+            position: absolute;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 22px;
+            height: 22px;
+            background: #fff;
+            border-radius: 50%;
+            border: 2px solid var(--progress-grey);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 2;
+            transition: border-color 0.3s, background 0.3s;
+        }
+        
+        .progress-checkpoint.completed {
+            border-color: var(--success-color);
+            background: var(--success-color);
+        }
+        
+        .progress-checkmark {
+            width: 12px;
+            height: 12px;
+            display: block;
         }
         
         #progress-label {
@@ -175,31 +259,6 @@
             z-index: 1;
         }
         
-        #exit-btn {
-            background: none;
-            border: none;
-            cursor: pointer;
-            margin-top: 0;
-            margin-left: 0;
-            margin-right: 24px;
-            margin-bottom: 0;
-            display: flex;
-            align-items: center;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.08);
-        }
-        
-        #exit-btn svg {
-            width: 36px;
-            height: 36px;
-            display: block;
-            transition: filter 0.2s;
-        }
-        
-        #exit-btn:hover svg {
-            filter: drop-shadow(0 0 4px #ff4d4d88);
-        }
-        
-        /* Остальные стили (как в предыдущей версии) */
         #exit-modal {
             display: none;
             position: fixed;
@@ -228,6 +287,29 @@
         @keyframes modalFadeIn {
             from { opacity: 0; transform: translateY(-20px); }
             to { opacity: 1; transform: translateY(0); }
+        }
+        
+        #exit-modal-content .modal-exit-icon {
+            width: 32px;
+            height: 32px;
+            margin-bottom: 6px;
+        }
+        
+        #exit-modal-content h3 {
+            color: var(--danger-color);
+            margin-top: 0;
+            font-size: 1.1rem;
+            font-weight: bold;
+            text-decoration: underline;
+            letter-spacing: 0.5px;
+        }
+        
+        #exit-modal-content p {
+            color: #222;
+            font-size: 1.05rem;
+            font-weight: bold;
+            text-decoration: underline wavy #FF4D4D 1.5px;
+            margin-bottom: 18px;
         }
         
         #exit-modal-buttons {
@@ -342,6 +424,7 @@
             height: auto;
             overflow: visible;
             margin-bottom: 40px;
+            transition: opacity 0.5s ease, transform 0.5s ease;
         }
         
         .step-content {
@@ -353,6 +436,7 @@
             color: var(--dark-color);
             font-weight: 400;
             text-align: left;
+            transition: background 0.3s ease;
         }
         
         .step-content strong {
@@ -376,26 +460,6 @@
             box-shadow: none !important;
         }
         
-        #exit-btn-splash {
-            background: none;
-            border: none;
-            cursor: pointer;
-            padding: 0;
-            margin: 0;
-            display: flex;
-            align-items: center;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.08);
-        }
-        #exit-btn-splash svg {
-            width: 40px;
-            height: 40px;
-            display: block;
-            transition: filter 0.2s;
-        }
-        #exit-btn-splash:hover svg {
-            filter: drop-shadow(0 0 4px #ff4d4d88);
-        }
-        
         /* Splash bottom text */
         #splash-bottom {
             position: absolute;
@@ -412,31 +476,6 @@
             font-size: 1.2rem;
             font-weight: 600;
             letter-spacing: 1px;
-        }
-        
-        .progress-checkpoint {
-            position: absolute;
-            top: 50%;
-            transform: translateY(-50%);
-            width: 22px;
-            height: 22px;
-            background: #fff;
-            border-radius: 50%;
-            border: 2px solid var(--progress-grey);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            z-index: 2;
-            transition: border-color 0.3s, background 0.3s;
-        }
-        .progress-checkpoint.completed {
-            border-color: var(--success-color);
-            background: var(--success-color);
-        }
-        .progress-checkmark {
-            width: 12px;
-            height: 12px;
-            display: block;
         }
         
         /* Hide progress label and percent */
