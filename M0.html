@@ -499,7 +499,6 @@
             const splashScreen = document.getElementById('splash-screen');
             const startBtn = document.getElementById('start-btn');
             const exitBtnSplash = document.getElementById('exit-btn-splash');
-            
             // Элементы основного контента
             const mainContent = document.getElementById('main-content');
             const content = document.getElementById('content');
@@ -509,13 +508,13 @@
             const exitModal = document.getElementById('exit-modal');
             const confirmExit = document.getElementById('confirm-exit');
             const cancelExit = document.getElementById('cancel-exit');
-            
             // Steps динамика
+            let currentStep = 0;
+            const totalSteps = steps.length;
             steps.forEach((step, i) => {
                 if (i === 0) step.classList.add('visible');
                 else step.classList.remove('visible');
             });
-            
             let debounce = false;
             btn.addEventListener('click', function() {
                 if (debounce) return;
@@ -533,8 +532,7 @@
                     btn.textContent = 'Перейти к следующему модулю';
                 }
             });
-            
-            // --- Исправленный обработчик для splash перехода ---
+            // Splash переход
             startBtn.addEventListener('click', function() {
                 splashScreen.style.transition = 'transform 0.8s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.8s cubic-bezier(0.4, 0, 0.2, 1)';
                 splashScreen.style.transform = 'translateY(-100%)';
@@ -550,8 +548,7 @@
                     }, 50);
                 }, 800);
             });
-            
-            // --- Исправленный обработчик для кнопки выхода на заставке ---
+            // Выход
             exitBtnSplash.addEventListener('click', function(e) {
                 e.preventDefault();
                 exitModal.style.display = 'flex';
