@@ -77,9 +77,6 @@
             align-items: center;
             padding: 0 32px;
             justify-content: space-between;
-            justify-content: flex-start;
-            padding-left: 12px;
-            padding-right: 32px;
         }
         
         #splash-number {
@@ -174,18 +171,18 @@
         }
         
         #progress-container {
-            flex: 1 1 auto;
             display: flex;
-            justify-content: flex-end;
             align-items: center;
+            justify-content: flex-end;
+            min-width: 320px;
             margin-left: auto;
             margin-right: 0;
-            min-width: 340px;
+            height: 56px;
         }
         
         .progress-flask {
             position: relative;
-            width: 320px;
+            width: 240px;
             height: var(--progress-bar-height);
             background: var(--progress-grey);
             border-radius: var(--progress-bar-height);
@@ -641,7 +638,11 @@
                 for (let i = 0; i < totalSteps; i++) {
                     const tick = document.createElement('div');
                     tick.className = 'progress-tick';
-                    tick.style.left = (i/(totalSteps-1)*100) + '%';
+                    // Чтобы штрихи не выходили за края, немного смещаем крайние
+                    let percent = (i/(totalSteps-1)*100);
+                    if (i === 0) percent = 2;
+                    if (i === totalSteps-1) percent = 98;
+                    tick.style.left = percent + '%';
                     progressFlask.appendChild(tick);
                     ticks.push(tick);
                 }
