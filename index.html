@@ -249,16 +249,18 @@
       display: flex;
       flex-direction: column;
       justify-content: center;
-      gap: 6px;
+      gap: 5px;
       z-index: 100;
-      padding: 8px;
+      padding: 0;
     }
 
     .menu-button span {
       display: block;
       width: 24px;
-      height: 2px;
+      height: 3px;
       background: var(--white);
+      margin: 0 auto;
+      border-radius: 2px;
       transition: all 0.3s ease;
     }
 
@@ -314,6 +316,10 @@
 
     .menu-content button:hover {
       background: var(--gray);
+    }
+
+    .menu-content button:active {
+      background: transparent;
     }
 
     /* Chat Widget */
@@ -414,11 +420,6 @@
         <!-- Модули будут добавлены динамически -->
       </div>
     </div>
-
-    <a href="chat.html" class="chat-widget">
-      <span class="ai-text">AI</span>
-      <span class="chat-icon">💬</span>
-    </a>
   </div>
 
   <script>
@@ -612,7 +613,7 @@
 
     // Обработка клика по кнопке тех. поддержки
     document.getElementById('supportButton').addEventListener('click', () => {
-      window.location.href = 'chat.html';
+      window.location.href = 'help.html';
     });
   </script>
 </body>
