@@ -14,6 +14,7 @@
             --light-color: #FFFFFF;
             --dark-color: #2F2F2F;
             --bg-color: #FFF9F0; /* Светло-желтый фон */
+            --progress-grey: #e0e0e0;
         }
         
         body {
@@ -52,6 +53,8 @@
             padding: 15px 20px;
             display: flex;
             justify-content: flex-end;
+            align-items: center;
+            z-index: 1010;
         }
         
         #splash-number {
@@ -149,10 +152,11 @@
         #progress-bar-bg {
             width: 100%;
             height: 10px;
-            background-color: #F0E6D2;
+            background-color: var(--progress-grey);
             border-radius: 10px;
-            overflow: hidden;
+            overflow: visible;
             box-shadow: inset 0 1px 3px rgba(0,0,0,0.1);
+            position: relative;
         }
         
         #progress-bar {
@@ -161,6 +165,8 @@
             border-radius: 10px;
             width: 0%;
             transition: width 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+            position: absolute;
+            left: 0; top: 0;
         }
         
         #exit-btn {
@@ -197,12 +203,13 @@
         
         #exit-modal-content {
             background-color: white;
-            padding: 30px;
-            border-radius: 16px;
+            padding: 40px 30px 30px 30px;
+            border-radius: 20px;
             max-width: 500px;
             text-align: center;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+            box-shadow: 0 16px 40px rgba(0,0,0,0.25);
             animation: modalFadeIn 0.3s ease;
+            position: relative;
         }
         
         @keyframes modalFadeIn {
@@ -253,6 +260,7 @@
             padding: 0 20px 100px;
             width: 100%;
             box-sizing: border-box;
+            transition: min-height 0.4s;
         }
         
         .hidden {
@@ -297,30 +305,16 @@
         }
         
         .step {
-            counter-increment: step-counter;
-            background: white;
-            padding: 30px;
-            border-radius: 16px;
-            box-shadow: 0 5px 15px rgba(0,0,0,0.05);
-            position: relative;
-            overflow: hidden;
-            border-left: 5px solid var(--accent-color);
+            display: none;
         }
         
-        .step::before {
-            content: counter(step-counter);
-            position: absolute;
-            top: 10px;
-            left: 10px;
-            font-size: 60px;
-            font-weight: bold;
-            color: rgba(255, 123, 37, 0.1);
-            z-index: 0;
-        }
-        
-        .step-content {
-            position: relative;
-            z-index: 1;
+        .step.visible {
+            display: block;
+            opacity: 1;
+            transform: translateY(0);
+            height: auto;
+            overflow: visible;
+            margin-bottom: 40px;
         }
         
         h1 {
@@ -330,40 +324,119 @@
             text-align: center;
             padding: 0 20px;
         }
+        
+        button, .modal-btn {
+            outline: none !important;
+            -webkit-tap-highlight-color: transparent;
+        }
+        button:focus, .modal-btn:focus {
+            outline: none !important;
+            box-shadow: none !important;
+        }
+        
+        #exit-btn-splash {
+            background: none;
+            border: none;
+            cursor: pointer;
+            padding: 0;
+            margin: 0;
+            display: flex;
+            align-items: center;
+        }
+        #exit-btn-splash svg {
+            width: 32px;
+            height: 32px;
+            fill: var(--danger-color);
+            transition: fill 0.2s;
+        }
+        #exit-btn-splash:hover svg {
+            fill: #d3166a;
+        }
+        
+        /* Splash bottom text */
+        #splash-bottom {
+            position: absolute;
+            bottom: 40px;
+            left: 0;
+            width: 100%;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 18px;
+        }
+        #splash-module-label {
+            color: var(--primary-color);
+            font-size: 1.2rem;
+            font-weight: 600;
+            letter-spacing: 1px;
+        }
+        
+        .progress-checkpoint {
+            position: absolute;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 24px;
+            height: 24px;
+            background: var(--progress-grey);
+            border-radius: 50%;
+            border: 2px solid #fff;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 2;
+            transition: background 0.3s;
+        }
+        .progress-checkpoint.completed {
+            background: var(--success-color);
+        }
+        .progress-checkmark {
+            width: 14px;
+            height: 14px;
+            display: block;
+        }
+        
+        /* Hide progress label and percent */
+        #progress-label, #progress-percent {
+            display: none !important;
+        }
     </style>
 </head>
 <body>
     <!-- Заставка -->
     <div id="splash-screen">
         <div id="splash-header">
-            <button id="exit-btn-splash">Выход</button>
+            <button id="exit-btn-splash" title="Выйти">
+                <svg viewBox="0 0 32 32"><rect x="6" y="4" width="14" height="24" rx="3" fill="#fff" stroke="#FF4D4D" stroke-width="2"/><rect x="12" y="14" width="4" height="4" rx="2" fill="#FF4D4D"/><rect x="20" y="12" width="6" height="8" rx="2" fill="#FF4D4D"/></svg>
+            </button>
         </div>
-        
-        <div id="splash-number">0</div>
-        <h1 id="splash-title">Модуль 0: Введение в Искусственный Интеллект</h1>
-        
-        <button id="start-btn">Начать изучение</button>
-        <button id="continue-splash">Продолжить</button>
+        <div id="splash-bottom">
+            <div id="splash-module-label">подготовительный модуль</div>
+            <button id="start-btn">Начать изучение</button>
+        </div>
     </div>
     
     <!-- Основной контент (скрыт до нажатия кнопки) -->
     <div id="main-content">
         <div id="header">
-            <button id="exit-btn">Выход</button>
+            <button id="exit-btn" title="Выйти">
+                <svg viewBox="0 0 32 32" width="28" height="28"><rect x="6" y="4" width="14" height="24" rx="3" fill="#fff" stroke="#FF4D4D" stroke-width="2"/><rect x="12" y="14" width="4" height="4" rx="2" fill="#FF4D4D"/><rect x="20" y="12" width="6" height="8" rx="2" fill="#FF4D4D"/></svg>
+            </button>
             <div id="progress-container">
                 <div id="progress-label">Прогресс изучения: <span id="progress-percent">0</span>%</div>
                 <div id="progress-bar-bg">
                     <div id="progress-bar"></div>
+                    <!-- Галочки будут добавлены скриптом -->
                 </div>
             </div>
         </div>
         
         <div id="exit-modal">
             <div id="exit-modal-content">
-                <h3 style="color: var(--danger-color); margin-top: 0;">Подтверждение выхода</h3>
+                <svg class="modal-exit-icon" viewBox="0 0 48 48"><rect x="10" y="6" width="20" height="36" rx="4" fill="#fff" stroke="#FF4D4D" stroke-width="3"/><rect x="20" y="22" width="8" height="8" rx="4" fill="#FF4D4D"/><rect x="32" y="18" width="10" height="12" rx="3" fill="#FF4D4D"/></svg>
+                <h3>Подтверждение выхода</h3>
                 <p>Выход в незаконченном уроке приведет к потере прогресса. После перезахода вы начнете изучать материал сначала.</p>
                 <div id="exit-modal-buttons">
-                    <button id="confirm-exit" class="modal-btn">Все равно выйти</button>
+                    <button id="confirm-exit" class="modal-btn">Выйти</button>
                     <button id="cancel-exit" class="modal-btn">Остаться</button>
                 </div>
             </div>
@@ -375,47 +448,47 @@
                     Добро пожаловать в Модуль 0 курса по Искусственному Интеллекту! Этот вводный модуль создан, чтобы помочь вам сформировать фундаментальное понимание ключевых концепций ИИ. Мы рассмотрим историю развития искусственного интеллекта, основные направления исследований и практические применения этой трансформационной технологии в современном мире.
                 </div>
             </div>
-            <div class="step hidden">
+            <div class="step">
                 <div class="step-content">
                     Искусственный интеллект уже стал неотъемлемой частью нашей повседневной жизни. От персонализированных рекомендаций в потоковых сервисах до систем автоматического перевода и голосовых помощников - ИИ окружает нас повсюду. В этом модуле мы исследуем, как различные технологии ИИ работают на практике и какие возможности они открывают для бизнеса, науки и общества в целом.
                 </div>
             </div>
-            <div class="step hidden">
+            <div class="step">
                 <div class="step-content">
                     Прежде чем погружаться в технические детали, важно понять философские основы ИИ. Что вообще означает "искусственный интеллект"? Как мы определяем интеллект у машин? Эти вопросы вызывают оживленные дискуссии среди исследователей. Мы рассмотрим различные подходы к определению ИИ и обсудим текущие ограничения технологий.
                 </div>
             </div>
-            <div class="step hidden">
+            <div class="step">
                 <div class="step-content">
                     История искусственного интеллекта насчитывает более 70 лет. От работ Алана Тьюринга до современных глубоких нейронных сетей - путь развития ИИ был полон как впечатляющих прорывов, так и периодов "зимы ИИ", когда интерес и финансирование резко сокращались. Понимание этой истории поможет вам лучше оценить современное состояние области.
                 </div>
             </div>
-            <div class="step hidden">
+            <div class="step">
                 <div class="step-content">
                     Основные направления исследований в ИИ включают машинное обучение, нейронные сети, компьютерное зрение, обработку естественного языка и робототехнику. Каждое из этих направлений решает уникальный набор задач и использует свои методы. В этом курсе мы последовательно изучим каждое из них, начиная с базовых концепций.
                 </div>
             </div>
-            <div class="step hidden">
+            <div class="step">
                 <div class="step-content">
                     Машинное обучение - это сердце современного ИИ. В отличие от традиционного программирования, где правила явно кодируются разработчиком, алгоритмы машинного обучения автоматически находят закономерности в данных. Мы рассмотрим три основных парадигмы: обучение с учителем, без учителя и с подкреплением.
                 </div>
             </div>
-            <div class="step hidden">
+            <div class="step">
                 <div class="step-content">
                     Нейронные сети вдохновлены биологической структурой человеческого мозга. Эти модели состоят из множества соединенных "нейронов", организованных в слои. Глубокое обучение (подраздел нейронных сетей) произвело революцию в ИИ, достигнув человеческого уровня в таких задачах, как распознавание изображений и обработка языка.
                 </div>
             </div>
-            <div class="step hidden">
+            <div class="step">
                 <div class="step-content">
                     Обработка естественного языка (NLP) позволяет компьютерам понимать, интерпретировать и генерировать человеческую речь. От чат-ботов до систем автоматического перевода - NLP технологии становятся все более совершенными. Мы рассмотрим, как алгоритмы анализируют текст и какие вызовы стоят перед этой областью.
                 </div>
             </div>
-            <div class="step hidden">
+            <div class="step">
                 <div class="step-content">
                     Компьютерное зрение дает машинам способность "видеть" и понимать визуальную информацию. Применения варьируются от медицинской диагностики до автономных транспортных средств. Мы изучим, как алгоритмы извлекают признаки из изображений и видео, и как они могут "понимать" визуальный контекст.
                 </div>
             </div>
-            <div class="step hidden">
+            <div class="step">
                 <div class="step-content">
                     Робототехника объединяет ИИ с механическими системами, создавая машины, способные взаимодействовать с физическим миром. Современные роботы могут выполнять сложные задачи в промышленности, медицине и даже в домашних условиях. В заключительной части модуля мы обсудим будущее ИИ и этические вопросы, связанные с его развитием.
                 </div>
@@ -430,84 +503,63 @@
             // Элементы заставки
             const splashScreen = document.getElementById('splash-screen');
             const startBtn = document.getElementById('start-btn');
-            const continueSplash = document.getElementById('continue-splash');
             const exitBtnSplash = document.getElementById('exit-btn-splash');
             
             // Элементы основного контента
             const mainContent = document.getElementById('main-content');
             const content = document.getElementById('content');
             const btn = document.getElementById('continue-btn');
-            const hiddenSteps = document.querySelectorAll('.hidden');
+            const steps = document.querySelectorAll('.step');
             const progressBar = document.getElementById('progress-bar');
-            const progressPercent = document.getElementById('progress-percent');
+            const progressBarBg = document.getElementById('progress-bar-bg');
             const exitBtn = document.getElementById('exit-btn');
             const exitModal = document.getElementById('exit-modal');
             const confirmExit = document.getElementById('confirm-exit');
             const cancelExit = document.getElementById('cancel-exit');
             
+            // Галочки прогресса
+            let checkpoints = [];
             let currentStep = 0;
-            const totalSteps = hiddenSteps.length + 1;
+            const totalSteps = steps.length;
             
-            // Обработчик кнопки "Начать изучение"
-            startBtn.addEventListener('click', function() {
-                // Анимация ухода заставки вверх
-                splashScreen.style.transform = 'translateY(-100%)';
-                
-                // Показываем основной контент после завершения анимации
-                setTimeout(function() {
-                    splashScreen.style.display = 'none';
-                    mainContent.style.display = 'block';
-                    
-                    // Плавное появление основного контента
-                    setTimeout(function() {
-                        content.style.opacity = 1;
-                    }, 50);
-                }, 800);
-            });
-            
-            // Обработчик кнопки "Продолжить" на заставке
-            continueSplash.addEventListener('click', function() {
-                // Анимация ухода заставки вверх
-                splashScreen.style.transform = 'translateY(-100%)';
-                
-                // Показываем основной контент после завершения анимации
-                setTimeout(function() {
-                    splashScreen.style.display = 'none';
-                    mainContent.style.display = 'block';
-                    
-                    // Плавное появление основного контента
-                    setTimeout(function() {
-                        content.style.opacity = 1;
-                    }, 50);
-                }, 800);
-            });
-            
-            // Обработчик кнопки выхода на заставке
-            exitBtnSplash.addEventListener('click', function() {
-                exitModal.style.display = 'flex';
-            });
-            
-            // Остальной JavaScript (как в предыдущей версии)
-            function updateProgress() {
-                const progress = ((currentStep + 1) / totalSteps) * 100;
-                progressBar.style.width = progress + '%';
-                progressPercent.textContent = Math.round(progress);
+            // Прогресс-бар с чекпоинтами
+            function renderCheckpoints() {
+                // Удалить старые
+                progressBarBg.querySelectorAll('.progress-checkpoint').forEach(e => e.remove());
+                checkpoints = [];
+                for (let i = 0; i < totalSteps; i++) {
+                    const cp = document.createElement('div');
+                    cp.className = 'progress-checkpoint';
+                    cp.style.left = (i/(totalSteps-1)*100) + '%';
+                    cp.innerHTML = '<svg class="progress-checkmark" viewBox="0 0 16 16"><circle cx="8" cy="8" r="7" stroke="#fff" stroke-width="2" fill="none"/><polyline points="4,9 7,12 12,5" stroke="#fff" stroke-width="2" fill="none"/></svg>';
+                    progressBarBg.appendChild(cp);
+                    checkpoints.push(cp);
+                }
             }
-            
+            function updateProgress() {
+                const progress = (currentStep) / (totalSteps-1) * 100;
+                progressBar.style.width = progress + '%';
+                checkpoints.forEach((cp, i) => {
+                    if (i <= currentStep) cp.classList.add('completed');
+                    else cp.classList.remove('completed');
+                });
+            }
+            renderCheckpoints();
             updateProgress();
             
+            // Steps динамика
+            steps.forEach((step, i) => {
+                if (i === 0) step.classList.add('visible');
+                else step.classList.remove('visible');
+            });
+            
             btn.addEventListener('click', function() {
-                if (currentStep < hiddenSteps.length) {
-                    hiddenSteps[currentStep].classList.add('visible');
-                    hiddenSteps[currentStep].scrollIntoView({ 
-                        behavior: 'smooth', 
-                        block: 'center' 
-                    });
-                    
+                if (currentStep < totalSteps-1) {
                     currentStep++;
+                    steps[currentStep].classList.add('visible');
+                    steps[currentStep].scrollIntoView({ behavior: 'smooth', block: 'center' });
                     updateProgress();
-                    
-                    if (currentStep === hiddenSteps.length) {
+                    if (currentStep === totalSteps-1) {
                         btn.textContent = 'Завершить модуль';
                     }
                 } else {
@@ -516,17 +568,30 @@
                 }
             });
             
+            // Splash переход
+            startBtn.addEventListener('click', function() {
+                splashScreen.style.transform = 'translateY(-100%)';
+                setTimeout(function() {
+                    splashScreen.style.display = 'none';
+                    mainContent.style.display = 'block';
+                    setTimeout(function() {
+                        content.style.opacity = 1;
+                    }, 50);
+                }, 800);
+            });
+            
+            // Выход
+            exitBtnSplash.addEventListener('click', function() {
+                exitModal.style.display = 'flex';
+            });
             exitBtn.addEventListener('click', function() {
                 exitModal.style.display = 'flex';
             });
-            
             cancelExit.addEventListener('click', function() {
                 exitModal.style.display = 'none';
             });
-            
             confirmExit.addEventListener('click', function() {
-                alert('Ваш прогресс сброшен. При следующем входе вы начнете сначала.');
-                window.location.href = '#';
+                window.location.href = 'index.html';
             });
         });
     </script>
