@@ -14,20 +14,22 @@
       --header-gray: #E0E0E0;
       --transition: 0.6s cubic-bezier(.77,0,.18,1);
       --disabled: #CCCCCC;
+      --blue: #4285F4;
     }
     body {
       margin: 0;
       min-height: 100vh;
       font-family: 'Segoe UI', 'Roboto', Arial, sans-serif;
-      background: linear-gradient(135deg, var(--white) 0%, var(--yellow) 100%);
+      background: var(--white);
       color: var(--text);
       overflow-x: hidden;
       -webkit-tap-highlight-color: transparent;
+      line-height: 1.6;
     }
     .splash {
       position: fixed;
       inset: 0;
-      background: linear-gradient(120deg, var(--white) 60%, var(--yellow) 100%);
+      background: var(--white);
       display: flex;
       flex-direction: column;
       align-items: center;
@@ -165,21 +167,19 @@
       flex-direction: column;
       align-items: center;
       width: 100%;
-      min-height: 60vh;
+      min-height: calc(100vh - 128px);
       padding-bottom: 6rem;
     }
     .content-block {
       max-width: 600px;
       width: 95%;
-      padding: 2.2rem 2.2rem;
-      font-size: 1.18rem;
-      line-height: 1.7;
+      padding: 1.5rem 1.2rem;
+      font-size: 1.1rem;
       color: #333;
-      margin-bottom: 1.5rem;
+      margin-bottom: 1rem;
       opacity: 0;
       transform: translateY(40px);
       transition: opacity 0.7s, transform 0.7s;
-      letter-spacing: 0.01em;
       position: relative;
       box-sizing: border-box;
     }
@@ -190,9 +190,8 @@
     .content-title {
       color: var(--orange);
       font-weight: 700;
-      font-size: 1.4rem;
-      margin-top: 0;
-      margin-bottom: 1rem;
+      font-size: 1.3rem;
+      margin: 0 0 0.8rem -0.5rem;
       display: flex;
       align-items: center;
     }
@@ -202,57 +201,61 @@
       background: rgba(255, 255, 255, 0.7);
       padding: 0.2rem 0.6rem;
       border-radius: 1rem;
-      backdrop-filter: blur(5px);
-      margin-right: 0.8rem;
+      margin-right: 0.5rem;
+      min-width: 24px;
+      text-align: center;
     }
     .content-block ul {
-      padding-left: 1.5rem;
-      margin: 1rem 0;
+      padding-left: 1rem;
+      margin: 0.8rem 0;
     }
     .content-block li {
-      margin-bottom: 0.5rem;
+      margin-bottom: 0.4rem;
       position: relative;
+      padding-left: 0.5rem;
     }
     .tip-card {
-      background: rgba(255, 255, 255, 0.9);
+      background: rgba(255, 248, 225, 0.8);
       border-left: 4px solid var(--orange);
-      padding: 1rem 1.2rem;
-      margin: 1.2rem 0;
+      padding: 0.8rem 1rem;
+      margin: 1rem 0;
       border-radius: 0 8px 8px 0;
-      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
     }
     .tip-card-title {
       font-weight: 700;
       color: var(--orange);
-      margin-top: 0;
-      margin-bottom: 0.5rem;
+      margin: 0 0 0.3rem 0;
+      font-size: 1rem;
     }
     .buttons-container {
       position: fixed;
-      bottom: 2.5rem;
+      bottom: 1.5rem;
       left: 0;
       width: 100%;
       display: flex;
       justify-content: center;
-      gap: 1rem;
+      gap: 0.8rem;
       z-index: 2;
+      padding: 0 1rem;
+      box-sizing: border-box;
     }
     .next-btn {
-      padding: 1rem 2.5rem;
-      font-size: 1.1rem;
+      padding: 0.8rem 1.8rem;
+      font-size: 1rem;
       background: linear-gradient(90deg, var(--yellow), var(--orange));
       color: var(--text);
       border: none;
       border-radius: 2rem;
       cursor: pointer;
       font-weight: 600;
-      box-shadow: 0 4px 24px #ff980055;
+      box-shadow: 0 4px 12px rgba(255, 152, 0, 0.3);
       transition: all 0.3s;
       opacity: 0;
       pointer-events: none;
-      min-width: 140px;
+      min-width: 120px;
       position: relative;
       overflow: hidden;
+      flex-shrink: 0;
     }
     .next-btn.show {
       opacity: 1;
@@ -272,27 +275,28 @@
       position: absolute;
       bottom: 0;
       left: 0;
-      height: 4px;
+      height: 3px;
       background: var(--orange);
       width: 0%;
-      transition: width 2s linear;
+      transition: width 0.5s linear;
     }
     .guide-btn {
-      padding: 1rem 1.5rem;
+      padding: 0.8rem 1rem;
       font-size: 0.9rem;
-      background: linear-gradient(90deg, #e0e0e0, #b0b0b0);
-      color: var(--text);
+      background: linear-gradient(90deg, var(--blue), #3367D6);
+      color: white;
       border: none;
       border-radius: 2rem;
       cursor: pointer;
       font-weight: 600;
-      box-shadow: 0 4px 24px rgba(0,0,0,0.1);
+      box-shadow: 0 4px 12px rgba(66, 133, 244, 0.3);
       transition: all 0.3s;
       opacity: 0;
       pointer-events: none;
-      min-width: 140px;
+      min-width: 120px;
       line-height: 1.2;
       text-align: center;
+      flex-shrink: 0;
     }
     .guide-btn.show {
       opacity: 1;
@@ -300,7 +304,7 @@
       animation: fadeInUp 1s;
     }
     .guide-btn:hover {
-      background: linear-gradient(90deg, #b0b0b0, #e0e0e0);
+      background: linear-gradient(90deg, #3367D6, var(--blue));
       transform: scale(1.05);
     }
     .action-btn {
@@ -308,36 +312,52 @@
       color: var(--text);
       border: none;
       border-radius: 1.5rem;
-      padding: 0.8rem 1.5rem;
+      padding: 0.7rem 1.2rem;
       font-weight: 600;
       cursor: pointer;
-      margin-top: 1rem;
+      margin-top: 0.8rem;
       display: inline-block;
       text-decoration: none;
       transition: all 0.3s;
+      font-size: 0.9rem;
     }
     .action-btn:hover {
       background: linear-gradient(90deg, var(--orange), var(--yellow));
       transform: scale(1.05);
     }
     .emoji {
-      font-size: 1.2em;
+      font-size: 1.1em;
       vertical-align: middle;
       margin-right: 0.3em;
     }
     .content-image {
       width: 100%;
-      border-radius: 12px;
-      margin-bottom: 1.2rem;
-      box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+      border-radius: 8px;
+      margin: 0.5rem 0 0.8rem 0;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+      border: 1px solid #eee;
+    }
+    .feature-list {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.5rem;
+      margin: 0.8rem 0;
+    }
+    .feature-item {
+      background: rgba(255, 152, 0, 0.1);
+      padding: 0.4rem 0.8rem;
+      border-radius: 1rem;
+      font-size: 0.9rem;
+      display: flex;
+      align-items: center;
     }
     @media (max-width: 600px) {
       .content-block {
-        padding: 1.5rem 1.2rem;
-        font-size: 1.05rem;
+        padding: 1.2rem 1rem;
+        font-size: 1rem;
       }
       .header-bar {
-        height: 44px;
+        height: 48px;
       }
       .exit-btn {
         font-size: 1.5rem;
@@ -346,18 +366,16 @@
         padding: 0;
       }
       .buttons-container {
-        flex-direction: column;
-        align-items: center;
-        gap: 0.8rem;
+        bottom: 1rem;
+        gap: 0.6rem;
       }
       .next-btn, .guide-btn {
-        font-size: 1rem;
-        padding: 0.8rem 1.5rem;
-        width: 90%;
-        max-width: 280px;
+        font-size: 0.9rem;
+        padding: 0.7rem 1rem;
+        min-width: 110px;
       }
       .guide-btn {
-        font-size: 0.85rem;
+        font-size: 0.8rem;
       }
     }
     button, .exit-btn {
@@ -387,7 +405,7 @@
     </div>
     <div class="buttons-container">
       <button class="next-btn" id="nextBtn">Далее</button>
-      <button class="guide-btn" id="guideBtn">Детальный<br>гайд</button>
+      <button class="guide-btn" id="guideBtn"><span class="emoji">🔗</span> Детальный<br>гайд</button>
     </div>
     <div id="exitModal" style="display:none; position:fixed; z-index:100; left:0; top:0; width:100vw; height:100vh; background:rgba(0,0,0,0.25); align-items:center; justify-content:center;">
       <div style="background:#fff; border-radius:1.2rem; max-width:90vw; width:340px; padding:2rem 1.2rem; box-shadow:0 8px 32px #0002; text-align:center;">
@@ -417,7 +435,7 @@
     const contentBlocks = [
       {
         title: "ДАВАЙ НАЧНЕМ МОДУЛЬ 0",
-        content: `Со следующего экрана и далее в этом модуле ты будешь видеть <b>вторую кнопку с полным и подробным гайдом</b>, чтобы можно было перейти в него когда удобно.<br><br>
+        content: `Со следующего экрана и далее в этом модуле ты будешь видеть <b>вторую кнопку с полным и подробным гайдом</b>, чтобы можно было перейти в него когда удобно.
         <div class="tip-card">
           <div class="tip-card-title">СОВЕТ</div>
           <div>Сначала пролистай этот модуль целиком для ознакомления, потому что может случится так, что гайд тебе и не понадобится</div>
@@ -425,21 +443,21 @@
       },
       {
         title: "НАЧНЕМ СО СТОИМОСТИ",
-        content: `У ChatGPT есть 3 тарифа:<br><br>
-        <ul>
-          <li>Бесплатный</li>
-          <li>PLUS за $20 в месяц</li>
-          <li>PRO за $200 в месяц</li>
-        </ul>
+        content: `У ChatGPT есть 3 тарифа:
+        <div class="feature-list">
+          <div class="feature-item"><span class="emoji">🔹</span> Бесплатный</div>
+          <div class="feature-item"><span class="emoji">🔹</span> PLUS за $20/мес</div>
+          <div class="feature-item"><span class="emoji">🔹</span> PRO за $200/мес</div>
+        </div>
         На старте имеет смысл использовать бесплатную версию, чтобы разобраться и приноровиться. Тем более, что её прям хорошо расширили функционалом <span class="emoji">😊</span>`
       },
       {
         title: "БЕСПЛАТНЫЙ ТАРИФ",
-        content: `<b>Возможности</b><br><br>
+        content: `<b>Возможности:</b>
         <ul>
           <li><span class="emoji">✅</span> Распознавание изображений</li>
           <li><span class="emoji">✅</span> Поиск в интернете</li>
-          <li><span class="emoji">✅</span> Генерация картинок (3 шт / день)</li>
+          <li><span class="emoji">✅</span> Генерация картинок (3 шт/день)</li>
           <li><span class="emoji">✅</span> Анализ данных</li>
           <li><span class="emoji">✅</span> Работа с голосом</li>
           <li><span class="emoji">✅</span> Генерация текстов</li>
@@ -448,15 +466,10 @@
       {
         title: "ОГРАНИЧЕНИЯ БЕСПЛАТНОГО ТАРИФА",
         content: `<ul>
-          <li><span class="emoji">⚠️</span> Лимит сообщений<br>
-          - около 10 за раз, после чего придется подождать несколько часов</li>
-          <li><span class="emoji">⚠️</span> Ограничение на ввод<br>
-          - не более 2048 символов в одном сообщении</li>
-          <li><span class="emoji">⚠️</span> Очереди в пиковые часы<br>
-          - в периоды высокой нагрузки можно столкнуться с ожиданием</li>
-          <li><span class="emoji">⚠️</span> Нельзя создавать GPTs<br>
-          - это узкоспециализированные чат-боты внутри самого ChatGPT<br>
-          - пользоваться чужими можно, создавать свои - нельзя</li>
+          <li><span class="emoji">⚠️</span> Лимит сообщений - около 10 за раз, после чего придется подождать несколько часов</li>
+          <li><span class="emoji">⚠️</span> Ограничение на ввод - не более 2048 символов в одном сообщении</li>
+          <li><span class="emoji">⚠️</span> Очереди в пиковые часы - в периоды высокой нагрузки можно столкнуться с ожиданием</li>
+          <li><span class="emoji">⚠️</span> Нельзя создавать GPTs - это узкоспециализированные чат-боты внутри самого ChatGPT (пользоваться чужими можно)</li>
         </ul>`
       },
       {
@@ -465,7 +478,7 @@
       },
       {
         title: "ТАРИФ PLUS за $20 в месяц",
-        content: `Данная подписка имеет смысл только для тех, кто<br><br>
+        content: `Данная подписка имеет смысл только для тех, кто:
         <ul>
           <li><span class="emoji">👉</span> Постоянно упирается в лимиты сообщений</li>
           <li><span class="emoji">👉</span> Создает десятки изображений ежедневно</li>
@@ -480,12 +493,12 @@
       },
       {
         title: "КАК ПОЛУЧИТЬ ДОСТУП",
-        content: `Существует несколько способов:<br><br>
-        <ul>
-          <li><b>Веб-версия</b> – chat.openai.com</li>
-          <li>Мобильное приложение для iOS и Android</li>
-          <li><b>Чат-боты в Telegram и Whatsapp</b></li>
-        </ul>
+        content: `Существует несколько способов:
+        <div class="feature-list">
+          <div class="feature-item"><span class="emoji">🌐</span> Веб-версия (chat.openai.com)</div>
+          <div class="feature-item"><span class="emoji">📱</span> Мобильное приложение</div>
+          <div class="feature-item"><span class="emoji">🤖</span> Чат-боты в Telegram/Whatsapp</div>
+        </div>
         Везде есть плюсы и минусы, поэтому давайте кратко разберем каждый из способов`
       },
       {
@@ -499,77 +512,93 @@
       },
       {
         title: "ИСПОЛЬЗОВАНИЕ VPN",
-        content: `Чтобы обойти блокировку, нужно использовать VPN. Есть несколько способов:<br><br>
-        <ul>
-          <li><span class="emoji">🔹</span> Установить VPN из магазина приложений (подойдет любой удобный вариант)</li>
-          <li><span class="emoji">🔹</span> Создать свой собственный VPN – это займет 10–12 минут</li>
-          <li><span class="emoji">🔹</span> Подробная инструкция по созданию своего VPN также доступна в гайде</li>
-        </ul>`
+        content: `Чтобы обойти блокировку, нужно использовать VPN:
+        <div class="feature-list">
+          <div class="feature-item"><span class="emoji">1.</span> Установить VPN из магазина приложений</div>
+          <div class="feature-item"><span class="emoji">2.</span> Создать свой собственный VPN (10-12 мин)</div>
+        </div>
+        Подробная инструкция по созданию своего VPN также доступна в гайде`
       },
       {
         title: "CHATGPT НА СМАРТФОНЕ",
-        content: `Это второй способ использовать ChatGPT<br><br>
-        <span class="emoji">📌</span> Удобный доступ с телефона<br>
-        <span class="emoji">📌</span> Можно общаться в любое время и в любом месте<br>
-        <span class="emoji">📌</span> Официальные версии для iOS и Android<br><br>
+        content: `Это второй способ использовать ChatGPT:
+        <div class="feature-list">
+          <div class="feature-item"><span class="emoji">📌</span> Удобный доступ с телефона</div>
+          <div class="feature-item"><span class="emoji">📌</span> Можно общаться в любое время</div>
+          <div class="feature-item"><span class="emoji">📌</span> Официальные версии для iOS/Android</div>
+        </div>
         Но есть нюанс...`
       },
       {
         title: "ПРИЛОЖЕНИЯ В РОССИИ НЕДОСТУПНЫ",
-        content: `Чтобы установить ChatGPT в телефон, нужно немножко потанцевать с бубнами.<br>
-        Поэтому имеет смысл заморачиваться лишь тогда, когда ты УЖЕ являешься уверенным пользователем <span class="emoji">😊</span><br><br>
-        <span class="emoji">🔍</span> Если всё же хочешь установить ChatGPT на телефон, инструкция всё там же ))`
+        content: `Чтобы установить ChatGPT в телефон, нужно немножко потанцевать с бубнами.
+        Поэтому имеет смысл заморачиваться лишь тогда, когда ты УЖЕ являешься уверенным пользователем <span class="emoji">😊</span>
+        <div class="tip-card">
+          <div class="tip-card-title">ПОДСКАЗКА</div>
+          <div>Если всё же хочешь установить ChatGPT на телефон, инструкция в детальном гайде</div>
+        </div>`
       },
       {
         title: "CHATGPT В TELEGRAM",
-        content: `Третий и самый простой способ получить доступ к ChatGPT в России – через Telegram-ботов<br><br>
-        <span class="emoji">🔍</span> Ты отправляешь запрос Telegram-боту<br>
-        <span class="emoji">🔍</span> Он передает его ChatGPT<br>
-        <span class="emoji">🔍</span> Получает ответ и отправляет его тебе<br><br>
+        content: `Третий и самый простой способ получить доступ к ChatGPT в России – через Telegram-ботов:
+        <div class="feature-list">
+          <div class="feature-item"><span class="emoji">1.</span> Ты отправляешь запрос боту</div>
+          <div class="feature-item"><span class="emoji">2.</span> Он передает его ChatGPT</div>
+          <div class="feature-item"><span class="emoji">3.</span> Получает ответ и отправляет тебе</div>
+        </div>
         Но у этого способа есть как плюсы, так и минусы`
       },
       {
         title: "ПЛЮСЫ TELEGRAM-БОТОВ",
         content: `<ul>
           <li><span class="emoji">✅</span> Не нужен VPN</li>
-          <li><span class="emoji">✅</span> Быстрый доступ (достаточно просто запустить бота)</li>
+          <li><span class="emoji">✅</span> Быстрый доступ (просто запустить бота)</li>
           <li><span class="emoji">✅</span> Оплата подписки в рублях с российских карт</li>
         </ul>`
       },
       {
         title: "МИНУСЫ TELEGRAM-БОТОВ",
         content: `<ul>
-          <li><span class="emoji">❌</span> Ограниченный функционал (не все возможности ChatGPT)</li>
-          <li><span class="emoji">❌</span> Качество ответов зависит от бота и модели</li>
+          <li><span class="emoji">❌</span> Ограниченный функционал</li>
+          <li><span class="emoji">❌</span> Качество ответов зависит от бота</li>
           <li><span class="emoji">❌</span> Безопасность: ты передаешь данные посреднику</li>
         </ul>`
       },
       {
         title: "КАК ВЫБРАТЬ TELEGRAM-БОТА?",
-        content: `Перед выбором и использованием любого Telegram-бота:<br><br>
-        <span class="emoji">🔍</span> Прочитай описание и условия использования<br>
-        <span class="emoji">🔍</span> Ознакомься с отзывами других пользователей<br>
-        <span class="emoji">🔍</span> Проверь, какую модель ChatGPT он использует<br><br>
-        Рекомендую использовать SYNTX AI – он один из крупнейших и проверенных<br><br>
+        content: `Перед выбором и использованием любого Telegram-бота:
+        <div class="feature-list">
+          <div class="feature-item"><span class="emoji">1.</span> Прочитай описание</div>
+          <div class="feature-item"><span class="emoji">2.</span> Ознакомься с отзывами</div>
+          <div class="feature-item"><span class="emoji">3.</span> Проверь модель ChatGPT</div>
+        </div>
+        Рекомендую использовать SYNTX AI – он один из крупнейших и проверенных
         <a href="#" class="action-btn" id="syntaxBtn">Перейти в SYNTX AI</a>`
       },
       {
         title: "CHATGPT В WHATSAPP",
-        content: `Это четвертый и БЕСПЛАТНЫЙ способ, который не требует наличия VPN, но в отличие от варианта с Telegram-ботом, он официальный.<br><br>
-        Из минусов - там используется устаревшая модель и ограничен функционал<br>
-        Подробная инструкция по установке в гайде`
+        content: `Это четвертый и БЕСПЛАТНЫЙ способ, который не требует наличия VPN, но в отличие от варианта с Telegram-ботом, он официальный.
+        <div class="tip-card">
+          <div class="tip-card-title">МИНУС</div>
+          <div>Используется устаревшая модель и ограничен функционал</div>
+        </div>`
       },
       {
         title: "МОДУЛЬ-0 пройден",
-        content: `Наши поздравления! Ты только что завершил подготовительный блок, в котором мы разобрали способы доступа к ChatGPT в обход всех блокировок.<br><br>
-        В следующем модуле «Основы ChatGPT» мы разберемся, как заставить нейросеть выполнять твои задачи, какие у неё есть ограничения и как получить максимально полезные ответы<br><br>
-        Продолжаем?`
+        content: `Наши поздравления! Ты только что завершил подготовительный блок, в котором мы разобрали способы доступа к ChatGPT в обход всех блокировок.
+        <div class="tip-card">
+          <div class="tip-card-title">ДАЛЬШЕ ИНТЕРЕСНЕЕ</div>
+          <div>В следующем модуле «Основы ChatGPT» мы разберемся, как заставить нейросеть выполнять твои задачи и получать максимально полезные ответы</div>
+        </div>`
       },
       {
         title: "ЗАКЛЮЧЕНИЕ",
-        content: `<span class="emoji">❗</span> <b>ОБЯЗАТЕЛЬНО ПОЛУЧИ ДОСТУП К ChatGPT</b><br><br>
-        <span class="emoji">👉</span> Без этого смотреть курс дальше не имеет смысла, так как мы будем практиковаться именно в ChatGPT, чтобы сразу закреплять знания на практике<br><br>
-        Выдели время и получи доступ в ChatGPT любым удобным способом из данного модуля. Поверь, когда ты начнешь им пользоваться - ты кайфонешь и всё поймешь <span class="emoji">🙏😌</span>`
+        content: `<span class="emoji">❗</span> <b>ОБЯЗАТЕЛЬНО ПОЛУЧИ ДОСТУП К ChatGPT</b>
+        <div class="feature-list">
+          <div class="feature-item"><span class="emoji">👉</span> Без этого курс не имеет смысла</div>
+          <div class="feature-item"><span class="emoji">👉</span> Мы будем практиковаться в ChatGPT</div>
+          <div class="feature-item"><span class="emoji">👉</span> Начни пользоваться - всё поймешь</div>
+        </div>`
       }
     ];
 
@@ -648,7 +677,7 @@
         nextBtn.removeChild(progress);
         nextBtn.disabled = false;
         isNextBtnCooldown = false;
-      }, 2000);
+      }, 500); // Уменьшил время до 0.5 секунды
     }
 
     startBtn.addEventListener('click', () => {
@@ -685,8 +714,8 @@
         nextBtn.classList.remove('show');
         guideBtn.classList.remove('show');
         setTimeout(() => {
-          window.location.href = 'index.html'; // Или на следующий модуль
-        }, 1500);
+          window.location.href = 'index.html';
+        }, 500);
       }
     });
 
@@ -709,8 +738,7 @@
 
     // Обработчик для кнопки гайда
     guideBtn.addEventListener('click', () => {
-      alert('Открывается детальный гайд...');
-      // Здесь можно добавить логику открытия гайда
+      window.open('https://kurl.ru/btRup', '_blank');
     });
   </script>
 </body>
