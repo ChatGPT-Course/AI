@@ -13,6 +13,7 @@
       --gray: #F2F2F2;
       --header-gray: #E0E0E0;
       --transition: 0.6s cubic-bezier(.77,0,.18,1);
+      --disabled: #CCCCCC;
     }
     body {
       margin: 0;
@@ -192,17 +193,17 @@
       font-size: 1.4rem;
       margin-top: 0;
       margin-bottom: 1rem;
+      display: flex;
+      align-items: center;
     }
     .content-counter {
-      position: absolute;
-      top: 1rem;
-      right: 1.5rem;
       font-size: 0.9rem;
       color: #666;
       background: rgba(255, 255, 255, 0.7);
       padding: 0.2rem 0.6rem;
       border-radius: 1rem;
       backdrop-filter: blur(5px);
+      margin-right: 0.8rem;
     }
     .content-block ul {
       padding-left: 1.5rem;
@@ -212,11 +213,31 @@
       margin-bottom: 0.5rem;
       position: relative;
     }
-    .next-btn {
+    .tip-card {
+      background: rgba(255, 255, 255, 0.9);
+      border-left: 4px solid var(--orange);
+      padding: 1rem 1.2rem;
+      margin: 1.2rem 0;
+      border-radius: 0 8px 8px 0;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    }
+    .tip-card-title {
+      font-weight: 700;
+      color: var(--orange);
+      margin-top: 0;
+      margin-bottom: 0.5rem;
+    }
+    .buttons-container {
       position: fixed;
       bottom: 2.5rem;
-      left: 50%;
-      transform: translateX(-50%);
+      left: 0;
+      width: 100%;
+      display: flex;
+      justify-content: center;
+      gap: 1rem;
+      z-index: 2;
+    }
+    .next-btn {
       padding: 1rem 2.5rem;
       font-size: 1.1rem;
       background: linear-gradient(90deg, var(--yellow), var(--orange));
@@ -227,18 +248,60 @@
       font-weight: 600;
       box-shadow: 0 4px 24px #ff980055;
       transition: all 0.3s;
-      z-index: 2;
       opacity: 0;
       pointer-events: none;
+      min-width: 140px;
+      position: relative;
+      overflow: hidden;
     }
     .next-btn.show {
       opacity: 1;
       pointer-events: auto;
       animation: fadeInUp 1s;
     }
-    .next-btn:hover {
+    .next-btn:hover:not(:disabled) {
       background: linear-gradient(90deg, var(--orange), var(--yellow));
-      transform: translateX(-50%) scale(1.05);
+      transform: scale(1.05);
+    }
+    .next-btn:disabled {
+      background: var(--disabled);
+      cursor: not-allowed;
+      transform: none !important;
+    }
+    .next-btn-progress {
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      height: 4px;
+      background: var(--orange);
+      width: 0%;
+      transition: width 2s linear;
+    }
+    .guide-btn {
+      padding: 1rem 1.5rem;
+      font-size: 0.9rem;
+      background: linear-gradient(90deg, #e0e0e0, #b0b0b0);
+      color: var(--text);
+      border: none;
+      border-radius: 2rem;
+      cursor: pointer;
+      font-weight: 600;
+      box-shadow: 0 4px 24px rgba(0,0,0,0.1);
+      transition: all 0.3s;
+      opacity: 0;
+      pointer-events: none;
+      min-width: 140px;
+      line-height: 1.2;
+      text-align: center;
+    }
+    .guide-btn.show {
+      opacity: 1;
+      pointer-events: auto;
+      animation: fadeInUp 1s;
+    }
+    .guide-btn:hover {
+      background: linear-gradient(90deg, #b0b0b0, #e0e0e0);
+      transform: scale(1.05);
     }
     .action-btn {
       background: linear-gradient(90deg, var(--yellow), var(--orange));
@@ -262,6 +325,12 @@
       vertical-align: middle;
       margin-right: 0.3em;
     }
+    .content-image {
+      width: 100%;
+      border-radius: 12px;
+      margin-bottom: 1.2rem;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+    }
     @media (max-width: 600px) {
       .content-block {
         padding: 1.5rem 1.2rem;
@@ -276,9 +345,19 @@
         height: 36px;
         padding: 0;
       }
-      .next-btn {
+      .buttons-container {
+        flex-direction: column;
+        align-items: center;
+        gap: 0.8rem;
+      }
+      .next-btn, .guide-btn {
         font-size: 1rem;
         padding: 0.8rem 1.5rem;
+        width: 90%;
+        max-width: 280px;
+      }
+      .guide-btn {
+        font-size: 0.85rem;
       }
     }
     button, .exit-btn {
@@ -306,7 +385,10 @@
     <div class="cards-container" id="cardsContainer">
       <!-- Контентные блоки будут добавляться сюда -->
     </div>
-    <button class="next-btn show" id="nextBtn">Далее</button>
+    <div class="buttons-container">
+      <button class="next-btn" id="nextBtn">Далее</button>
+      <button class="guide-btn" id="guideBtn">Детальный<br>гайд</button>
+    </div>
     <div id="exitModal" style="display:none; position:fixed; z-index:100; left:0; top:0; width:100vw; height:100vh; background:rgba(0,0,0,0.25); align-items:center; justify-content:center;">
       <div style="background:#fff; border-radius:1.2rem; max-width:90vw; width:340px; padding:2rem 1.2rem; box-shadow:0 8px 32px #0002; text-align:center;">
         <div style="font-size:1.15rem; margin-bottom:1.5rem; color:#222;">Вы действительно хотите выйти? Ваш прогресс в этом уроке не сохранится, и при следующем входе его нужно будет пройти заново.</div>
@@ -322,6 +404,7 @@
     const startBtn = document.getElementById('startBtn');
     const mainContent = document.getElementById('mainContent');
     const nextBtn = document.getElementById('nextBtn');
+    const guideBtn = document.getElementById('guideBtn');
     const progressBar = document.getElementById('progressBar');
     const cardsContainer = document.getElementById('cardsContainer');
     const exitBtn = document.getElementById('exitBtn');
@@ -335,7 +418,10 @@
       {
         title: "ДАВАЙ НАЧНЕМ МОДУЛЬ 0",
         content: `Со следующего экрана и далее в этом модуле ты будешь видеть <b>вторую кнопку с полным и подробным гайдом</b>, чтобы можно было перейти в него когда удобно.<br><br>
-        <b>СОВЕТ:</b> сначала пролистай этот модуль целиком для ознакомления, потому что может случится так, что гайд тебе и не понадобится`
+        <div class="tip-card">
+          <div class="tip-card-title">СОВЕТ</div>
+          <div>Сначала пролистай этот модуль целиком для ознакомления, потому что может случится так, что гайд тебе и не понадобится</div>
+        </div>`
       },
       {
         title: "НАЧНЕМ СО СТОИМОСТИ",
@@ -489,6 +575,7 @@
 
     const totalBlocks = contentBlocks.length;
     let currentBlockIndex = 0;
+    let isNextBtnCooldown = false;
 
     function updateProgressBar() {
       const percent = ((currentBlockIndex + 1) / totalBlocks) * 100;
@@ -499,16 +586,19 @@
       const block = document.createElement('div');
       block.className = 'content-block';
       
-      // Добавляем номер блока (справа вверху)
-      const blockCounter = document.createElement('div');
-      blockCounter.className = 'content-counter';
-      blockCounter.textContent = `${index + 1}/${totalBlocks}`;
-      block.appendChild(blockCounter);
-      
-      // Добавляем заголовок (слева вверху)
+      // Добавляем заголовок с номером
       const title = document.createElement('h2');
       title.className = 'content-title';
-      title.textContent = contentBlocks[index].title;
+      
+      const counter = document.createElement('span');
+      counter.className = 'content-counter';
+      counter.textContent = `${index + 1}`;
+      title.appendChild(counter);
+      
+      const titleText = document.createElement('span');
+      titleText.textContent = contentBlocks[index].title;
+      title.appendChild(titleText);
+      
       block.appendChild(title);
       
       // Добавляем контент
@@ -537,6 +627,30 @@
       }, 50);
     }
 
+    function startNextBtnCooldown() {
+      if (isNextBtnCooldown) return;
+      
+      isNextBtnCooldown = true;
+      nextBtn.disabled = true;
+      
+      // Создаем элемент прогресс-бара
+      const progress = document.createElement('div');
+      progress.className = 'next-btn-progress';
+      nextBtn.appendChild(progress);
+      
+      // Запускаем анимацию прогресс-бара
+      setTimeout(() => {
+        progress.style.width = '100%';
+      }, 10);
+      
+      // По завершении анимации
+      setTimeout(() => {
+        nextBtn.removeChild(progress);
+        nextBtn.disabled = false;
+        isNextBtnCooldown = false;
+      }, 2000);
+    }
+
     startBtn.addEventListener('click', () => {
       splash.classList.add('hide');
       setTimeout(() => {
@@ -548,10 +662,19 @@
     });
 
     nextBtn.addEventListener('click', () => {
+      if (isNextBtnCooldown) return;
+      
+      startNextBtnCooldown();
+      
       if (currentBlockIndex < totalBlocks - 1) {
         currentBlockIndex++;
         addContentBlock(currentBlockIndex);
         updateProgressBar();
+        
+        // Показываем кнопку гайда после первого нажатия
+        if (currentBlockIndex === 1) {
+          guideBtn.classList.add('show');
+        }
         
         // На предпоследнем блоке меняем текст кнопки
         if (currentBlockIndex === totalBlocks - 2) {
@@ -560,6 +683,7 @@
       } else {
         // Завершение модуля
         nextBtn.classList.remove('show');
+        guideBtn.classList.remove('show');
         setTimeout(() => {
           window.location.href = 'index.html'; // Или на следующий модуль
         }, 1500);
@@ -583,9 +707,11 @@
       exitModal.style.display = 'none';
     });
 
-    // Инициализация кнопки "Далее" по центру
-    nextBtn.style.left = '50%';
-    nextBtn.style.transform = 'translateX(-50%)';
+    // Обработчик для кнопки гайда
+    guideBtn.addEventListener('click', () => {
+      alert('Открывается детальный гайд...');
+      // Здесь можно добавить логику открытия гайда
+    });
   </script>
 </body>
 </html>
