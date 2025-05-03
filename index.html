@@ -487,95 +487,7 @@
         }
         
         // Обновляем UI один раз после проверки
-        updateUI();
-      } catch (error) {
-        console.error('Ошибка при работе с базой данных:', error);
-      }
-    }
-
-    // Функция для скрытия экрана загрузки
-    function hideLoadingScreen() {
-      const loadingScreen = document.getElementById('loading-screen');
-      loadingScreen.style.opacity = '0';
-      setTimeout(() => {
-        loadingScreen.style.display = 'none';
-        document.getElementById('app-content').style.opacity = '1';
-      }, 500);
-    }
-
-    // Основная функция
-    document.addEventListener('DOMContentLoaded', async () => {
-      // Показываем экран загрузки
-      document.getElementById('loading-screen').style.display = 'flex';
-      document.getElementById('app-content').style.opacity = '0';
-
-      if (window.Telegram?.WebApp) {
-        await initTelegramApp();
-      } else {
-        await initTestMode();
-      }
-    });
-
-    async function initTelegramApp() {
-      // Убираем стандартную заставку Telegram
-      if (window.Telegram?.WebApp) {
-        Telegram.WebApp.ready();
-        Telegram.WebApp.expand();
-      }
-
-      const tg = window.Telegram.WebApp;
-      const user = tg.initDataUnsafe.user;
-      
-      state.userId = user.id.toString();
-      state.username = user.username || null;
-
-      // Устанавливаем данные пользователя из Telegram
-      document.getElementById('userName').textContent = 
-        [user.first_name, user.last_name].filter(Boolean).join(' ') || 'Пользователь';
-      document.getElementById('userId').textContent = `ID: ${state.userId}`;
-
-      // Устанавливаем аватар
-      const avatarElement = document.getElementById('userAvatar');
-      if (user.photo_url) {
-        const img = new Image();
-        img.src = user.photo_url;
-        img.onload = () => {
-          avatarElement.innerHTML = '';
-          avatarElement.appendChild(img);
-        };
-      } else {
-        const fallback = user.first_name?.charAt(0).toUpperCase() || 'U';
-        document.getElementById('avatar-fallback').textContent = fallback;
-      }
-
-      // Проверяем и создаем пользователя в Firebase
-      await checkAndCreateUser(user);
-      
-      state.isLoaded = true;
-      hideLoadingScreen();
-    }
-
-    async function initTestMode() {
-      const testUser = {
-        id: "test-user",
-        first_name: "Тестовый",
-        last_name: "Пользователь",
-        username: "test"
-      };
-      
-      state.userId = testUser.id;
-      document.getElementById('userName').textContent = 'Тестовый пользователь';
-      document.getElementById('userId').textContent = 'ID: test-user';
-      document.getElementById('avatar-fallback').textContent = 'T';
-      
-      // Проверяем и создаем тестового пользователя в Firebase
-      await checkAndCreateUser(testUser);
-      
-      state.isLoaded = true;
-      hideLoadingScreen();
-    }
-
-    function updateUI() {
+        function updateUI() {
   const modules = [
     { id: -1, title: "Введение", desc: "Стартовая информация о курсе и основах ИИ", link: "intro.html" },
     { id: 0, title: "Введение в ИИ", desc: "Основы, история, примеры использования искусственного интеллекта", link: "M0.html" },
@@ -647,6 +559,102 @@
     `;
   });
   document.getElementById('modules-container').innerHTML = html;
+}
+
+function handleModuleClick(link, isLocked, lockReason, moduleId, isCompleted) {
+  if (isLocked) {
+    if (lockReason === 'oplata') {
+      // Показываем красивый попап о необходимости оплаты
+      showPaymentPopup();
+    } else {
+      // Показываем сообщение о необходимости пройти предыдущие модули
+      showProgressPopup(moduleId);
+    }
+    return;
+  }
+  
+  if (isCompleted) {
+    if (confirm('Этот модуль уже изучен. Хотите повторить?')) {
+      window.location.href = link;
+    }
+    return;
+  }
+  
+  // Переходим на страницу модуля
+  window.location.href = link;
+}
+
+function showPaymentPopup() {
+  // Создаем попап для оплаты
+  const popup = document.createElement('div');
+  popup.style.position = 'fixed';
+  popup.style.top = '0';
+  popup.style.left = '0';
+  popup.style.right = '0';
+  popup.style.bottom = '0';
+  popup.style.backgroundColor = 'rgba(0,0,0,0.7)';
+  popup.style.display = 'flex';
+  popup.style.justifyContent = 'center';
+  popup.style.alignItems = 'center';
+  popup.style.zIndex = '1000';
+  
+  popup.innerHTML = `
+    <div style="background: white; padding: 24px; border-radius: 16px; max-width: 320px; text-align: center;">
+      <h3 style="margin-bottom: 16px; color: var(--primary);">Требуется полный курс</h3>
+      <p style="margin-bottom: 24px;">Для доступа к этому модулю необходимо приобрести полную версию курса.</p>
+      <button id="buyButton" style="background: var(--primary); color: white; border: none; padding: 12px 24px; border-radius: 8px; font-weight: 600; cursor: pointer; width: 100%;">
+        Купить полный курс
+      </button>
+      <button id="closePopup" style="margin-top: 12px; background: transparent; border: none; color: var(--primary); font-weight: 600; cursor: pointer;">
+        Закрыть
+      </button>
+    </div>
+  `;
+  
+  document.body.appendChild(popup);
+  
+  // Обработчики кнопок
+  document.getElementById('buyButton').addEventListener('click', () => {
+    // Здесь логика для перехода на оплату
+    alert('Перенаправление на страницу оплаты...');
+    // В реальном приложении: window.location.href = 'payment.html';
+  });
+  
+  document.getElementById('closePopup').addEventListener('click', () => {
+    document.body.removeChild(popup);
+  });
+}
+
+function showProgressPopup(moduleId) {
+  // Создаем попап о необходимости пройти предыдущие модули
+  const popup = document.createElement('div');
+  popup.style.position = 'fixed';
+  popup.style.top = '0';
+  popup.style.left = '0';
+  popup.style.right = '0';
+  popup.style.bottom = '0';
+  popup.style.backgroundColor = 'rgba(0,0,0,0.7)';
+  popup.style.display = 'flex';
+  popup.style.justifyContent = 'center';
+  popup.style.alignItems = 'center';
+  popup.style.zIndex = '1000';
+  
+  popup.innerHTML = `
+    <div style="background: white; padding: 24px; border-radius: 16px; max-width: 320px; text-align: center;">
+      <h3 style="margin-bottom: 16px; color: var(--primary);">Сначала пройдите предыдущие модули</h3>
+      <p style="margin-bottom: 24px;">Для доступа к модулю ${moduleId} необходимо сначала завершить модуль ${moduleId - 1}.</p>
+      <button id="closePopup" style="background: var(--primary); color: white; border: none; padding: 12px 24px; border-radius: 8px; font-weight: 600; cursor: pointer; width: 100%;">
+        Понятно
+      </button>
+    </div>
+  `;
+  
+  document.body.appendChild(popup);
+  
+  // Обработчик кнопки закрытия
+  document.getElementById('closePopup').addEventListener('click', () => {
+    document.body.removeChild(popup);
+  });
 }
 
     function handleModuleClick(link, isLocked, lockReason, moduleId, isCompleted) {
