@@ -8,6 +8,7 @@
   <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
   <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
   <style>
+    /* Стили остаются без изменений */
     :root {
       --primary: #FF7A00;
       --primary-light: #FF9E40;
@@ -595,32 +596,76 @@
         let lockIcon = '';
         let grayStyle = '';
 
-        // Определяем доступность по прогрессу
-        if (module.id > state.progress) {
-          isLocked = true;
-          lockReason = 'progress';
-          grayStyle = 'color: #aaa;';
-          lockIcon = '<span class="lock-icon">🔒</span>';
-          cardClass += ' locked';
-          btnClass += ' locked';
-          buttonText = 'Закрыто';
+        // Логика доступа на основе progress
+        if (module.id === -1) {
+          // Введение всегда доступно
+          if (state.progress > 0) {
+            isCompleted = true;
+            buttonText = 'Изучено';
+            buttonIcon = '✔️';
+          }
+        } else if (module.id === 0) {
+          // Модуль 0 доступен при progress >= 1
+          if (state.progress >= 1) {
+            isCompleted = state.progress > 0;
+            buttonText = isCompleted ? 'Изучено' : 'Начать';
+            buttonIcon = isCompleted ? '✔️' : '';
+          } else {
+            isLocked = true;
+            lockReason = 'progress';
+            grayStyle = 'color: #aaa;';
+            lockIcon = '<span class="lock-icon">🔒</span>';
+            cardClass += ' locked';
+            btnClass += ' locked';
+            buttonText = 'Закрыто';
+          }
+        } else if (module.id === 1) {
+          // Модуль 1 доступен при progress >= 2
+          if (state.progress >= 2) {
+            isCompleted = state.progress > 1;
+            buttonText = isCompleted ? 'Изучено' : 'Начать';
+            buttonIcon = isCompleted ? '✔️' : '';
+          } else {
+            isLocked = true;
+            lockReason = 'progress';
+            grayStyle = 'color: #aaa;';
+            lockIcon = '<span class="lock-icon">🔒</span>';
+            cardClass += ' locked';
+            btnClass += ' locked';
+            buttonText = 'Закрыто';
+          }
+        } else if (module.id === 2) {
+          // Модуль 2 доступен при progress >= 3
+          if (state.progress >= 3) {
+            isCompleted = state.progress > 2;
+            buttonText = isCompleted ? 'Изучено' : 'Начать';
+            buttonIcon = isCompleted ? '✔️' : '';
+          } else {
+            isLocked = true;
+            lockReason = 'progress';
+            grayStyle = 'color: #aaa;';
+            lockIcon = '<span class="lock-icon">🔒</span>';
+            cardClass += ' locked';
+            btnClass += ' locked';
+            buttonText = 'Закрыто';
+          }
+        } else if (module.id === 3) {
+          // Модуль 3 доступен при progress >= 4
+          if (state.progress >= 4) {
+            isCompleted = state.progress > 3;
+            buttonText = isCompleted ? 'Изучено' : 'Начать';
+            buttonIcon = isCompleted ? '✔️' : '';
+          } else {
+            isLocked = true;
+            lockReason = 'progress';
+            grayStyle = 'color: #aaa;';
+            lockIcon = '<span class="lock-icon">🔒</span>';
+            cardClass += ' locked';
+            btnClass += ' locked';
+            buttonText = 'Закрыто';
+          }
         }
-        // Если модуль завершён
-        if (module.id >= 0 && state.progress > module.id) {
-          isCompleted = true;
-          buttonText = 'Изучено';
-          buttonIcon = '✔️';
-        }
-        // Если модуль закрыт из-за оплаты
-        if (module.id > 0 && !state.isPaid) {
-          isLocked = true;
-          lockReason = 'oplata';
-          grayStyle = 'color: #aaa;';
-          lockIcon = '<span class="lock-icon">🔒</span>';
-          cardClass += ' locked';
-          btnClass += ' locked';
-          buttonText = 'Закрыто';
-        }
+
         html += `
           <div class="${cardClass}" style="${grayStyle}" onclick="handleModuleClick('${module.link}', ${isLocked}, '${lockReason}', ${module.id}, ${isCompleted})">
             <div class="module-label">${module.id === -1 ? 'Введение' : 'Модуль ' + module.id + ' - ' + module.title}</div>
