@@ -576,109 +576,78 @@
     }
 
     function updateUI() {
-      const modules = [
-        { id: -1, title: "Введение", desc: "Стартовая информация о курсе и основах ИИ", link: "intro.html" },
-        { id: 0, title: "Введение в ИИ", desc: "Основы, история, примеры использования искусственного интеллекта", link: "M0.html" },
-        { id: 1, title: "Основы ChatGPT", desc: "Базовые принципы работы с ChatGPT, ключевые концепции", link: "M1.html" },
-        { id: 2, title: "ChatGPT PRO", desc: "Продвинутые техники и методы работы с ChatGPT", link: "M2.html" },
-        { id: 3, title: "ChatGPT MASTER", desc: "Экспертный уровень использования ChatGPT", link: "M3.html" }
-      ];
+  const modules = [
+    { id: -1, title: "Введение", desc: "Стартовая информация о курсе и основах ИИ", link: "intro.html" },
+    { id: 0, title: "Введение в ИИ", desc: "Основы, история, примеры использования искусственного интеллекта", link: "M0.html" },
+    { id: 1, title: "Основы ChatGPT", desc: "Базовые принципы работы с ChatGPT, ключевые концепции", link: "M1.html" },
+    { id: 2, title: "ChatGPT PRO", desc: "Продвинутые техники и методы работы с ChatGPT", link: "M2.html" },
+    { id: 3, title: "ChatGPT MASTER", desc: "Экспертный уровень использования ChatGPT", link: "M3.html" }
+  ];
 
-      let html = '';
-      modules.forEach(module => {
-        let isLocked = false;
-        let lockReason = '';
-        let isCompleted = false;
-        let buttonText = 'Начать';
-        let buttonIcon = '';
-        let cardClass = 'module';
-        let btnClass = 'module-btn';
-        let lockIcon = '';
-        let grayStyle = '';
+  let html = '';
+  modules.forEach(module => {
+    let isLocked = false;
+    let lockReason = '';
+    let isCompleted = false;
+    let buttonText = 'Начать';
+    let buttonIcon = '';
+    let cardClass = 'module';
+    let btnClass = 'module-btn';
+    let lockIcon = '';
+    let grayStyle = '';
 
-        // Логика доступа на основе progress
-        if (module.id === -1) {
-          // Введение всегда доступно
-          if (state.progress > 0) {
-            isCompleted = true;
-            buttonText = 'Изучено';
-            buttonIcon = '✔️';
-          }
-        } else if (module.id === 0) {
-          // Модуль 0 доступен при progress >= 1
-          if (state.progress >= 1) {
-            isCompleted = state.progress > 0;
-            buttonText = isCompleted ? 'Изучено' : 'Начать';
-            buttonIcon = isCompleted ? '✔️' : '';
-          } else {
-            isLocked = true;
-            lockReason = 'progress';
-            grayStyle = 'color: #aaa;';
-            lockIcon = '<span class="lock-icon">🔒</span>';
-            cardClass += ' locked';
-            btnClass += ' locked';
-            buttonText = 'Закрыто';
-          }
-        } else if (module.id === 1) {
-          // Модуль 1 доступен при progress >= 2
-          if (state.progress >= 2) {
-            isCompleted = state.progress > 1;
-            buttonText = isCompleted ? 'Изучено' : 'Начать';
-            buttonIcon = isCompleted ? '✔️' : '';
-          } else {
-            isLocked = true;
-            lockReason = 'progress';
-            grayStyle = 'color: #aaa;';
-            lockIcon = '<span class="lock-icon">🔒</span>';
-            cardClass += ' locked';
-            btnClass += ' locked';
-            buttonText = 'Закрыто';
-          }
-        } else if (module.id === 2) {
-          // Модуль 2 доступен при progress >= 3
-          if (state.progress >= 3) {
-            isCompleted = state.progress > 2;
-            buttonText = isCompleted ? 'Изучено' : 'Начать';
-            buttonIcon = isCompleted ? '✔️' : '';
-          } else {
-            isLocked = true;
-            lockReason = 'progress';
-            grayStyle = 'color: #aaa;';
-            lockIcon = '<span class="lock-icon">🔒</span>';
-            cardClass += ' locked';
-            btnClass += ' locked';
-            buttonText = 'Закрыто';
-          }
-        } else if (module.id === 3) {
-          // Модуль 3 доступен при progress >= 4
-          if (state.progress >= 4) {
-            isCompleted = state.progress > 3;
-            buttonText = isCompleted ? 'Изучено' : 'Начать';
-            buttonIcon = isCompleted ? '✔️' : '';
-          } else {
-            isLocked = true;
-            lockReason = 'progress';
-            grayStyle = 'color: #aaa;';
-            lockIcon = '<span class="lock-icon">🔒</span>';
-            cardClass += ' locked';
-            btnClass += ' locked';
-            buttonText = 'Закрыто';
-          }
-        }
-
-        html += `
-          <div class="${cardClass}" style="${grayStyle}" onclick="handleModuleClick('${module.link}', ${isLocked}, '${lockReason}', ${module.id}, ${isCompleted})">
-            <div class="module-label">${module.id === -1 ? 'Введение' : 'Модуль ' + module.id + ' - ' + module.title}</div>
-            <div class="module-content">
-              <div class="module-desc">${module.desc}</div>
-              <button class="${btnClass}">${buttonIcon ? buttonIcon + ' ' : ''}${buttonText}</button>
-              ${lockIcon}
-            </div>
-          </div>
-        `;
-      });
-      document.getElementById('modules-container').innerHTML = html;
+    // Логика доступа на основе progress
+    if (module.id === -1) {
+      // Введение всегда доступно
+      isCompleted = state.progress >= 1;
+      buttonText = isCompleted ? 'Изучено' : 'Начать';
+      buttonIcon = isCompleted ? '✔️' : '';
+    } else {
+      // Для всех остальных модулей
+      const moduleAvailable = state.progress >= module.id + 1;
+      const nextModuleAvailable = state.progress >= module.id + 2;
+      
+      if (moduleAvailable) {
+        // Модуль доступен
+        isCompleted = nextModuleAvailable;
+        buttonText = isCompleted ? 'Изучено' : 'Начать';
+        buttonIcon = isCompleted ? '✔️' : '';
+      } else {
+        // Модуль заблокирован
+        isLocked = true;
+        lockReason = 'progress';
+        grayStyle = 'color: #aaa;';
+        lockIcon = '<span class="lock-icon">🔒</span>';
+        cardClass += ' locked';
+        btnClass += ' locked';
+        buttonText = 'Закрыто';
+      }
     }
+
+    // Проверка оплаты для модулей 1, 2, 3
+    if (module.id >= 1 && !state.isPaid) {
+      isLocked = true;
+      lockReason = 'oplata';
+      grayStyle = 'color: #aaa;';
+      lockIcon = '<span class="lock-icon">🔒</span>';
+      cardClass += ' locked';
+      btnClass += ' locked';
+      buttonText = 'Закрыто';
+    }
+
+    html += `
+      <div class="${cardClass}" style="${grayStyle}" onclick="handleModuleClick('${module.link}', ${isLocked}, '${lockReason}', ${module.id}, ${isCompleted})">
+        <div class="module-label">${module.id === -1 ? 'Введение' : 'Модуль ' + module.id + ' - ' + module.title}</div>
+        <div class="module-content">
+          <div class="module-desc">${module.desc}</div>
+          <button class="${btnClass}">${buttonIcon ? buttonIcon + ' ' : ''}${buttonText}</button>
+          ${lockIcon}
+        </div>
+      </div>
+    `;
+  });
+  document.getElementById('modules-container').innerHTML = html;
+}
 
     function handleModuleClick(link, isLocked, lockReason, moduleId, isCompleted) {
       if (isLocked) {
