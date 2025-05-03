@@ -8,7 +8,6 @@
   <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
   <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
   <style>
-    /* Стили остаются без изменений */
     :root {
       --primary: #FF7A00;
       --primary-light: #FF9E40;
@@ -373,6 +372,58 @@
       line-height: 1;
     }
 
+    /* Popup Styles */
+    .popup-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: rgba(0,0,0,0.7);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      z-index: 2000;
+    }
+
+    .popup-content {
+      background: white;
+      padding: 24px;
+      border-radius: 16px;
+      max-width: 320px;
+      width: 100%;
+      text-align: center;
+      box-shadow: 0 8px 32px rgba(0,0,0,0.2);
+    }
+
+    .popup-title {
+      font-size: 20px;
+      font-weight: 600;
+      color: var(--primary);
+      margin-bottom: 16px;
+    }
+
+    .popup-message {
+      margin-bottom: 24px;
+      color: var(--dark);
+    }
+
+    .popup-button {
+      background: var(--primary);
+      color: white;
+      border: none;
+      padding: 12px 24px;
+      border-radius: 8px;
+      font-weight: 600;
+      cursor: pointer;
+      width: 100%;
+      transition: background 0.2s;
+    }
+
+    .popup-button:hover {
+      background: var(--primary-light);
+    }
+
     @media (max-width: 600px) {
       .header {
         padding: 15px;
@@ -441,7 +492,7 @@
       authDomain: "vrot-x-7a48f.firebaseapp.com",
       databaseURL: "https://vrot-x-7a48f-default-rtdb.firebaseio.com",
       projectId: "vrot-x-7a48f",
-      storageBucket: "vrot-x-7a48f.firebasestorage.app",
+      storageBucket: "vrot-x-7a48f.appspot.com",
       messagingSenderId: "622297225288",
       appId: "1:622297225288:web:5df6a5b02ffddedd96e07d"
     };
@@ -459,6 +510,16 @@
       progress: 0
     };
 
+    // Функция для скрытия экрана загрузки
+    function hideLoadingScreen() {
+      const loadingScreen = document.getElementById('loading-screen');
+      loadingScreen.style.opacity = '0';
+      setTimeout(() => {
+        loadingScreen.style.display = 'none';
+        document.getElementById('app-content').style.opacity = '1';
+      }, 500);
+    }
+
     // Функция для проверки и создания пользователя в Firebase
     async function checkAndCreateUser(user) {
       try {
@@ -475,7 +536,7 @@
             progress: 0
           });
           console.log('Создан новый пользователь:', user.id);
-          state.isPaid = false; // Новый пользователь, оплаты нет
+          state.isPaid = false;
           state.progress = 0;
         } else {
           // Получаем данные существующего пользователя
@@ -486,220 +547,250 @@
           console.log('Прогресс пользователя:', state.progress);
         }
         
-        // Обновляем UI один раз после проверки
-        function updateUI() {
-  const modules = [
-    { id: -1, title: "Введение", desc: "Стартовая информация о курсе и основах ИИ", link: "intro.html" },
-    { id: 0, title: "Введение в ИИ", desc: "Основы, история, примеры использования искусственного интеллекта", link: "M0.html" },
-    { id: 1, title: "Основы ChatGPT", desc: "Базовые принципы работы с ChatGPT, ключевые концепции", link: "M1.html" },
-    { id: 2, title: "ChatGPT PRO", desc: "Продвинутые техники и методы работы с ChatGPT", link: "M2.html" },
-    { id: 3, title: "ChatGPT MASTER", desc: "Экспертный уровень использования ChatGPT", link: "M3.html" }
-  ];
-
-  let html = '';
-  modules.forEach(module => {
-    let isLocked = false;
-    let lockReason = '';
-    let isCompleted = false;
-    let buttonText = 'Начать';
-    let buttonIcon = '';
-    let cardClass = 'module';
-    let btnClass = 'module-btn';
-    let lockIcon = '';
-    let grayStyle = '';
-
-    // Логика доступа на основе progress
-    if (module.id === -1) {
-      // Введение всегда доступно
-      isCompleted = state.progress >= 1;
-      buttonText = isCompleted ? 'Изучено' : 'Начать';
-      buttonIcon = isCompleted ? '✔️' : '';
-    } else {
-      // Для всех остальных модулей
-      const moduleAvailable = state.progress >= module.id + 1;
-      const nextModuleAvailable = state.progress >= module.id + 2;
-      
-      if (moduleAvailable) {
-        // Модуль доступен
-        isCompleted = nextModuleAvailable;
-        buttonText = isCompleted ? 'Изучено' : 'Начать';
-        buttonIcon = isCompleted ? '✔️' : '';
-      } else {
-        // Модуль заблокирован
-        isLocked = true;
-        lockReason = 'progress';
-        grayStyle = 'color: #aaa;';
-        lockIcon = '<span class="lock-icon">🔒</span>';
-        cardClass += ' locked';
-        btnClass += ' locked';
-        buttonText = 'Закрыто';
+        // Обновляем UI
+        updateUI();
+        state.isLoaded = true;
+        hideLoadingScreen();
+      } catch (error) {
+        console.error('Ошибка при работе с базой данных:', error);
+        // В случае ошибки все равно показываем интерфейс
+        state.isLoaded = true;
+        hideLoadingScreen();
       }
     }
 
-    // Проверка оплаты для модулей 1, 2, 3
-    if (module.id >= 1 && !state.isPaid) {
-      isLocked = true;
-      lockReason = 'oplata';
-      grayStyle = 'color: #aaa;';
-      lockIcon = '<span class="lock-icon">🔒</span>';
-      cardClass += ' locked';
-      btnClass += ' locked';
-      buttonText = 'Закрыто';
+    // Функция обновления интерфейса модулей
+    function updateUI() {
+      const modules = [
+        { id: -1, title: "Введение", desc: "Стартовая информация о курсе и основах ИИ", link: "intro.html" },
+        { id: 0, title: "Введение в ИИ", desc: "Основы, история, примеры использования искусственного интеллекта", link: "M0.html" },
+        { id: 1, title: "Основы ChatGPT", desc: "Базовые принципы работы с ChatGPT, ключевые концепции", link: "M1.html" },
+        { id: 2, title: "ChatGPT PRO", desc: "Продвинутые техники и методы работы с ChatGPT", link: "M2.html" },
+        { id: 3, title: "ChatGPT MASTER", desc: "Экспертный уровень использования ChatGPT", link: "M3.html" }
+      ];
+
+      let html = '';
+      modules.forEach(module => {
+        let isLocked = false;
+        let lockReason = '';
+        let isCompleted = false;
+        let buttonText = 'Начать';
+        let buttonIcon = '';
+        let cardClass = 'module';
+        let btnClass = 'module-btn';
+        let lockIcon = '';
+        let grayStyle = '';
+
+        // Логика доступа на основе progress
+        if (module.id === -1) {
+          // Введение всегда доступно
+          isCompleted = state.progress >= 1;
+          buttonText = isCompleted ? 'Изучено' : 'Начать';
+          buttonIcon = isCompleted ? '✔️' : '';
+        } else {
+          // Для всех остальных модулей
+          const moduleAvailable = state.progress >= module.id + 1;
+          const nextModuleAvailable = state.progress >= module.id + 2;
+          
+          if (moduleAvailable) {
+            // Модуль доступен
+            isCompleted = nextModuleAvailable;
+            buttonText = isCompleted ? 'Изучено' : 'Начать';
+            buttonIcon = isCompleted ? '✔️' : '';
+          } else {
+            // Модуль заблокирован
+            isLocked = true;
+            lockReason = 'progress';
+            grayStyle = 'color: #aaa;';
+            lockIcon = '<span class="lock-icon">🔒</span>';
+            cardClass += ' locked';
+            btnClass += ' locked';
+            buttonText = 'Закрыто';
+          }
+        }
+
+        // Проверка оплаты для модулей 1, 2, 3
+        if (module.id >= 1 && !state.isPaid) {
+          isLocked = true;
+          lockReason = 'oplata';
+          grayStyle = 'color: #aaa;';
+          lockIcon = '<span class="lock-icon">🔒</span>';
+          cardClass += ' locked';
+          btnClass += ' locked';
+          buttonText = 'Закрыто';
+        }
+
+        html += `
+          <div class="${cardClass}" style="${grayStyle}" onclick="handleModuleClick('${module.link}', ${isLocked}, '${lockReason}', ${module.id}, ${isCompleted})">
+            <div class="module-label">${module.id === -1 ? 'Введение' : 'Модуль ' + module.id}</div>
+            <h3 class="module-title">${module.title}</h3>
+            <div class="module-desc">${module.desc}</div>
+            <button class="${btnClass}">${buttonIcon ? buttonIcon + ' ' : ''}${buttonText}</button>
+            ${lockIcon}
+          </div>
+        `;
+      });
+      document.getElementById('modules-container').innerHTML = html;
     }
 
-    html += `
-      <div class="${cardClass}" style="${grayStyle}" onclick="handleModuleClick('${module.link}', ${isLocked}, '${lockReason}', ${module.id}, ${isCompleted})">
-        <div class="module-label">${module.id === -1 ? 'Введение' : 'Модуль ' + module.id + ' - ' + module.title}</div>
-        <div class="module-content">
-          <div class="module-desc">${module.desc}</div>
-          <button class="${btnClass}">${buttonIcon ? buttonIcon + ' ' : ''}${buttonText}</button>
-          ${lockIcon}
-        </div>
-      </div>
-    `;
-  });
-  document.getElementById('modules-container').innerHTML = html;
-}
-
-function handleModuleClick(link, isLocked, lockReason, moduleId, isCompleted) {
-  if (isLocked) {
-    if (lockReason === 'oplata') {
-      // Показываем красивый попап о необходимости оплаты
-      showPaymentPopup();
-    } else {
-      // Показываем сообщение о необходимости пройти предыдущие модули
-      showProgressPopup(moduleId);
-    }
-    return;
-  }
-  
-  if (isCompleted) {
-    if (confirm('Этот модуль уже изучен. Хотите повторить?')) {
-      window.location.href = link;
-    }
-    return;
-  }
-  
-  // Переходим на страницу модуля
-  window.location.href = link;
-}
-
-function showPaymentPopup() {
-  // Создаем попап для оплаты
-  const popup = document.createElement('div');
-  popup.style.position = 'fixed';
-  popup.style.top = '0';
-  popup.style.left = '0';
-  popup.style.right = '0';
-  popup.style.bottom = '0';
-  popup.style.backgroundColor = 'rgba(0,0,0,0.7)';
-  popup.style.display = 'flex';
-  popup.style.justifyContent = 'center';
-  popup.style.alignItems = 'center';
-  popup.style.zIndex = '1000';
-  
-  popup.innerHTML = `
-    <div style="background: white; padding: 24px; border-radius: 16px; max-width: 320px; text-align: center;">
-      <h3 style="margin-bottom: 16px; color: var(--primary);">Требуется полный курс</h3>
-      <p style="margin-bottom: 24px;">Для доступа к этому модулю необходимо приобрести полную версию курса.</p>
-      <button id="buyButton" style="background: var(--primary); color: white; border: none; padding: 12px 24px; border-radius: 8px; font-weight: 600; cursor: pointer; width: 100%;">
-        Купить полный курс
-      </button>
-      <button id="closePopup" style="margin-top: 12px; background: transparent; border: none; color: var(--primary); font-weight: 600; cursor: pointer;">
-        Закрыть
-      </button>
-    </div>
-  `;
-  
-  document.body.appendChild(popup);
-  
-  // Обработчики кнопок
-  document.getElementById('buyButton').addEventListener('click', () => {
-    // Здесь логика для перехода на оплату
-    alert('Перенаправление на страницу оплаты...');
-    // В реальном приложении: window.location.href = 'payment.html';
-  });
-  
-  document.getElementById('closePopup').addEventListener('click', () => {
-    document.body.removeChild(popup);
-  });
-}
-
-function showProgressPopup(moduleId) {
-  // Создаем попап о необходимости пройти предыдущие модули
-  const popup = document.createElement('div');
-  popup.style.position = 'fixed';
-  popup.style.top = '0';
-  popup.style.left = '0';
-  popup.style.right = '0';
-  popup.style.bottom = '0';
-  popup.style.backgroundColor = 'rgba(0,0,0,0.7)';
-  popup.style.display = 'flex';
-  popup.style.justifyContent = 'center';
-  popup.style.alignItems = 'center';
-  popup.style.zIndex = '1000';
-  
-  popup.innerHTML = `
-    <div style="background: white; padding: 24px; border-radius: 16px; max-width: 320px; text-align: center;">
-      <h3 style="margin-bottom: 16px; color: var(--primary);">Сначала пройдите предыдущие модули</h3>
-      <p style="margin-bottom: 24px;">Для доступа к модулю ${moduleId} необходимо сначала завершить модуль ${moduleId - 1}.</p>
-      <button id="closePopup" style="background: var(--primary); color: white; border: none; padding: 12px 24px; border-radius: 8px; font-weight: 600; cursor: pointer; width: 100%;">
-        Понятно
-      </button>
-    </div>
-  `;
-  
-  document.body.appendChild(popup);
-  
-  // Обработчик кнопки закрытия
-  document.getElementById('closePopup').addEventListener('click', () => {
-    document.body.removeChild(popup);
-  });
-}
-
+    // Обработчик клика по модулю
     function handleModuleClick(link, isLocked, lockReason, moduleId, isCompleted) {
       if (isLocked) {
         if (lockReason === 'oplata') {
-          alert('Для доступа к этому модулю необходимо приобрести полную версию курса');
+          showPaymentPopup();
         } else {
-          alert('Нужно пройти предыдущие модули для открытия');
+          showProgressPopup(moduleId);
         }
         return;
       }
+      
       if (isCompleted) {
         if (confirm('Этот модуль уже изучен. Хотите повторить?')) {
           window.location.href = link;
         }
         return;
       }
-      // Переходим на страницу модуля
+      
       window.location.href = link;
     }
 
-    // Глобальная функция для обработки кликов по модулям
-    window.handleModuleClick = handleModuleClick;
+    // Показать попап оплаты
+    function showPaymentPopup() {
+      const popup = document.createElement('div');
+      popup.className = 'popup-overlay';
+      popup.innerHTML = `
+        <div class="popup-content">
+          <h3 class="popup-title">Требуется полный курс</h3>
+          <p class="popup-message">Для доступа к этому модулю необходимо приобрести полную версию курса.</p>
+          <button id="buyButton" class="popup-button">Купить полный курс</button>
+          <button id="closePopup" style="margin-top: 12px; background: transparent; border: none; color: var(--primary); font-weight: 600; cursor: pointer;">
+            Закрыть
+          </button>
+        </div>
+      `;
+      
+      document.body.appendChild(popup);
+      
+      document.getElementById('buyButton').addEventListener('click', () => {
+        // Здесь должна быть логика перехода на оплату
+        alert('Перенаправление на страницу оплаты...');
+        document.body.removeChild(popup);
+      });
+      
+      document.getElementById('closePopup').addEventListener('click', () => {
+        document.body.removeChild(popup);
+      });
+    }
 
-    // Обработка меню
-    const menuButton = document.getElementById('menuButton');
-    const menuContent = document.getElementById('menuContent');
+    // Показать попап прогресса
+    function showProgressPopup(moduleId) {
+      const popup = document.createElement('div');
+      popup.className = 'popup-overlay';
+      popup.innerHTML = `
+        <div class="popup-content">
+          <h3 class="popup-title">Сначала пройдите предыдущие модули</h3>
+          <p class="popup-message">Для доступа к модулю ${moduleId} необходимо сначала завершить модуль ${moduleId - 1}.</p>
+          <button id="closePopup" class="popup-button">Понятно</button>
+        </div>
+      `;
+      
+      document.body.appendChild(popup);
+      
+      document.getElementById('closePopup').addEventListener('click', () => {
+        document.body.removeChild(popup);
+      });
+    }
 
-    menuButton.addEventListener('click', () => {
-      menuButton.classList.toggle('active');
-      menuContent.classList.toggle('active');
-    });
+    // Инициализация Telegram Web App
+    async function initTelegramApp() {
+      try {
+        if (window.Telegram?.WebApp) {
+          Telegram.WebApp.ready();
+          Telegram.WebApp.expand();
+        }
 
-    // Закрытие меню при клике вне его
-    document.addEventListener('click', (e) => {
-      if (!menuButton.contains(e.target) && !menuContent.contains(e.target)) {
-        menuButton.classList.remove('active');
-        menuContent.classList.remove('active');
+        const tg = window.Telegram.WebApp;
+        const user = tg.initDataUnsafe?.user;
+        
+        if (!user) {
+          throw new Error('Пользователь Telegram не определен');
+        }
+
+        state.userId = user.id.toString();
+        state.username = user.username || null;
+
+        // Устанавливаем данные пользователя из Telegram
+        document.getElementById('userName').textContent = 
+          [user.first_name, user.last_name].filter(Boolean).join(' ') || 'Пользователь';
+        document.getElementById('userId').textContent = `ID: ${state.userId}`;
+
+        // Устанавливаем аватар
+        const avatarElement = document.getElementById('userAvatar');
+        if (user.photo_url) {
+          const img = new Image();
+          img.src = user.photo_url;
+          img.onload = () => {
+            avatarElement.innerHTML = '';
+            avatarElement.appendChild(img);
+          };
+          img.onerror = () => {
+            const fallback = user.first_name?.charAt(0).toUpperCase() || 'U';
+            document.getElementById('avatar-fallback').textContent = fallback;
+          };
+        } else {
+          const fallback = user.first_name?.charAt(0).toUpperCase() || 'U';
+          document.getElementById('avatar-fallback').textContent = fallback;
+        }
+
+        // Проверяем и создаем пользователя в Firebase
+        await checkAndCreateUser(user);
+      } catch (error) {
+        console.error('Ошибка инициализации Telegram:', error);
+        // В случае ошибки переходим в тестовый режим
+        await initTestMode();
+      }
+    }
+
+    // Инициализация тестового режима
+    async function initTestMode() {
+      const testUser = {
+        id: "test-user",
+        first_name: "Тестовый",
+        last_name: "Пользователь",
+        username: "test"
+      };
+      
+      state.userId = testUser.id;
+      document.getElementById('userName').textContent = 'Тестовый пользователь';
+      document.getElementById('userId').textContent = 'ID: test-user';
+      document.getElementById('avatar-fallback').textContent = 'T';
+      
+      // Проверяем и создаем тестового пользователя в Firebase
+      await checkAndCreateUser(testUser);
+    }
+
+    // Основная функция инициализации
+    document.addEventListener('DOMContentLoaded', async () => {
+      try {
+        // Показываем экран загрузки
+        document.getElementById('loading-screen').style.display = 'flex';
+        document.getElementById('app-content').style.opacity = '0';
+
+        if (window.Telegram?.WebApp) {
+          await initTelegramApp();
+        } else {
+          await initTestMode();
+        }
+      } catch (error) {
+        console.error('Ошибка инициализации:', error);
+        // В случае любой ошибки все равно скрываем экран загрузки
+        state.isLoaded = true;
+        hideLoadingScreen();
       }
     });
 
-    // Обработка клика по кнопке тех. поддержки
-    document.getElementById('supportButton').addEventListener('click', () => {
-      window.location.href = 'help.html';
-    });
+    // Глобальные функции
+    window.handleModuleClick = handleModuleClick;
   </script>
 </body>
 </html>
