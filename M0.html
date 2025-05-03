@@ -167,12 +167,9 @@
       min-height: 60vh;
       padding-bottom: 6rem;
     }
-    .card {
+    .content-block {
       max-width: 600px;
       width: 95%;
-      background: rgba(255,255,255,0.96);
-      border-radius: 2rem;
-      box-shadow: 0 8px 32px #ff980033;
       padding: 2.2rem 2.2rem;
       font-size: 1.18rem;
       line-height: 1.7;
@@ -185,32 +182,33 @@
       position: relative;
       box-sizing: border-box;
     }
-    .card.visible {
+    .content-block.visible {
       opacity: 1;
       transform: translateY(0);
     }
-    .card-title {
+    .content-title {
       color: var(--orange);
       font-weight: 700;
       font-size: 1.4rem;
       margin-top: 0;
       margin-bottom: 1rem;
     }
-    .card-counter {
+    .content-counter {
       position: absolute;
       top: 1rem;
       right: 1.5rem;
       font-size: 0.9rem;
       color: #666;
-      background: #eee;
+      background: rgba(255, 255, 255, 0.7);
       padding: 0.2rem 0.6rem;
       border-radius: 1rem;
+      backdrop-filter: blur(5px);
     }
-    .card ul {
+    .content-block ul {
       padding-left: 1.5rem;
       margin: 1rem 0;
     }
-    .card li {
+    .content-block li {
       margin-bottom: 0.5rem;
       position: relative;
     }
@@ -265,10 +263,9 @@
       margin-right: 0.3em;
     }
     @media (max-width: 600px) {
-      .card {
+      .content-block {
         padding: 1.5rem 1.2rem;
         font-size: 1.05rem;
-        border-radius: 1.5rem;
       }
       .header-bar {
         height: 44px;
@@ -307,7 +304,7 @@
       </div>
     </div>
     <div class="cards-container" id="cardsContainer">
-      <!-- Карточки будут добавляться сюда -->
+      <!-- Контентные блоки будут добавляться сюда -->
     </div>
     <button class="next-btn show" id="nextBtn">Далее</button>
     <div id="exitModal" style="display:none; position:fixed; z-index:100; left:0; top:0; width:100vw; height:100vh; background:rgba(0,0,0,0.25); align-items:center; justify-content:center;">
@@ -333,8 +330,8 @@
     const modalExitBtn = document.getElementById('modalExitBtn');
     const modalStayBtn = document.getElementById('modalStayBtn');
 
-    // Все карточки в правильном порядке
-    const cards = [
+    // Все контентные блоки в правильном порядке
+    const contentBlocks = [
       {
         title: "ДАВАЙ НАЧНЕМ МОДУЛЬ 0",
         content: `Со следующего экрана и далее в этом модуле ты будешь видеть <b>вторую кнопку с полным и подробным гайдом</b>, чтобы можно было перейти в него когда удобно.<br><br>
@@ -490,36 +487,36 @@
       }
     ];
 
-    const totalCards = cards.length;
-    let currentCardIndex = 0;
+    const totalBlocks = contentBlocks.length;
+    let currentBlockIndex = 0;
 
     function updateProgressBar() {
-      const percent = ((currentCardIndex + 1) / totalCards) * 100;
+      const percent = ((currentBlockIndex + 1) / totalBlocks) * 100;
       progressBar.style.width = percent + '%';
     }
 
-    function addCard(index) {
-      const card = document.createElement('div');
-      card.className = 'card';
+    function addContentBlock(index) {
+      const block = document.createElement('div');
+      block.className = 'content-block';
       
-      // Добавляем номер карточки (справа вверху)
-      const cardCounter = document.createElement('div');
-      cardCounter.className = 'card-counter';
-      cardCounter.textContent = `${index + 1}/${totalCards}`;
-      card.appendChild(cardCounter);
+      // Добавляем номер блока (справа вверху)
+      const blockCounter = document.createElement('div');
+      blockCounter.className = 'content-counter';
+      blockCounter.textContent = `${index + 1}/${totalBlocks}`;
+      block.appendChild(blockCounter);
       
       // Добавляем заголовок (слева вверху)
       const title = document.createElement('h2');
-      title.className = 'card-title';
-      title.textContent = cards[index].title;
-      card.appendChild(title);
+      title.className = 'content-title';
+      title.textContent = contentBlocks[index].title;
+      block.appendChild(title);
       
       // Добавляем контент
       const content = document.createElement('div');
-      content.innerHTML = cards[index].content;
-      card.appendChild(content);
+      content.innerHTML = contentBlocks[index].content;
+      block.appendChild(content);
       
-      // Добавляем кнопку для SYNTX AI на соответствующей карточке
+      // Добавляем кнопку для SYNTX AI на соответствующем блоке
       if (index === 15) {
         const button = document.getElementById('syntaxBtn');
         if (button) {
@@ -531,12 +528,12 @@
         }
       }
       
-      cardsContainer.appendChild(card);
+      cardsContainer.appendChild(block);
       
       // Анимация появления
       setTimeout(() => {
-        card.classList.add('visible');
-        card.scrollIntoView({ behavior: 'smooth', block: 'end' });
+        block.classList.add('visible');
+        block.scrollIntoView({ behavior: 'smooth', block: 'end' });
       }, 50);
     }
 
@@ -544,20 +541,20 @@
       splash.classList.add('hide');
       setTimeout(() => {
         mainContent.classList.add('show');
-        addCard(0);
+        addContentBlock(0);
         updateProgressBar();
         nextBtn.classList.add('show');
       }, 600);
     });
 
     nextBtn.addEventListener('click', () => {
-      if (currentCardIndex < totalCards - 1) {
-        currentCardIndex++;
-        addCard(currentCardIndex);
+      if (currentBlockIndex < totalBlocks - 1) {
+        currentBlockIndex++;
+        addContentBlock(currentBlockIndex);
         updateProgressBar();
         
-        // На предпоследней карточке меняем текст кнопки
-        if (currentCardIndex === totalCards - 2) {
+        // На предпоследнем блоке меняем текст кнопки
+        if (currentBlockIndex === totalBlocks - 2) {
           nextBtn.textContent = 'Завершить';
         }
       } else {
