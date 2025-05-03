@@ -454,7 +454,8 @@
       userId: null,
       username: null,
       isPaid: false,
-      isLoaded: false
+      isLoaded: false,
+      progress: 0
     };
 
     // Функция для проверки и создания пользователя в Firebase
@@ -469,15 +470,19 @@
             name: [user.first_name, user.last_name].filter(Boolean).join(' '),
             username: user.username || '',
             oplata: 0,
-            date_oplata: '-'
+            date_oplata: '-',
+            progress: 0
           });
           console.log('Создан новый пользователь:', user.id);
           state.isPaid = false; // Новый пользователь, оплаты нет
+          state.progress = 0;
         } else {
           // Получаем данные существующего пользователя
           const userData = snapshot.val();
           state.isPaid = userData.oplata === 1;
+          state.progress = typeof userData.progress === 'number' ? userData.progress : 0;
           console.log('Статус оплаты пользователя:', state.isPaid);
+          console.log('Прогресс пользователя:', state.progress);
         }
         
         // Обновляем UI один раз после проверки
@@ -571,6 +576,7 @@
 
     function updateUI() {
       const modules = [
+        { id: -1, title: "Введение", desc: "Стартовая информация о курсе и основах ИИ", link: "intro.html" },
         { id: 0, title: "Введение в ИИ", desc: "Основы, история, примеры использования искусственного интеллекта", link: "M0.html" },
         { id: 1, title: "Основы ChatGPT", desc: "Базовые принципы работы с ChatGPT, ключевые концепции", link: "M1.html" },
         { id: 2, title: "ChatGPT PRO", desc: "Продвинутые техники и методы работы с ChatGPT", link: "M2.html" },
@@ -579,13 +585,49 @@
 
       let html = '';
       modules.forEach(module => {
-        const isLocked = module.id !== 0 && !state.isPaid;
+        let isLocked = false;
+        let lockReason = '';
+        let isCompleted = false;
+        let buttonText = 'Начать';
+        let buttonIcon = '';
+        let cardClass = 'module';
+        let btnClass = 'module-btn';
+        let lockIcon = '';
+        let grayStyle = '';
+
+        // Определяем доступность по прогрессу
+        if (module.id > state.progress) {
+          isLocked = true;
+          lockReason = 'progress';
+          grayStyle = 'color: #aaa;';
+          lockIcon = '<span class="lock-icon">🔒</span>';
+          cardClass += ' locked';
+          btnClass += ' locked';
+          buttonText = 'Закрыто';
+        }
+        // Если модуль завершён
+        if (module.id >= 0 && state.progress > module.id) {
+          isCompleted = true;
+          buttonText = 'Изучено';
+          buttonIcon = '✔️';
+        }
+        // Если модуль закрыт из-за оплаты
+        if (module.id > 0 && !state.isPaid) {
+          isLocked = true;
+          lockReason = 'oplata';
+          grayStyle = 'color: #aaa;';
+          lockIcon = '<span class="lock-icon">🔒</span>';
+          cardClass += ' locked';
+          btnClass += ' locked';
+          buttonText = 'Закрыто';
+        }
         html += `
-          <div class="module ${isLocked ? 'locked' : ''}" onclick="handleModuleClick('${module.link}', ${isLocked})">
-            <div class="module-label">Модуль ${module.id} - ${module.title}</div>
+          <div class="${cardClass}" style="${grayStyle}" onclick="handleModuleClick('${module.link}', ${isLocked}, '${lockReason}', ${module.id}, ${isCompleted})">
+            <div class="module-label">${module.id === -1 ? 'Введение' : 'Модуль ' + module.id + ' - ' + module.title}</div>
             <div class="module-content">
               <div class="module-desc">${module.desc}</div>
-              <button class="module-btn">${isLocked ? 'Закрыто' : 'Начать'}</button>
+              <button class="${btnClass}">${buttonIcon ? buttonIcon + ' ' : ''}${buttonText}</button>
+              ${lockIcon}
             </div>
           </div>
         `;
@@ -593,9 +635,19 @@
       document.getElementById('modules-container').innerHTML = html;
     }
 
-    function handleModuleClick(link, isLocked) {
+    function handleModuleClick(link, isLocked, lockReason, moduleId, isCompleted) {
       if (isLocked) {
-        alert('Для доступа к этому модулю необходимо приобрести полную версию курса');
+        if (lockReason === 'oplata') {
+          alert('Для доступа к этому модулю необходимо приобрести полную версию курса');
+        } else {
+          alert('Нужно пройти предыдущие модули для открытия');
+        }
+        return;
+      }
+      if (isCompleted) {
+        if (confirm('Этот модуль уже изучен. Хотите повторить?')) {
+          window.location.href = link;
+        }
         return;
       }
       // Переходим на страницу модуля
