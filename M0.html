@@ -332,10 +332,12 @@
     }
     .content-image {
       width: 100%;
+      max-width: 500px;
       border-radius: 8px;
-      margin: 0.5rem 0 0.8rem 0;
+      margin: 0 0 1rem 0;
       box-shadow: 0 2px 8px rgba(0,0,0,0.1);
       border: 1px solid #eee;
+      display: block;
     }
     .feature-list {
       display: flex;
@@ -350,6 +352,17 @@
       font-size: 0.9rem;
       display: flex;
       align-items: center;
+    }
+    .image-container {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.5rem;
+      justify-content: center;
+      margin: 0.8rem 0;
+    }
+    .image-container img {
+      max-width: calc(50% - 0.25rem);
+      flex: 1 1 45%;
     }
     @media (max-width: 600px) {
       .content-block {
@@ -376,6 +389,10 @@
       }
       .guide-btn {
         font-size: 0.8rem;
+      }
+      .image-container img {
+        max-width: 100%;
+        flex: 1 1 100%;
       }
     }
     button, .exit-btn {
@@ -435,6 +452,7 @@
     const contentBlocks = [
       {
         title: "ДАВАЙ НАЧНЕМ МОДУЛЬ 0",
+        image: "1.jpg",
         content: `Со следующего экрана и далее в этом модуле ты будешь видеть <b>вторую кнопку с полным и подробным гайдом</b>, чтобы можно было перейти в него когда удобно.
         <div class="tip-card">
           <div class="tip-card-title">СОВЕТ</div>
@@ -493,6 +511,7 @@
       },
       {
         title: "КАК ПОЛУЧИТЬ ДОСТУП",
+        image: "5.jpg",
         content: `Существует несколько способов:
         <div class="feature-list">
           <div class="feature-item"><span class="emoji">🌐</span> Веб-версия (chat.openai.com)</div>
@@ -503,6 +522,7 @@
       },
       {
         title: "ВЕБ-ВЕРСИЯ ChatGPT",
+        image: "4.jpg",
         content: `<ul>
           <li><span class="emoji">✔️</span> Работает прямо в браузере</li>
           <li><span class="emoji">✔️</span> Не требует установки приложений</li>
@@ -512,6 +532,7 @@
       },
       {
         title: "ИСПОЛЬЗОВАНИЕ VPN",
+        image: "3.jpg",
         content: `Чтобы обойти блокировку, нужно использовать VPN:
         <div class="feature-list">
           <div class="feature-item"><span class="emoji">1.</span> Установить VPN из магазина приложений</div>
@@ -521,6 +542,7 @@
       },
       {
         title: "CHATGPT НА СМАРТФОНЕ",
+        image: "2.jpg",
         content: `Это второй способ использовать ChatGPT:
         <div class="feature-list">
           <div class="feature-item"><span class="emoji">📌</span> Удобный доступ с телефона</div>
@@ -531,6 +553,7 @@
       },
       {
         title: "ПРИЛОЖЕНИЯ В РОССИИ НЕДОСТУПНЫ",
+        images: ["6.jpg", "8.jpg"],
         content: `Чтобы установить ChatGPT в телефон, нужно немножко потанцевать с бубнами.
         Поэтому имеет смысл заморачиваться лишь тогда, когда ты УЖЕ являешься уверенным пользователем <span class="emoji">😊</span>
         <div class="tip-card">
@@ -550,6 +573,7 @@
       },
       {
         title: "ПЛЮСЫ TELEGRAM-БОТОВ",
+        image: "7.jpg",
         content: `<ul>
           <li><span class="emoji">✅</span> Не нужен VPN</li>
           <li><span class="emoji">✅</span> Быстрый доступ (просто запустить бота)</li>
@@ -566,6 +590,7 @@
       },
       {
         title: "КАК ВЫБРАТЬ TELEGRAM-БОТА?",
+        image: "11.jpg",
         content: `Перед выбором и использованием любого Telegram-бота:
         <div class="feature-list">
           <div class="feature-item"><span class="emoji">1.</span> Прочитай описание</div>
@@ -577,6 +602,7 @@
       },
       {
         title: "CHATGPT В WHATSAPP",
+        image: "10.jpg",
         content: `Это четвертый и БЕСПЛАТНЫЙ способ, который не требует наличия VPN, но в отличие от варианта с Telegram-ботом, он официальный.
         <div class="tip-card">
           <div class="tip-card-title">МИНУС</div>
@@ -585,6 +611,7 @@
       },
       {
         title: "МОДУЛЬ-0 пройден",
+        image: "9.jpg",
         content: `Наши поздравления! Ты только что завершил подготовительный блок, в котором мы разобрали способы доступа к ChatGPT в обход всех блокировок.
         <div class="tip-card">
           <div class="tip-card-title">ДАЛЬШЕ ИНТЕРЕСНЕЕ</div>
@@ -629,6 +656,29 @@
       title.appendChild(titleText);
       
       block.appendChild(title);
+      
+      // Добавляем изображение (если есть)
+      if (contentBlocks[index].image) {
+        const img = document.createElement('img');
+        img.className = 'content-image';
+        img.src = `https://raw.githubusercontent.com/username/photo_course/main/${contentBlocks[index].image}`;
+        img.alt = contentBlocks[index].title;
+        block.appendChild(img);
+      }
+      
+      // Добавляем несколько изображений (если есть)
+      if (contentBlocks[index].images) {
+        const imgContainer = document.createElement('div');
+        imgContainer.className = 'image-container';
+        contentBlocks[index].images.forEach(imgName => {
+          const img = document.createElement('img');
+          img.className = 'content-image';
+          img.src = `https://raw.githubusercontent.com/username/photo_course/main/${imgName}`;
+          img.alt = contentBlocks[index].title;
+          imgContainer.appendChild(img);
+        });
+        block.appendChild(imgContainer);
+      }
       
       // Добавляем контент
       const content = document.createElement('div');
