@@ -5,8 +5,6 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Основы ИИ — Онлайн курс</title>
   <script src="https://telegram.org/js/telegram-web-app.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
   <style>
     :root {
       --primary: #FF7A00;
@@ -486,20 +484,13 @@
   </div>
 
   <script>
-    // Конфигурация Firebase
-    const firebaseConfig = {
-      apiKey: "AIzaSyCMos6Y7C-krTLuKCI4VJG-TFLo6QI--k8",
-      authDomain: "vrot-x-7a48f.firebaseapp.com",
-      databaseURL: "https://vrot-x-7a48f-default-rtdb.firebaseio.com",
-      projectId: "vrot-x-7a48f",
-      storageBucket: "vrot-x-7a48f.appspot.com",
-      messagingSenderId: "622297225288",
-      appId: "1:622297225288:web:5df6a5b02ffddedd96e07d"
+    // Конфигурация NocoDB
+    const nocodbConfig = {
+      apiUrl: 'https://app.nocodb.com/api/v2/tables/mc6qh91f060pv4y/records',
+      apiToken: 'jCmuja47NRet1NtTkENYj6iLxEZBmta6xId2DFX4',
+      defaultLimit: 25,
+      defaultViewId: 'vwz8x1qjxgvl15di'
     };
-
-    // Инициализация Firebase
-    firebase.initializeApp(firebaseConfig);
-    const database = firebase.database();
 
     // Состояние приложения
     const state = {
@@ -520,29 +511,86 @@
       }, 500);
     }
 
-    // Функция для проверки и создания пользователя в Firebase
+    // Функция для выполнения запросов к NocoDB
+    async function nocodbRequest(endpoint, method = 'GET', body = null) {
+      const headers = {
+        'Content-Type': 'application/json',
+        'xc-token': nocodbConfig.apiToken
+      };
+
+      const options = {
+        method,
+        headers
+      };
+
+      if (body) {
+        options.body = JSON.stringify(body);
+      }
+
+      try {
+        const response = await fetch(`${nocodbConfig.apiUrl}${endpoint}`, options);
+        if (!response.ok) {
+          throw new Error(`HTTP error! status: ${response.status}`);
+        }
+        return await response.json();
+      } catch (error) {
+        console.error('Ошибка при запросе к NocoDB:', error);
+        throw error;
+      }
+    }
+
+    // Функция для поиска пользователя в NocoDB
+    async function findUserInNocodb(userId) {
+      try {
+        const response = await nocodbRequest(
+          `?where=(tg_user_id,eq,${userId})&viewId=${nocodbConfig.defaultViewId}`
+        );
+        
+        if (response.list && response.list.length > 0) {
+          return response.list[0];
+        }
+        return null;
+      } catch (error) {
+        console.error('Ошибка при поиске пользователя:', error);
+        return null;
+      }
+    }
+
+    // Функция для создания нового пользователя в NocoDB
+    async function createUserInNocodb(user) {
+      try {
+        const newUser = {
+          tg_user_id: user.id.toString(),
+          name: [user.first_name, user.last_name].filter(Boolean).join(' '),
+          username: user.username || '',
+          oplata: 0,
+          date_oplata: '-',
+          progress: 0
+        };
+
+        const response = await nocodbRequest('', 'POST', newUser);
+        return response;
+      } catch (error) {
+        console.error('Ошибка при создании пользователя:', error);
+        throw error;
+      }
+    }
+
+    // Функция для проверки и создания пользователя в NocoDB
     async function checkAndCreateUser(user) {
       try {
-        const userRef = database.ref(`users/${user.id}`);
-        const snapshot = await userRef.once('value');
+        const existingUser = await findUserInNocodb(user.id);
         
-        if (!snapshot.exists()) {
+        if (!existingUser) {
           // Создаем нового пользователя
-          await userRef.set({
-            name: [user.first_name, user.last_name].filter(Boolean).join(' '),
-            username: user.username || '',
-            oplata: 0,
-            date_oplata: '-',
-            progress: 0
-          });
+          await createUserInNocodb(user);
           console.log('Создан новый пользователь:', user.id);
           state.isPaid = false;
           state.progress = 0;
         } else {
           // Получаем данные существующего пользователя
-          const userData = snapshot.val();
-          state.isPaid = userData.oplata === 1;
-          state.progress = typeof userData.progress === 'number' ? userData.progress : 0;
+          state.isPaid = existingUser.oplata === 1;
+          state.progress = typeof existingUser.progress === 'number' ? existingUser.progress : 0;
           console.log('Статус оплаты пользователя:', state.isPaid);
           console.log('Прогресс пользователя:', state.progress);
         }
@@ -742,7 +790,7 @@
           document.getElementById('avatar-fallback').textContent = fallback;
         }
 
-        // Проверяем и создаем пользователя в Firebase
+        // Проверяем и создаем пользователя в NocoDB
         await checkAndCreateUser(user);
       } catch (error) {
         console.error('Ошибка инициализации Telegram:', error);
@@ -765,7 +813,7 @@
       document.getElementById('userId').textContent = 'ID: test-user';
       document.getElementById('avatar-fallback').textContent = 'T';
       
-      // Проверяем и создаем тестового пользователя в Firebase
+      // Проверяем и создаем тестового пользователя в NocoDB
       await checkAndCreateUser(testUser);
     }
 
