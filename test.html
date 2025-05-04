@@ -1,41 +1,47 @@
 <!DOCTYPE html>
-<html>
+<html lang="ru">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-    <meta name="author" content="Aurelio De Rosa">
-    <title>Демонстрация API вибраций от Aurelio De Rosa</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Вибрация на кнопку</title>
     <style>
-        body { max-width: 500px; margin: 2em auto; font-size: 20px; }
-        h1 { text-align: center; }
-        .hidden { display: none; }
-        .buttons-wrapper { text-align: center; }
-        .button-demo { padding: 0.5em; margin: 1em auto; }
-        .author { display: block; margin-top: 1em; }
+        body {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+            font-family: Arial, sans-serif;
+            background-color: #f0f0f0;
+        }
+        button {
+            padding: 15px 30px;
+            font-size: 18px;
+            cursor: pointer;
+            background-color: #007BFF;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            transition: background-color 0.3s;
+        }
+        button:hover {
+            background-color: #0056b3;
+        }
     </style>
 </head>
 <body>
-    <h1>Vibration API</h1>
-    <div class="buttons-wrapper">
-        <button id="button-play-v-once" class="button-demo">Однократная вибрация</button>
-        <button id="button-play-v-thrice" class="button-demo">Трёхкратная вибрация</button>
-        <button id="button-stop-v" class="button-demo">Остановить</button>
-    </div>
-    <span id="v-unsupported" class="hidden">Вибрация не поддерживается</span>
-    <small class="author">
-        Demo created by <a href="http://www.audero.it"> Aurelio De Rosa</a> (<a href="https://twitter.com/AurelioDeRosa">@AurelioDeRosa</a>)
-    </small>
+    <button id="vibrationButton">Вибрировать</button>
+
+    <script>
+        const button = document.getElementById('vibrationButton');
+
+        button.addEventListener('click', () => {
+            if (navigator.vibrate) {
+                navigator.vibrate(200); // Вибрация на 200 миллисекунд
+            } else {
+                alert('Ваше устройство не поддерживает вибрацию.');
+            }
+        });
+    </script>
 </body>
-<script>
-    window.navigator = window.navigator || {};
-    if (navigator.vibrate === undefined) {
-        document.getElementById('v-unsupported').classList.remove('hidden');
-    }
-    document.getElementById('button-play-v-thrice').addEventListener('click', function() {
-        navigator.vibrate([1000, 500, 1000, 500, 2000]);
-    });
-    document.getElementById('button-stop-v').addEventListener('click', function() {
-        navigator.vibrate(0);
-    });
-</script>
 </html>
