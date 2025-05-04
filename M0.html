@@ -148,10 +148,10 @@
       border-radius: 6px;
       position: relative;
       margin-left: 0.5rem;
-      margin-right: 1rem;
+      margin-right: 0.5rem;
       overflow: hidden;
       border: 1px solid #ddd;
-      min-width: 120px;
+      max-width: calc(100% - 160px);
     }
     .progress-bar-inner {
       height: 100%;
@@ -256,6 +256,9 @@
       position: relative;
       overflow: hidden;
       flex-shrink: 0;
+    }
+    .next-btn.centered {
+      margin: 0 auto;
     }
     .next-btn.show {
       opacity: 1;
@@ -364,6 +367,27 @@
       max-width: calc(50% - 0.25rem);
       flex: 1 1 45%;
     }
+    .report-btn {
+      background: var(--white);
+      border: none;
+      color: var(--text);
+      font-size: 1.2rem;
+      border-radius: 8px;
+      width: 40px;
+      height: 40px;
+      cursor: pointer;
+      font-weight: 700;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: all 0.2s;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+      margin-left: 0.5rem;
+    }
+    .report-btn:hover {
+      background: #e0e0e0;
+      transform: scale(1.07);
+    }
     @media (max-width: 600px) {
       .content-block {
         padding: 1.2rem 1rem;
@@ -376,6 +400,10 @@
         width: 36px;
         height: 36px;
         padding: 0;
+      }
+      .report-btn {
+        width: 36px;
+        height: 36px;
       }
       .buttons-container {
         bottom: 1rem;
@@ -393,6 +421,9 @@
         max-width: 100%;
         flex: 1 1 100%;
       }
+      .progress-bar {
+        max-width: calc(100% - 140px);
+      }
     }
     button, .exit-btn {
       outline: none !important;
@@ -405,7 +436,9 @@
 </head>
 <body>
   <div class="splash" id="splash">
-    <button class="exit-btn splash-exit" id="splashExitBtn" title="Выйти"><span>&#8592;</span></button>
+    <div style="position: absolute; top: 0.5rem; left: 0.5rem; width: 100%; display: flex;">
+      <button class="exit-btn" id="splashExitBtn" title="Выйти"><span>&#8592;</span></button>
+    </div>
     <h1>Модуль 0:<br>Доступ к ChatGPT</h1>
     <button id="startBtn">Начать</button>
   </div>
@@ -415,12 +448,13 @@
       <div class="progress-bar">
         <div class="progress-bar-inner" id="progressBar"></div>
       </div>
+      <button class="report-btn" id="reportBtn" title="Сообщить о проблеме">🚩</button>
     </div>
     <div class="cards-container" id="cardsContainer">
       <!-- Контентные блоки будут добавляться сюда -->
     </div>
     <div class="buttons-container">
-      <button class="next-btn" id="nextBtn">Далее</button>
+      <button class="next-btn centered" id="nextBtn">Далее</button>
       <button class="guide-btn" id="guideBtn"><span class="emoji">🔗</span> Детальный<br>гайд</button>
     </div>
     <div id="exitModal" style="display:none; position:fixed; z-index:100; left:0; top:0; width:100vw; height:100vh; background:rgba(0,0,0,0.25); align-items:center; justify-content:center;">
@@ -446,6 +480,7 @@
     const exitModal = document.getElementById('exitModal');
     const modalExitBtn = document.getElementById('modalExitBtn');
     const modalStayBtn = document.getElementById('modalStayBtn');
+    const reportBtn = document.getElementById('reportBtn');
 
     // Все контентные блоки в правильном порядке
     const contentBlocks = [
@@ -696,10 +731,23 @@
         block.classList.add('visible');
         // Скроллим так, чтобы заголовок был под шапкой
         const headerHeight = document.querySelector('.header-bar').offsetHeight;
-        window.scrollTo({
-          top: block.offsetTop - headerHeight - 10,
-          behavior: 'smooth'
-        });
+        const blockTop = block.offsetTop;
+        const windowHeight = window.innerHeight;
+        const blockHeight = block.offsetHeight;
+        
+        // Если блок меньше высоты экрана, центрируем его
+        if (blockHeight < windowHeight - headerHeight) {
+          window.scrollTo({
+            top: blockTop - (windowHeight - blockHeight - headerHeight) / 2,
+            behavior: 'smooth'
+          });
+        } else {
+          // Иначе просто скроллим к верху блока
+          window.scrollTo({
+            top: blockTop - headerHeight - 10,
+            behavior: 'smooth'
+          });
+        }
       }, 50);
     }
 
@@ -725,6 +773,11 @@
         nextBtn.disabled = false;
         isNextBtnCooldown = false;
       }, 500);
+      
+      // Добавляем вибрацию (если поддерживается)
+      if ('vibrate' in navigator) {
+        navigator.vibrate(10);
+      }
     }
 
     startBtn.addEventListener('click', () => {
@@ -747,8 +800,9 @@
         addContentBlock(currentBlockIndex);
         updateProgressBar();
         
-        // Показываем кнопку гайда после первого нажатия
+        // После первого клика убираем центрирование кнопки "Далее"
         if (currentBlockIndex === 1) {
+          nextBtn.classList.remove('centered');
           guideBtn.classList.add('show');
         }
         
@@ -776,9 +830,11 @@
       e.preventDefault();
       exitModal.style.display = 'flex';
     });
+    
     modalExitBtn.addEventListener('click', () => {
       window.location.href = 'index.html';
     });
+    
     modalStayBtn.addEventListener('click', () => {
       exitModal.style.display = 'none';
     });
@@ -787,6 +843,40 @@
     guideBtn.addEventListener('click', () => {
       window.open('https://kurl.ru/btRup', '_blank');
     });
+
+    // Обработчик для кнопки жалобы/ошибки
+    reportBtn.addEventListener('click', () => {
+      // Временное решение - можно заменить на нужный функционал
+      alert('Функция сообщения о проблеме будет добавлена в ближайшее время. Спасибо за понимание!');
+      
+      // Вариант с вибрацией для обратной связи
+      if ('vibrate' in navigator) {
+        navigator.vibrate([50, 50, 50]);
+      }
+    });
+
+    // Обработчик для закрытия модального окна при клике вне его
+    exitModal.addEventListener('click', (e) => {
+      if (e.target === exitModal) {
+        exitModal.style.display = 'none';
+      }
+    });
+
+    // Добавляем обработчик клавиши Escape для закрытия модального окна
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape' && exitModal.style.display === 'flex') {
+        exitModal.style.display = 'none';
+      }
+    });
+
+    // Инициализация первого блока при загрузке (на случай, если пользователь вернется)
+    if (cardsContainer.children.length === 0) {
+      addContentBlock(0);
+      updateProgressBar();
+    }
+
+    // Оптимизация для мобильных устройств - предотвращение масштабирования при фокусе
+    document.addEventListener('touchstart', function() {}, {passive: true});
   </script>
 </body>
 </html>
