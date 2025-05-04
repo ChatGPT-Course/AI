@@ -432,6 +432,12 @@
     button:focus, .exit-btn:focus {
       outline: none !important;
     }
+    .divider {
+      height: 1px;
+      background-color: #ddd;
+      margin: 1.5rem 0;
+      width: 100%;
+    }
   </style>
 </head>
 <body>
@@ -587,14 +593,14 @@
       },
       {
         title: "ПРИЛОЖЕНИЯ В РОССИИ НЕДОСТУПНЫ",
-        images: "6.jpg",
+        image: "6.jpg",
         content: `Чтобы установить ChatGPT в телефон, нужно немножко потанцевать с бубнами.<br>
         Поэтому имеет смысл заморачиваться лишь тогда, когда ты УЖЕ являешься уверенным пользователем <span class="emoji">😊</span><br><br>
         <span class="emoji">🔍</span> Если всё же хочешь установить ChatGPT на телефон, инструкция всё там же ))`
       },
       {
         title: "CHATGPT В TELEGRAM",
-        images: "8.jpg",
+        image: "8.jpg",
         content: `Третий и самый простой способ получить доступ к ChatGPT в России – через Telegram-ботов<br><br>
         <span class="emoji">🔍</span> Ты отправляешь запрос Telegram-боту<br>
         <span class="emoji">🔍</span> Он передает его ChatGPT<br>
@@ -603,16 +609,15 @@
       },
       {
         title: "ПЛЮСЫ TELEGRAM-БОТОВ",
-        image: "7.jpg",
-        content: `<ul>
+        content: `<b>ПЛЮСЫ</b><br><br>
+        <ul>
           <li><span class="emoji">✅</span> Не нужен VPN</li>
           <li><span class="emoji">✅</span> Быстрый доступ (достаточно просто запустить бота)</li>
           <li><span class="emoji">✅</span> Оплата подписки в рублях с российских карт</li>
-        </ul>`
-      },
-      {
-        title: "МИНУСЫ TELEGRAM-БОТОВ",
-        content: `<ul>
+        </ul>
+        <div class="divider"></div>
+        <b>МИНУСЫ</b><br><br>
+        <ul>
           <li><span class="emoji">❌</span> Ограниченный функционал (не все возможности ChatGPT)</li>
           <li><span class="emoji">❌</span> Качество ответов зависит от бота и модели</li>
           <li><span class="emoji">❌</span> Безопасность: ты передаешь данные посреднику</li>
@@ -690,23 +695,6 @@
         block.appendChild(img);
       }
       
-      // Добавляем несколько изображений (если есть)
-      if (contentBlocks[index].images) {
-        const imgContainer = document.createElement('div');
-        imgContainer.className = 'image-container';
-        contentBlocks[index].images.forEach(imgName => {
-          const img = document.createElement('img');
-          img.className = 'content-image';
-          img.src = `photo_course/${imgName}`;
-          img.alt = contentBlocks[index].title;
-          img.onerror = function() {
-            console.error('Не удалось загрузить изображение:', this.src);
-          };
-          imgContainer.appendChild(img);
-        });
-        block.appendChild(imgContainer);
-      }
-      
       // Добавляем контент
       const content = document.createElement('div');
       content.innerHTML = contentBlocks[index].content;
@@ -729,25 +717,25 @@
       // Анимация появления и скролл к заголовку
       setTimeout(() => {
         block.classList.add('visible');
-        // Скроллим так, чтобы заголовок был под шапкой
+        // Скроллим так, чтобы блок начинался сразу под шапкой
         const headerHeight = document.querySelector('.header-bar').offsetHeight;
         const blockTop = block.offsetTop;
         const windowHeight = window.innerHeight;
-        const blockHeight = block.offsetHeight;
         
-        // Если блок меньше высоты экрана, центрируем его
-        if (blockHeight < windowHeight - headerHeight) {
-          window.scrollTo({
-            top: blockTop - (windowHeight - blockHeight - headerHeight) / 2,
-            behavior: 'smooth'
-          });
-        } else {
-          // Иначе просто скроллим к верху блока
-          window.scrollTo({
-            top: blockTop - headerHeight - 10,
-            behavior: 'smooth'
-          });
+        // Вычисляем позицию для скролла
+        const scrollToPosition = blockTop - headerHeight - 10;
+        
+        // Если блок короткий, добавляем пустое пространство
+        if (block.offsetHeight < windowHeight - headerHeight) {
+          const emptySpace = document.createElement('div');
+          emptySpace.style.height = `${windowHeight - block.offsetHeight - headerHeight - 20}px`;
+          block.appendChild(emptySpace);
         }
+        
+        window.scrollTo({
+          top: scrollToPosition,
+          behavior: 'smooth'
+        });
       }, 50);
     }
 
@@ -756,6 +744,11 @@
       
       isNextBtnCooldown = true;
       nextBtn.disabled = true;
+      
+      // Добавляем вибрацию
+      if ('vibrate' in navigator) {
+        navigator.vibrate(30);
+      }
       
       // Создаем элемент прогресс-бара
       const progress = document.createElement('div');
@@ -773,11 +766,6 @@
         nextBtn.disabled = false;
         isNextBtnCooldown = false;
       }, 500);
-      
-      // Добавляем вибрацию (если поддерживается)
-      if ('vibrate' in navigator) {
-        navigator.vibrate(10);
-      }
     }
 
     startBtn.addEventListener('click', () => {
@@ -806,17 +794,18 @@
           guideBtn.classList.add('show');
         }
         
-        // На предпоследнем блоке меняем текст кнопки
+        // На предпоследнем блоке меняем текст кнопки и делаем её активной
         if (currentBlockIndex === totalBlocks - 2) {
           nextBtn.textContent = 'Завершить';
+          nextBtn.disabled = false;
         }
-      } else {
-        // Завершение модуля
-        nextBtn.classList.remove('show');
-        guideBtn.classList.remove('show');
-        setTimeout(() => {
-          window.location.href = 'index.html';
-        }, 500);
+        
+        // На последнем блоке делаем переход
+        if (currentBlockIndex === totalBlocks - 1) {
+          setTimeout(() => {
+            window.location.href = 'index.html';
+          }, 1000);
+        }
       }
     });
 
@@ -830,11 +819,11 @@
       e.preventDefault();
       exitModal.style.display = 'flex';
     });
-    
+
     modalExitBtn.addEventListener('click', () => {
       window.location.href = 'index.html';
     });
-    
+
     modalStayBtn.addEventListener('click', () => {
       exitModal.style.display = 'none';
     });
@@ -849,7 +838,7 @@
       // Временное решение - можно заменить на нужный функционал
       alert('Функция сообщения о проблеме будет добавлена в ближайшее время. Спасибо за понимание!');
       
-      // Вариант с вибрацией для обратной связи
+      // Вибрация для обратной связи
       if ('vibrate' in navigator) {
         navigator.vibrate([50, 50, 50]);
       }
@@ -869,7 +858,7 @@
       }
     });
 
-    // Инициализация первого блока при загрузке (на случай, если пользователь вернется)
+    // Инициализация первого блока при загрузке
     if (cardsContainer.children.length === 0) {
       addContentBlock(0);
       updateProgressBar();
