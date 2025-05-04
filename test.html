@@ -1,33 +1,41 @@
 <!DOCTYPE html>
-<html lang="ru">
+<html>
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Фото курса</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <meta name="author" content="Aurelio De Rosa">
+    <title>Демонстрация API вибраций от Aurelio De Rosa</title>
     <style>
-        body {
-            font-family: Arial, sans-serif;
-            text-align: center;
-            padding: 20px;
-            background-color: #f8f9fa;
-        }
-        img {
-            max-width: 100%;
-            height: auto;
-            border-radius: 8px;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
-            margin-top: 20px;
-        }
-        .container {
-            max-width: 800px;
-            margin: 0 auto;
-        }
+        body { max-width: 500px; margin: 2em auto; font-size: 20px; }
+        h1 { text-align: center; }
+        .hidden { display: none; }
+        .buttons-wrapper { text-align: center; }
+        .button-demo { padding: 0.5em; margin: 1em auto; }
+        .author { display: block; margin-top: 1em; }
     </style>
 </head>
 <body>
-    <div class="container">
-        <h1>Фото из курса</h1>
-        <img src="photo_course/1.jpg" alt="Фото 1 из курса">
+    <h1>Vibration API</h1>
+    <div class="buttons-wrapper">
+        <button id="button-play-v-once" class="button-demo">Однократная вибрация</button>
+        <button id="button-play-v-thrice" class="button-demo">Трёхкратная вибрация</button>
+        <button id="button-stop-v" class="button-demo">Остановить</button>
     </div>
+    <span id="v-unsupported" class="hidden">Вибрация не поддерживается</span>
+    <small class="author">
+        Demo created by <a href="http://www.audero.it"> Aurelio De Rosa</a> (<a href="https://twitter.com/AurelioDeRosa">@AurelioDeRosa</a>)
+    </small>
 </body>
+<script>
+    window.navigator = window.navigator || {};
+    if (navigator.vibrate === undefined) {
+        document.getElementById('v-unsupported').classList.remove('hidden');
+    }
+    document.getElementById('button-play-v-thrice').addEventListener('click', function() {
+        navigator.vibrate([1000, 500, 1000, 500, 2000]);
+    });
+    document.getElementById('button-stop-v').addEventListener('click', function() {
+        navigator.vibrate(0);
+    });
+</script>
 </html>
