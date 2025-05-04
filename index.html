@@ -190,7 +190,7 @@
 
     @keyframes pulse {
       0% { box-shadow: 0 0 0 0 rgba(255, 122, 0, 0.4); }
-      70% { box-shadow: 0 0 0 10px rgba(255, 122, 0, 0); }
+      70% { box-shadow: 0 0 0 20px rgba(255, 122, 0, 0); }
       100% { box-shadow: 0 0 0 0 rgba(255, 122, 0, 0); }
     }
 
@@ -758,7 +758,7 @@
     function updateUI() {
       const modules = [
         { id: -1, title: "Введение", desc: "Стартовая информация о курсе и основах ИИ", link: "intro.html" },
-        { id: 0, title: "Введение в ИИ", desc: "Основы, история, примеры использования искусственного интеллекта", link: "M0.html" },
+        { id: 0, title: "Доступ к ChatGPT", desc: "Основы, история, примеры использования искусственного интеллекта", link: "M0.html" },
         { id: 1, title: "Основы ChatGPT", desc: "Базовые принципы работы с ChatGPT, ключевые концепции", link: "M1.html" },
         { id: 2, title: "ChatGPT PRO", desc: "Продвинутые техники и методы работы с ChatGPT", link: "M2.html" },
         { id: 3, title: "ChatGPT MASTER", desc: "Экспертный уровень использования ChatGPT", link: "M3.html" }
@@ -770,7 +770,7 @@
         let lockReason = '';
         let isCompleted = false;
         let isCurrent = false;
-        let buttonText = 'Начать';
+        let buttonText = 'Изучить модуль';
         let buttonIcon = '';
         let cardClass = 'module';
         let btnClass = 'module-btn';
@@ -782,7 +782,7 @@
           // Введение
           isCompleted = state.progress >= 1;
           isCurrent = state.progress === 0;
-          buttonText = isCompleted ? 'Изучено' : 'Начать';
+          buttonText = isCompleted ? 'Модуль пройден' : 'Изучить модуль';
           buttonIcon = isCompleted ? '✔️' : '';
         } else {
           // Все остальные модули
@@ -793,13 +793,13 @@
           isCurrent = state.progress === module.id + 1;
           
           if (moduleAvailable) {
-            buttonText = isCompleted ? 'Изучено' : 'Начать';
+            buttonText = isCompleted ? 'Модуль пройден' : 'Изучить модуль';
             buttonIcon = isCompleted ? '✔️' : '';
           } else {
             isLocked = true;
             lockReason = 'progress';
             lockIcon = '<span class="lock-icon">🔒</span>';
-            buttonText = 'Закрыто';
+            buttonText = 'Недоступен';
           }
         }
 
@@ -808,7 +808,7 @@
           isLocked = true;
           lockReason = 'oplata';
           lockIcon = '<span class="lock-icon">🔒</span>';
-          buttonText = 'Закрыто';
+          buttonText = 'Недоступен';
         }
 
         // Устанавливаем классы в зависимости от статуса
@@ -903,8 +903,7 @@
       document.body.appendChild(popup);
       
       document.getElementById('buyButton').addEventListener('click', () => {
-        // Здесь должна быть логика перехода на оплату
-        alert('Перенаправление на страницу оплаты...');
+        window.location.href = 'oplata.html';
         document.body.removeChild(popup);
       });
       
@@ -1020,8 +1019,7 @@
         // Инициализация меню
         document.getElementById('menuButton').addEventListener('click', toggleMenu);
         document.getElementById('supportButton').addEventListener('click', () => {
-          alert('Свяжитесь с поддержкой через @ваш_аккаунт в Telegram');
-          toggleMenu();
+          window.location.href = 'help.html';
         });
 
         if (window.Telegram?.WebApp) {
