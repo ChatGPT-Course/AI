@@ -572,6 +572,9 @@
 
     // Функции
     function addContentBlock(index) {
+      // Очищаем контейнер перед добавлением нового блока
+      cardsContainer.innerHTML = '';
+      
       const block = document.createElement('div');
       block.className = 'content-block';
       
@@ -594,11 +597,12 @@
       
       cardsContainer.appendChild(block);
       
+      // Показываем блок с анимацией
       setTimeout(() => {
         block.classList.add('visible');
-        const headerHeight = document.querySelector('.header-bar').offsetHeight;
+        // Прокручиваем к верху страницы, чтобы блок был под шапкой
         window.scrollTo({
-          top: block.offsetTop - headerHeight - 10,
+          top: 0,
           behavior: 'smooth'
         });
       }, 50);
