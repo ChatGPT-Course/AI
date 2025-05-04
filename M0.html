@@ -804,23 +804,3 @@
       }, 500);
     }
 
-    // Загрузка гайда из внешнего файла
-    function loadGuideContent() {
-      fetch('test.html')
-        .then(response => response.text())
-        .then(data => {
-          guideContent.innerHTML = data;
-        })
-        .catch(error => {
-          console.error('Ошибка загрузки гайда:', error);
-          guideContent.innerHTML = '<p>Не удалось загрузить гайд. Пожалуйста, попробуйте позже.</p>';
-        });
-    }
-
-    startBtn.addEventListener('click', () => {
-      splash.classList.add('hide');
-      setTimeout(() => {
-        mainContent.classList.add('show');
-        addContentBlock(0);
-        updateProgressBar();
-        nextBtn.classList.add
