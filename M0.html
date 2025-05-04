@@ -388,6 +388,37 @@
       background: #e0e0e0;
       transform: scale(1.07);
     }
+    .modal-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: rgba(0,0,0,0.7);
+      z-index: 100;
+      display: none;
+      align-items: center;
+      justify-content: center;
+    }
+    .modal-content {
+      background: white;
+      border-radius: 12px;
+      width: 90%;
+      max-width: 800px;
+      max-height: 80vh;
+      overflow-y: auto;
+      padding: 20px;
+      position: relative;
+    }
+    .close-modal {
+      position: absolute;
+      top: 10px;
+      right: 10px;
+      background: none;
+      border: none;
+      font-size: 24px;
+      cursor: pointer;
+    }
     @media (max-width: 600px) {
       .content-block {
         padding: 1.2rem 1rem;
@@ -472,6 +503,13 @@
         </div>
       </div>
     </div>
+    <!-- Модальное окно для гайда -->
+    <div class="modal-overlay" id="guideModal">
+      <div class="modal-content">
+        <button class="close-modal" id="closeGuideModal">&times;</button>
+        <div id="guideContent"></div>
+      </div>
+    </div>
   </div>
   <script>
     const splash = document.getElementById('splash');
@@ -487,6 +525,9 @@
     const modalExitBtn = document.getElementById('modalExitBtn');
     const modalStayBtn = document.getElementById('modalStayBtn');
     const reportBtn = document.getElementById('reportBtn');
+    const guideModal = document.getElementById('guideModal');
+    const closeGuideModal = document.getElementById('closeGuideModal');
+    const guideContent = document.getElementById('guideContent');
 
     // Все контентные блоки в правильном порядке
     const contentBlocks = [
@@ -608,7 +649,7 @@
         Но у этого способа есть как плюсы, так и минусы`
       },
       {
-        title: "ПЛЮСЫ TELEGRAM-БОТОВ",
+        title: "ПЛЮСЫ И МИНУСЫ TELEGRAM-БОТОВ",
         content: `<b>ПЛЮСЫ</b><br><br>
         <ul>
           <li><span class="emoji">✅</span> Не нужен VPN</li>
@@ -658,6 +699,7 @@
     const totalBlocks = contentBlocks.length;
     let currentBlockIndex = 0;
     let isNextBtnCooldown = false;
+    let blockAdded = false; // Флаг для отслеживания добавления первого блока
 
     function updateProgressBar() {
       const percent = ((currentBlockIndex + 1) / totalBlocks) * 100;
@@ -665,6 +707,15 @@
     }
 
     function addContentBlock(index) {
+      // Удаляем предыдущий блок, если он есть (кроме первого)
+      if (blockAdded && cardsContainer.children.length > 0) {
+        const lastBlock = cardsContainer.lastChild;
+        lastBlock.classList.remove('visible');
+        setTimeout(() => {
+          cardsContainer.removeChild(lastBlock);
+        }, 300);
+      }
+
       const block = document.createElement('div');
       block.className = 'content-block';
       
@@ -713,6 +764,7 @@
       }
       
       cardsContainer.appendChild(block);
+      blockAdded = true;
       
       // Анимация появления и скролл к заголовку
       setTimeout(() => {
@@ -720,20 +772,9 @@
         // Скроллим так, чтобы блок начинался сразу под шапкой
         const headerHeight = document.querySelector('.header-bar').offsetHeight;
         const blockTop = block.offsetTop;
-        const windowHeight = window.innerHeight;
-        
-        // Вычисляем позицию для скролла
-        const scrollToPosition = blockTop - headerHeight - 10;
-        
-        // Если блок короткий, добавляем пустое пространство
-        if (block.offsetHeight < windowHeight - headerHeight) {
-          const emptySpace = document.createElement('div');
-          emptySpace.style.height = `${windowHeight - block.offsetHeight - headerHeight - 20}px`;
-          block.appendChild(emptySpace);
-        }
         
         window.scrollTo({
-          top: scrollToPosition,
+          top: blockTop - headerHeight - 10,
           behavior: 'smooth'
         });
       }, 50);
@@ -744,11 +785,6 @@
       
       isNextBtnCooldown = true;
       nextBtn.disabled = true;
-      
-      // Добавляем вибрацию
-      if ('vibrate' in navigator) {
-        navigator.vibrate(30);
-      }
       
       // Создаем элемент прогресс-бара
       const progress = document.createElement('div');
@@ -768,104 +804,23 @@
       }, 500);
     }
 
+    // Загрузка гайда из внешнего файла
+    function loadGuideContent() {
+      fetch('test.html')
+        .then(response => response.text())
+        .then(data => {
+          guideContent.innerHTML = data;
+        })
+        .catch(error => {
+          console.error('Ошибка загрузки гайда:', error);
+          guideContent.innerHTML = '<p>Не удалось загрузить гайд. Пожалуйста, попробуйте позже.</p>';
+        });
+    }
+
     startBtn.addEventListener('click', () => {
       splash.classList.add('hide');
       setTimeout(() => {
         mainContent.classList.add('show');
         addContentBlock(0);
         updateProgressBar();
-        nextBtn.classList.add('show');
-      }, 600);
-    });
-
-    nextBtn.addEventListener('click', () => {
-      if (isNextBtnCooldown) return;
-      
-      startNextBtnCooldown();
-      
-      if (currentBlockIndex < totalBlocks - 1) {
-        currentBlockIndex++;
-        addContentBlock(currentBlockIndex);
-        updateProgressBar();
-        
-        // После первого клика убираем центрирование кнопки "Далее"
-        if (currentBlockIndex === 1) {
-          nextBtn.classList.remove('centered');
-          guideBtn.classList.add('show');
-        }
-        
-        // На предпоследнем блоке меняем текст кнопки и делаем её активной
-        if (currentBlockIndex === totalBlocks - 2) {
-          nextBtn.textContent = 'Завершить';
-          nextBtn.disabled = false;
-        }
-        
-        // На последнем блоке делаем переход
-        if (currentBlockIndex === totalBlocks - 1) {
-          setTimeout(() => {
-            window.location.href = 'index.html';
-          }, 1000);
-        }
-      }
-    });
-
-    // Кнопка выхода на заставке
-    splashExitBtn.addEventListener('click', () => {
-      window.location.href = 'index.html';
-    });
-
-    // Кнопка выхода на основном экране
-    exitBtn.addEventListener('click', (e) => {
-      e.preventDefault();
-      exitModal.style.display = 'flex';
-    });
-
-    modalExitBtn.addEventListener('click', () => {
-      window.location.href = 'index.html';
-    });
-
-    modalStayBtn.addEventListener('click', () => {
-      exitModal.style.display = 'none';
-    });
-
-    // Обработчик для кнопки гайда
-    guideBtn.addEventListener('click', () => {
-      window.open('https://kurl.ru/btRup', '_blank');
-    });
-
-    // Обработчик для кнопки жалобы/ошибки
-    reportBtn.addEventListener('click', () => {
-      // Временное решение - можно заменить на нужный функционал
-      alert('Функция сообщения о проблеме будет добавлена в ближайшее время. Спасибо за понимание!');
-      
-      // Вибрация для обратной связи
-      if ('vibrate' in navigator) {
-        navigator.vibrate([50, 50, 50]);
-      }
-    });
-
-    // Обработчик для закрытия модального окна при клике вне его
-    exitModal.addEventListener('click', (e) => {
-      if (e.target === exitModal) {
-        exitModal.style.display = 'none';
-      }
-    });
-
-    // Добавляем обработчик клавиши Escape для закрытия модального окна
-    document.addEventListener('keydown', (e) => {
-      if (e.key === 'Escape' && exitModal.style.display === 'flex') {
-        exitModal.style.display = 'none';
-      }
-    });
-
-    // Инициализация первого блока при загрузке
-    if (cardsContainer.children.length === 0) {
-      addContentBlock(0);
-      updateProgressBar();
-    }
-
-    // Оптимизация для мобильных устройств - предотвращение масштабирования при фокусе
-    document.addEventListener('touchstart', function() {}, {passive: true});
-  </script>
-</body>
-</html>
+        nextBtn.classList.add
