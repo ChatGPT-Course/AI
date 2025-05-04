@@ -196,6 +196,27 @@
       min-width: 24px;
       text-align: center;
     }
+    .content-block ul {
+      padding-left: 1rem;
+      margin: 0.8rem 0;
+    }
+    .content-block li {
+      margin-bottom: 0.4rem;
+      position: relative;
+    }
+    .tip-card {
+      background: rgba(255, 248, 225, 0.8);
+      border-left: 4px solid var(--orange);
+      padding: 0.8rem 1rem;
+      margin: 1rem 0;
+      border-radius: 0 8px 8px 0;
+    }
+    .tip-card-title {
+      font-weight: 700;
+      color: var(--orange);
+      margin: 0 0 0.3rem 0;
+      font-size: 1rem;
+    }
     .buttons-container {
       position: fixed;
       bottom: 1.5rem;
@@ -546,17 +567,11 @@
       }
     ];
 
-    let currentBlockIndex = -1; // Начинаем с -1, чтобы первый блок добавился правильно
+    let currentBlockIndex = 0;
     const totalBlocks = contentBlocks.length;
-    let isFirstBlockAdded = false;
 
     // Функции
     function addContentBlock(index) {
-      // Очищаем контейнер перед добавлением нового блока
-      if (isFirstBlockAdded) {
-        cardsContainer.innerHTML = '';
-      }
-      
       const block = document.createElement('div');
       block.className = 'content-block';
       
@@ -577,27 +592,13 @@
       content.innerHTML = contentBlocks[index].content;
       block.appendChild(content);
       
-      // Добавляем пустое пространство, если блок короткий
-      const windowHeight = window.innerHeight;
-      const headerHeight = document.querySelector('.header-bar').offsetHeight;
-      const blockHeight = block.offsetHeight;
-      const minHeight = windowHeight - headerHeight - 100; // Минимальная высота с запасом
-      
-      if (blockHeight < minHeight) {
-        const emptySpace = document.createElement('div');
-        emptySpace.style.height = `${minHeight - blockHeight}px`;
-        block.appendChild(emptySpace);
-      }
-      
       cardsContainer.appendChild(block);
-      isFirstBlockAdded = true;
       
-      // Анимация появления и скролл
       setTimeout(() => {
         block.classList.add('visible');
-        const scrollPosition = block.offsetTop - headerHeight - 10;
+        const headerHeight = document.querySelector('.header-bar').offsetHeight;
         window.scrollTo({
-          top: scrollPosition,
+          top: block.offsetTop - headerHeight - 10,
           behavior: 'smooth'
         });
       }, 50);
@@ -613,8 +614,7 @@
       splash.classList.add('hide');
       setTimeout(() => {
         mainContent.classList.add('show');
-        currentBlockIndex = 0;
-        addContentBlock(currentBlockIndex);
+        addContentBlock(0);
         updateProgressBar();
         nextBtn.classList.add('show');
       }, 300);
@@ -665,9 +665,8 @@
     });
 
     // Инициализация
-    if (!isFirstBlockAdded) {
-      currentBlockIndex = 0;
-      addContentBlock(currentBlockIndex);
+    if (cardsContainer.children.length === 0) {
+      addContentBlock(0);
     }
   </script>
 </body>
