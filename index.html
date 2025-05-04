@@ -498,7 +498,9 @@
       username: null,
       isPaid: false,
       isLoaded: false,
-      progress: 0
+      progress: 0,
+      checkInterval: null,
+      lastCheckTime: 0
     };
 
     // Функция для скрытия экрана загрузки
@@ -576,6 +578,55 @@
       }
     }
 
+    // Функция для проверки данных пользователя
+    async function checkUserData() {
+      if (!state.userId) return;
+      
+      try {
+        const currentTime = Date.now();
+        // Проверяем не чаще чем раз в 2 секунды
+        if (currentTime - state.lastCheckTime < 2000) return;
+        
+        state.lastCheckTime = currentTime;
+        
+        const userData = await findUserInNocodb(state.userId);
+        if (!userData) return;
+        
+        // Проверяем изменения в данных
+        const isPaidChanged = (userData.oplata === 1) !== state.isPaid;
+        const progressChanged = userData.progress !== state.progress;
+        
+        if (isPaidChanged || progressChanged) {
+          state.isPaid = userData.oplata === 1;
+          state.progress = typeof userData.progress === 'number' ? userData.progress : 0;
+          
+          console.log('Обновлены данные пользователя:', {
+            isPaid: state.isPaid,
+            progress: state.progress
+          });
+          
+          // Обновляем интерфейс
+          updateUI();
+        }
+      } catch (error) {
+        console.error('Ошибка при проверке данных пользователя:', error);
+      }
+    }
+
+    // Функция для запуска периодической проверки
+    function startDataChecking() {
+      // Останавливаем предыдущий интервал, если он был
+      if (state.checkInterval) {
+        clearInterval(state.checkInterval);
+      }
+      
+      // Запускаем новую проверку сразу
+      checkUserData();
+      
+      // Устанавливаем интервал проверки каждые 2 секунды
+      state.checkInterval = setInterval(checkUserData, 2000);
+    }
+
     // Функция для проверки и создания пользователя в NocoDB
     async function checkAndCreateUser(user) {
       try {
@@ -599,6 +650,9 @@
         updateUI();
         state.isLoaded = true;
         hideLoadingScreen();
+        
+        // Запускаем периодическую проверку данных
+        startDataChecking();
       } catch (error) {
         console.error('Ошибка при работе с базой данных:', error);
         // В случае ошибки все равно показываем интерфейс
