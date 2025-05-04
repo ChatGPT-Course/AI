@@ -148,10 +148,10 @@
       border-radius: 6px;
       position: relative;
       margin-left: 0.5rem;
-      margin-right: 0.5rem;
+      margin-right: 1rem;
       overflow: hidden;
       border: 1px solid #ddd;
-      max-width: calc(100% - 160px);
+      min-width: 120px;
     }
     .progress-bar-inner {
       height: 100%;
@@ -256,9 +256,6 @@
       position: relative;
       overflow: hidden;
       flex-shrink: 0;
-    }
-    .next-btn.centered {
-      margin: 0 auto;
     }
     .next-btn.show {
       opacity: 1;
@@ -367,58 +364,6 @@
       max-width: calc(50% - 0.25rem);
       flex: 1 1 45%;
     }
-    .report-btn {
-      background: var(--white);
-      border: none;
-      color: var(--text);
-      font-size: 1.2rem;
-      border-radius: 8px;
-      width: 40px;
-      height: 40px;
-      cursor: pointer;
-      font-weight: 700;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      transition: all 0.2s;
-      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-      margin-left: 0.5rem;
-    }
-    .report-btn:hover {
-      background: #e0e0e0;
-      transform: scale(1.07);
-    }
-    .modal-overlay {
-      position: fixed;
-      top: 0;
-      left: 0;
-      right: 0;
-      bottom: 0;
-      background: rgba(0,0,0,0.7);
-      z-index: 100;
-      display: none;
-      align-items: center;
-      justify-content: center;
-    }
-    .modal-content {
-      background: white;
-      border-radius: 12px;
-      width: 90%;
-      max-width: 800px;
-      max-height: 80vh;
-      overflow-y: auto;
-      padding: 20px;
-      position: relative;
-    }
-    .close-modal {
-      position: absolute;
-      top: 10px;
-      right: 10px;
-      background: none;
-      border: none;
-      font-size: 24px;
-      cursor: pointer;
-    }
     @media (max-width: 600px) {
       .content-block {
         padding: 1.2rem 1rem;
@@ -431,10 +376,6 @@
         width: 36px;
         height: 36px;
         padding: 0;
-      }
-      .report-btn {
-        width: 36px;
-        height: 36px;
       }
       .buttons-container {
         bottom: 1rem;
@@ -452,9 +393,6 @@
         max-width: 100%;
         flex: 1 1 100%;
       }
-      .progress-bar {
-        max-width: calc(100% - 140px);
-      }
     }
     button, .exit-btn {
       outline: none !important;
@@ -463,19 +401,11 @@
     button:focus, .exit-btn:focus {
       outline: none !important;
     }
-    .divider {
-      height: 1px;
-      background-color: #ddd;
-      margin: 1.5rem 0;
-      width: 100%;
-    }
   </style>
 </head>
 <body>
   <div class="splash" id="splash">
-    <div style="position: absolute; top: 0.5rem; left: 0.5rem; width: 100%; display: flex;">
-      <button class="exit-btn" id="splashExitBtn" title="Выйти"><span>&#8592;</span></button>
-    </div>
+    <button class="exit-btn splash-exit" id="splashExitBtn" title="Выйти"><span>&#8592;</span></button>
     <h1>Модуль 0:<br>Доступ к ChatGPT</h1>
     <button id="startBtn">Начать</button>
   </div>
@@ -485,13 +415,12 @@
       <div class="progress-bar">
         <div class="progress-bar-inner" id="progressBar"></div>
       </div>
-      <button class="report-btn" id="reportBtn" title="Сообщить о проблеме">🚩</button>
     </div>
     <div class="cards-container" id="cardsContainer">
       <!-- Контентные блоки будут добавляться сюда -->
     </div>
     <div class="buttons-container">
-      <button class="next-btn centered" id="nextBtn">Далее</button>
+      <button class="next-btn" id="nextBtn">Далее</button>
       <button class="guide-btn" id="guideBtn"><span class="emoji">🔗</span> Детальный<br>гайд</button>
     </div>
     <div id="exitModal" style="display:none; position:fixed; z-index:100; left:0; top:0; width:100vw; height:100vh; background:rgba(0,0,0,0.25); align-items:center; justify-content:center;">
@@ -501,13 +430,6 @@
           <button id="modalExitBtn" style="background:linear-gradient(90deg, var(--orange), var(--yellow)); color:#222; border:none; border-radius:1.5rem; padding:0.7rem 1.5rem; font-weight:600; cursor:pointer;">Выйти</button>
           <button id="modalStayBtn" style="background:#eee; color:#222; border:none; border-radius:1.5rem; padding:0.7rem 1.5rem; font-weight:600; cursor:pointer;">Остаться</button>
         </div>
-      </div>
-    </div>
-    <!-- Модальное окно для гайда -->
-    <div class="modal-overlay" id="guideModal">
-      <div class="modal-content">
-        <button class="close-modal" id="closeGuideModal">&times;</button>
-        <div id="guideContent"></div>
       </div>
     </div>
   </div>
@@ -524,10 +446,6 @@
     const exitModal = document.getElementById('exitModal');
     const modalExitBtn = document.getElementById('modalExitBtn');
     const modalStayBtn = document.getElementById('modalStayBtn');
-    const reportBtn = document.getElementById('reportBtn');
-    const guideModal = document.getElementById('guideModal');
-    const closeGuideModal = document.getElementById('closeGuideModal');
-    const guideContent = document.getElementById('guideContent');
 
     // Все контентные блоки в правильном порядке
     const contentBlocks = [
@@ -634,14 +552,14 @@
       },
       {
         title: "ПРИЛОЖЕНИЯ В РОССИИ НЕДОСТУПНЫ",
-        image: "6.jpg",
+        images: "6.jpg",
         content: `Чтобы установить ChatGPT в телефон, нужно немножко потанцевать с бубнами.<br>
         Поэтому имеет смысл заморачиваться лишь тогда, когда ты УЖЕ являешься уверенным пользователем <span class="emoji">😊</span><br><br>
         <span class="emoji">🔍</span> Если всё же хочешь установить ChatGPT на телефон, инструкция всё там же ))`
       },
       {
         title: "CHATGPT В TELEGRAM",
-        image: "8.jpg",
+        images: "8.jpg",
         content: `Третий и самый простой способ получить доступ к ChatGPT в России – через Telegram-ботов<br><br>
         <span class="emoji">🔍</span> Ты отправляешь запрос Telegram-боту<br>
         <span class="emoji">🔍</span> Он передает его ChatGPT<br>
@@ -649,16 +567,17 @@
         Но у этого способа есть как плюсы, так и минусы`
       },
       {
-        title: "ПЛЮСЫ И МИНУСЫ TELEGRAM-БОТОВ",
-        content: `<b>ПЛЮСЫ</b><br><br>
-        <ul>
+        title: "ПЛЮСЫ TELEGRAM-БОТОВ",
+        image: "7.jpg",
+        content: `<ul>
           <li><span class="emoji">✅</span> Не нужен VPN</li>
           <li><span class="emoji">✅</span> Быстрый доступ (достаточно просто запустить бота)</li>
           <li><span class="emoji">✅</span> Оплата подписки в рублях с российских карт</li>
-        </ul>
-        <div class="divider"></div>
-        <b>МИНУСЫ</b><br><br>
-        <ul>
+        </ul>`
+      },
+      {
+        title: "МИНУСЫ TELEGRAM-БОТОВ",
+        content: `<ul>
           <li><span class="emoji">❌</span> Ограниченный функционал (не все возможности ChatGPT)</li>
           <li><span class="emoji">❌</span> Качество ответов зависит от бота и модели</li>
           <li><span class="emoji">❌</span> Безопасность: ты передаешь данные посреднику</li>
@@ -699,7 +618,6 @@
     const totalBlocks = contentBlocks.length;
     let currentBlockIndex = 0;
     let isNextBtnCooldown = false;
-    let blockAdded = false; // Флаг для отслеживания добавления первого блока
 
     function updateProgressBar() {
       const percent = ((currentBlockIndex + 1) / totalBlocks) * 100;
@@ -707,15 +625,6 @@
     }
 
     function addContentBlock(index) {
-      // Удаляем предыдущий блок, если он есть (кроме первого)
-      if (blockAdded && cardsContainer.children.length > 0) {
-        const lastBlock = cardsContainer.lastChild;
-        lastBlock.classList.remove('visible');
-        setTimeout(() => {
-          cardsContainer.removeChild(lastBlock);
-        }, 300);
-      }
-
       const block = document.createElement('div');
       block.className = 'content-block';
       
@@ -746,6 +655,23 @@
         block.appendChild(img);
       }
       
+      // Добавляем несколько изображений (если есть)
+      if (contentBlocks[index].images) {
+        const imgContainer = document.createElement('div');
+        imgContainer.className = 'image-container';
+        contentBlocks[index].images.forEach(imgName => {
+          const img = document.createElement('img');
+          img.className = 'content-image';
+          img.src = `photo_course/${imgName}`;
+          img.alt = contentBlocks[index].title;
+          img.onerror = function() {
+            console.error('Не удалось загрузить изображение:', this.src);
+          };
+          imgContainer.appendChild(img);
+        });
+        block.appendChild(imgContainer);
+      }
+      
       // Добавляем контент
       const content = document.createElement('div');
       content.innerHTML = contentBlocks[index].content;
@@ -764,17 +690,14 @@
       }
       
       cardsContainer.appendChild(block);
-      blockAdded = true;
       
       // Анимация появления и скролл к заголовку
       setTimeout(() => {
         block.classList.add('visible');
-        // Скроллим так, чтобы блок начинался сразу под шапкой
+        // Скроллим так, чтобы заголовок был под шапкой
         const headerHeight = document.querySelector('.header-bar').offsetHeight;
-        const blockTop = block.offsetTop;
-        
         window.scrollTo({
-          top: blockTop - headerHeight - 10,
+          top: block.offsetTop - headerHeight - 10,
           behavior: 'smooth'
         });
       }, 50);
@@ -804,3 +727,66 @@
       }, 500);
     }
 
+    startBtn.addEventListener('click', () => {
+      splash.classList.add('hide');
+      setTimeout(() => {
+        mainContent.classList.add('show');
+        addContentBlock(0);
+        updateProgressBar();
+        nextBtn.classList.add('show');
+      }, 600);
+    });
+
+    nextBtn.addEventListener('click', () => {
+      if (isNextBtnCooldown) return;
+      
+      startNextBtnCooldown();
+      
+      if (currentBlockIndex < totalBlocks - 1) {
+        currentBlockIndex++;
+        addContentBlock(currentBlockIndex);
+        updateProgressBar();
+        
+        // Показываем кнопку гайда после первого нажатия
+        if (currentBlockIndex === 1) {
+          guideBtn.classList.add('show');
+        }
+        
+        // На предпоследнем блоке меняем текст кнопки
+        if (currentBlockIndex === totalBlocks - 2) {
+          nextBtn.textContent = 'Завершить';
+        }
+      } else {
+        // Завершение модуля
+        nextBtn.classList.remove('show');
+        guideBtn.classList.remove('show');
+        setTimeout(() => {
+          window.location.href = 'index.html';
+        }, 500);
+      }
+    });
+
+    // Кнопка выхода на заставке
+    splashExitBtn.addEventListener('click', () => {
+      window.location.href = 'index.html';
+    });
+
+    // Кнопка выхода на основном экране
+    exitBtn.addEventListener('click', (e) => {
+      e.preventDefault();
+      exitModal.style.display = 'flex';
+    });
+    modalExitBtn.addEventListener('click', () => {
+      window.location.href = 'index.html';
+    });
+    modalStayBtn.addEventListener('click', () => {
+      exitModal.style.display = 'none';
+    });
+
+    // Обработчик для кнопки гайда
+    guideBtn.addEventListener('click', () => {
+      window.open('https://kurl.ru/btRup', '_blank');
+    });
+  </script>
+</body>
+</html>
