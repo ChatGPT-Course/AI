@@ -13,6 +13,10 @@
       --dark: #333333;
       --gray: #F5F5F5;
       --graphite: #4A4A4A;
+      --success: #4CAF50;
+      --success-light: #81C784;
+      --disabled: #9E9E9E;
+      --disabled-light: #E0E0E0;
     }
 
     * {
@@ -151,6 +155,7 @@
       display: grid;
       grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
       gap: 20px;
+      position: relative;
     }
 
     .module {
@@ -160,7 +165,7 @@
       box-shadow: 0 4px 16px rgba(255, 122, 0, 0.1);
       transition: all 0.3s ease;
       position: relative;
-      cursor: pointer;
+      cursor: default;
       margin-top: 30px;
     }
 
@@ -169,8 +174,22 @@
     }
 
     .module.locked {
-      opacity: 0.7;
+      background: var(--disabled-light);
       cursor: not-allowed;
+    }
+
+    .module.completed {
+      background: #E8F5E9;
+    }
+
+    .module.current {
+      animation: pulse 2s infinite;
+    }
+
+    @keyframes pulse {
+      0% { box-shadow: 0 0 0 0 rgba(255, 122, 0, 0.4); }
+      70% { box-shadow: 0 0 0 10px rgba(255, 122, 0, 0); }
+      100% { box-shadow: 0 0 0 0 rgba(255, 122, 0, 0); }
     }
 
     .module-label {
@@ -184,6 +203,14 @@
       font-size: 16px;
       font-weight: 500;
       z-index: 2;
+    }
+
+    .module-label.completed {
+      background: var(--success);
+    }
+
+    .module-label.locked {
+      background: var(--disabled);
     }
 
     .module-content {
@@ -220,9 +247,27 @@
       background: var(--primary-light);
     }
 
-    .module.locked .module-btn {
-      background: #ccc;
+    .module-btn.completed {
+      background: var(--success);
+    }
+
+    .module-btn.completed:hover {
+      background: var(--success-light);
+    }
+
+    .module-btn.locked {
+      background: var(--disabled);
       cursor: not-allowed;
+    }
+
+    .module-btn.pulse {
+      animation: pulseBtn 2s infinite;
+    }
+
+    @keyframes pulseBtn {
+      0% { transform: scale(1); }
+      50% { transform: scale(1.05); }
+      100% { transform: scale(1); }
     }
 
     .lock-icon {
@@ -230,6 +275,42 @@
       top: 16px;
       right: 16px;
       font-size: 20px;
+      color: var(--disabled);
+    }
+
+    /* Progress line */
+    .progress-line {
+      position: absolute;
+      height: 4px;
+      background: var(--disabled-light);
+      top: 50%;
+      left: 0;
+      right: 0;
+      z-index: 1;
+      margin-top: -15px;
+    }
+
+    .progress-line-fill {
+      position: absolute;
+      height: 100%;
+      background: var(--success);
+      width: 0;
+      transition: width 1s ease;
+    }
+
+    .progress-line-glow {
+      position: absolute;
+      height: 100%;
+      background: var(--success-light);
+      width: 0;
+      opacity: 0;
+      animation: progressGlow 2s infinite;
+    }
+
+    @keyframes progressGlow {
+      0% { width: 0; opacity: 0; }
+      50% { opacity: 1; }
+      100% { width: 100%; opacity: 0; }
     }
 
     /* Menu Button Styles */
@@ -444,6 +525,10 @@
       .modules-grid {
         grid-template-columns: 1fr;
       }
+
+      .progress-line {
+        display: none;
+      }
     }
   </style>
 </head>
@@ -477,6 +562,10 @@
     </div>
 
     <div class="content">
+      <div class="progress-line">
+        <div class="progress-line-fill" id="progressFill"></div>
+        <div class="progress-line-glow" id="progressGlow"></div>
+      </div>
       <div class="modules-grid" id="modules-container">
         <!-- Модули будут добавлены динамически -->
       </div>
@@ -500,7 +589,8 @@
       isLoaded: false,
       progress: 0,
       checkInterval: null,
-      lastCheckTime: 0
+      lastCheckTime: 0,
+      menuOpen: false
     };
 
     // Функция для скрытия экрана загрузки
@@ -672,41 +762,41 @@
       ];
 
       let html = '';
-      modules.forEach(module => {
+      modules.forEach((module, index) => {
         let isLocked = false;
         let lockReason = '';
         let isCompleted = false;
+        let isCurrent = false;
         let buttonText = 'Начать';
         let buttonIcon = '';
         let cardClass = 'module';
         let btnClass = 'module-btn';
+        let labelClass = 'module-label';
         let lockIcon = '';
         let grayStyle = '';
 
-        // Логика доступа на основе progress
+        // Определяем статус модуля
         if (module.id === -1) {
-          // Введение всегда доступно
+          // Введение
           isCompleted = state.progress >= 1;
+          isCurrent = state.progress === 0;
           buttonText = isCompleted ? 'Изучено' : 'Начать';
           buttonIcon = isCompleted ? '✔️' : '';
         } else {
-          // Для всех остальных модулей
+          // Все остальные модули
           const moduleAvailable = state.progress >= module.id + 1;
           const nextModuleAvailable = state.progress >= module.id + 2;
           
+          isCompleted = nextModuleAvailable;
+          isCurrent = state.progress === module.id + 1;
+          
           if (moduleAvailable) {
-            // Модуль доступен
-            isCompleted = nextModuleAvailable;
             buttonText = isCompleted ? 'Изучено' : 'Начать';
             buttonIcon = isCompleted ? '✔️' : '';
           } else {
-            // Модуль заблокирован
             isLocked = true;
             lockReason = 'progress';
-            grayStyle = 'color: #aaa;';
             lockIcon = '<span class="lock-icon">🔒</span>';
-            cardClass += ' locked';
-            btnClass += ' locked';
             buttonText = 'Закрыто';
           }
         }
@@ -715,27 +805,68 @@
         if (module.id >= 1 && !state.isPaid) {
           isLocked = true;
           lockReason = 'oplata';
-          grayStyle = 'color: #aaa;';
           lockIcon = '<span class="lock-icon">🔒</span>';
-          cardClass += ' locked';
-          btnClass += ' locked';
           buttonText = 'Закрыто';
         }
 
+        // Устанавливаем классы в зависимости от статуса
+        if (isCompleted) {
+          cardClass += ' completed';
+          btnClass += ' completed';
+          labelClass += ' completed';
+        } else if (isLocked) {
+          cardClass += ' locked';
+          btnClass += ' locked';
+          labelClass += ' locked';
+        } else if (isCurrent) {
+          cardClass += ' current';
+        }
+
+        // Добавляем анимацию пульсации для текущей кнопки
+        if (isCurrent || (isLocked && index === state.progress + 1)) {
+          btnClass += ' pulse';
+        }
+
         html += `
-          <div class="${cardClass}" style="${grayStyle}" onclick="handleModuleClick('${module.link}', ${isLocked}, '${lockReason}', ${module.id}, ${isCompleted})">
-            <div class="module-label">${module.id === -1 ? 'Введение' : 'Модуль ' + module.id}</div>
+          <div class="${cardClass}">
+            <div class="${labelClass}">${module.id === -1 ? 'Введение' : 'Модуль ' + module.id}</div>
             <h3 class="module-title">${module.title}</h3>
             <div class="module-desc">${module.desc}</div>
-            <button class="${btnClass}">${buttonIcon ? buttonIcon + ' ' : ''}${buttonText}</button>
+            <button class="${btnClass}" onclick="handleModuleClick('${module.link}', ${isLocked}, '${lockReason}', ${module.id}, ${isCompleted})">
+              ${buttonIcon ? buttonIcon + ' ' : ''}${buttonText}
+            </button>
             ${lockIcon}
           </div>
         `;
       });
       document.getElementById('modules-container').innerHTML = html;
+      
+      // Обновляем прогресс-бар
+      updateProgressBar();
     }
 
-    // Обработчик клика по модулю
+    // Обновление прогресс-бара
+    function updateProgressBar() {
+      const progressFill = document.getElementById('progressFill');
+      const progressGlow = document.getElementById('progressGlow');
+      const totalModules = 5; // Введение + 4 модуля
+      const progressPercent = (state.progress / totalModules) * 100;
+      
+      progressFill.style.width = `${progressPercent}%`;
+      
+      // Анимация заполнения линии прогресса
+      if (state.progress > 0) {
+        setTimeout(() => {
+          progressGlow.style.width = `${progressPercent}%`;
+          progressGlow.style.opacity = '1';
+          setTimeout(() => {
+            progressGlow.style.opacity = '0';
+          }, 2000);
+        }, 1000);
+      }
+    }
+
+    // Обработчик клика по модулю (теперь только по кнопке)
     function handleModuleClick(link, isLocked, lockReason, moduleId, isCompleted) {
       if (isLocked) {
         if (lockReason === 'oplata') {
@@ -801,6 +932,16 @@
       document.getElementById('closePopup').addEventListener('click', () => {
         document.body.removeChild(popup);
       });
+    }
+
+    // Обработчик меню
+    function toggleMenu() {
+      state.menuOpen = !state.menuOpen;
+      const menuButton = document.getElementById('menuButton');
+      const menuContent = document.getElementById('menuContent');
+      
+      menuButton.classList.toggle('active', state.menuOpen);
+      menuContent.classList.toggle('active', state.menuOpen);
     }
 
     // Инициализация Telegram Web App
@@ -877,6 +1018,13 @@
         // Показываем экран загрузки
         document.getElementById('loading-screen').style.display = 'flex';
         document.getElementById('app-content').style.opacity = '0';
+
+        // Инициализация меню
+        document.getElementById('menuButton').addEventListener('click', toggleMenu);
+        document.getElementById('supportButton').addEventListener('click', () => {
+          alert('Свяжитесь с поддержкой через @ваш_аккаунт в Telegram');
+          toggleMenu();
+        });
 
         if (window.Telegram?.WebApp) {
           await initTelegramApp();
