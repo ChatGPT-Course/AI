@@ -149,12 +149,13 @@
       padding: 0 20px 20px;
       max-width: 1200px;
       margin: 0 auto;
+      position: relative;
     }
 
     .modules-grid {
       display: grid;
       grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-      gap: 20px;
+      gap: 40px;
       position: relative;
     }
 
@@ -167,6 +168,7 @@
       position: relative;
       cursor: default;
       margin-top: 30px;
+      z-index: 2;
     }
 
     .module:hover {
@@ -284,10 +286,10 @@
       height: 4px;
       background: var(--disabled-light);
       top: 50%;
-      left: 0;
-      right: 0;
+      left: 20px;
+      right: 20px;
       z-index: 1;
-      margin-top: -15px;
+      margin-top: -2px;
     }
 
     .progress-line-fill {
@@ -524,6 +526,7 @@
 
       .modules-grid {
         grid-template-columns: 1fr;
+        gap: 30px;
       }
 
       .progress-line {
@@ -773,7 +776,6 @@
         let btnClass = 'module-btn';
         let labelClass = 'module-label';
         let lockIcon = '';
-        let grayStyle = '';
 
         // Определяем статус модуля
         if (module.id === -1) {
@@ -820,10 +822,6 @@
           labelClass += ' locked';
         } else if (isCurrent) {
           cardClass += ' current';
-        }
-
-        // Добавляем анимацию пульсации для текущей кнопки
-        if (isCurrent || (isLocked && index === state.progress + 1)) {
           btnClass += ' pulse';
         }
 
