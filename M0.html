@@ -324,6 +324,10 @@
       margin: 1.5rem 0;
       width: 100%;
     }
+    .empty-space {
+      height: 50vh;
+      width: 100%;
+    }
     @media (max-width: 600px) {
       .splash h1 {
         font-size: 1.5rem;
@@ -345,6 +349,9 @@
       .next-btn, .guide-btn {
         padding: 0.7rem 1rem;
         min-width: 110px;
+      }
+      .empty-space {
+        height: 40vh;
       }
     }
   </style>
@@ -570,10 +577,16 @@
 
     let currentBlockIndex = 0;
     const totalBlocks = contentBlocks.length;
-    let isFirstLoad = true;
+    let emptySpace = null;
 
     // Функции
     function addContentBlock(index) {
+      // Удаляем предыдущее пустое пространство, если оно есть
+      if (emptySpace) {
+        emptySpace.remove();
+        emptySpace = null;
+      }
+
       // Создаем блок
       const block = document.createElement('div');
       block.className = 'content-block';
@@ -597,6 +610,11 @@
       
       // Добавляем блок в контейнер
       cardsContainer.appendChild(block);
+      
+      // Добавляем пустое пространство после блока
+      emptySpace = document.createElement('div');
+      emptySpace.className = 'empty-space';
+      cardsContainer.appendChild(emptySpace);
       
       // Показываем блок с анимацией
       setTimeout(() => {
@@ -674,8 +692,7 @@
     });
 
     // Инициализация
-    if (isFirstLoad) {
-      isFirstLoad = false;
+    if (cardsContainer.children.length === 0) {
       addContentBlock(0);
     }
   </script>
