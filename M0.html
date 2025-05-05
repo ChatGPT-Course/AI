@@ -570,30 +570,11 @@
 
     let currentBlockIndex = 0;
     const totalBlocks = contentBlocks.length;
-    let isFirstBlock = true;
+    let isFirstLoad = true;
 
     // Функции
     function addContentBlock(index) {
-      // Если это первый блок, просто добавляем его
-      if (isFirstBlock) {
-        isFirstBlock = false;
-        createBlock(index);
-        return;
-      }
-
-      // Для всех последующих блоков сначала прокручиваем вверх
-      window.scrollTo({
-        top: 0,
-        behavior: 'smooth'
-      });
-
-      // Затем через небольшой таймаут добавляем новый блок
-      setTimeout(() => {
-        createBlock(index);
-      }, 300);
-    }
-
-    function createBlock(index) {
+      // Создаем блок
       const block = document.createElement('div');
       block.className = 'content-block';
       
@@ -614,24 +595,21 @@
       content.innerHTML = contentBlocks[index].content;
       block.appendChild(content);
       
+      // Добавляем блок в контейнер
       cardsContainer.appendChild(block);
       
       // Показываем блок с анимацией
       setTimeout(() => {
         block.classList.add('visible');
         
-        // Если блок маленький, прокручиваем так, чтобы он был под шапкой
+        // Прокручиваем так, чтобы заголовок блока был сразу под шапкой
         const headerHeight = document.querySelector('.header-bar').offsetHeight;
-        const blockHeight = block.offsetHeight;
-        const windowHeight = window.innerHeight;
+        const blockTop = block.offsetTop;
         
-        if (blockHeight < windowHeight - headerHeight - 100) {
-          const scrollPosition = block.offsetTop - headerHeight;
-          window.scrollTo({
-            top: scrollPosition,
-            behavior: 'smooth'
-          });
-        }
+        window.scrollTo({
+          top: blockTop - headerHeight,
+          behavior: 'smooth'
+        });
       }, 50);
     }
 
@@ -696,7 +674,8 @@
     });
 
     // Инициализация
-    if (cardsContainer.children.length === 0) {
+    if (isFirstLoad) {
+      isFirstLoad = false;
       addContentBlock(0);
     }
   </script>
