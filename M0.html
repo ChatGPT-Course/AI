@@ -168,10 +168,11 @@
       color: #333;
       margin-bottom: 1rem;
       opacity: 0;
-      transform: translateY(40px);
-      transition: opacity 0.7s, transform 0.7s;
+      transform: translateY(20px);
+      transition: opacity 0.5s ease-out, transform 0.5s ease-out;
       position: relative;
       box-sizing: border-box;
+      transition-delay: 0.1s;
     }
     .content-block.visible {
       opacity: 1;
@@ -572,9 +573,6 @@
 
     // Функции
     function addContentBlock(index) {
-      // Очищаем контейнер перед добавлением нового блока
-      cardsContainer.innerHTML = '';
-      
       const block = document.createElement('div');
       block.className = 'content-block';
       
@@ -600,9 +598,13 @@
       // Показываем блок с анимацией
       setTimeout(() => {
         block.classList.add('visible');
-        // Прокручиваем к верху страницы, чтобы блок был под шапкой
+        
+        // Прокручиваем к новому блоку, чтобы он был под шапкой
+        const headerHeight = document.querySelector('.header-bar').offsetHeight;
+        const blockPosition = block.offsetTop - headerHeight;
+        
         window.scrollTo({
-          top: 0,
+          top: blockPosition,
           behavior: 'smooth'
         });
       }, 50);
