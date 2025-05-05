@@ -570,9 +570,30 @@
 
     let currentBlockIndex = 0;
     const totalBlocks = contentBlocks.length;
+    let isFirstBlock = true;
 
     // Функции
     function addContentBlock(index) {
+      // Если это первый блок, просто добавляем его
+      if (isFirstBlock) {
+        isFirstBlock = false;
+        createBlock(index);
+        return;
+      }
+
+      // Для всех последующих блоков сначала прокручиваем вверх
+      window.scrollTo({
+        top: 0,
+        behavior: 'smooth'
+      });
+
+      // Затем через небольшой таймаут добавляем новый блок
+      setTimeout(() => {
+        createBlock(index);
+      }, 300);
+    }
+
+    function createBlock(index) {
       const block = document.createElement('div');
       block.className = 'content-block';
       
@@ -599,14 +620,18 @@
       setTimeout(() => {
         block.classList.add('visible');
         
-        // Прокручиваем к новому блоку, чтобы он был под шапкой
+        // Если блок маленький, прокручиваем так, чтобы он был под шапкой
         const headerHeight = document.querySelector('.header-bar').offsetHeight;
-        const blockPosition = block.offsetTop - headerHeight;
+        const blockHeight = block.offsetHeight;
+        const windowHeight = window.innerHeight;
         
-        window.scrollTo({
-          top: blockPosition,
-          behavior: 'smooth'
-        });
+        if (blockHeight < windowHeight - headerHeight - 100) {
+          const scrollPosition = block.offsetTop - headerHeight;
+          window.scrollTo({
+            top: scrollPosition,
+            behavior: 'smooth'
+          });
+        }
       }, 50);
     }
 
