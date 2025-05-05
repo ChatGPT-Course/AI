@@ -804,42 +804,62 @@
       completionModal.classList.remove('show');
     }
     
-    async function updateUserProgress() {
-      try {
-        // Получаем ID пользователя из cookie
-        const userId = getCookie('tg_user_id');
-        if (!userId) return;
-        
-        // Ищем запись пользователя в NocoDB
-        const response = await fetch(`${nocodbConfig.apiUrl}?where=(tg_id,eq,${userId})`, {
-          headers: {
-            'xc-token': nocodbConfig.apiToken
-          }
-        });
-        
-        const data = await response.json();
-        if (!data.list || data.list.length === 0) return;
-        
-        const record = data.list[0];
-        
-        // Обновляем прогресс пользователя
-        await fetch(`${nocodbConfig.apiUrl}/${record.Id}`, {
-          method: 'PATCH',
-          headers: {
-            'Content-Type': 'application/json',
-            'xc-token': nocodbConfig.apiToken
-          },
-          body: JSON.stringify({
-            progress: 2 // Устанавливаем прогресс на 2 (модуль 0 пройден)
-          })
-        });
-        
-        console.log('User progress updated successfully');
-      } catch (error) {
-        console.error('Error updating user progress:', error);
-      }
+async function updateUserProgress() {
+  try {
+    // Получаем ID пользователя из cookie
+    const userId = getCookie('tg_user_id');
+    if (!userId) {
+      console.error('User ID not found in cookies');
+      return;
     }
     
+    console.log('Updating progress for user ID:', userId);
+    
+    // Ищем запись пользователя в NocoDB
+    const searchResponse = await fetch(`${nocodbConfig.apiUrl}?where=(tg_user_id,eq,${userId})`, {
+      headers: {
+        'xc-token': nocodbConfig.apiToken,
+        'Content-Type': 'application/json'
+      }
+    });
+    
+    const searchData = await searchResponse.json();
+    console.log('Search response:', searchData);
+    
+    if (!searchData.list || searchData.list.length === 0) {
+      console.error('User record not found');
+      return;
+    }
+    
+    const record = searchData.list[0];
+    const recordId = record.Id || record.id; // Пробуем оба варианта
+    
+    console.log('Found record ID:', recordId);
+    
+    // Обновляем прогресс пользователя
+    const updateResponse = await fetch(`${nocodbConfig.apiUrl}/${recordId}`, {
+      method: 'PATCH',
+      headers: {
+        'Content-Type': 'application/json',
+        'xc-token': nocodbConfig.apiToken
+      },
+      body: JSON.stringify({
+        progress: 2 // Устанавливаем прогресс на 2 (модуль 0 пройден)
+      })
+    });
+    
+    const updateResult = await updateResponse.json();
+    console.log('Update response:', updateResult);
+    
+    if (updateResponse.ok) {
+      console.log('User progress updated successfully');
+    } else {
+      console.error('Failed to update progress:', updateResult);
+    }
+  } catch (error) {
+    console.error('Error updating user progress:', error);
+  }
+}
     function getCookie(name) {
       const value = `; ${document.cookie}`;
       const parts = value.split(`; ${name}=`);
