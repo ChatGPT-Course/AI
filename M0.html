@@ -393,7 +393,7 @@
   </div>
 
   <script>
-    // Элементы
+        // Элементы
     const splash = document.getElementById('splash');
     const startBtn = document.getElementById('startBtn');
     const mainContent = document.getElementById('mainContent');
@@ -578,10 +578,14 @@
     let currentBlockIndex = 0;
     const totalBlocks = contentBlocks.length;
     let emptySpace = null;
+    let isFirstBlockAdded = false;
 
     // Функции
     function addContentBlock(index) {
-      // Удаляем предыдущее пустое пространство, если оно есть
+      // Если это первый блок и он уже добавлен - пропускаем
+      if (index === 0 && isFirstBlockAdded) return;
+      
+      // Удаляем предыдущее пустое пространство
       if (emptySpace) {
         emptySpace.remove();
         emptySpace = null;
@@ -615,6 +619,9 @@
       emptySpace = document.createElement('div');
       emptySpace.className = 'empty-space';
       cardsContainer.appendChild(emptySpace);
+      
+      // Помечаем первый блок как добавленный
+      if (index === 0) isFirstBlockAdded = true;
       
       // Показываем блок с анимацией
       setTimeout(() => {
@@ -692,7 +699,7 @@
     });
 
     // Инициализация
-    if (cardsContainer.children.length === 0) {
+    if (!isFirstBlockAdded) {
       addContentBlock(0);
     }
   </script>
