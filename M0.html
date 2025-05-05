@@ -15,6 +15,7 @@
       --transition: 0.6s cubic-bezier(.77,0,.18,1);
       --disabled: #CCCCCC;
       --blue: #4285F4;
+      --green: #4CAF50;
     }
     body {
       margin: 0;
@@ -328,6 +329,108 @@
       height: 50vh;
       width: 100%;
     }
+    
+    /* Confetti styles */
+    .confetti {
+      position: fixed;
+      width: 10px;
+      height: 10px;
+      background-color: #f00;
+      opacity: 0.8;
+      z-index: 1000;
+      animation: confetti-fall 5s linear forwards;
+    }
+    
+    @keyframes confetti-fall {
+      0% {
+        transform: translateY(-100vh) rotate(0deg);
+        opacity: 1;
+      }
+      100% {
+        transform: translateY(100vh) rotate(360deg);
+        opacity: 0;
+      }
+    }
+    
+    /* Completion modal styles */
+    .completion-modal {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background-color: rgba(255, 255, 255, 0.9);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      z-index: 1001;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.5s ease;
+    }
+    
+    .completion-modal.show {
+      opacity: 1;
+      pointer-events: auto;
+    }
+    
+    .checkmark {
+      width: 100px;
+      height: 100px;
+      border-radius: 50%;
+      background-color: var(--green);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-bottom: 2rem;
+      animation: scaleIn 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    }
+    
+    .checkmark::after {
+      content: "";
+      display: block;
+      width: 30px;
+      height: 60px;
+      border: solid white;
+      border-width: 0 5px 5px 0;
+      transform: rotate(45deg);
+      margin-top: -10px;
+    }
+    
+    .completion-title {
+      font-size: 2rem;
+      font-weight: 700;
+      color: var(--green);
+      margin-bottom: 2rem;
+      text-align: center;
+      animation: fadeInUp 0.5s ease;
+    }
+    
+    .completion-btn {
+      padding: 1rem 2rem;
+      font-size: 1.2rem;
+      background: linear-gradient(90deg, var(--green), #45a049);
+      color: white;
+      border: none;
+      border-radius: 2rem;
+      cursor: pointer;
+      font-weight: 600;
+      box-shadow: 0 4px 12px rgba(76, 175, 80, 0.3);
+      transition: all 0.3s;
+      animation: fadeInUp 0.5s ease 0.2s both;
+    }
+    
+    .completion-btn:hover {
+      background: linear-gradient(90deg, #45a049, var(--green));
+      transform: scale(1.05);
+    }
+    
+    @keyframes scaleIn {
+      from { transform: scale(0); }
+      to { transform: scale(1); }
+    }
+
     @media (max-width: 600px) {
       .splash h1 {
         font-size: 1.5rem;
@@ -352,6 +455,17 @@
       }
       .empty-space {
         height: 40vh;
+      }
+      .completion-title {
+        font-size: 1.5rem;
+      }
+      .checkmark {
+        width: 80px;
+        height: 80px;
+      }
+      .completion-btn {
+        font-size: 1rem;
+        padding: 0.8rem 1.5rem;
       }
     }
   </style>
@@ -390,10 +504,17 @@
         </div>
       </div>
     </div>
+    
+    <!-- Completion modal -->
+    <div class="completion-modal" id="completionModal">
+      <div class="checkmark"></div>
+      <h2 class="completion-title">Модуль 0 ПРОЙДЕН!</h2>
+      <button class="completion-btn" id="completionBtn">Вернуться в меню</button>
+    </div>
   </div>
 
   <script>
-        // Элементы
+    // Элементы
     const splash = document.getElementById('splash');
     const startBtn = document.getElementById('startBtn');
     const mainContent = document.getElementById('mainContent');
@@ -407,6 +528,16 @@
     const exitModal = document.getElementById('exitModal');
     const modalExitBtn = document.getElementById('modalExitBtn');
     const modalStayBtn = document.getElementById('modalStayBtn');
+    const completionModal = document.getElementById('completionModal');
+    const completionBtn = document.getElementById('completionBtn');
+
+    // Конфигурация NocoDB
+    const nocodbConfig = {
+      apiUrl: 'https://app.nocodb.com/api/v2/tables/mc6qh91f060pv4y/records',
+      apiToken: 'jCmuja47NRet1NtTkENYj6iLxEZBmta6xId2DFX4',
+      defaultLimit: 25,
+      defaultViewId: 'vwz8x1qjxgvl15di'
+    };
 
     // Все контентные блоки
     const contentBlocks = [
@@ -642,6 +773,78 @@
       const percent = ((currentBlockIndex + 1) / totalBlocks) * 100;
       progressBar.style.width = percent + '%';
     }
+    
+    function createConfetti() {
+      const colors = ['#f44336', '#e91e63', '#9c27b0', '#673ab7', '#3f51b5', '#2196f3', '#03a9f4', '#00bcd4', '#009688', '#4CAF50', '#8BC34A', '#CDDC39', '#FFEB3B', '#FFC107', '#FF9800', '#FF5722'];
+      
+      for (let i = 0; i < 150; i++) {
+        const confetti = document.createElement('div');
+        confetti.className = 'confetti';
+        confetti.style.left = Math.random() * 100 + 'vw';
+        confetti.style.backgroundColor = colors[Math.floor(Math.random() * colors.length)];
+        confetti.style.width = (Math.random() * 10 + 5) + 'px';
+        confetti.style.height = (Math.random() * 10 + 5) + 'px';
+        confetti.style.animationDuration = (Math.random() * 3 + 2) + 's';
+        confetti.style.animationDelay = (Math.random() * 2) + 's';
+        document.body.appendChild(confetti);
+        
+        // Удаляем конфетти после анимации
+        setTimeout(() => {
+          confetti.remove();
+        }, 7000);
+      }
+    }
+    
+    function showCompletionModal() {
+      createConfetti();
+      completionModal.classList.add('show');
+    }
+    
+    function hideCompletionModal() {
+      completionModal.classList.remove('show');
+    }
+    
+    async function updateUserProgress() {
+      try {
+        // Получаем ID пользователя из cookie
+        const userId = getCookie('tg_user_id');
+        if (!userId) return;
+        
+        // Ищем запись пользователя в NocoDB
+        const response = await fetch(`${nocodbConfig.apiUrl}?where=(tg_id,eq,${userId})`, {
+          headers: {
+            'xc-token': nocodbConfig.apiToken
+          }
+        });
+        
+        const data = await response.json();
+        if (!data.list || data.list.length === 0) return;
+        
+        const record = data.list[0];
+        
+        // Обновляем прогресс пользователя
+        await fetch(`${nocodbConfig.apiUrl}/${record.Id}`, {
+          method: 'PATCH',
+          headers: {
+            'Content-Type': 'application/json',
+            'xc-token': nocodbConfig.apiToken
+          },
+          body: JSON.stringify({
+            progress: 2 // Устанавливаем прогресс на 2 (модуль 0 пройден)
+          })
+        });
+        
+        console.log('User progress updated successfully');
+      } catch (error) {
+        console.error('Error updating user progress:', error);
+      }
+    }
+    
+    function getCookie(name) {
+      const value = `; ${document.cookie}`;
+      const parts = value.split(`; ${name}=`);
+      if (parts.length === 2) return parts.pop().split(';').shift();
+    }
 
     // Обработчики событий
     startBtn.addEventListener('click', () => {
@@ -672,7 +875,10 @@
         if (currentBlockIndex === totalBlocks - 1) {
           nextBtn.textContent = 'Завершить';
           nextBtn.onclick = () => {
-            window.location.href = 'index.html';
+            // Обновляем прогресс пользователя
+            updateUserProgress();
+            // Показываем экран завершения
+            showCompletionModal();
           };
         }
       }
@@ -696,6 +902,10 @@
 
     reportBtn.addEventListener('click', () => {
       alert('Сообщение о проблеме будет добавлено в ближайшее время');
+    });
+    
+    completionBtn.addEventListener('click', () => {
+      window.location.href = 'index.html';
     });
 
     // Инициализация
