@@ -164,15 +164,15 @@
       border-radius: 16px;
       padding: 24px;
       box-shadow: 0 4px 16px rgba(255, 122, 0, 0.1);
-      transition: all 0.3s ease;
+      transition: all 0.2s ease;
       position: relative;
       cursor: default;
       margin-top: 30px;
       z-index: 2;
     }
 
-    .module:hover {
-      transform: translateY(-5px);
+    .module:active:not(.locked) {
+      transform: scale(0.98) translateY(2px);
     }
 
     .module.locked {
@@ -185,13 +185,7 @@
     }
 
     .module.current {
-      animation: pulse 2s infinite;
-    }
-
-    @keyframes pulse {
-      0% { box-shadow: 0 0 0 0 rgba(255, 122, 0, 0.4); }
-      70% { box-shadow: 0 0 0 20px rgba(255, 122, 0, 0); }
-      100% { box-shadow: 0 0 0 0 rgba(255, 122, 0, 0); }
+      box-shadow: 0 4px 16px rgba(255, 122, 0, 0.2);
     }
 
     .module-label {
@@ -242,10 +236,14 @@
       font-weight: 600;
       cursor: pointer;
       width: 100%;
-      transition: background 0.2s;
+      transition: background 0.2s, transform 0.1s;
     }
 
-    .module-btn:hover {
+    .module-btn:active:not(:disabled) {
+      transform: scale(0.98);
+    }
+
+    .module-btn:hover:not(:disabled) {
       background: var(--primary-light);
     }
 
@@ -253,23 +251,13 @@
       background: var(--success);
     }
 
-    .module-btn.completed:hover {
+    .module-btn.completed:hover:not(:disabled) {
       background: var(--success-light);
     }
 
     .module-btn.locked {
       background: var(--disabled);
       cursor: not-allowed;
-    }
-
-    .module-btn.pulse {
-      animation: pulseBtn 2s infinite;
-    }
-
-    @keyframes pulseBtn {
-      0% { transform: scale(1); }
-      50% { transform: scale(1.05); }
-      100% { transform: scale(1); }
     }
 
     .lock-icon {
@@ -300,19 +288,17 @@
       transition: width 1s ease;
     }
 
-    .progress-line-glow {
+    /* Connecting line */
+    .connecting-line {
       position: absolute;
-      height: 100%;
-      background: var(--success-light);
-      width: 0;
-      opacity: 0;
-      animation: progressGlow 2s infinite;
-    }
-
-    @keyframes progressGlow {
-      0% { width: 0; opacity: 0; }
-      50% { opacity: 1; }
-      100% { width: 100%; opacity: 0; }
+      height: 2px;
+      background: #DDD;
+      left: 50%;
+      right: 50%;
+      bottom: -20px;
+      transform: translateX(-50%);
+      width: 80%;
+      z-index: 1;
     }
 
     /* Menu Button Styles */
@@ -414,45 +400,6 @@
       background: #222;
     }
 
-    /* Chat Widget */
-    .chat-widget {
-      position: fixed;
-      bottom: 30px;
-      right: 30px;
-      width: 60px;
-      height: 60px;
-      background: var(--primary);
-      border-radius: 50%;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      cursor: pointer;
-      box-shadow: 0 4px 16px rgba(255, 122, 0, 0.2);
-      transition: transform 0.3s ease;
-      z-index: 1000;
-      text-decoration: none;
-      padding: 8px;
-      gap: 2px;
-    }
-
-    .chat-widget:hover {
-      transform: scale(1.1);
-    }
-
-    .chat-widget .ai-text {
-      color: var(--white);
-      font-size: 14px;
-      font-weight: bold;
-      line-height: 1;
-    }
-
-    .chat-widget .chat-icon {
-      font-size: 18px;
-      color: var(--white);
-      line-height: 1;
-    }
-
     /* Popup Styles */
     .popup-overlay {
       position: fixed;
@@ -487,6 +434,13 @@
     .popup-message {
       margin-bottom: 24px;
       color: var(--dark);
+      line-height: 1.4;
+    }
+
+    .popup-buttons {
+      display: flex;
+      gap: 12px;
+      justify-content: space-between;
     }
 
     .popup-button {
@@ -497,12 +451,22 @@
       border-radius: 8px;
       font-weight: 600;
       cursor: pointer;
-      width: 100%;
       transition: background 0.2s;
+      flex: 1;
+    }
+
+    .popup-button.secondary {
+      background: #EEE;
+      color: var(--dark);
+      flex: 0.5;
     }
 
     .popup-button:hover {
       background: var(--primary-light);
+    }
+
+    .popup-button.secondary:hover {
+      background: #DDD;
     }
 
     @media (max-width: 600px) {
@@ -531,6 +495,17 @@
 
       .progress-line {
         display: none;
+      }
+
+      .popup-buttons {
+        flex-direction: column;
+        gap: 8px;
+      }
+
+      .popup-button,
+      .popup-button.secondary {
+        width: 100%;
+        flex: none;
       }
     }
   </style>
@@ -567,7 +542,6 @@
     <div class="content">
       <div class="progress-line">
         <div class="progress-line-fill" id="progressFill"></div>
-        <div class="progress-line-glow" id="progressGlow"></div>
       </div>
       <div class="modules-grid" id="modules-container">
         <!-- Модули будут добавлены динамически -->
@@ -595,6 +569,26 @@
       lastCheckTime: 0,
       menuOpen: false
     };
+
+    // Функция для установки cookie
+    function setCookie(name, value, days) {
+      const date = new Date();
+      date.setTime(date.getTime() + (days * 24 * 60 * 60 * 1000));
+      const expires = "expires=" + date.toUTCString();
+      document.cookie = name + "=" + value + ";" + expires + ";path=/";
+    }
+
+    // Функция для получения cookie
+    function getCookie(name) {
+      const cookies = document.cookie.split('; ');
+      for (const cookie of cookies) {
+        const [cookieName, cookieValue] = cookie.split('=');
+        if (cookieName === name) {
+          return decodeURIComponent(cookieValue);
+        }
+      }
+      return null;
+    }
 
     // Функция для скрытия экрана загрузки
     function hideLoadingScreen() {
@@ -822,7 +816,6 @@
           labelClass += ' locked';
         } else if (isCurrent) {
           cardClass += ' current';
-          btnClass += ' pulse';
         }
 
         html += `
@@ -834,6 +827,7 @@
               ${buttonIcon ? buttonIcon + ' ' : ''}${buttonText}
             </button>
             ${lockIcon}
+            ${module.id === -1 ? '<div class="connecting-line"></div>' : ''}
           </div>
         `;
       });
@@ -846,22 +840,10 @@
     // Обновление прогресс-бара
     function updateProgressBar() {
       const progressFill = document.getElementById('progressFill');
-      const progressGlow = document.getElementById('progressGlow');
       const totalModules = 5; // Введение + 4 модуля
       const progressPercent = (state.progress / totalModules) * 100;
       
       progressFill.style.width = `${progressPercent}%`;
-      
-      // Анимация заполнения линии прогресса
-      if (state.progress > 0) {
-        setTimeout(() => {
-          progressGlow.style.width = `${progressPercent}%`;
-          progressGlow.style.opacity = '1';
-          setTimeout(() => {
-            progressGlow.style.opacity = '0';
-          }, 2000);
-        }, 1000);
-      }
     }
 
     // Обработчик клика по модулю (теперь только по кнопке)
@@ -891,12 +873,12 @@
       popup.className = 'popup-overlay';
       popup.innerHTML = `
         <div class="popup-content">
-          <h3 class="popup-title">Требуется полный курс</h3>
-          <p class="popup-message">Для доступа к этому модулю необходимо приобрести полную версию курса.</p>
-          <button id="buyButton" class="popup-button">Купить полный курс</button>
-          <button id="closePopup" style="margin-top: 12px; background: transparent; border: none; color: var(--primary); font-weight: 600; cursor: pointer;">
-            Закрыть
-          </button>
+          <h3 class="popup-title">Ой-ой! Нет доступа</h3>
+          <p class="popup-message">Доступ для этого модуля открыт в полной версии курса</p>
+          <div class="popup-buttons">
+            <button id="buyButton" class="popup-button">Купить полный курс</button>
+            <button id="closePopup" class="popup-button secondary">Ок</button>
+          </div>
         </div>
       `;
       
@@ -918,8 +900,8 @@
       popup.className = 'popup-overlay';
       popup.innerHTML = `
         <div class="popup-content">
-          <h3 class="popup-title">Сначала пройдите предыдущие модули</h3>
-          <p class="popup-message">Для доступа к модулю ${moduleId} необходимо сначала завершить модуль ${moduleId - 1}.</p>
+          <h3 class="popup-title">Не так быстро!</h3>
+          <p class="popup-message">Для доступа к модулю ${moduleId} нужно пройти предыдущий модуль ${moduleId - 1}.</p>
           <button id="closePopup" class="popup-button">Понятно</button>
         </div>
       `;
@@ -958,6 +940,9 @@
 
         state.userId = user.id.toString();
         state.username = user.username || null;
+
+        // Сохраняем ID пользователя в cookie
+        setCookie('tg_user_id', state.userId, 30);
 
         // Устанавливаем данные пользователя из Telegram
         document.getElementById('userName').textContent = 
