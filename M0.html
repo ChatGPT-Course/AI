@@ -711,18 +711,30 @@
     let emptySpace = null;
     let isFirstBlockAdded = false;
 
+    // Проверяем наличие cookie при загрузке
+    document.addEventListener('DOMContentLoaded', function() {
+      const userId = getCookie('tg_user_id');
+      if (!userId) {
+        alert('Ошибка: ID пользователя не найден. Пожалуйста, войдите в систему.');
+        window.location.href = 'login.html'; // Перенаправляем на страницу входа
+      }
+    });
+
     // Функции
+    function getCookie(name) {
+      const value = `; ${document.cookie}`;
+      const parts = value.split(`; ${name}=`);
+      if (parts.length === 2) return parts.pop().split(';').shift();
+    }
+
     function addContentBlock(index) {
-      // Если это первый блок и он уже добавлен - пропускаем
       if (index === 0 && isFirstBlockAdded) return;
       
-      // Удаляем предыдущее пустое пространство
       if (emptySpace) {
         emptySpace.remove();
         emptySpace = null;
       }
 
-      // Создаем блок
       const block = document.createElement('div');
       block.className = 'content-block';
       
@@ -743,22 +755,17 @@
       content.innerHTML = contentBlocks[index].content;
       block.appendChild(content);
       
-      // Добавляем блок в контейнер
       cardsContainer.appendChild(block);
       
-      // Добавляем пустое пространство после блока
       emptySpace = document.createElement('div');
       emptySpace.className = 'empty-space';
       cardsContainer.appendChild(emptySpace);
       
-      // Помечаем первый блок как добавленный
       if (index === 0) isFirstBlockAdded = true;
       
-      // Показываем блок с анимацией
       setTimeout(() => {
         block.classList.add('visible');
         
-        // Прокручиваем так, чтобы заголовок блока был сразу под шапкой
         const headerHeight = document.querySelector('.header-bar').offsetHeight;
         const blockTop = block.offsetTop;
         
@@ -788,7 +795,6 @@
         confetti.style.animationDelay = (Math.random() * 2) + 's';
         document.body.appendChild(confetti);
         
-        // Удаляем конфетти после анимации
         setTimeout(() => {
           confetti.remove();
         }, 7000);
@@ -800,70 +806,73 @@
       completionModal.classList.add('show');
     }
     
-    function hideCompletionModal() {
-      completionModal.classList.remove('show');
-    }
-    
-async function updateUserProgress() {
-  try {
-    // Получаем ID пользователя из cookie
-    const userId = getCookie('tg_user_id');
-    if (!userId) {
-      console.error('User ID not found in cookies');
-      return;
-    }
-    
-    console.log('Updating progress for user ID:', userId);
-    
-    // Ищем запись пользователя в NocoDB
-    const searchResponse = await fetch(`${nocodbConfig.apiUrl}?where=(tg_user_id,eq,${userId})`, {
-      headers: {
-        'xc-token': nocodbConfig.apiToken,
-        'Content-Type': 'application/json'
+    async function updateUserProgress() {
+      try {
+        const userId = getCookie('tg_user_id');
+        if (!userId) {
+          console.error('User ID not found in cookies');
+          return { success: false, message: 'User ID not found' };
+        }
+
+        console.log('Updating progress for user ID:', userId);
+
+        // 1. Находим запись пользователя в NocoDB
+        const searchUrl = `${nocodbConfig.apiUrl}?where=(tg_user_id,eq,${userId})`;
+        const searchResponse = await fetch(searchUrl, {
+          headers: {
+            'xc-auth': nocodbConfig.apiToken,
+            'Content-Type': 'application/json'
+          }
+        });
+
+        if (!searchResponse.ok) {
+          throw new Error(`Search failed: ${searchResponse.status}`);
+        }
+
+        const searchData = await searchResponse.json();
+        console.log('Search response:', searchData);
+
+        if (!searchData.list || searchData.list.length === 0) {
+          throw new Error('User record not found');
+        }
+
+        const record = searchData.list[0];
+        const recordId = record.Id;
+
+        if (!recordId) {
+          throw new Error('Record ID not found');
+        }
+
+        console.log('Found record ID:', recordId);
+
+        // 2. Обновляем прогресс пользователя
+        const updateUrl = `${nocodbConfig.apiUrl}/${recordId}`;
+        const updateResponse = await fetch(updateUrl, {
+          method: 'PATCH',
+          headers: {
+            'Content-Type': 'application/json',
+            'xc-auth': nocodbConfig.apiToken
+          },
+          body: JSON.stringify({
+            progress: 2 // Устанавливаем прогресс на 2 (модуль 0 пройден)
+          })
+        });
+
+        if (!updateResponse.ok) {
+          throw new Error(`Update failed: ${updateResponse.status}`);
+        }
+
+        const updateResult = await updateResponse.json();
+        console.log('Update successful:', updateResult);
+        return { success: true, message: 'Progress updated' };
+
+      } catch (error) {
+        console.error('Error updating progress:', error);
+        return { 
+          success: false, 
+          message: error.message || 'Failed to update progress' 
+        };
       }
-    });
-    
-    const searchData = await searchResponse.json();
-    console.log('Search response:', searchData);
-    
-    if (!searchData.list || searchData.list.length === 0) {
-      console.error('User record not found');
-      return;
-    }
-    
-    const record = searchData.list[0];
-    const recordId = record.Id || record.id; // Пробуем оба варианта
-    
-    console.log('Found record ID:', recordId);
-    
-    // Обновляем прогресс пользователя
-    const updateResponse = await fetch(`${nocodbConfig.apiUrl}/${recordId}`, {
-      method: 'PATCH',
-      headers: {
-        'Content-Type': 'application/json',
-        'xc-token': nocodbConfig.apiToken
-      },
-      body: JSON.stringify({
-        progress: 2 // Устанавливаем прогресс на 2 (модуль 0 пройден)
-      })
-    });
-    
-    const updateResult = await updateResponse.json();
-    console.log('Update response:', updateResult);
-    
-    if (updateResponse.ok) {
-      console.log('User progress updated successfully');
-    } else {
-      console.error('Failed to update progress:', updateResult);
-    }
-  } catch (error) {
-    console.error('Error updating user progress:', error);
-  }
-}
-    function getCookie(name) {
-      const value = `; ${document.cookie}`;
-      const parts = value.split(`; ${name}=`);
-      if (parts.length === 2) return parts.pop().split(';').shift();
     }
 
     // Обработчики событий
@@ -881,7 +890,7 @@ async function updateUserProgress() {
       window.location.href = 'index.html';
     });
 
-    nextBtn.addEventListener('click', () => {
+    nextBtn.addEventListener('click', async function() {
       if (currentBlockIndex < totalBlocks - 1) {
         currentBlockIndex++;
         addContentBlock(currentBlockIndex);
@@ -894,11 +903,19 @@ async function updateUserProgress() {
         
         if (currentBlockIndex === totalBlocks - 1) {
           nextBtn.textContent = 'Завершить';
-          nextBtn.onclick = () => {
-            // Обновляем прогресс пользователя
-            updateUserProgress();
-            // Показываем экран завершения
-            showCompletionModal();
+          nextBtn.onclick = async () => {
+            nextBtn.disabled = true;
+            nextBtn.textContent = 'Сохранение...';
+            
+            const result = await updateUserProgress();
+            
+            if (result.success) {
+              showCompletionModal();
+            } else {
+              alert(`Ошибка: ${result.message}`);
+              nextBtn.disabled = false;
+              nextBtn.textContent = 'Завершить';
+            }
           };
         }
       }
