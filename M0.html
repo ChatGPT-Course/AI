@@ -800,68 +800,88 @@
     }
     
     // Обновление прогресса пользователя в NocoDB
-    async function updateUserProgress() {
-      try {
-        const userId = getCookie('tg_user_id');
-        if (!userId) {
-          console.error('ID пользователя не найден в cookie');
-          return { success: false, message: 'Не удалось идентифицировать пользователя' };
-        }
-
-        console.log('Обновление прогресса для пользователя:', userId);
-
-        // 1. Ищем пользователя в таблице по tg_user_id (первый столбец)
-        const searchUrl = `${nocodbConfig.apiUrl}?where=(tg_user_id,eq,${userId})`;
-        const searchResponse = await fetch(searchUrl, {
-          headers: {
-            'xc-auth': nocodbConfig.apiToken,
-            'Content-Type': 'application/json'
-          }
-        });
-
-        if (!searchResponse.ok) {
-          throw new Error(`Ошибка поиска: ${searchResponse.status}`);
-        }
-
-        const searchData = await searchResponse.json();
-        console.log('Результат поиска:', searchData);
-
-        if (!searchData.list || searchData.list.length === 0) {
-          throw new Error('Пользователь не найден в базе данных');
-        }
-
-        const userRecord = searchData.list[0];
-        const recordId = userRecord.Id;
-
-        // 2. Обновляем только поле progress (шестой столбец)
-        const updateUrl = `${nocodbConfig.apiUrl}/${recordId}`;
-        const updateResponse = await fetch(updateUrl, {
-          method: 'PATCH',
-          headers: {
-            'Content-Type': 'application/json',
-            'xc-auth': nocodbConfig.apiToken
-          },
-          body: JSON.stringify({
-            progress: 2 // Устанавливаем прогресс на 2
-          })
-        });
-
-        if (!updateResponse.ok) {
-          throw new Error(`Ошибка обновления: ${updateResponse.status}`);
-        }
-
-        const updateResult = await updateResponse.json();
-        console.log('Прогресс успешно обновлен:', updateResult);
-        return { success: true, message: 'Прогресс сохранен' };
-
-      } catch (error) {
-        console.error('Ошибка при обновлении прогресса:', error);
-        return { 
-          success: false, 
-          message: error.message || 'Не удалось сохранить прогресс' 
-        };
-      }
+async function updateUserProgress() {
+  try {
+    const userId = getCookie('tg_user_id');
+    if (!userId) {
+      console.error('User ID not found in cookies');
+      return { success: false, message: 'User ID not found' };
     }
+
+    console.log('Trying to update progress for user ID:', userId);
+
+    // 1. Формируем URL для поиска пользователя
+    const searchUrl = new URL(nocodbConfig.apiUrl);
+    searchUrl.searchParams.append('where', `(tg_user_id,eq,${userId})`);
+    
+    console.log('Search URL:', searchUrl.toString());
+
+    // 2. Пробуем разные варианты авторизации
+    const headers = {
+      'Content-Type': 'application/json',
+      'xc-token': nocodbConfig.apiToken, // Основной вариант
+      'xc-auth': nocodbConfig.apiToken,  // Альтернативный вариант
+      'Authorization': `Bearer ${nocodbConfig.apiToken}` // Ещё один вариант
+    };
+
+    // 3. Отправляем запрос с обработкой CORS
+    const searchResponse = await fetch(searchUrl, {
+      method: 'GET',
+      headers: headers,
+      credentials: 'include', // Важно для работы с куками
+      mode: 'cors' // Явно указываем режим CORS
+    });
+
+    console.log('Search response status:', searchResponse.status);
+    
+    if (!searchResponse.ok) {
+      const errorText = await searchResponse.text();
+      console.error('Search failed with response:', errorText);
+      throw new Error(`Search failed: ${searchResponse.status}`);
+    }
+
+    const searchData = await searchResponse.json();
+    console.log('Search response data:', searchData);
+
+    if (!searchData.list || searchData.list.length === 0) {
+      throw new Error('User record not found');
+    }
+
+    const recordId = searchData.list[0].Id;
+    console.log('Found record ID:', recordId);
+
+    // 4. Обновление записи
+    const updateUrl = `${nocodbConfig.apiUrl}/${recordId}`;
+    console.log('Update URL:', updateUrl);
+    
+    const updateResponse = await fetch(updateUrl, {
+      method: 'PATCH',
+      headers: headers,
+      body: JSON.stringify({ progress: 2 }),
+      credentials: 'include',
+      mode: 'cors'
+    });
+
+    console.log('Update response status:', updateResponse.status);
+    
+    if (!updateResponse.ok) {
+      const updateError = await updateResponse.text();
+      console.error('Update failed with response:', updateError);
+      throw new Error(`Update failed: ${updateResponse.status}`);
+    }
+
+    const updateResult = await updateResponse.json();
+    console.log('Update successful:', updateResult);
+    return { success: true, message: 'Progress updated' };
+
+  } catch (error) {
+    console.error('Full error details:', error);
+    return { 
+      success: false, 
+      message: `Ошибка соединения с сервером: ${error.message}` 
+    };
+  }
+}
 
     // Завершение модуля
     async function completeModule() {
