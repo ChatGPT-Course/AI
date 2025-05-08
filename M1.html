@@ -1,1 +1,890 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <title>Модуль 1: Основы работы с ChatGPT</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    :root {
+      --orange: #FF9800;
+      --yellow: #FFF9C4;
+      --white: #FFF;
+      --text: #222;
+      --gray: #F2F2F2;
+      --header-gray: #E0E0E0;
+      --transition: 0.6s cubic-bezier(.77,0,.18,1);
+      --disabled: #CCCCCC;
+      --blue: #4285F4;
+    }
+    body {
+      margin: 0;
+      min-height: 100vh;
+      font-family: 'Segoe UI', 'Roboto', Arial, sans-serif;
+      background: var(--white);
+      color: var(--text);
+      overflow-x: hidden;
+      -webkit-tap-highlight-color: transparent;
+      line-height: 1.6;
+    }
+    .splash {
+      position: fixed;
+      inset: 0;
+      background: var(--white);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      z-index: 10;
+      transition: opacity var(--transition), visibility var(--transition);
+      padding: 2rem 1rem;
+    }
+    .splash.hide {
+      opacity: 0;
+      visibility: hidden;
+      pointer-events: none;
+    }
+    .splash h1 {
+      font-size: 2.1rem;
+      color: var(--orange);
+      margin-bottom: 2rem;
+      letter-spacing: 1px;
+      text-shadow: 0 2px 16px #ff980044;
+      font-weight: 700;
+      animation: fadeIn 1.2s;
+      text-align: center;
+      word-break: break-word;
+      line-height: 1.2;
+    }
+    .splash button {
+      padding: 1rem 2.5rem;
+      font-size: 1.2rem;
+      background: linear-gradient(90deg, var(--yellow), var(--orange));
+      color: var(--text);
+      border: none;
+      border-radius: 2rem;
+      cursor: pointer;
+      font-weight: 600;
+      box-shadow: 0 4px 24px #ff980055;
+      transition: background 0.3s, transform 0.2s;
+      animation: fadeInUp 1.5s;
+    }
+    .splash button:hover {
+      background: linear-gradient(90deg, var(--orange), var(--yellow));
+      transform: scale(1.05);
+    }
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(-30px);}
+      to { opacity: 1; transform: translateY(0);}
+    }
+    @keyframes fadeInUp {
+      from { opacity: 0; transform: translateY(30px);}
+      to { opacity: 1; transform: translateY(0);}
+    }
+    .main-content {
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity var(--transition);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+    .main-content.show {
+      opacity: 1;
+      pointer-events: auto;
+    }
+    .header-bar {
+      display: flex;
+      align-items: center;
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100vw;
+      height: 56px;
+      background: var(--header-gray);
+      z-index: 5;
+      box-shadow: 0 2px 12px #ff980022;
+      padding: 0 0.5rem;
+    }
+    .exit-btn {
+      background: var(--white);
+      border: none;
+      color: var(--text);
+      font-size: 1.2rem;
+      border-radius: 8px;
+      width: 40px;
+      height: 40px;
+      margin-right: 1rem;
+      cursor: pointer;
+      font-weight: 700;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: all 0.2s;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    }
+    .exit-btn:hover {
+      background: #e0e0e0;
+      transform: scale(1.07);
+    }
+    .exit-btn span {
+      display: block;
+      line-height: 1;
+      transform: translateX(-1px);
+    }
+    .progress-bar {
+      flex: 1;
+      height: 12px;
+      background: #fff3;
+      border-radius: 6px;
+      position: relative;
+      margin-left: 0.5rem;
+      margin-right: 0.5rem;
+      overflow: hidden;
+      border: 1px solid #ddd;
+      max-width: calc(100% - 160px);
+    }
+    .progress-bar-inner {
+      height: 100%;
+      width: 0;
+      background: linear-gradient(90deg, var(--yellow), var(--orange));
+      border-radius: 6px;
+      transition: width 0.5s cubic-bezier(.77,0,.18,1);
+      z-index: 2;
+    }
+    .cards-container {
+      margin-top: 72px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      width: 100%;
+      min-height: calc(100vh - 128px);
+      padding-bottom: 6rem;
+    }
+    .content-block {
+      max-width: 600px;
+      width: 95%;
+      padding: 1.5rem 1.2rem;
+      font-size: 1.1rem;
+      color: #333;
+      margin-bottom: 1rem;
+      opacity: 0;
+      transform: translateY(20px);
+      transition: opacity 0.5s ease-out, transform 0.5s ease-out;
+      position: relative;
+      box-sizing: border-box;
+      transition-delay: 0.1s;
+    }
+    .content-block.visible {
+      opacity: 1;
+      transform: translateY(0);
+    }
+    .content-title {
+      color: var(--orange);
+      font-weight: 700;
+      font-size: 1.3rem;
+      margin: 0 0 0.8rem 0;
+      display: flex;
+      align-items: center;
+    }
+    .content-counter {
+      font-size: 0.9rem;
+      color: #666;
+      background: rgba(255, 255, 255, 0.7);
+      padding: 0.2rem 0.6rem;
+      border-radius: 1rem;
+      margin-left: 0.8rem;
+    }
+    .content-block ul {
+      padding-left: 1rem;
+      margin: 0.8rem 0;
+    }
+    .content-block li {
+      margin-bottom: 0.4rem;
+      position: relative;
+    }
+    .tip-card {
+      background: rgba(255, 248, 225, 0.8);
+      border-left: 4px solid var(--orange);
+      padding: 0.8rem 1rem;
+      margin: 1rem 0;
+      border-radius: 0 8px 8px 0;
+    }
+    .tip-card-title {
+      font-weight: 700;
+      color: var(--orange);
+      margin: 0 0 0.3rem 0;
+      font-size: 1rem;
+    }
+    .buttons-container {
+      position: fixed;
+      bottom: 1.5rem;
+      left: 0;
+      width: 100%;
+      display: flex;
+      justify-content: center;
+      gap: 0.8rem;
+      z-index: 2;
+      padding: 0 1rem;
+      box-sizing: border-box;
+    }
+    .next-btn {
+      padding: 0.8rem 1.8rem;
+      font-size: 1rem;
+      background: linear-gradient(90deg, var(--yellow), var(--orange));
+      color: var(--text);
+      border: none;
+      border-radius: 2rem;
+      cursor: pointer;
+      font-weight: 600;
+      box-shadow: 0 4px 12px rgba(255, 152, 0, 0.3);
+      transition: all 0.3s;
+      opacity: 0;
+      pointer-events: none;
+      min-width: 120px;
+      position: relative;
+      overflow: hidden;
+    }
+    .next-btn.centered {
+      margin: 0 auto;
+    }
+    .next-btn.show {
+      opacity: 1;
+      pointer-events: auto;
+      animation: fadeInUp 1s;
+    }
+    .next-btn:hover:not(:disabled) {
+      background: linear-gradient(90deg, var(--orange), var(--yellow));
+      transform: scale(1.05);
+    }
+    .next-btn:disabled {
+      background: var(--disabled);
+      cursor: not-allowed;
+      transform: none !important;
+    }
+    .guide-btn {
+      padding: 0.8rem 1rem;
+      font-size: 0.9rem;
+      background: linear-gradient(90deg, var(--blue), #3367D6);
+      color: white;
+      border: none;
+      border-radius: 2rem;
+      cursor: pointer;
+      font-weight: 600;
+      box-shadow: 0 4px 12px rgba(66, 133, 244, 0.3);
+      transition: all 0.3s;
+      opacity: 0;
+      pointer-events: none;
+      min-width: 120px;
+    }
+    .guide-btn.show {
+      opacity: 1;
+      pointer-events: auto;
+      animation: fadeInUp 1s;
+    }
+    .guide-btn:hover {
+      background: linear-gradient(90deg, #3367D6, var(--blue));
+      transform: scale(1.05);
+    }
+    .report-btn {
+      background: var(--white);
+      border: none;
+      color: var(--text);
+      font-size: 1.2rem;
+      border-radius: 8px;
+      width: 40px;
+      height: 40px;
+      cursor: pointer;
+      font-weight: 700;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: all 0.2s;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+      margin-left: 0.5rem;
+    }
+    .report-btn:hover {
+      background: #e0e0e0;
+      transform: scale(1.07);
+    }
+    .content-image {
+      width: 100%;
+      max-width: 500px;
+      border-radius: 8px;
+      margin: 0 0 1rem 0;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+      border: 1px solid #eee;
+      display: block;
+    }
+    .divider {
+      height: 1px;
+      background-color: #ddd;
+      margin: 1.5rem 0;
+      width: 100%;
+    }
+    .empty-space {
+      height: 50vh;
+      width: 100%;
+    }
+    /* Новые стили для модального окна завершения */
+    .completion-modal {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0,0,0,0.7);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      z-index: 1000;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.3s ease;
+    }
+    .completion-modal.active {
+      opacity: 1;
+      pointer-events: auto;
+    }
+    .completion-content {
+      background: white;
+      padding: 2rem;
+      border-radius: 16px;
+      text-align: center;
+      max-width: 90%;
+      width: 350px;
+      box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+      transform: scale(0.9);
+      transition: transform 0.3s ease;
+    }
+    .completion-modal.active .completion-content {
+      transform: scale(1);
+    }
+    .checkmark {
+      width: 80px;
+      height: 80px;
+      margin: 0 auto 1.5rem;
+      position: relative;
+    }
+    .checkmark-circle {
+      width: 100%;
+      height: 100%;
+      border-radius: 50%;
+      background: rgba(76, 175, 80, 0.1);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
+    .checkmark-icon {
+      color: #4CAF50;
+      font-size: 50px;
+    }
+    .completion-title {
+      font-size: 1.5rem;
+      font-weight: 700;
+      margin-bottom: 1rem;
+      color: #333;
+    }
+    .completion-btn {
+      padding: 0.8rem 2rem;
+      background: linear-gradient(90deg, var(--yellow), var(--orange));
+      color: var(--text);
+      border: none;
+      border-radius: 2rem;
+      font-weight: 600;
+      cursor: pointer;
+      margin-top: 1.5rem;
+      transition: all 0.3s;
+    }
+    .completion-btn:hover {
+      background: linear-gradient(90deg, var(--orange), var(--yellow));
+      transform: scale(1.05);
+    }
+    /* Анимация конфетти */
+    .confetti {
+      position: fixed;
+      width: 10px;
+      height: 10px;
+      background-color: #f00;
+      opacity: 0;
+      z-index: 999;
+      animation: confetti-fall 3s linear forwards;
+    }
+    @keyframes confetti-fall {
+      0% {
+        transform: translateY(-100vh) rotate(0deg);
+        opacity: 1;
+      }
+      100% {
+        transform: translateY(100vh) rotate(360deg);
+        opacity: 0;
+      }
+    }
+    @media (max-width: 600px) {
+      .splash h1 {
+        font-size: 1.5rem;
+      }
+      .content-block {
+        padding: 1.2rem 1rem;
+        font-size: 1rem;
+      }
+      .header-bar {
+        height: 48px;
+      }
+      .exit-btn, .report-btn {
+        width: 36px;
+        height: 36px;
+      }
+      .buttons-container {
+        bottom: 1rem;
+      }
+      .next-btn, .guide-btn {
+        padding: 0.7rem 1rem;
+        min-width: 110px;
+      }
+      .empty-space {
+        height: 40vh;
+      }
+      .completion-content {
+        padding: 1.5rem;
+      }
+      .checkmark {
+        width: 60px;
+        height: 60px;
+      }
+      .checkmark-icon {
+        font-size: 40px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="splash" id="splash">
+    <div style="position: absolute; top: 0.5rem; left: 0.5rem; width: 100%; display: flex;">
+      <button class="exit-btn" id="splashExitBtn" title="Выйти"><span>&#8592;</span></button>
+    </div>
+    <h1>Модуль 1:<br>Основы работы с ChatGPT</h1>
+    <button id="startBtn">Начать</button>
+  </div>
 
+  <div class="main-content" id="mainContent">
+    <div class="header-bar">
+      <button class="exit-btn" id="exitBtn" title="Выйти"><span>&#8592;</span></button>
+      <div class="progress-bar">
+        <div class="progress-bar-inner" id="progressBar"></div>
+      </div>
+      <button class="report-btn" id="reportBtn" title="Сообщить о проблеме">🚩</button>
+    </div>
+    
+    <div class="cards-container" id="cardsContainer"></div>
+    
+    <div class="buttons-container">
+      <button class="next-btn centered" id="nextBtn">Далее</button>
+      <button class="guide-btn" id="guideBtn"><span class="emoji">🔗</span> Детальный гайд</button>
+    </div>
+    
+    <div id="exitModal" style="display:none; position:fixed; z-index:100; left:0; top:0; width:100vw; height:100vh; background:rgba(0,0,0,0.25); align-items:center; justify-content:center;">
+      <div style="background:#fff; border-radius:1.2rem; max-width:90vw; width:340px; padding:2rem 1.2rem; box-shadow:0 8px 32px #0002; text-align:center;">
+        <div style="font-size:1.15rem; margin-bottom:1.5rem; color:#222;">Вы действительно хотите выйти? Ваш прогресс не сохранится.</div>
+        <div style="display:flex; gap:1rem; justify-content:center;">
+          <button id="modalExitBtn" style="background:linear-gradient(90deg, var(--orange), var(--yellow)); color:#222; border:none; border-radius:1.5rem; padding:0.7rem 1.5rem; font-weight:600; cursor:pointer;">Выйти</button>
+          <button id="modalStayBtn" style="background:#eee; color:#222; border:none; border-radius:1.5rem; padding:0.7rem 1.5rem; font-weight:600; cursor:pointer;">Остаться</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Модальное окно завершения модуля -->
+  <div class="completion-modal" id="completionModal">
+    <div class="completion-content">
+      <div class="checkmark">
+        <div class="checkmark-circle">
+          <div class="checkmark-icon">✓</div>
+        </div>
+      </div>
+      <div class="completion-title">Модуль 1 пройден!</div>
+      <button class="completion-btn" id="completionBtn">Вернуться в меню</button>
+    </div>
+  </div>
+
+  <script>
+    // Конфигурация NocoDB
+    const config = {
+      orgs: 'weamcfo6',
+      projectName: 'p27jdsmk69wuimh',
+      tableName: 'mc6qh91f060pv4y',
+      apiToken: 'bocQfycJpJsTG_tbwEf8ma8E5rhoig0njMDXFWtJ'
+    };
+
+    // Элементы
+    const splash = document.getElementById('splash');
+    const startBtn = document.getElementById('startBtn');
+    const mainContent = document.getElementById('mainContent');
+    const nextBtn = document.getElementById('nextBtn');
+    const guideBtn = document.getElementById('guideBtn');
+    const progressBar = document.getElementById('progressBar');
+    const cardsContainer = document.getElementById('cardsContainer');
+    const exitBtn = document.getElementById('exitBtn');
+    const splashExitBtn = document.getElementById('splashExitBtn');
+    const reportBtn = document.getElementById('reportBtn');
+    const exitModal = document.getElementById('exitModal');
+    const modalExitBtn = document.getElementById('modalExitBtn');
+    const modalStayBtn = document.getElementById('modalStayBtn');
+    const completionModal = document.getElementById('completionModal');
+    const completionBtn = document.getElementById('completionBtn');
+
+    // Все контентные блоки
+    const contentBlocks = [
+      {
+        title: "Экран 1: Приветствие",
+        content: `🔍 Привет! Добро пожаловать в модуль, который покажет, что начать работать с ChatGPT – это проще, чем кажется, особенно если вы никогда с этим не сталкивались.<br><br>
+        В этом модуле вы узнаете:<br>
+        ☑ Что такое ChatGPT и как он «думает»<br>
+        ☑ Как правильно задавать ему вопросы, чтобы получать понятные и полезные ответ<br>
+        ☑ И главное — как сразу применить это в реальной жизни: для работы, учебы, хобби или просто для себя<br><br>
+        Будет быстро, без заумных терминов, простыми словами и с примерами. Если готовы начинать, нажимайте кнопку ниже и погнали ✅️`
+      },
+      {
+        title: "Экран 2: Что такое ChatGPT ?",
+        content: `ChatGPT — это большая языковая модель, если говорить по-умному.<br><br>
+        А если по-простому — это как огромная цифровая библиотека, которая хранит и знает наизусть миллионы текстов: книги, статьи, инструкции, посты, анекдоты, рецепты и цитаты всех известных людей.<br><br>
+        <b>Интересный факт:</b><br>
+        Если считать, что человек читает со скоростью 300 слов в минуту, то для прочтения всей информации, на которой был обучен ChatGPT, потребуется примерно 16 666 667 часов или 5130 лет непрерывного чтения 😊<br><br>
+        <b>Поэтому ChatGPT умеет:</b><br><br>
+        - Отвечать на любые вопросы<br>
+        <i>«Как сварить рис?» или «Что подарить коллеге?»</i><br><br>
+        - Составлять и редактировать тексты<br>
+        <i>— посты, поздравления, истории, статьи</i><br><br>
+        - Придумывать идеи<br>
+        <i>— для подарков, ужина, выходных, проектов</i><br><br>
+        - Помогать с учебой<br>
+        <i>— объяснять сложные темы простыми словами</i><br><br>
+        - Планировать<br>
+        <i>— путешествия, день, бюджет, обучение</i><br><br>
+        <div class="divider"></div>
+        [✔️] А ещё поддержать диалог, выступить в роли психолога, составить бизнес-план, проанализировать рынок, составить структуру сайта, помочь собрать резюме, придумать сценарий праздника и многое другое…<br><br>
+        [🔴️] Но важно понимать, что ChatGPT не хранит готовые ответы. Вместо этого он каждый раз собирает их заново, опираясь на свою базу знаний.<br><br>
+        [🔴️] Именно поэтому от того, как вы сформулируете свой запрос к нему, будет зависеть и качество его ответа. Но об этом далее…`
+      },
+      {
+        title: "Экран 3: Как ChatGPT формирует ответы",
+        content: `- Принцип его работы похож на игру в «Угадай слово». Когда вы пишете «Собака сидит на…», он может продолжить:<br><br>
+        - …коврике<br>
+        - …полу<br>
+        - …биване<br>
+        - …лужайке<br>
+        - …лебцери<br><br>
+        Делает он это, предсказывая следующее слово, на основе примеров из текстов, на которых был «обучен».<br><br>
+        ✔ Чем понятнее ваш запрос, тем точнее будет его ответ. Если формулировка слишком общая или расплывчатая, ChatGPT может ошибиться или даже выдумать информацию, которой не существует.<br><br>
+        <div class="divider"></div>
+        <b>Давайте закрепим</b><br><br>
+        <b>Что сделает ChatGPT, если ваш запрос будет нечетким или неточным?</b><br><br>
+        - Ответить случайно<br>
+        - Попросить уточнить вопрос<br>
+        - Выдумать ответ<br>
+        - Проверить ответ<br><br>
+        ✔ Правильный ответ: <b>выдумает</b>. ChatGPT постарается угадать, что вы имели в виду, но может и ошибиться. Поэтому четкие формулировки всегда работают лучше.`
+      },
+      {
+        title: "Экран 4: Что такое промит?",
+        content: `- Промит — это и есть ваш запрос к ChatGPT. Именно с него всё начинается.<br><br>
+        - От того, насколько чётко вы сформулируете промит, зависит то, насколько релевантным будет ответ.<br><br>
+        <b>Хороший промит:</b><br>
+        Придумай забавную историю про кола по имени Рыжик, который отправился в лес на поиски волшебной мыши. Добавь неожиданный поворот в сюжете.<br><br>
+        <b>Слабый промит:</b><br>
+        Расскажи что-нибудь про кола<br><br>
+        - Понятный запрос = понятный ответ. Всё просто.`
+      },
+      {
+        title: "Экран 5: Потренируемся на практике",
+        content: `В практических заданиях вы можете использовать встроенный ChatGPT, нажав ниже на кнопку [Открыть ChatGPT], или использовать свой вариант.<br><br>
+        ✔️ Попросите ChatGPT придумать продолжение фразы, используя разные проиты:<br><br>
+        <b>☜ Слабый:</b><br>
+        Жили-были в далекой стране… Придумай продолжение.<br><br>
+        <b>📝 Развёрнутый:</b><br>
+        Жили-были в далекой стране принц и принцесса. Придумай продолжение, где они находят загадочный артефакт, который меняет их судьбу.<br><br>
+        ✔️ Обратите внимание, как детализация повлияет на ответ<br><br>
+        💡 Лайфхак: когда ваша история будет готова, можно попросить ChatGPT сделать к ней иллюстрацию*<br><br>
+        <i>*не будет работать во встроенном в курс ChatGPT – нужно использовать свой</i><br><br>
+        После того как ChatGPT придумал историю, попросите его нарисовать к ней картинку и посмотрите, как она оживает 😊️`
+      },
+      {
+        title: "Экран 6: Некоторые практические примеры использования ChatGPT",
+        content: `1. <b>Исправить ошибки в тексте</b><br>
+        https://chatopt.com/share/6818dbcf-564-8011-b0a5-de1f0dc69edc<br><br>
+        2. <b>Написать вовлекающий пост</b><br>
+        https://chatopt.com/share/6818df63-6460-8011-bae4-20dec61d729f<br><br>
+        3. <b>Перевести на другие языки</b><br>
+        https://chatopt.com/share/6818e010-de38-8011-ac8b-0e37bc563cad<br><br>
+        4. <b>Сделать выжимку из статьи</b><br>
+        https://chatopt.com/share/6818e202-e7b8-8011-8976-324ad3a59b16<br><br>
+        5. <b>Объяснить по принципу Парето</b><br>
+        https://chatopt.com/share/6818e2ce-5578-8011-866d-52a567fd1b96<br><br>
+        6. <b>Составить план обучения на 7 дней</b><br>
+        https://chatopt.com/share/6818e37b-5bd8-8011-b343-3e91c33094e6<br><br>
+        7. <b>Кратко пересказать книгу</b><br>
+        https://chatopt.com/share/6818e30-7890-8011-878f-797671736d36<br><br>
+        8. <b>Составить контент-план на 5 дней</b><br>
+        https://chatopt.com/share/6818e4d3-5918-8011-aeb5-e04d128df2f2<br><br>
+        9. <b>Придумать сценарий спектакля</b><br>
+        https://chatopt.com/share/6818e60c-de34-8011-9321-388329d56d984<br><br>
+        10. <b>Подобрать базовый гардероб</b><br>
+        https://chatopt.com/share/6818e718-31d0-8011-9061-fdb3ebac95dd<br><br>
+        <div class="divider"></div>
+        📌 <b>Лайфхак:</b> вы сами можете попросить ChatGPT предложить разные варианты его использования в повседневной жизни или в вашей работе`
+      },
+      {
+        title: "Экран 7: Как уточнять запросы",
+        content: `- ChatGPT — это не волшебная кнопка, нажав на которую вы гарантировано будете получать нужный результат, поэтому одного запроса может оказаться недостаточно. Но не отчаивайтесь – как и с любым собеседником, достаточно лишь уточнить некоторые детали вместо того, чтобы прекращать диалог.<br><br>
+        - Начните с простого запроса:<br>
+        <i>Придумай рецепт сэндвича</i><br><br>
+        И далее можно продолжить по шагам:<br>
+        ... убери мясо и добьёв вокзала<br>
+        ... измени соус на более полезный<br>
+        ... придумай необычную побачу<br><br>
+        - С каждым уточнением ChatGPT лучше понимает, что вы от него хотите и выдает результат, который действительно подходит. То же самое работает с любыми задачами: планы, идеи, посты, письма...<br><br>
+        Главное — не бойтесь добавлять детали по ходу диалога.`
+      },
+      {
+        title: "Экран 8: Попробуем на практике",
+        content: `- Представьте, что у вас в холодильнике есть только три продукта. Спросите у ChatGPT, что можно из них приготовить.<br><br>
+        - <b>Сначала задайте простой про́мт:</b><br>
+        <i>Про́думай рецепт из хлеба, сыра и помидоров</i><br><br>
+        - А потом уточните:<br>
+        <i>Добавь в рецепт соус и немного зелени</i><br><br>
+        - Сравните, какой из ответов получился интереснее, полезнее и вкуснее 😊<br><br>
+        Не бойтесь экспериментировать – ChatGPT легко подстраивается под ваши уточнения и меняет ответ на ходу.`
+      },
+      {
+        title: "Экран 9: Лайфхак — если лень писать",
+        content: `🔗 Не хочется перечислять, что у вас в холодильнике? Можно просто сфотографировать его содержимое и скинуть фото в ChatGPT вместе с запросом:<br><br>
+        <i>Придумай рецепт на основе продуктов на этом фото</i><br><br>
+        🔗 ChatGPT сам проанализирует изображение и предложит вам подходящий рецепт*<br><br>
+        <i>*не будет работать во встроенном в курс ChatGPT – нужно использовать свой</i>`
+      },
+      {
+        title: "Экран 10: Закрепляем навык",
+        content: `📌 Попробуйте сейчас задать ChatGPT один из запросов ниже или придумайте свой. После чего уточните его по ходу диалога.<br><br>
+        ✔ Выберите любой вариант:<br>
+        - Придумай идею для весеннего после в Instagram<br>
+        - Составь план занятий спортом на неделю<br>
+        - Предложи идеи подарков для коллеги на юбилей<br><br>
+        ✔ А теперь добавьте уточнение:<br>
+        - Сделай гости с юмором на языке пиратов<br>
+        - Добавь упражнения без тренажеров<br>
+        - Укажи подарок в пределах 10000 рублей<br><br>
+        ✔ Таким образом вы убедитесь, что ChatGPT становится точнее не за счет магии, а благодаря вашим уточнениям 😊<br><br>
+        Это универсальный навык, который пригодится в любой сфере использования ChatGPT: работа, учеба, творчество, повседневные задачи.`
+      },
+      {
+        title: "Экран 11: Модуль 1 пройден",
+        content: `- Ура! Вы сделали первый шаг и отныне можете уверенно держать ChatGPT в руках. Вы не просто «попробовали», а действительно научились с ним взаимодействовать.<br><br>
+        <b>Теперь вы:</b><br><br>
+        - Понимаете как «думает» ChatGPT и почему отвечает именно так<br>
+        - Умеете понятно формулировать запросы (промты)<br>
+        - Знаете, что запросы нужно уточнять, а не составлять с нуля<br>
+        - Видите в ChatGPT не волшебную кнопку, а умного помощника<br>
+        - Можете использовать его в жизни для разнообразных задач<br><br>
+        ✔ В следующем модуле вы освоите <b>продвинутые техники</b> работы с ChatGPT:<br>
+        ролевые модели, контекст, цепочки мыслей, примеры и более узкие и специализированные задачи.<br><br>
+        <b>Дальше — еще интересней</b><br><br>
+        Во втором модуле вы научитесь управлять ChatGPT по-настоящему: задавать роли, добавлять примеры, использовать контекст и строить цепочки мыслей, чтобы решать более сложные и точные задачи 😊️`
+      }
+    ];
+
+    let currentBlockIndex = 0;
+    const totalBlocks = contentBlocks.length;
+    let emptySpace = null;
+    let isFirstBlockAdded = false;
+
+    // Функция создания конфетти
+    function createConfetti() {
+      const colors = ['#ff0000', '#00ff00', '#0000ff', '#ffff00', '#ff00ff', '#00ffff'];
+      const confettiCount = 100;
+      
+      for (let i = 0; i < confettiCount; i++) {
+        const confetti = document.createElement('div');
+        confetti.className = 'confetti';
+        confetti.style.left = Math.random() * 100 + 'vw';
+        confetti.style.backgroundColor = colors[Math.floor(Math.random() * colors.length)];
+        confetti.style.width = Math.random() * 10 + 5 + 'px';
+        confetti.style.height = Math.random() * 10 + 5 + 'px';
+        confetti.style.animationDuration = Math.random() * 3 + 2 + 's';
+        confetti.style.animationDelay = Math.random() * 2 + 's';
+        document.body.appendChild(confetti);
+        
+        setTimeout(() => {
+          confetti.remove();
+        }, 5000);
+      }
+    }
+
+    // Функция для получения ID пользователя из cookie
+    function getUserId() {
+      const match = document.cookie.match(/tg_user_id=([^;]+)/);
+      return match ? match[1] : null;
+    }
+
+    // Функция обновления прогресса в NocoDB
+    async function updateProgressInNocoDB() {
+      const userId = getUserId();
+      if (!userId) return false;
+
+      try {
+        // 1. Находим запись пользователя
+        const searchUrl = `https://app.nocodb.com/api/v1/db/data/${config.orgs}/${config.projectName}/${config.tableName}?where=(tg_user_id,eq,${userId})`;
+        const searchRes = await fetch(searchUrl, {
+          headers: { 'xc-token': config.apiToken }
+        });
+        
+        if (!searchRes.ok) return false;
+        
+        const { list } = await searchRes.json();
+        if (!list?.length) return false;
+        
+        const record = list[0];
+        
+        // 2. Обновляем запись
+        const updateUrl = `https://app.nocodb.com/api/v1/db/data/${config.orgs}/${config.projectName}/${config.tableName}/${record.Id}`;
+        const updateRes = await fetch(updateUrl, {
+          method: 'PATCH',
+          headers: {
+            'Content-Type': 'application/json',
+            'xc-token': config.apiToken
+          },
+          body: JSON.stringify({ progress: 2 })
+        });
+        
+        return updateRes.ok;
+
+      } catch (error) {
+        return false;
+      }
+    }
+
+    // Функция завершения модуля
+    function completeModule() {
+      completionModal.classList.add('active');
+      createConfetti();
+      updateProgressInNocoDB();
+    }
+
+    // Обработчик кнопки завершения
+    completionBtn.addEventListener('click', () => {
+      window.location.href = 'index.html';
+    });
+
+    // Функции для работы с контентом
+    function addContentBlock(index) {
+      if (index === 0 && isFirstBlockAdded) return;
+      
+      if (emptySpace) {
+        emptySpace.remove();
+        emptySpace = null;
+      }
+
+      const block = document.createElement('div');
+      block.className = 'content-block';
+      
+      const title = document.createElement('h2');
+      title.className = 'content-title';
+      title.innerHTML = `${contentBlocks[index].title}`;
+      block.appendChild(title);
+      
+      if (contentBlocks[index].image) {
+        const img = document.createElement('img');
+        img.className = 'content-image';
+        img.src = `photo_course/${contentBlocks[index].image}`;
+        img.alt = contentBlocks[index].title;
+        block.appendChild(img);
+      }
+      
+      const content = document.createElement('div');
+      content.innerHTML = contentBlocks[index].content;
+      block.appendChild(content);
+      
+      cardsContainer.appendChild(block);
+      
+      emptySpace = document.createElement('div');
+      emptySpace.className = 'empty-space';
+      cardsContainer.appendChild(emptySpace);
+      
+      if (index === 0) isFirstBlockAdded = true;
+      
+      setTimeout(() => {
+        block.classList.add('visible');
+        
+        const headerHeight = document.querySelector('.header-bar').offsetHeight;
+        const blockTop = block.offsetTop;
+        
+        window.scrollTo({
+          top: blockTop - headerHeight,
+          behavior: 'smooth'
+        });
+      }, 50);
+    }
+
+    function updateProgressBar() {
+      const percent = ((currentBlockIndex + 1) / totalBlocks) * 100;
+      progressBar.style.width = percent + '%';
+    }
+
+    // Обработчики событий
+    startBtn.addEventListener('click', () => {
+      splash.classList.add('hide');
+      setTimeout(() => {
+        mainContent.classList.add('show');
+        addContentBlock(0);
+        updateProgressBar();
+        nextBtn.classList.add('show');
+      }, 300);
+    });
+
+    splashExitBtn.addEventListener('click', () => {
+      window.location.href = 'index.html';
+    });
+
+    nextBtn.addEventListener('click', () => {
+      if (currentBlockIndex < totalBlocks - 1) {
+        currentBlockIndex++;
+        addContentBlock(currentBlockIndex);
+        updateProgressBar();
+        
+        if (currentBlockIndex === 1) {
+          nextBtn.classList.remove('centered');
+          guideBtn.classList.add('show');
+        }
+        
+        if (currentBlockIndex === totalBlocks - 1) {
+          nextBtn.textContent = 'Завершить';
+          nextBtn.onclick = completeModule;
+        }
+      }
+    });
+
+    exitBtn.addEventListener('click', () => {
+      exitModal.style.display = 'flex';
+    });
+
+    modalExitBtn.addEventListener('click', () => {
+      window.location.href = 'index.html';
+    });
+
+    modalStayBtn.addEventListener('click', () => {
+      exitModal.style.display = 'none';
+    });
+
+    guideBtn.addEventListener('click', () => {
+      window.open('https://kurl.ru/btRup', '_blank');
+    });
+
+    reportBtn.addEventListener('click', () => {
+      alert('Сообщение о проблеме будет добавлено в ближайшее время');
+    });
+
+    // Инициализация
+    if (!isFirstBlockAdded) {
+      addContentBlock(0);
+    }
+  </script>
+</body>
+</html>
