@@ -185,7 +185,6 @@
       margin: 0 0 0.8rem 0;
       display: flex;
       align-items: center;
-      justify-content: space-between;
     }
     .content-counter {
       font-size: 0.9rem;
@@ -194,8 +193,6 @@
       padding: 0.2rem 0.6rem;
       border-radius: 1rem;
       margin-left: 0.8rem;
-      min-width: 24px;
-      text-align: center;
     }
     .content-block ul {
       padding-left: 1rem;
@@ -328,6 +325,100 @@
       height: 50vh;
       width: 100%;
     }
+    /* Новые стили для модального окна завершения */
+    .completion-modal {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0,0,0,0.7);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      z-index: 1000;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.3s ease;
+    }
+    .completion-modal.active {
+      opacity: 1;
+      pointer-events: auto;
+    }
+    .completion-content {
+      background: white;
+      padding: 2rem;
+      border-radius: 16px;
+      text-align: center;
+      max-width: 90%;
+      width: 350px;
+      box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+      transform: scale(0.9);
+      transition: transform 0.3s ease;
+    }
+    .completion-modal.active .completion-content {
+      transform: scale(1);
+    }
+    .checkmark {
+      width: 80px;
+      height: 80px;
+      margin: 0 auto 1.5rem;
+      position: relative;
+    }
+    .checkmark-circle {
+      width: 100%;
+      height: 100%;
+      border-radius: 50%;
+      background: rgba(76, 175, 80, 0.1);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
+    .checkmark-icon {
+      color: #4CAF50;
+      font-size: 50px;
+    }
+    .completion-title {
+      font-size: 1.5rem;
+      font-weight: 700;
+      margin-bottom: 1rem;
+      color: #333;
+    }
+    .completion-btn {
+      padding: 0.8rem 2rem;
+      background: linear-gradient(90deg, var(--yellow), var(--orange));
+      color: var(--text);
+      border: none;
+      border-radius: 2rem;
+      font-weight: 600;
+      cursor: pointer;
+      margin-top: 1.5rem;
+      transition: all 0.3s;
+    }
+    .completion-btn:hover {
+      background: linear-gradient(90deg, var(--orange), var(--yellow));
+      transform: scale(1.05);
+    }
+    /* Анимация конфетти */
+    .confetti {
+      position: fixed;
+      width: 10px;
+      height: 10px;
+      background-color: #f00;
+      opacity: 0;
+      z-index: 999;
+      animation: confetti-fall 3s linear forwards;
+    }
+    @keyframes confetti-fall {
+      0% {
+        transform: translateY(-100vh) rotate(0deg);
+        opacity: 1;
+      }
+      100% {
+        transform: translateY(100vh) rotate(360deg);
+        opacity: 0;
+      }
+    }
     @media (max-width: 600px) {
       .splash h1 {
         font-size: 1.5rem;
@@ -352,6 +443,16 @@
       }
       .empty-space {
         height: 40vh;
+      }
+      .completion-content {
+        padding: 1.5rem;
+      }
+      .checkmark {
+        width: 60px;
+        height: 60px;
+      }
+      .checkmark-icon {
+        font-size: 40px;
       }
     }
   </style>
@@ -392,8 +493,21 @@
     </div>
   </div>
 
+  <!-- Модальное окно завершения модуля -->
+  <div class="completion-modal" id="completionModal">
+    <div class="completion-content">
+      <div class="checkmark">
+        <div class="checkmark-circle">
+          <div class="checkmark-icon">✓</div>
+        </div>
+      </div>
+      <div class="completion-title">Модуль 0 пройден!</div>
+      <button class="completion-btn" id="completionBtn">Вернуться в меню</button>
+    </div>
+  </div>
+
   <script>
-        // Элементы
+    // Элементы
     const splash = document.getElementById('splash');
     const startBtn = document.getElementById('startBtn');
     const mainContent = document.getElementById('mainContent');
@@ -407,6 +521,8 @@
     const exitModal = document.getElementById('exitModal');
     const modalExitBtn = document.getElementById('modalExitBtn');
     const modalStayBtn = document.getElementById('modalStayBtn');
+    const completionModal = document.getElementById('completionModal');
+    const completionBtn = document.getElementById('completionBtn');
 
     // Все контентные блоки
     const contentBlocks = [
@@ -580,24 +696,108 @@
     let emptySpace = null;
     let isFirstBlockAdded = false;
 
-    // Функции
+    // Функция создания конфетти
+    function createConfetti() {
+      const colors = ['#ff0000', '#00ff00', '#0000ff', '#ffff00', '#ff00ff', '#00ffff'];
+      const confettiCount = 100;
+      
+      for (let i = 0; i < confettiCount; i++) {
+        const confetti = document.createElement('div');
+        confetti.className = 'confetti';
+        confetti.style.left = Math.random() * 100 + 'vw';
+        confetti.style.backgroundColor = colors[Math.floor(Math.random() * colors.length)];
+        confetti.style.width = Math.random() * 10 + 5 + 'px';
+        confetti.style.height = Math.random() * 10 + 5 + 'px';
+        confetti.style.animationDuration = Math.random() * 3 + 2 + 's';
+        confetti.style.animationDelay = Math.random() * 2 + 's';
+        document.body.appendChild(confetti);
+        
+        // Удаляем конфетти после анимации
+        setTimeout(() => {
+          confetti.remove();
+        }, 5000);
+      }
+    }
+
+    // Функция обновления прогресса в NocoDB
+    async function updateProgressInNocoDB() {
+      const userId = getUserId();
+      if (!userId) return;
+
+      try {
+        // Конфигурация NocoDB
+        const config = {
+          apiUrl: 'https://app.nocodb.com/api/v1/db/data/v1/weamcfo6/p27jdsmk69wuimh/mc6qh91f060pv4y',
+          apiToken: 'YOUR_API_TOKEN' // Замените на реальный токен
+        };
+
+        // 1. Находим запись пользователя
+        const searchUrl = `${config.apiUrl}?where=(tg_user_id,eq,${userId})`;
+        const searchRes = await fetch(searchUrl, {
+          headers: { 'xc-token': config.apiToken }
+        });
+        
+        if (!searchRes.ok) throw new Error(`Ошибка поиска: ${searchRes.status}`);
+        
+        const { list } = await searchRes.json();
+        if (!list?.length) throw new Error('Запись не найдена');
+        
+        const record = list[0];
+        
+        // 2. Обновляем запись
+        const updateUrl = `${config.apiUrl}/${record.Id}`;
+        const updateRes = await fetch(updateUrl, {
+          method: 'PATCH',
+          headers: {
+            'Content-Type': 'application/json',
+            'xc-token': config.apiToken
+          },
+          body: JSON.stringify({ progress: 2 }) // Устанавливаем progress = 2
+        });
+        
+        if (!updateRes.ok) {
+          const errorDetails = await updateRes.json().catch(() => ({}));
+          throw new Error(errorDetails.message || `Ошибка ${updateRes.status}`);
+        }
+
+        console.log('Прогресс успешно обновлен в NocoDB');
+      } catch (error) {
+        console.error('Ошибка при обновлении прогресса:', error);
+      }
+    }
+
+    // Функция завершения модуля
+    function completeModule() {
+      // Показываем модальное окно
+      completionModal.classList.add('active');
+      
+      // Запускаем конфетти
+      createConfetti();
+      
+      // Обновляем прогресс в NocoDB
+      updateProgressInNocoDB();
+    }
+
+    // Обработчик кнопки завершения
+    completionBtn.addEventListener('click', () => {
+      window.location.href = 'index.html';
+    });
+
+    // Функции для работы с контентом
     function addContentBlock(index) {
-      // Если это первый блок и он уже добавлен - пропускаем
       if (index === 0 && isFirstBlockAdded) return;
       
-      // Удаляем предыдущее пустое пространство
       if (emptySpace) {
         emptySpace.remove();
         emptySpace = null;
       }
 
-      // Создаем блок
       const block = document.createElement('div');
       block.className = 'content-block';
       
       const title = document.createElement('h2');
       title.className = 'content-title';
-      title.innerHTML = `${contentBlocks[index].title} <span class="content-counter">${index + 1}</span>`;
+      title.innerHTML = `${contentBlocks[index].title}`;
       block.appendChild(title);
       
       if (contentBlocks[index].image) {
@@ -671,9 +871,7 @@
         
         if (currentBlockIndex === totalBlocks - 1) {
           nextBtn.textContent = 'Завершить';
-          nextBtn.onclick = () => {
-            window.location.href = 'index.html';
-          };
+          nextBtn.onclick = completeModule; // Изменяем обработчик на завершение модуля
         }
       }
     });
@@ -702,6 +900,75 @@
     if (!isFirstBlockAdded) {
       addContentBlock(0);
     }
+
+    // Функция для получения user_id из cookie
+    function getUserId() {
+      const cookies = document.cookie.split(';');
+      for (const cookie of cookies) {
+        const [name, value] = cookie.trim().split('=');
+        if (name === 'tg_user_id') return value;
+      }
+      return null;
+    }
+
+    // Функция для обновления прогресса в NocoDB
+    async function updateNocoDBProgress() {
+      const userId = getUserId();
+      if (!userId) return;
+
+      try {
+        // Конфигурация NocoDB API
+        const config = {
+          apiUrl: 'https://app.nocodb.com/api/v1/db/data/v1/weamcfo6/p27jdsmk69wuimh/mc6qh91f060pv4y',
+          apiToken: 'YOUR_API_TOKEN' // Замените на реальный токен
+        };
+
+        // 1. Находим запись пользователя
+        const searchUrl = `${config.apiUrl}?where=(tg_user_id,eq,${userId})`;
+        const searchRes = await fetch(searchUrl, {
+          headers: { 'xc-token': config.apiToken }
+        });
+
+        if (!searchRes.ok) throw new Error(`Ошибка поиска: ${searchRes.status}`);
+
+        const { list } = await searchRes.json();
+        if (!list?.length) throw new Error('Пользователь не найден');
+
+        // 2. Обновляем запись
+        const updateUrl = `${config.apiUrl}/${list[0].Id}`;
+        const updateRes = await fetch(updateUrl, {
+          method: 'PATCH',
+          headers: {
+            'Content-Type': 'application/json',
+            'xc-token': config.apiToken
+          },
+          body: JSON.stringify({ progress: 2 }) // Устанавливаем progress = 2
+        });
+
+        if (!updateRes.ok) throw new Error(`Ошибка обновления: ${updateRes.status}`);
+
+        console.log('Прогресс успешно обновлен в NocoDB');
+      } catch (error) {
+        console.error('Ошибка при обновлении прогресса:', error);
+      }
+    }
+
+    // Функция завершения модуля
+    function completeModule() {
+      // Показываем модальное окно завершения
+      completionModal.classList.add('active');
+      
+      // Запускаем анимацию конфетти
+      createConfetti();
+      
+      // Обновляем прогресс в NocoDB
+      updateNocoDBProgress();
+    }
+
+    // Обработчик кнопки в модальном окне завершения
+    completionBtn.addEventListener('click', () => {
+      window.location.href = 'index.html';
+    });
   </script>
 </body>
 </html>
