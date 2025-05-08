@@ -2,98 +2,105 @@
 <html lang="ru">
 <head>
     <meta charset="UTF-8">
-    <title>Тест обновления Progress в NocoDB</title>
+    <title>Обновление данных в NocoDB</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <style>
         body {
             font-family: Arial, sans-serif;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            height: 100vh;
-            margin: 0;
             padding: 20px;
+            text-align: center;
             background-color: #f5f5f5;
         }
+        .button-container {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            margin-top: 30px;
+        }
         button {
-            padding: 12px 24px;
+            padding: 15px 25px;
             font-size: 18px;
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        #introBtn {
             background-color: #4285f4;
             color: white;
-            border: none;
-            border-radius: 4px;
-            cursor: pointer;
-            margin-bottom: 20px;
         }
-        #log {
-            width: 90%;
-            max-width: 800px;
-            height: 300px;
-            overflow-y: auto;
-            background-color: white;
-            border: 1px solid #ddd;
-            padding: 15px;
-            font-family: monospace;
-            white-space: pre-wrap;
-            border-radius: 4px;
+        #moBtn {
+            background-color: #34a853;
+            color: white;
         }
-        .success { color: green; }
-        .error { color: red; }
-        .info { color: blue; }
+        button:active {
+            transform: scale(0.95);
+        }
+        #status {
+            margin-top: 20px;
+            padding: 10px;
+            border-radius: 5px;
+        }
+        .success {
+            background-color: #e6f4ea;
+            color: #34a853;
+        }
+        .error {
+            background-color: #fce8e6;
+            color: #d93025;
+        }
     </style>
 </head>
 <body>
-    <button id="testButton">Обновить Progress</button>
-    <div id="log">Готов к тестированию... Нажмите кнопку.</div>
+    <h2>Выберите действие:</h2>
+    <div class="button-container">
+        <button id="introBtn">ИНТРО</button>
+        <button id="moBtn">М0</button>
+    </div>
+    <div id="status"></div>
 
     <script>
-        const logElement = document.getElementById('log');
-        const testButton = document.getElementById('testButton');
-
-        // Конфигурация NocoDB API
-        const nocodbConfig = {
+        // Конфигурация NocoDB (ЗАМЕНИТЕ НА СВОИ ДАННЫЕ)
+        const config = {
             apiUrl: 'https://app.nocodb.com/api/v2/tables/mc6qh91f060pv4y/records',
             apiToken: 'bocQfycJpJsTG_tbwEf8ma8E5rhoig0njMDXFWtJ'
         };
 
-        // Функция логирования
-        function log(message, type = 'info') {
-            const timestamp = new Date().toLocaleTimeString();
-            const logEntry = document.createElement('div');
-            logEntry.className = type;
-            logEntry.textContent = `[${timestamp}] ${message}`;
-            logElement.appendChild(logEntry);
-            logElement.scrollTop = logElement.scrollHeight;
-        }
+        // Элементы интерфейса
+        const introBtn = document.getElementById('introBtn');
+        const moBtn = document.getElementById('moBtn');
+        const statusDiv = document.getElementById('status');
 
-        // Получение cookie
-        function getCookie(name) {
+        // Получаем user_id из cookie
+        function getUserId() {
             const cookies = document.cookie.split(';');
             for (const cookie of cookies) {
-                const [cookieName, cookieValue] = cookie.trim().split('=');
-                if (cookieName === name) return cookieValue;
+                const [name, value] = cookie.trim().split('=');
+                if (name === 'tg_user_id') return value;
             }
             return null;
         }
 
-        // Основная функция обновления progress
-        async function updateProgress() {
-            try {
-                // 1. Получаем ID пользователя из cookie
-                const userId = getCookie('tg_user_id');
-                if (!userId) {
-                    throw new Error('Cookie tg_user_id не найден');
-                }
-                log(`Найден tg_user_id: ${userId}`, 'info');
+        // Обновляем статус
+        function updateStatus(message, isSuccess = true) {
+            statusDiv.textContent = message;
+            statusDiv.className = isSuccess ? 'success' : 'error';
+        }
 
-                // 2. Ищем пользователя в таблице по tg_user_id
-                log(`Поиск пользователя в таблице...`, 'info');
-                const searchUrl = `${nocodbConfig.apiUrl}?where=(tg_user_id,eq,${userId})`;
-                
+        // Обновляем запись в NocoDB
+        async function updateRecord(columnName, value) {
+            const userId = getUserId();
+            if (!userId) {
+                updateStatus('Ошибка: tg_user_id не найден в cookie', false);
+                return;
+            }
+
+            try {
+                // 1. Находим запись пользователя
+                const searchUrl = `${config.apiUrl}?where=(tg_user_id,eq,${userId})`;
                 const searchResponse = await fetch(searchUrl, {
                     headers: {
-                        'xc-token': nocodbConfig.apiToken,
+                        'xc-token': config.apiToken,
                         'Content-Type': 'application/json'
                     }
                 });
@@ -103,27 +110,22 @@
                 }
 
                 const searchData = await searchResponse.json();
-                log(`Результат поиска: ${JSON.stringify(searchData)}`, 'info');
-
                 if (!searchData.list || searchData.list.length === 0) {
                     throw new Error('Пользователь не найден в таблице');
                 }
 
                 const record = searchData.list[0];
-                log(`Найдена запись: ID=${record.Id}, Текущий progress=${record.progress}`, 'info');
-
-                // 3. Обновляем только поле progress
-                log(`Обновление progress на 2...`, 'info');
-                const updateUrl = `${nocodbConfig.apiUrl}/${record.Id}`;
                 
+                // 2. Обновляем запись
+                const updateUrl = `${config.apiUrl}/${record.Id}`;
                 const updateResponse = await fetch(updateUrl, {
                     method: 'PATCH',
                     headers: {
                         'Content-Type': 'application/json',
-                        'xc-token': nocodbConfig.apiToken
+                        'xc-token': config.apiToken
                     },
                     body: JSON.stringify({
-                        progress: 2  // Только это поле обновляем
+                        [columnName]: value
                     })
                 });
 
@@ -131,46 +133,26 @@
                     throw new Error(`Ошибка обновления: ${updateResponse.status}`);
                 }
 
-                const result = await updateResponse.json();
-                log(`Успешно обновлено! Новые данные: ${JSON.stringify(result)}`, 'success');
-                return true;
-
+                updateStatus(`Успешно обновлено! ${columnName} = ${value}`);
             } catch (error) {
-                log(`ОШИБКА: ${error.message}`, 'error');
-                
-                // Дополнительная информация об ошибке
-                if (error.response) {
-                    try {
-                        const errorDetails = await error.response.json();
-                        log(`Детали ошибки: ${JSON.stringify(errorDetails)}`, 'error');
-                    } catch (e) {
-                        log(`Не удалось прочитать детали ошибки`, 'error');
-                    }
-                }
-                
-                return false;
+                console.error('Ошибка:', error);
+                updateStatus(`ОШИБКА: ${error.message}`, false);
             }
         }
 
-        // Инициализация
-        testButton.addEventListener('click', async () => {
-            logElement.innerHTML = '';
-            log('Начало процесса обновления...', 'info');
-            
-            testButton.disabled = true;
-            testButton.textContent = 'Выполняется...';
-            
-            await updateProgress();
-            
-            testButton.disabled = false;
-            testButton.textContent = 'Повторить проверку';
-        });
+        // Обработчики кнопок
+        introBtn.addEventListener('click', () => updateRecord('intro', '1'));
+        moBtn.addEventListener('click', () => updateRecord('Mo', '2'));
 
-        // Для тестирования в браузере
-        if (!getCookie('tg_user_id') && !window.Telegram?.WebApp) {
-            document.cookie = 'tg_user_id=test_user_123; path=/';
-            log('Установлена тестовая cookie: tg_user_id=test_user_123', 'info');
-        }
+        // Проверяем при загрузке
+        document.addEventListener('DOMContentLoaded', () => {
+            const userId = getUserId();
+            if (userId) {
+                updateStatus(`Текущий пользователь: ${userId}`, true);
+            } else {
+                updateStatus('Внимание: tg_user_id не найден в cookie', false);
+            }
+        });
     </script>
 </body>
 </html>
