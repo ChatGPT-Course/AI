@@ -25,22 +25,30 @@
       overflow-x: hidden;
       -webkit-tap-highlight-color: transparent;
       line-height: 1.6;
+      position: relative;
     }
+    /* Обновленные стили заставки */
     .splash {
       position: fixed;
-      inset: 0;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
       background: var(--white);
       display: flex;
       flex-direction: column;
       align-items: center;
       justify-content: center;
-      z-index: 10;
-      transition: opacity var(--transition), visibility var(--transition);
+      z-index: 1000;
+      transition: opacity var(--transition);
       padding: 2rem 1rem;
+      pointer-events: auto;
+    }
+    .splash * {
+      pointer-events: auto;
     }
     .splash.hide {
       opacity: 0;
-      visibility: hidden;
       pointer-events: none;
     }
     .splash h1 {
@@ -54,8 +62,12 @@
       text-align: center;
       word-break: break-word;
       line-height: 1.2;
+      position: relative;
+      z-index: 1001;
     }
     .splash button {
+      position: relative;
+      z-index: 1001;
       padding: 1rem 2.5rem;
       font-size: 1.2rem;
       background: linear-gradient(90deg, var(--yellow), var(--orange));
@@ -65,12 +77,20 @@
       cursor: pointer;
       font-weight: 600;
       box-shadow: 0 4px 24px #ff980055;
-      transition: background 0.3s, transform 0.2s;
-      animation: fadeInUp 1.5s;
+      transition: all 0.3s;
     }
     .splash button:hover {
       background: linear-gradient(90deg, var(--orange), var(--yellow));
       transform: scale(1.05);
+    }
+    .splash .exit-btn {
+      position: absolute;
+      top: 0.5rem;
+      left: 0.5rem;
+      background: var(--white);
+      width: 40px;
+      height: 40px;
+      z-index: 1002;
     }
     @keyframes fadeIn {
       from { opacity: 0; transform: translateY(-30px);}
@@ -183,16 +203,6 @@
       font-weight: 700;
       font-size: 1.3rem;
       margin: 0 0 0.8rem 0;
-      display: flex;
-      align-items: center;
-    }
-    .content-counter {
-      font-size: 0.9rem;
-      color: #666;
-      background: rgba(255, 255, 255, 0.7);
-      padding: 0.2rem 0.6rem;
-      border-radius: 1rem;
-      margin-left: 0.8rem;
     }
     .content-block ul {
       padding-left: 1rem;
@@ -325,7 +335,7 @@
       height: 50vh;
       width: 100%;
     }
-    /* Новые стили для модального окна завершения */
+    /* Стили для модального окна завершения */
     .completion-modal {
       position: fixed;
       top: 0;
@@ -458,10 +468,9 @@
   </style>
 </head>
 <body>
+  <!-- Обновленная заставка с исправленными кнопками -->
   <div class="splash" id="splash">
-    <div style="position: absolute; top: 0.5rem; left: 0.5rem; width: 100%; display: flex;">
-      <button class="exit-btn" id="splashExitBtn" title="Выйти"><span>&#8592;</span></button>
-    </div>
+    <button class="exit-btn" id="splashExitBtn" title="Выйти"><span>&#8592;</span></button>
     <h1>Модуль 0:<br>Доступ к ChatGPT</h1>
     <button id="startBtn">Начать</button>
   </div>
@@ -712,7 +721,6 @@
         confetti.style.animationDelay = Math.random() * 2 + 's';
         document.body.appendChild(confetti);
         
-        // Удаляем конфетти после анимации
         setTimeout(() => {
           confetti.remove();
         }, 5000);
@@ -725,10 +733,9 @@
       if (!userId) return;
 
       try {
-        // Конфигурация NocoDB
         const config = {
           apiUrl: 'https://app.nocodb.com/api/v1/db/data/v1/weamcfo6/p27jdsmk69wuimh/mc6qh91f060pv4y',
-          apiToken: 'bocQfycJpJsTG_tbwEf8ma8E5rhoig0njMDXFWtJ // Замените на реальный токен
+          apiToken: 'YOUR_API_TOKEN' // Замените на реальный токен
         };
 
         // 1. Находим запись пользователя
@@ -742,23 +749,18 @@
         const { list } = await searchRes.json();
         if (!list?.length) throw new Error('Запись не найдена');
         
-        const record = list[0];
-        
         // 2. Обновляем запись
-        const updateUrl = `${config.apiUrl}/${record.Id}`;
+        const updateUrl = `${config.apiUrl}/${list[0].Id}`;
         const updateRes = await fetch(updateUrl, {
           method: 'PATCH',
           headers: {
             'Content-Type': 'application/json',
             'xc-token': config.apiToken
           },
-          body: JSON.stringify({ progress: 2 }) // Устанавливаем progress = 2
+          body: JSON.stringify({ progress: 2 })
         });
         
-        if (!updateRes.ok) {
-          const errorDetails = await updateRes.json().catch(() => ({}));
-          throw new Error(errorDetails.message || `Ошибка ${updateRes.status}`);
-        }
+        if (!updateRes.ok) throw new Error(`Ошибка обновления: ${updateRes.status}`);
 
         console.log('Прогресс успешно обновлен в NocoDB');
       } catch (error) {
@@ -768,22 +770,12 @@
 
     // Функция завершения модуля
     function completeModule() {
-      // Показываем модальное окно
       completionModal.classList.add('active');
-      
-      // Запускаем конфетти
       createConfetti();
-      
-      // Обновляем прогресс в NocoDB
       updateProgressInNocoDB();
     }
 
-    // Обработчик кнопки завершения
-    completionBtn.addEventListener('click', () => {
-      window.location.href = 'index.html';
-    });
-
-    // Функции для работы с контентом
+    // Функция добавления контентного блока
     function addContentBlock(index) {
       if (index === 0 && isFirstBlockAdded) return;
       
@@ -797,7 +789,7 @@
       
       const title = document.createElement('h2');
       title.className = 'content-title';
-      title.innerHTML = `${contentBlocks[index].title}`;
+      title.textContent = contentBlocks[index].title;
       block.appendChild(title);
       
       if (contentBlocks[index].image) {
@@ -812,25 +804,18 @@
       content.innerHTML = contentBlocks[index].content;
       block.appendChild(content);
       
-      // Добавляем блок в контейнер
       cardsContainer.appendChild(block);
       
-      // Добавляем пустое пространство после блока
       emptySpace = document.createElement('div');
       emptySpace.className = 'empty-space';
       cardsContainer.appendChild(emptySpace);
       
-      // Помечаем первый блок как добавленный
       if (index === 0) isFirstBlockAdded = true;
       
-      // Показываем блок с анимацией
       setTimeout(() => {
         block.classList.add('visible');
-        
-        // Прокручиваем так, чтобы заголовок блока был сразу под шапкой
         const headerHeight = document.querySelector('.header-bar').offsetHeight;
         const blockTop = block.offsetTop;
-        
         window.scrollTo({
           top: blockTop - headerHeight,
           behavior: 'smooth'
@@ -843,65 +828,6 @@
       progressBar.style.width = percent + '%';
     }
 
-    // Обработчики событий
-    startBtn.addEventListener('click', () => {
-      splash.classList.add('hide');
-      setTimeout(() => {
-        mainContent.classList.add('show');
-        addContentBlock(0);
-        updateProgressBar();
-        nextBtn.classList.add('show');
-      }, 300);
-    });
-
-    splashExitBtn.addEventListener('click', () => {
-      window.location.href = 'index.html';
-    });
-
-    nextBtn.addEventListener('click', () => {
-      if (currentBlockIndex < totalBlocks - 1) {
-        currentBlockIndex++;
-        addContentBlock(currentBlockIndex);
-        updateProgressBar();
-        
-        if (currentBlockIndex === 1) {
-          nextBtn.classList.remove('centered');
-          guideBtn.classList.add('show');
-        }
-        
-        if (currentBlockIndex === totalBlocks - 1) {
-          nextBtn.textContent = 'Завершить';
-          nextBtn.onclick = completeModule; // Изменяем обработчик на завершение модуля
-        }
-      }
-    });
-
-    exitBtn.addEventListener('click', () => {
-      exitModal.style.display = 'flex';
-    });
-
-    modalExitBtn.addEventListener('click', () => {
-      window.location.href = 'index.html';
-    });
-
-    modalStayBtn.addEventListener('click', () => {
-      exitModal.style.display = 'none';
-    });
-
-    guideBtn.addEventListener('click', () => {
-      window.open('https://kurl.ru/btRup', '_blank');
-    });
-
-    reportBtn.addEventListener('click', () => {
-      alert('Сообщение о проблеме будет добавлено в ближайшее время');
-    });
-
-    // Инициализация
-    if (!isFirstBlockAdded) {
-      addContentBlock(0);
-    }
-
-    // Функция для получения user_id из cookie
     function getUserId() {
       const cookies = document.cookie.split(';');
       for (const cookie of cookies) {
@@ -911,63 +837,70 @@
       return null;
     }
 
-    // Функция для обновления прогресса в NocoDB
-    async function updateNocoDBProgress() {
-      const userId = getUserId();
-      if (!userId) return;
+    // Инициализация
+    document.addEventListener('DOMContentLoaded', function() {
+      // Обработчики для заставки
+      startBtn.addEventListener('click', function() {
+        splash.classList.add('hide');
+        setTimeout(() => {
+          mainContent.classList.add('show');
+          addContentBlock(0);
+          updateProgressBar();
+          nextBtn.classList.add('show');
+        }, 300);
+      });
 
-      try {
-        // Конфигурация NocoDB API
-        const config = {
-          apiUrl: 'https://app.nocodb.com/api/v1/db/data/v1/weamcfo6/p27jdsmk69wuimh/mc6qh91f060pv4y',
-          apiToken: 'YOUR_API_TOKEN' // Замените на реальный токен
-        };
+      splashExitBtn.addEventListener('click', function() {
+        window.location.href = 'index.html';
+      });
 
-        // 1. Находим запись пользователя
-        const searchUrl = `${config.apiUrl}?where=(tg_user_id,eq,${userId})`;
-        const searchRes = await fetch(searchUrl, {
-          headers: { 'xc-token': config.apiToken }
-        });
+      // Остальные обработчики
+      nextBtn.addEventListener('click', function() {
+        if (currentBlockIndex < totalBlocks - 1) {
+          currentBlockIndex++;
+          addContentBlock(currentBlockIndex);
+          updateProgressBar();
+          
+          if (currentBlockIndex === 1) {
+            nextBtn.classList.remove('centered');
+            guideBtn.classList.add('show');
+          }
+          
+          if (currentBlockIndex === totalBlocks - 1) {
+            nextBtn.textContent = 'Завершить';
+            nextBtn.onclick = completeModule;
+          }
+        }
+      });
 
-        if (!searchRes.ok) throw new Error(`Ошибка поиска: ${searchRes.status}`);
+      exitBtn.addEventListener('click', function() {
+        exitModal.style.display = 'flex';
+      });
 
-        const { list } = await searchRes.json();
-        if (!list?.length) throw new Error('Пользователь не найден');
+      modalExitBtn.addEventListener('click', function() {
+        window.location.href = 'index.html';
+      });
 
-        // 2. Обновляем запись
-        const updateUrl = `${config.apiUrl}/${list[0].Id}`;
-        const updateRes = await fetch(updateUrl, {
-          method: 'PATCH',
-          headers: {
-            'Content-Type': 'application/json',
-            'xc-token': config.apiToken
-          },
-          body: JSON.stringify({ progress: 2 }) // Устанавливаем progress = 2
-        });
+      modalStayBtn.addEventListener('click', function() {
+        exitModal.style.display = 'none';
+      });
 
-        if (!updateRes.ok) throw new Error(`Ошибка обновления: ${updateRes.status}`);
+      guideBtn.addEventListener('click', function() {
+        window.open('https://kurl.ru/btRup', '_blank');
+      });
 
-        console.log('Прогресс успешно обновлен в NocoDB');
-      } catch (error) {
-        console.error('Ошибка при обновлении прогресса:', error);
+      reportBtn.addEventListener('click', function() {
+        alert('Сообщение о проблеме будет добавлено в ближайшее время');
+      });
+
+      completionBtn.addEventListener('click', function() {
+        window.location.href = 'index.html';
+      });
+
+      // Первый блок
+      if (!isFirstBlockAdded) {
+        addContentBlock(0);
       }
-    }
-
-    // Функция завершения модуля
-    function completeModule() {
-      // Показываем модальное окно завершения
-      completionModal.classList.add('active');
-      
-      // Запускаем анимацию конфетти
-      createConfetti();
-      
-      // Обновляем прогресс в NocoDB
-      updateNocoDBProgress();
-    }
-
-    // Обработчик кнопки в модальном окне завершения
-    completionBtn.addEventListener('click', () => {
-      window.location.href = 'index.html';
     });
   </script>
 </body>
