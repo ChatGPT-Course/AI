@@ -183,6 +183,16 @@
       font-weight: 700;
       font-size: 1.3rem;
       margin: 0 0 0.8rem 0;
+      display: flex;
+      align-items: center;
+    }
+    .content-counter {
+      font-size: 0.9rem;
+      color: #666;
+      background: rgba(255, 255, 255, 0.7);
+      padding: 0.2rem 0.6rem;
+      border-radius: 1rem;
+      margin-left: 0.8rem;
     }
     .content-block ul {
       padding-left: 1rem;
@@ -190,6 +200,7 @@
     }
     .content-block li {
       margin-bottom: 0.4rem;
+      position: relative;
     }
     .tip-card {
       background: rgba(255, 248, 225, 0.8);
@@ -197,6 +208,12 @@
       padding: 0.8rem 1rem;
       margin: 1rem 0;
       border-radius: 0 8px 8px 0;
+    }
+    .tip-card-title {
+      font-weight: 700;
+      color: var(--orange);
+      margin: 0 0 0.3rem 0;
+      font-size: 1rem;
     }
     .buttons-container {
       position: fixed;
@@ -224,6 +241,8 @@
       opacity: 0;
       pointer-events: none;
       min-width: 120px;
+      position: relative;
+      overflow: hidden;
     }
     .next-btn.centered {
       margin: 0 auto;
@@ -231,10 +250,16 @@
     .next-btn.show {
       opacity: 1;
       pointer-events: auto;
+      animation: fadeInUp 1s;
     }
     .next-btn:hover:not(:disabled) {
       background: linear-gradient(90deg, var(--orange), var(--yellow));
       transform: scale(1.05);
+    }
+    .next-btn:disabled {
+      background: var(--disabled);
+      cursor: not-allowed;
+      transform: none !important;
     }
     .guide-btn {
       padding: 0.8rem 1rem;
@@ -254,10 +279,32 @@
     .guide-btn.show {
       opacity: 1;
       pointer-events: auto;
+      animation: fadeInUp 1s;
     }
     .guide-btn:hover {
       background: linear-gradient(90deg, #3367D6, var(--blue));
       transform: scale(1.05);
+    }
+    .report-btn {
+      background: var(--white);
+      border: none;
+      color: var(--text);
+      font-size: 1.2rem;
+      border-radius: 8px;
+      width: 40px;
+      height: 40px;
+      cursor: pointer;
+      font-weight: 700;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: all 0.2s;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+      margin-left: 0.5rem;
+    }
+    .report-btn:hover {
+      background: #e0e0e0;
+      transform: scale(1.07);
     }
     .content-image {
       width: 100%;
@@ -266,7 +313,19 @@
       margin: 0 0 1rem 0;
       box-shadow: 0 2px 8px rgba(0,0,0,0.1);
       border: 1px solid #eee;
+      display: block;
     }
+    .divider {
+      height: 1px;
+      background-color: #ddd;
+      margin: 1.5rem 0;
+      width: 100%;
+    }
+    .empty-space {
+      height: 50vh;
+      width: 100%;
+    }
+    /* Новые стили для модального окна завершения */
     .completion-modal {
       position: fixed;
       top: 0;
@@ -280,7 +339,7 @@
       z-index: 1000;
       opacity: 0;
       pointer-events: none;
-      transition: opacity 0.3s;
+      transition: opacity 0.3s ease;
     }
     .completion-modal.active {
       opacity: 1;
@@ -295,7 +354,7 @@
       width: 350px;
       box-shadow: 0 10px 25px rgba(0,0,0,0.2);
       transform: scale(0.9);
-      transition: transform 0.3s;
+      transition: transform 0.3s ease;
     }
     .completion-modal.active .completion-content {
       transform: scale(1);
@@ -323,6 +382,7 @@
       font-size: 1.5rem;
       font-weight: 700;
       margin-bottom: 1rem;
+      color: #333;
     }
     .completion-btn {
       padding: 0.8rem 2rem;
@@ -333,6 +393,31 @@
       font-weight: 600;
       cursor: pointer;
       margin-top: 1.5rem;
+      transition: all 0.3s;
+    }
+    .completion-btn:hover {
+      background: linear-gradient(90deg, var(--orange), var(--yellow));
+      transform: scale(1.05);
+    }
+    /* Анимация конфетти */
+    .confetti {
+      position: fixed;
+      width: 10px;
+      height: 10px;
+      background-color: #f00;
+      opacity: 0;
+      z-index: 999;
+      animation: confetti-fall 3s linear forwards;
+    }
+    @keyframes confetti-fall {
+      0% {
+        transform: translateY(-100vh) rotate(0deg);
+        opacity: 1;
+      }
+      100% {
+        transform: translateY(100vh) rotate(360deg);
+        opacity: 0;
+      }
     }
     @media (max-width: 600px) {
       .splash h1 {
@@ -340,11 +425,12 @@
       }
       .content-block {
         padding: 1.2rem 1rem;
+        font-size: 1rem;
       }
       .header-bar {
         height: 48px;
       }
-      .exit-btn {
+      .exit-btn, .report-btn {
         width: 36px;
         height: 36px;
       }
@@ -353,13 +439,52 @@
       }
       .next-btn, .guide-btn {
         padding: 0.7rem 1rem;
+        min-width: 110px;
       }
+      .empty-space {
+        height: 40vh;
+      }
+      .completion-content {
+        padding: 1.5rem;
+      }
+      .checkmark {
+        width: 60px;
+        height: 60px;
+      }
+      .checkmark-icon {
+        font-size: 40px;
+      }
+    }
+    /* Стили для статуса обновления */
+    .update-status {
+      position: fixed;
+      bottom: 80px;
+      left: 50%;
+      transform: translateX(-50%);
+      padding: 10px 20px;
+      border-radius: 20px;
+      background: rgba(0,0,0,0.7);
+      color: white;
+      z-index: 100;
+      opacity: 0;
+      transition: opacity 0.3s;
+    }
+    .update-status.show {
+      opacity: 1;
+    }
+    .update-status.success {
+      background: rgba(40, 167, 69, 0.9);
+    }
+    .update-status.error {
+      background: rgba(220, 53, 69, 0.9);
     }
   </style>
 </head>
 <body>
   <div class="splash" id="splash">
-    <button class="exit-btn" id="splashExitBtn" title="Выйти"><span>&#8592;</span></button>
+    <div style="position: absolute; top: 0.5rem; left: 0.5rem; width: 100%; display: flex;">
+      <button class="exit-btn" id="splashExitBtn" title="Выйти"><span>&#8592;</span></button>
+    </div>
     <h1>Модуль 0:<br>Доступ к ChatGPT</h1>
     <button id="startBtn">Начать</button>
   </div>
@@ -370,6 +495,7 @@
       <div class="progress-bar">
         <div class="progress-bar-inner" id="progressBar"></div>
       </div>
+      <button class="report-btn" id="reportBtn" title="Сообщить о проблеме">🚩</button>
     </div>
     
     <div class="cards-container" id="cardsContainer"></div>
@@ -378,8 +504,19 @@
       <button class="next-btn centered" id="nextBtn">Далее</button>
       <button class="guide-btn" id="guideBtn"><span class="emoji">🔗</span> Детальный гайд</button>
     </div>
+    
+    <div id="exitModal" style="display:none; position:fixed; z-index:100; left:0; top:0; width:100vw; height:100vh; background:rgba(0,0,0,0.25); align-items:center; justify-content:center;">
+      <div style="background:#fff; border-radius:1.2rem; max-width:90vw; width:340px; padding:2rem 1.2rem; box-shadow:0 8px 32px #0002; text-align:center;">
+        <div style="font-size:1.15rem; margin-bottom:1.5rem; color:#222;">Вы действительно хотите выйти? Ваш прогресс не сохранится.</div>
+        <div style="display:flex; gap:1rem; justify-content:center;">
+          <button id="modalExitBtn" style="background:linear-gradient(90deg, var(--orange), var(--yellow)); color:#222; border:none; border-radius:1.5rem; padding:0.7rem 1.5rem; font-weight:600; cursor:pointer;">Выйти</button>
+          <button id="modalStayBtn" style="background:#eee; color:#222; border:none; border-radius:1.5rem; padding:0.7rem 1.5rem; font-weight:600; cursor:pointer;">Остаться</button>
+        </div>
+      </div>
+    </div>
   </div>
 
+  <!-- Модальное окно завершения модуля -->
   <div class="completion-modal" id="completionModal">
     <div class="completion-content">
       <div class="checkmark">
@@ -392,6 +529,9 @@
     </div>
   </div>
 
+  <!-- Статус обновления -->
+  <div class="update-status" id="updateStatus"></div>
+
   <script>
     // Конфигурация NocoDB
     const config = {
@@ -401,7 +541,7 @@
       apiToken: 'bocQfycJpJsTG_tbwEf8ma8E5rhoig0njMDXFWtJ'
     };
 
-    // Основные элементы
+    // Элементы
     const splash = document.getElementById('splash');
     const startBtn = document.getElementById('startBtn');
     const mainContent = document.getElementById('mainContent');
@@ -411,10 +551,15 @@
     const cardsContainer = document.getElementById('cardsContainer');
     const exitBtn = document.getElementById('exitBtn');
     const splashExitBtn = document.getElementById('splashExitBtn');
+    const reportBtn = document.getElementById('reportBtn');
+    const exitModal = document.getElementById('exitModal');
+    const modalExitBtn = document.getElementById('modalExitBtn');
+    const modalStayBtn = document.getElementById('modalStayBtn');
     const completionModal = document.getElementById('completionModal');
     const completionBtn = document.getElementById('completionBtn');
+    const updateStatusEl = document.getElementById('updateStatus');
 
-    // Контентные блоки
+    // Все контентные блоки
     const contentBlocks = [
       {
         title: "ДАВАЙ НАЧНЕМ МОДУЛЬ 0",
@@ -583,32 +728,77 @@
 
     let currentBlockIndex = 0;
     const totalBlocks = contentBlocks.length;
+    let emptySpace = null;
+    let isFirstBlockAdded = false;
 
-    // Получаем ID пользователя из cookie
+    // Функция создания конфетти
+    function createConfetti() {
+      const colors = ['#ff0000', '#00ff00', '#0000ff', '#ffff00', '#ff00ff', '#00ffff'];
+      const confettiCount = 100;
+      
+      for (let i = 0; i < confettiCount; i++) {
+        const confetti = document.createElement('div');
+        confetti.className = 'confetti';
+        confetti.style.left = Math.random() * 100 + 'vw';
+        confetti.style.backgroundColor = colors[Math.floor(Math.random() * colors.length)];
+        confetti.style.width = Math.random() * 10 + 5 + 'px';
+        confetti.style.height = Math.random() * 10 + 5 + 'px';
+        confetti.style.animationDuration = Math.random() * 3 + 2 + 's';
+        confetti.style.animationDelay = Math.random() * 2 + 's';
+        document.body.appendChild(confetti);
+        
+        setTimeout(() => {
+          confetti.remove();
+        }, 5000);
+      }
+    }
+
+    // Функция для отображения статуса
+    function showStatus(message, isSuccess = true) {
+      updateStatusEl.textContent = message;
+      updateStatusEl.className = `update-status ${isSuccess ? 'success' : 'error'} show`;
+      
+      setTimeout(() => {
+        updateStatusEl.classList.remove('show');
+      }, 3000);
+    }
+
+    // Функция получения ID пользователя из cookie
     function getUserId() {
       const match = document.cookie.match(/tg_user_id=([^;]+)/);
       return match ? match[1] : null;
     }
 
-    // Обновляем прогресс в NocoDB
+    // Функция обновления прогресса в NocoDB
     async function updateProgressInNocoDB() {
       const userId = getUserId();
-      if (!userId) return false;
+      if (!userId) {
+        showStatus('Ошибка: ID пользователя не найден', false);
+        return false;
+      }
 
       try {
+        showStatus('Обновление прогресса...');
+        
         // 1. Находим запись пользователя
         const searchUrl = `https://app.nocodb.com/api/v1/db/data/${config.orgs}/${config.projectName}/${config.tableName}?where=(tg_user_id,eq,${userId})`;
         const searchRes = await fetch(searchUrl, {
           headers: { 'xc-token': config.apiToken }
         });
         
-        if (!searchRes.ok) return false;
+        if (!searchRes.ok) {
+          throw new Error(`Ошибка поиска: ${searchRes.status}`);
+        }
         
         const { list } = await searchRes.json();
-        if (!list?.length) return false;
+        if (!list?.length) {
+          throw new Error('Запись не найдена');
+        }
         
         const record = list[0];
-
+        
+        showStatus(`Найдена запись ID ${record.Id}. Обновляем...`);
+        
         // 2. Обновляем запись
         const updateUrl = `https://app.nocodb.com/api/v1/db/data/${config.orgs}/${config.projectName}/${config.tableName}/${record.Id}`;
         const updateRes = await fetch(updateUrl, {
@@ -620,27 +810,55 @@
           body: JSON.stringify({ progress: 2 })
         });
         
-        return updateRes.ok;
+        if (!updateRes.ok) {
+          const errorDetails = await updateRes.json().catch(() => ({}));
+          throw new Error(errorDetails.message || `Ошибка ${updateRes.status}`);
+        }
 
-      } catch {
+        const result = await updateRes.json();
+        showStatus('Прогресс успешно обновлен!');
+        console.log('Прогресс обновлен:', result);
+        return true;
+
+      } catch (error) {
+        console.error('Ошибка при обновлении прогресса:', error);
+        showStatus(`Ошибка: ${error.message}`, false);
         return false;
       }
     }
 
-    // Завершение модуля
+    // Функция завершения модуля
     function completeModule() {
+      // Показываем модальное окно
       completionModal.classList.add('active');
+      
+      // Запускаем конфетти
+      createConfetti();
+      
+      // Обновляем прогресс в NocoDB
       updateProgressInNocoDB();
     }
 
-    // Добавление контентного блока
+    // Обработчик кнопки завершения
+    completionBtn.addEventListener('click', () => {
+      window.location.href = 'index.html';
+    });
+
+    // Функции для работы с контентом
     function addContentBlock(index) {
+      if (index === 0 && isFirstBlockAdded) return;
+      
+      if (emptySpace) {
+        emptySpace.remove();
+        emptySpace = null;
+      }
+
       const block = document.createElement('div');
       block.className = 'content-block';
       
       const title = document.createElement('h2');
       title.className = 'content-title';
-      title.textContent = contentBlocks[index].title;
+      title.innerHTML = `${contentBlocks[index].title}`;
       block.appendChild(title);
       
       if (contentBlocks[index].image) {
@@ -655,18 +873,32 @@
       content.innerHTML = contentBlocks[index].content;
       block.appendChild(content);
       
+      // Добавляем блок в контейнер
       cardsContainer.appendChild(block);
       
+      // Добавляем пустое пространство после блока
+      emptySpace = document.createElement('div');
+      emptySpace.className = 'empty-space';
+      cardsContainer.appendChild(emptySpace);
+      
+      // Помечаем первый блок как добавленный
+      if (index === 0) isFirstBlockAdded = true;
+      
+      // Показываем блок с анимацией
       setTimeout(() => {
         block.classList.add('visible');
+        
+        // Прокручиваем так, чтобы заголовок блока был сразу под шапкой
+        const headerHeight = document.querySelector('.header-bar').offsetHeight;
+        const blockTop = block.offsetTop;
+        
         window.scrollTo({
-          top: block.offsetTop - document.querySelector('.header-bar').offsetHeight,
+          top: blockTop - headerHeight,
           behavior: 'smooth'
         });
       }, 50);
     }
 
-    // Обновление прогресс-бара
     function updateProgressBar() {
       const percent = ((currentBlockIndex + 1) / totalBlocks) * 100;
       progressBar.style.width = percent + '%';
@@ -700,25 +932,35 @@
         
         if (currentBlockIndex === totalBlocks - 1) {
           nextBtn.textContent = 'Завершить';
-          nextBtn.onclick = completeModule;
+          nextBtn.onclick = completeModule; // Изменяем обработчик на завершение модуля
         }
       }
     });
 
     exitBtn.addEventListener('click', () => {
+      exitModal.style.display = 'flex';
+    });
+
+    modalExitBtn.addEventListener('click', () => {
       window.location.href = 'index.html';
+    });
+
+    modalStayBtn.addEventListener('click', () => {
+      exitModal.style.display = 'none';
     });
 
     guideBtn.addEventListener('click', () => {
       window.open('https://kurl.ru/btRup', '_blank');
     });
 
-    completionBtn.addEventListener('click', () => {
-      window.location.href = 'index.html';
+    reportBtn.addEventListener('click', () => {
+      alert('Сообщение о проблеме будет добавлено в ближайшее время');
     });
 
-    // Инициализация первого блока
-    addContentBlock(0);
+    // Инициализация
+    if (!isFirstBlockAdded) {
+      addContentBlock(0);
+    }
   </script>
 </body>
 </html>
