@@ -1,1 +1,997 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <title>Модуль 0: Доступ к ChatGPT</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    :root {
+      --orange: #FF9800;
+      --yellow: #FFF9C4;
+      --white: #FFF;
+      --text: #222;
+      --gray: #F2F2F2;
+      --header-gray: #E0E0E0;
+      --transition: 0.6s cubic-bezier(.77,0,.18,1);
+      --disabled: #CCCCCC;
+      --blue: #4285F4;
+    }
+    body {
+      margin: 0;
+      min-height: 100vh;
+      font-family: 'Segoe UI', 'Roboto', Arial, sans-serif;
+      background: var(--white);
+      color: var(--text);
+      overflow-x: hidden;
+      -webkit-tap-highlight-color: transparent;
+      line-height: 1.6;
+    }
+    .splash {
+      position: fixed;
+      inset: 0;
+      background: var(--white);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      z-index: 10;
+      transition: opacity var(--transition), visibility var(--transition);
+      padding: 2rem 1rem;
+    }
+    .splash.hide {
+      opacity: 0;
+      visibility: hidden;
+      pointer-events: none;
+    }
+    .splash h1 {
+      font-size: 2.1rem;
+      color: var(--orange);
+      margin-bottom: 2rem;
+      letter-spacing: 1px;
+      text-shadow: 0 2px 16px #ff980044;
+      font-weight: 700;
+      animation: fadeIn 1.2s;
+      text-align: center;
+      word-break: break-word;
+      line-height: 1.2;
+    }
+    .splash button {
+      padding: 1rem 2.5rem;
+      font-size: 1.2rem;
+      background: linear-gradient(90deg, var(--yellow), var(--orange));
+      color: var(--text);
+      border: none;
+      border-radius: 2rem;
+      cursor: pointer;
+      font-weight: 600;
+      box-shadow: 0 4px 24px #ff980055;
+      transition: background 0.3s, transform 0.2s;
+      animation: fadeInUp 1.5s;
+    }
+    .splash button:hover {
+      background: linear-gradient(90deg, var(--orange), var(--yellow));
+      transform: scale(1.05);
+    }
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(-30px);}
+      to { opacity: 1; transform: translateY(0);}
+    }
+    @keyframes fadeInUp {
+      from { opacity: 0; transform: translateY(30px);}
+      to { opacity: 1; transform: translateY(0);}
+    }
+    .main-content {
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity var(--transition);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+    .main-content.show {
+      opacity: 1;
+      pointer-events: auto;
+    }
+    .header-bar {
+      display: flex;
+      align-items: center;
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100vw;
+      height: 56px;
+      background: var(--header-gray);
+      z-index: 5;
+      box-shadow: 0 2px 12px #ff980022;
+      padding: 0 0.5rem;
+    }
+    .exit-btn {
+      background: var(--white);
+      border: none;
+      color: var(--text);
+      font-size: 1.2rem;
+      border-radius: 8px;
+      width: 40px;
+      height: 40px;
+      margin-right: 1rem;
+      cursor: pointer;
+      font-weight: 700;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: all 0.2s;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    }
+    .exit-btn:hover {
+      background: #e0e0e0;
+      transform: scale(1.07);
+    }
+    .exit-btn span {
+      display: block;
+      line-height: 1;
+      transform: translateX(-1px);
+    }
+    .progress-bar {
+      flex: 1;
+      height: 12px;
+      background: #fff3;
+      border-radius: 6px;
+      position: relative;
+      margin-left: 0.5rem;
+      margin-right: 0.5rem;
+      overflow: hidden;
+      border: 1px solid #ddd;
+      max-width: calc(100% - 160px);
+    }
+    .progress-bar-inner {
+      height: 100%;
+      width: 0;
+      background: linear-gradient(90deg, var(--yellow), var(--orange));
+      border-radius: 6px;
+      transition: width 0.5s cubic-bezier(.77,0,.18,1);
+      z-index: 2;
+    }
+    .cards-container {
+      margin-top: 72px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      width: 100%;
+      min-height: calc(100vh - 128px);
+      padding-bottom: 6rem;
+    }
+    .content-block {
+      max-width: 600px;
+      width: 95%;
+      padding: 1.5rem 1.2rem;
+      font-size: 1.1rem;
+      color: #333;
+      margin-bottom: 1rem;
+      opacity: 0;
+      transform: translateY(20px);
+      transition: opacity 0.5s ease-out, transform 0.5s ease-out;
+      position: relative;
+      box-sizing: border-box;
+      transition-delay: 0.1s;
+    }
+    .content-block.visible {
+      opacity: 1;
+      transform: translateY(0);
+    }
+    .content-title {
+      color: var(--orange);
+      font-weight: 700;
+      font-size: 1.3rem;
+      margin: 0 0 0.8rem 0;
+      display: flex;
+      align-items: center;
+    }
+    .content-counter {
+      font-size: 0.9rem;
+      color: #666;
+      background: rgba(255, 255, 255, 0.7);
+      padding: 0.2rem 0.6rem;
+      border-radius: 1rem;
+      margin-left: 0.8rem;
+    }
+    .content-block ul {
+      padding-left: 1rem;
+      margin: 0.8rem 0;
+    }
+    .content-block li {
+      margin-bottom: 0.4rem;
+      position: relative;
+    }
+    .tip-card {
+      background: rgba(255, 248, 225, 0.8);
+      border-left: 4px solid var(--orange);
+      padding: 0.8rem 1rem;
+      margin: 1rem 0;
+      border-radius: 0 8px 8px 0;
+    }
+    .tip-card-title {
+      font-weight: 700;
+      color: var(--orange);
+      margin: 0 0 0.3rem 0;
+      font-size: 1rem;
+    }
+    .buttons-container {
+      position: fixed;
+      bottom: 1.5rem;
+      left: 0;
+      width: 100%;
+      display: flex;
+      justify-content: center;
+      gap: 0.8rem;
+      z-index: 2;
+      padding: 0 1rem;
+      box-sizing: border-box;
+    }
+        .confetti-container {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      pointer-events: none;
+      z-index: 1000;
+      overflow: hidden;
+    }
+    
+    .confetti {
+      position: absolute;
+      width: 12px;
+      height: 12px;
+      opacity: 0;
+      animation: confetti-fall 2s ease-in forwards;
+      transform-origin: center bottom;
+    }
+    
+    @keyframes confetti-fall {
+      0% {
+        transform: translateY(-100px) rotate(0deg) scale(1);
+        opacity: 1;
+      }
+      60% {
+        opacity: 0.8;
+      }
+      100% {
+        transform: translateY(calc(100vh + 100px)) rotate(360deg) scale(0.5);
+        opacity: 0;
+      }
+    }
+    
+    .confetti-left {
+      left: 10%;
+      animation-delay: 0.1s;
+    }
+    
+    .confetti-right {
+      right: 10%;
+      animation-delay: 0.2s;
+    }
+    
+    .confetti-center-left {
+      left: 30%;
+      animation-delay: 0.3s;
+    }
+    
+    .confetti-center-right {
+      right: 30%;
+      animation-delay: 0.4s;
+    }
+    
+    .confetti-far-left {
+      left: 5%;
+      animation-delay: 0.5s;
+    }
+    
+    .confetti-far-right {
+      right: 5%;
+      animation-delay: 0.6s;
+    }
+    .next-btn {
+      padding: 0.8rem 1.8rem;
+      font-size: 1rem;
+      background: linear-gradient(90deg, var(--yellow), var(--orange));
+      color: var(--text);
+      border: none;
+      border-radius: 2rem;
+      cursor: pointer;
+      font-weight: 600;
+      box-shadow: 0 4px 12px rgba(255, 152, 0, 0.3);
+      transition: all 0.3s;
+      opacity: 0;
+      pointer-events: none;
+      min-width: 120px;
+      position: relative;
+      overflow: hidden;
+    }
+    .next-btn.centered {
+      margin: 0 auto;
+    }
+    .next-btn.show {
+      opacity: 1;
+      pointer-events: auto;
+      animation: fadeInUp 1s;
+    }
+    .next-btn:hover:not(:disabled) {
+      background: linear-gradient(90deg, var(--orange), var(--yellow));
+      transform: scale(1.05);
+    }
+    .next-btn:disabled {
+      background: var(--disabled);
+      cursor: not-allowed;
+      transform: none !important;
+    }
+    .guide-btn {
+      padding: 0.8rem 1rem;
+      font-size: 0.9rem;
+      background: linear-gradient(90deg, var(--blue), #3367D6);
+      color: white;
+      border: none;
+      border-radius: 2rem;
+      cursor: pointer;
+      font-weight: 600;
+      box-shadow: 0 4px 12px rgba(66, 133, 244, 0.3);
+      transition: all 0.3s;
+      opacity: 0;
+      pointer-events: none;
+      min-width: 120px;
+    }
+    .guide-btn.show {
+      opacity: 1;
+      pointer-events: auto;
+      animation: fadeInUp 1s;
+    }
+    .guide-btn:hover {
+      background: linear-gradient(90deg, #3367D6, var(--blue));
+      transform: scale(1.05);
+    }
+    .report-btn {
+      background: var(--white);
+      border: none;
+      color: var(--text);
+      font-size: 1.2rem;
+      border-radius: 8px;
+      width: 40px;
+      height: 40px;
+      cursor: pointer;
+      font-weight: 700;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: all 0.2s;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+      margin-left: 0.5rem;
+    }
+    .report-btn:hover {
+      background: #e0e0e0;
+      transform: scale(1.07);
+    }
+    .content-image {
+      width: 100%;
+      max-width: 500px;
+      border-radius: 8px;
+      margin: 0 0 1rem 0;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+      border: 1px solid #eee;
+      display: block;
+    }
+    .divider {
+      height: 1px;
+      background-color: #ddd;
+      margin: 1.5rem 0;
+      width: 100%;
+    }
+    .empty-space {
+      height: 50vh;
+      width: 100%;
+    }
+    /* Новые стили для модального окна завершения */
+    .completion-modal {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0,0,0,0.7);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      z-index: 1000;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.3s ease;
+    }
+    .completion-modal.active {
+      opacity: 1;
+      pointer-events: auto;
+    }
+    .completion-content {
+      background: white;
+      padding: 2rem;
+      border-radius: 16px;
+      text-align: center;
+      max-width: 90%;
+      width: 350px;
+      box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+      transform: scale(0.9);
+      transition: transform 0.3s ease;
+    }
+    .completion-modal.active .completion-content {
+      transform: scale(1);
+    }
+    .checkmark {
+      width: 80px;
+      height: 80px;
+      margin: 0 auto 1.5rem;
+      position: relative;
+    }
+    .checkmark-circle {
+      width: 100%;
+      height: 100%;
+      border-radius: 50%;
+      background: rgba(76, 175, 80, 0.1);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
+    .checkmark-icon {
+      color: #4CAF50;
+      font-size: 50px;
+    }
+    .completion-title {
+      font-size: 1.5rem;
+      font-weight: 700;
+      margin-bottom: 1rem;
+      color: #333;
+    }
+    .completion-btn {
+      padding: 0.8rem 2rem;
+      background: linear-gradient(90deg, var(--yellow), var(--orange));
+      color: var(--text);
+      border: none;
+      border-radius: 2rem;
+      font-weight: 600;
+      cursor: pointer;
+      margin-top: 1.5rem;
+      transition: all 0.3s;
+    }
+    .completion-btn:hover {
+      background: linear-gradient(90deg, var(--orange), var(--yellow));
+      transform: scale(1.05);
+    }
+    /* Анимация конфетти */
+    .confetti {
+      position: fixed;
+      width: 10px;
+      height: 10px;
+      background-color: #f00;
+      opacity: 0;
+      z-index: 999;
+      animation: confetti-fall 3s linear forwards;
+    }
+    @keyframes confetti-fall {
+      0% {
+        transform: translateY(-100vh) rotate(0deg);
+        opacity: 1;
+      }
+      100% {
+        transform: translateY(100vh) rotate(360deg);
+        opacity: 0;
+      }
+    }
+    @media (max-width: 600px) {
+      .splash h1 {
+        font-size: 1.5rem;
+      }
+      .content-block {
+        padding: 1.2rem 1rem;
+        font-size: 1rem;
+      }
+      .header-bar {
+        height: 48px;
+      }
+      .exit-btn, .report-btn {
+        width: 36px;
+        height: 36px;
+      }
+      .buttons-container {
+        bottom: 1rem;
+      }
+      .next-btn, .guide-btn {
+        padding: 0.7rem 1rem;
+        min-width: 110px;
+      }
+      .empty-space {
+        height: 40vh;
+      }
+      .completion-content {
+        padding: 1.5rem;
+      }
+      .checkmark {
+        width: 60px;
+        height: 60px;
+      }
+      .checkmark-icon {
+        font-size: 40px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="splash" id="splash">
+    <div style="position: absolute; top: 0.5rem; left: 0.5rem; width: 100%; display: flex;">
+      <button class="exit-btn" id="splashExitBtn" title="Выйти"><span>&#8592;</span></button>
+    </div>
+    <h1>Модуль 0:<br>Доступ к ChatGPT</h1>
+    <button id="startBtn">Начать</button>
+  </div>
 
+  <div class="main-content" id="mainContent">
+    <div class="header-bar">
+      <button class="exit-btn" id="exitBtn" title="Выйти"><span>&#8592;</span></button>
+      <div class="progress-bar">
+        <div class="progress-bar-inner" id="progressBar"></div>
+      </div>
+      <button class="report-btn" id="reportBtn" title="Сообщить о проблеме">🚩</button>
+    </div>
+    
+    <div class="cards-container" id="cardsContainer"></div>
+    
+    <div class="buttons-container">
+      <button class="next-btn centered" id="nextBtn">Далее</button>
+      <button class="guide-btn" id="guideBtn"><span class="emoji">🔗</span> Детальный гайд</button>
+    </div>
+    
+    <div id="exitModal" style="display:none; position:fixed; z-index:100; left:0; top:0; width:100vw; height:100vh; background:rgba(0,0,0,0.25); align-items:center; justify-content:center;">
+      <div style="background:#fff; border-radius:1.2rem; max-width:90vw; width:340px; padding:2rem 1.2rem; box-shadow:0 8px 32px #0002; text-align:center;">
+        <div style="font-size:1.15rem; margin-bottom:1.5rem; color:#222;">Вы действительно хотите выйти? Ваш прогресс не сохранится.</div>
+        <div style="display:flex; gap:1rem; justify-content:center;">
+          <button id="modalExitBtn" style="background:linear-gradient(90deg, var(--orange), var(--yellow)); color:#222; border:none; border-radius:1.5rem; padding:0.7rem 1.5rem; font-weight:600; cursor:pointer;">Выйти</button>
+          <button id="modalStayBtn" style="background:#eee; color:#222; border:none; border-radius:1.5rem; padding:0.7rem 1.5rem; font-weight:600; cursor:pointer;">Остаться</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Модальное окно завершения модуля -->
+  <div class="completion-modal" id="completionModal">
+    <div class="completion-content">
+      <div class="checkmark">
+        <div class="checkmark-circle">
+          <div class="checkmark-icon">✓</div>
+        </div>
+      </div>
+      <div class="completion-title">Модуль 0 пройден!</div>
+      <button class="completion-btn" id="completionBtn">Вернуться в меню</button>
+    </div>
+  </div>
+
+  <script>
+    // Конфигурация NocoDB
+    const config = {
+      orgs: 'weamcfo6',
+      projectName: 'p27jdsmk69wuimh',
+      tableName: 'mc6qh91f060pv4y',
+      apiToken: 'bocQfycJpJsTG_tbwEf8ma8E5rhoig0njMDXFWtJ'
+    };
+
+    // Элементы
+    const splash = document.getElementById('splash');
+    const startBtn = document.getElementById('startBtn');
+    const mainContent = document.getElementById('mainContent');
+    const nextBtn = document.getElementById('nextBtn');
+    const guideBtn = document.getElementById('guideBtn');
+    const progressBar = document.getElementById('progressBar');
+    const cardsContainer = document.getElementById('cardsContainer');
+    const exitBtn = document.getElementById('exitBtn');
+    const splashExitBtn = document.getElementById('splashExitBtn');
+    const reportBtn = document.getElementById('reportBtn');
+    const exitModal = document.getElementById('exitModal');
+    const modalExitBtn = document.getElementById('modalExitBtn');
+    const modalStayBtn = document.getElementById('modalStayBtn');
+    const completionModal = document.getElementById('completionModal');
+    const completionBtn = document.getElementById('completionBtn');
+
+    // Все контентные блоки
+    const contentBlocks = [
+      {
+        title: "ДАВАЙ НАЧНЕМ МОДУЛЬ 0",
+        image: "1.jpg",
+        content: `Со следующего экрана и далее в этом модуле ты будешь видеть <b>вторую кнопку с полным и подробным гайдом</b>, чтобы можно было перейти в него когда удобно.<br><br>
+        <b>СОВЕТ:</b> сначала пролистай этот модуль целиком для ознакомления, потому что может случится так, что гайд тебе и не понадобится`
+      },
+      {
+        title: "НАЧНЕМ СО СТОИМОСТИ",
+        content: `У ChatGPT есть 3 тарифа:<br><br>
+        <ul>
+          <li>Бесплатный</li>
+          <li>PLUS за $20 в месяц</li>
+          <li>PRO за $200 в месяц</li>
+        </ul>
+        На старте имеет смысл использовать бесплатную версию, чтобы разобраться и приноровиться. Тем более, что её прям хорошо расширили функционалом <span class="emoji">😊</span>`
+      },
+      {
+        title: "БЕСПЛАТНЫЙ ТАРИФ",
+        content: `<b>Возможности</b><br><br>
+        <ul>
+          <li><span class="emoji">✅</span> Распознавание изображений</li>
+          <li><span class="emoji">✅</span> Поиск в интернете</li>
+          <li><span class="emoji">✅</span> Генерация картинок (3 шт / день)</li>
+          <li><span class="emoji">✅</span> Анализ данных</li>
+          <li><span class="emoji">✅</span> Работа с голосом</li>
+          <li><span class="emoji">✅</span> Генерация текстов</li>
+        </ul>`
+      },
+      {
+        title: "ОГРАНИЧЕНИЯ БЕСПЛАТНОГО ТАРИФА",
+        content: `<ul>
+          <li><span class="emoji">⚠️</span> Лимит сообщений<br>
+          - около 10 за раз, после чего придется подождать несколько часов</li>
+          <li><span class="emoji">⚠️</span> Ограничение на ввод<br>
+          - не более 2048 символов в одном сообщении</li>
+          <li><span class="emoji">⚠️</span> Очереди в пиковые часы<br>
+          - в периоды высокой нагрузки можно столкнуться с ожиданием</li>
+          <li><span class="emoji">⚠️</span> Нельзя создавать GPTs<br>
+          - это узкоспециализированные чат-боты внутри самого ChatGPT<br>
+          - пользоваться чужими можно, создавать свои - нельзя</li>
+        </ul>`
+      },
+      {
+        title: "НЕ ВСЕ МОДЕЛИ CHATGPT",
+        content: `Для разных задач можно использовать разные модели ChatGPT, но для 99% задач подходит модель 4o, которая есть в бесплатном тарифе`
+      },
+      {
+        title: "ТАРИФ PLUS за $20 в месяц",
+        content: `Данная подписка имеет смысл только для тех, кто<br><br>
+        <ul>
+          <li><span class="emoji">👉</span> Постоянно упирается в лимиты сообщений</li>
+          <li><span class="emoji">👉</span> Создает десятки изображений ежедневно</li>
+          <li><span class="emoji">👉</span> Работает с большими объемами данных</li>
+          <li><span class="emoji">👉</span> Хочет создавать собственные GPTs под конкретные задачи</li>
+          <li><span class="emoji">👉</span> Хочет больше моделей для работы</li>
+        </ul>`
+      },
+      {
+        title: "ТАРИФ PRO за $200 в месяц",
+        content: `Данная подписка нужна на уровне космоса и для задач национальных масштабов. Для 99.8% пользователей она бесполезна, поэтому её даже рассматривать не будем <span class="emoji">😊️</span>`
+      },
+      {
+        title: "КАК ПОЛУЧИТЬ ДОСТУП",
+        image: "5.jpg",
+        content: `Существует несколько способов:<br><br>
+        <ul>
+          <li><b>Веб-версия</b> – chat.openai.com</li>
+          <li>Мобильное приложение для iOS и Android</li>
+          <li><b>Чат-боты в Telegram и Whatsapp</b></li>
+        </ul>
+        Везде есть плюсы и минусы, поэтому давайте кратко разберем каждый из способов`
+      },
+      {
+        title: "ВЕБ-ВЕРСИЯ ChatGPT",
+        image: "4.jpg",
+        content: `<ul>
+          <li><span class="emoji">✔️</span> Работает прямо в браузере</li>
+          <li><span class="emoji">✔️</span> Не требует установки приложений</li>
+          <li><span class="emoji">✔️</span> Поддерживает полный функционал</li>
+          <li><span class="emoji">✔️</span> На мой взгляд самый лучший и адекватный способ - один раз сделать и забыть</li>
+        </ul>`
+      },
+      {
+        title: "ИСПОЛЬЗОВАНИЕ VPN",
+        image: "3.jpg",
+        content: `Чтобы обойти блокировку, нужно использовать VPN. Есть несколько способов:<br><br>
+        <ul>
+          <li><span class="emoji">🔹</span> Установить VPN из магазина приложений (подойдет любой удобный вариант)</li>
+          <li><span class="emoji">🔹</span> Создать свой собственный VPN – это займет 10–12 минут</li>
+          <li><span class="emoji">🔹</span> Подробная инструкция по созданию своего VPN также доступна в гайде</li>
+        </ul>`
+      },
+      {
+        title: "CHATGPT НА СМАРТФОНЕ",
+        image: "2.jpg",
+        content: `Это второй способ использовать ChatGPT<br><br>
+        <span class="emoji">📌</span> Удобный доступ с телефона<br>
+        <span class="emoji">📌</span> Можно общаться в любое время и в любом месте<br>
+        <span class="emoji">📌</span> Официальные версии для iOS и Android<br><br>
+        Но есть нюанс...`
+      },
+      {
+        title: "ПРИЛОЖЕНИЯ В РОССИИ НЕДОСТУПНЫ",
+        image: "6.jpg",
+        content: `Чтобы установить ChatGPT в телефон, нужно немножко потанцевать с бубнами.<br>
+        Поэтому имеет смысл заморачиваться лишь тогда, когда ты УЖЕ являешься уверенным пользователем <span class="emoji">😊</span><br><br>
+        <span class="emoji">🔍</span> Если всё же хочешь установить ChatGPT на телефон, инструкция всё там же ))`
+      },
+      {
+        title: "CHATGPT В TELEGRAM",
+        image: "8.jpg",
+        content: `Третий и самый простой способ получить доступ к ChatGPT в России – через Telegram-ботов<br><br>
+        <span class="emoji">🔍</span> Ты отправляешь запрос Telegram-боту<br>
+        <span class="emoji">🔍</span> Он передает его ChatGPT<br>
+        <span class="emoji">🔍</span> Получает ответ и отправляет его тебе<br><br>
+        Но у этого способа есть как плюсы, так и минусы`
+      },
+      {
+        title: "ПЛЮСЫ И МИНУСЫ TELEGRAM-БОТОВ",
+        content: `<b>ПЛЮСЫ</b><br><br>
+        <ul>
+          <li><span class="emoji">✅</span> Не нужен VPN</li>
+          <li><span class="emoji">✅</span> Быстрый доступ (достаточно просто запустить бота)</li>
+          <li><span class="emoji">✅</span> Оплата подписки в рублях с российских карт</li>
+        </ul>
+        <div class="divider"></div>
+        <b>МИНУСЫ</b><br><br>
+        <ul>
+          <li><span class="emoji">❌</span> Ограниченный функционал (не все возможности ChatGPT)</li>
+          <li><span class="emoji">❌</span> Качество ответов зависит от бота и модели</li>
+          <li><span class="emoji">❌</span> Безопасность: ты передаешь данные посреднику</li>
+        </ul>`
+      },
+      {
+        title: "КАК ВЫБРАТЬ TELEGRAM-БОТА?",
+        image: "11.jpg",
+        content: `Перед выбором и использованием любого Telegram-бота:<br><br>
+        <span class="emoji">🔍</span> Прочитай описание и условия использования<br>
+        <span class="emoji">🔍</span> Ознакомься с отзывами других пользователей<br>
+        <span class="emoji">🔍</span> Проверь, какую модель ChatGPT он использует<br><br>
+        Рекомендую использовать SYNTX AI – он один из крупнейших и проверенных<br><br>
+        <a href="#" class="action-btn" id="syntaxBtn">Перейти в SYNTX AI</a>`
+      },
+      {
+        title: "CHATGPT В WHATSAPP",
+        image: "10.jpg",
+        content: `Это четвертый и БЕСПЛАТНЫЙ способ, который не требует наличия VPN, но в отличие от варианта с Telegram-ботом, он официальный.<br><br>
+        Из минусов - там используется устаревшая модель и ограничен функционал<br>
+        Подробная инструкция по установке в гайде`
+      },
+      {
+        title: "МОДУЛЬ-0 пройден",
+        image: "9.jpg",
+        content: `Наши поздравления! Ты только что завершил подготовительный блок, в котором мы разобрали способы доступа к ChatGPT в обход всех блокировок.<br><br>
+        В следующем модуле «Основы ChatGPT» мы разберемся, как заставить нейросеть выполнять твои задачи, какие у неё есть ограничения и как получить максимально полезные ответы<br><br>
+        Продолжаем?`
+      },
+      {
+        title: "ЗАКЛЮЧЕНИЕ",
+        content: `<span class="emoji">❗</span> <b>ОБЯЗАТЕЛЬНО ПОЛУЧИ ДОСТУП К ChatGPT</b><br><br>
+        <span class="emoji">👉</span> Без этого смотреть курс дальше не имеет смысла, так как мы будем практиковаться именно в ChatGPT, чтобы сразу закреплять знания на практике<br><br>
+        Выдели время и получи доступ в ChatGPT любым удобным способом из данного модуля. Поверь, когда ты начнешь им пользоваться - ты кайфонешь и всё поймешь <span class="emoji">🙏😌</span>`
+      }
+    ];
+
+    let currentBlockIndex = 0;
+    const totalBlocks = contentBlocks.length;
+    let emptySpace = null;
+    let isFirstBlockAdded = false;
+
+function createConfetti() {
+      const colors = ['#FF5252', '#FF4081', '#E040FB', '#7C4DFF', '#536DFE', '#448AFF', '#40C4FF', '#18FFFF', '#64FFDA', '#69F0AE', '#B2FF59', '#EEFF41', '#FFFF00', '#FFD740', '#FFAB40', '#FF6E40'];
+      const shapes = ['circle', 'rect', 'triangle'];
+      
+      // Создаем контейнер для конфетти
+      const container = document.createElement('div');
+      container.className = 'confetti-container';
+      document.body.appendChild(container);
+      
+      // Создаем 16 конфетти (можно увеличить количество)
+      for (let i = 0; i < 16; i++) {
+        const confetti = document.createElement('div');
+        confetti.className = `confetti confetti-${i % 2 === 0 ? 'left' : 'right'}`;
+        
+        // Случайный цвет
+        const color = colors[Math.floor(Math.random() * colors.length)];
+        confetti.style.backgroundColor = color;
+        
+        // Случайная форма
+        const shape = shapes[Math.floor(Math.random() * shapes.length)];
+        if (shape === 'circle') {
+          confetti.style.borderRadius = '50%';
+        } else if (shape === 'triangle') {
+          confetti.style.width = '0';
+          confetti.style.height = '0';
+          confetti.style.borderLeft = '6px solid transparent';
+          confetti.style.borderRight = '6px solid transparent';
+          confetti.style.borderBottom = `12px solid ${color}`;
+          confetti.style.backgroundColor = 'transparent';
+        }
+        
+        // Случайный размер
+        const size = Math.random() * 8 + 6;
+        if (shape !== 'triangle') {
+          confetti.style.width = `${size}px`;
+          confetti.style.height = `${size}px`;
+        }
+        
+        // Случайная позиция по горизонтали
+        const positions = ['left', 'right', 'center-left', 'center-right', 'far-left', 'far-right'];
+        const positionClass = positions[Math.floor(Math.random() * positions.length)];
+        confetti.classList.add(`confetti-${positionClass}`);
+        
+        // Случайная задержка
+        confetti.style.animationDelay = `${Math.random() * 0.5}s`;
+        
+        // Случайная продолжительность анимации
+        confetti.style.animationDuration = `${Math.random() * 1 + 1.5}s`;
+        
+        container.appendChild(confetti);
+      }
+      
+      // Удаляем контейнер после завершения анимации
+      setTimeout(() => {
+        container.remove();
+      }, 3000);
+    }
+
+    // Функция для получения ID пользователя из cookie
+    function getUserId() {
+      const match = document.cookie.match(/tg_user_id=([^;]+)/);
+      return match ? match[1] : null;
+    }
+
+    // Функция обновления прогресса в NocoDB
+    async function updateProgressInNocoDB() {
+      const userId = getUserId();
+      if (!userId) return false;
+
+      try {
+        // 1. Находим запись пользователя
+        const searchUrl = `https://app.nocodb.com/api/v1/db/data/${config.orgs}/${config.projectName}/${config.tableName}?where=(tg_user_id,eq,${userId})`;
+        const searchRes = await fetch(searchUrl, {
+          headers: { 'xc-token': config.apiToken }
+        });
+        
+        if (!searchRes.ok) return false;
+        
+        const { list } = await searchRes.json();
+        if (!list?.length) return false;
+        
+        const record = list[0];
+        
+        // 2. Обновляем запись
+        const updateUrl = `https://app.nocodb.com/api/v1/db/data/${config.orgs}/${config.projectName}/${config.tableName}/${record.Id}`;
+        const updateRes = await fetch(updateUrl, {
+          method: 'PATCH',
+          headers: {
+            'Content-Type': 'application/json',
+            'xc-token': config.apiToken
+          },
+          body: JSON.stringify({ progress: 2 })
+        });
+        
+        return updateRes.ok;
+
+      } catch (error) {
+        return false;
+      }
+    }
+
+    // Функция завершения модуля
+    function completeModule() {
+      completionModal.classList.add('active');
+      createConfetti();
+      updateProgressInNocoDB();
+    }
+
+    // Обработчик кнопки завершения
+    completionBtn.addEventListener('click', () => {
+      window.location.href = 'index.html';
+    });
+
+    // Функции для работы с контентом
+    function addContentBlock(index) {
+      if (index === 0 && isFirstBlockAdded) return;
+      
+      if (emptySpace) {
+        emptySpace.remove();
+        emptySpace = null;
+      }
+
+      const block = document.createElement('div');
+      block.className = 'content-block';
+      
+      const title = document.createElement('h2');
+      title.className = 'content-title';
+      title.innerHTML = `${contentBlocks[index].title}`;
+      block.appendChild(title);
+      
+      if (contentBlocks[index].image) {
+        const img = document.createElement('img');
+        img.className = 'content-image';
+        img.src = `photo_course/${contentBlocks[index].image}`;
+        img.alt = contentBlocks[index].title;
+        block.appendChild(img);
+      }
+      
+      const content = document.createElement('div');
+      content.innerHTML = contentBlocks[index].content;
+      block.appendChild(content);
+      
+      cardsContainer.appendChild(block);
+      
+      emptySpace = document.createElement('div');
+      emptySpace.className = 'empty-space';
+      cardsContainer.appendChild(emptySpace);
+      
+      if (index === 0) isFirstBlockAdded = true;
+      
+      setTimeout(() => {
+        block.classList.add('visible');
+        
+        const headerHeight = document.querySelector('.header-bar').offsetHeight;
+        const blockTop = block.offsetTop;
+        
+        window.scrollTo({
+          top: blockTop - headerHeight,
+          behavior: 'smooth'
+        });
+      }, 50);
+    }
+
+    function updateProgressBar() {
+      const percent = ((currentBlockIndex + 1) / totalBlocks) * 100;
+      progressBar.style.width = percent + '%';
+    }
+
+    // Обработчики событий
+    startBtn.addEventListener('click', () => {
+      splash.classList.add('hide');
+      setTimeout(() => {
+        mainContent.classList.add('show');
+        addContentBlock(0);
+        updateProgressBar();
+        nextBtn.classList.add('show');
+      }, 300);
+    });
+
+    splashExitBtn.addEventListener('click', () => {
+      window.location.href = 'index.html';
+    });
+
+    nextBtn.addEventListener('click', () => {
+      if (currentBlockIndex < totalBlocks - 1) {
+        currentBlockIndex++;
+        addContentBlock(currentBlockIndex);
+        updateProgressBar();
+        
+        if (currentBlockIndex === 1) {
+          nextBtn.classList.remove('centered');
+          guideBtn.classList.add('show');
+        }
+        
+        if (currentBlockIndex === totalBlocks - 1) {
+          nextBtn.textContent = 'Завершить';
+          nextBtn.onclick = completeModule;
+        }
+      }
+    });
+
+    exitBtn.addEventListener('click', () => {
+      exitModal.style.display = 'flex';
+    });
+
+    modalExitBtn.addEventListener('click', () => {
+      window.location.href = 'index.html';
+    });
+
+    modalStayBtn.addEventListener('click', () => {
+      exitModal.style.display = 'none';
+    });
+
+    guideBtn.addEventListener('click', () => {
+      window.open('https://kurl.ru/btRup', '_blank');
+    });
+
+    reportBtn.addEventListener('click', () => {
+      alert('Сообщение о проблеме будет добавлено в ближайшее время');
+    });
+
+    // Инициализация
+    if (!isFirstBlockAdded) {
+      addContentBlock(0);
+    }
+  </script>
+</body>
+</html>
