@@ -2,93 +2,43 @@
 <html lang="ru">
 <head>
     <meta charset="UTF-8">
-    <title>Обновление данных в NocoDB</title>
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Обновление данных</title>
     <style>
-        body {
-            font-family: Arial, sans-serif;
-            padding: 20px;
-            text-align: center;
-            background-color: #f5f5f5;
-        }
-        .button-container {
-            display: flex;
-            flex-direction: column;
-            gap: 15px;
-            margin-top: 30px;
-        }
-        button {
-            padding: 15px 25px;
-            font-size: 18px;
-            border: none;
-            border-radius: 10px;
-            cursor: pointer;
-            transition: all 0.3s;
-        }
-        #introBtn {
-            background-color: #4285f4;
-            color: white;
-        }
-        #moBtn {
-            background-color: #34a853;
-            color: white;
-        }
-        button:active {
-            transform: scale(0.95);
-        }
-        #status {
-            margin-top: 20px;
-            padding: 10px;
-            border-radius: 5px;
-        }
-        .success {
-            background-color: #e6f4ea;
-            color: #34a853;
-        }
-        .error {
-            background-color: #fce8e6;
-            color: #d93025;
-        }
+        body { font-family: Arial, padding: 20px; text-align: center; }
+        button { padding: 12px 24px; margin: 10px; background: #4285f4; color: white; border: none; border-radius: 4px; cursor: pointer; }
+        #status { margin-top: 20px; padding: 10px; }
+        .success { background: #e6ffed; color: #006400; }
+        .error { background: #ffebee; color: #d32f2f; }
     </style>
 </head>
 <body>
     <h2>Выберите действие:</h2>
-    <div class="button-container">
-        <button id="introBtn">ИНТРО</button>
-        <button id="moBtn">М0</button>
-    </div>
-    <div id="status"></div>
+    <button id="introBtn">ИНТРО (1)</button>
+    <button id="moBtn">М0 (2)</button>
+    <div id="status">Ожидание действий...</div>
 
     <script>
-        // Конфигурация NocoDB (ЗАМЕНИТЕ НА СВОИ ДАННЫЕ)
+        // КОНФИГУРАЦИЯ (ЗАМЕНИТЕ!)
         const config = {
             apiUrl: 'https://app.nocodb.com/api/v2/tables/mc6qh91f060pv4y/records',
-            apiToken: 'bocQfycJpJsTG_tbwEf8ma8E5rhoig0njMDXFWtJ'
+            apiToken: 'bocQfycJpJsTG_tbwEf8ma8E5rhoig0njMDXFWtJ' // Получите на https://app.nocodb.com/#/account/tokens
         };
-
-        // Элементы интерфейса
-        const introBtn = document.getElementById('introBtn');
-        const moBtn = document.getElementById('moBtn');
-        const statusDiv = document.getElementById('status');
 
         // Получаем user_id из cookie
         function getUserId() {
-            const cookies = document.cookie.split(';');
-            for (const cookie of cookies) {
-                const [name, value] = cookie.trim().split('=');
-                if (name === 'tg_user_id') return value;
-            }
-            return null;
+            const cookie = document.cookie.match(/tg_user_id=([^;]+)/);
+            return cookie ? cookie[1] : null;
         }
 
         // Обновляем статус
         function updateStatus(message, isSuccess = true) {
-            statusDiv.textContent = message;
-            statusDiv.className = isSuccess ? 'success' : 'error';
+            const status = document.getElementById('status');
+            status.textContent = message;
+            status.className = isSuccess ? 'success' : 'error';
         }
 
-        // Обновляем запись в NocoDB
-        async function updateRecord(columnName, value) {
+        // Основная функция обновления
+        async function updateColumn(columnName, value) {
             const userId = getUserId();
             if (!userId) {
                 updateStatus('Ошибка: tg_user_id не найден в cookie', false);
@@ -96,63 +46,43 @@
             }
 
             try {
-                // 1. Находим запись пользователя
+                // 1. Ищем запись пользователя
                 const searchUrl = `${config.apiUrl}?where=(tg_user_id,eq,${userId})`;
-                const searchResponse = await fetch(searchUrl, {
-                    headers: {
-                        'xc-token': config.apiToken,
-                        'Content-Type': 'application/json'
-                    }
+                const searchRes = await fetch(searchUrl, {
+                    headers: { 'xc-token': config.apiToken }
                 });
 
-                if (!searchResponse.ok) {
-                    throw new Error(`Ошибка поиска: ${searchResponse.status}`);
-                }
-
-                const searchData = await searchResponse.json();
-                if (!searchData.list || searchData.list.length === 0) {
-                    throw new Error('Пользователь не найден в таблице');
-                }
-
-                const record = searchData.list[0];
+                if (!searchRes.ok) throw new Error(`Ошибка поиска: ${searchRes.status}`);
                 
+                const { list } = await searchRes.json();
+                if (!list?.length) throw new Error('Пользователь не найден');
+
                 // 2. Обновляем запись
-                const updateUrl = `${config.apiUrl}/${record.Id}`;
-                const updateResponse = await fetch(updateUrl, {
-                    method: 'PATCH',
+                const updateUrl = `${config.apiUrl}/${list[0].Id}`;
+                const updateRes = await fetch(updateUrl, {
+                    method: 'PATCH', // Важно: используем PATCH для обновления
                     headers: {
                         'Content-Type': 'application/json',
                         'xc-token': config.apiToken
                     },
-                    body: JSON.stringify({
-                        [columnName]: value
-                    })
+                    body: JSON.stringify({ [columnName]: value })
                 });
 
-                if (!updateResponse.ok) {
-                    throw new Error(`Ошибка обновления: ${updateResponse.status}`);
+                if (!updateRes.ok) {
+                    const errorDetails = await updateRes.json().catch(() => ({}));
+                    throw new Error(errorDetails.message || `Ошибка ${updateRes.status}`);
                 }
 
-                updateStatus(`Успешно обновлено! ${columnName} = ${value}`);
+                updateStatus(`Успешно! ${columnName} = ${value}`);
             } catch (error) {
                 console.error('Ошибка:', error);
-                updateStatus(`ОШИБКА: ${error.message}`, false);
+                updateStatus(`Ошибка: ${error.message}`, false);
             }
         }
 
-        // Обработчики кнопок
-        introBtn.addEventListener('click', () => updateRecord('intro', '1'));
-        moBtn.addEventListener('click', () => updateRecord('Mo', '2'));
-
-        // Проверяем при загрузке
-        document.addEventListener('DOMContentLoaded', () => {
-            const userId = getUserId();
-            if (userId) {
-                updateStatus(`Текущий пользователь: ${userId}`, true);
-            } else {
-                updateStatus('Внимание: tg_user_id не найден в cookie', false);
-            }
-        });
+        // Назначаем обработчики
+        document.getElementById('introBtn').onclick = () => updateColumn('intro', '1');
+        document.getElementById('moBtn').onclick = () => updateColumn('Mo', '2');
     </script>
 </body>
 </html>
