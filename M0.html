@@ -728,45 +728,64 @@
     }
 
     // Функция обновления прогресса в NocoDB
-    async function updateProgressInNocoDB() {
-      const userId = getUserId();
-      if (!userId) return;
+// Функция обновления прогресса в NocoDB
+async function updateProgressInNocoDB() {
+    const userId = getUserId();
+    if (!userId) {
+        console.log('User ID not found in cookies');
+        return;
+    }
 
-      try {
+    try {
         const config = {
-          apiUrl: 'https://app.nocodb.com/api/v1/db/data/v1/weamcfo6/p27jdsmk69wuimh/mc6qh91f060pv4y',
-          apiToken: 'bocQfycJpJsTG_tbwEf8ma8E5rhoig0njMDXFWtJ' // Замените на реальный токен
+            apiUrl: 'https://app.nocodb.com/api/v1/db/data/v1/weamcfo6/p27jdsmk69wuimh/mc6qh91f060pv4y',
+            apiToken: 'YOUR_API_TOKEN' // Замените на реальный токен
         };
 
-        // 1. Находим запись пользователя
+        // 1. Находим запись пользователя по tg_user_id
         const searchUrl = `${config.apiUrl}?where=(tg_user_id,eq,${userId})`;
         const searchRes = await fetch(searchUrl, {
-          headers: { 'xc-token': config.apiToken }
+            headers: { 
+                'xc-token': config.apiToken,
+                'Content-Type': 'application/json'
+            }
         });
         
-        if (!searchRes.ok) throw new Error(`Ошибка поиска: ${searchRes.status}`);
+        if (!searchRes.ok) {
+            throw new Error(`Ошибка поиска: ${searchRes.status}`);
+        }
         
-        const { list } = await searchRes.json();
-        if (!list?.length) throw new Error('Запись не найдена');
+        const data = await searchRes.json();
+        if (!data.list || data.list.length === 0) {
+            throw new Error('Запись пользователя не найдена');
+        }
         
-        // 2. Обновляем запись
-        const updateUrl = `${config.apiUrl}/${list[0].Id}`;
+        const record = data.list[0];
+        const recordId = record.Id;
+
+        // 2. Обновляем запись - устанавливаем progress = 2
+        const updateUrl = `${config.apiUrl}/${recordId}`;
         const updateRes = await fetch(updateUrl, {
-          method: 'PATCH',
-          headers: {
-            'Content-Type': 'application/json',
-            'xc-token': config.apiToken
-          },
-          body: JSON.stringify({ progress: 2 })
+            method: 'PATCH',
+            headers: {
+                'xc-token': config.apiToken,
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ progress: 2 })
         });
         
-        if (!updateRes.ok) throw new Error(`Ошибка обновления: ${updateRes.status}`);
+        if (!updateRes.ok) {
+            const errorData = await updateRes.json();
+            throw new Error(`Ошибка обновления: ${updateRes.status} - ${errorData.message || 'Неизвестная ошибка'}`);
+        }
 
         console.log('Прогресс успешно обновлен в NocoDB');
-      } catch (error) {
+        return true;
+    } catch (error) {
         console.error('Ошибка при обновлении прогресса:', error);
-      }
+        return false;
     }
+}
 
     // Функция завершения модуля
     function completeModule() {
