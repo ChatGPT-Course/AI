@@ -2,44 +2,60 @@
 <html lang="ru">
 <head>
     <meta charset="UTF-8">
-    <title>NocoDB Редактор</title>
-    <script src="https://cdn.jsdelivr.net/npm/@nocodb/sdk/dist/nocodb-sdk.umd.min.js"></script>
+    <title>NocoDB Record Updater</title>
     <style>
         body { font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; }
-        button { padding: 10px 15px; margin: 5px; background: #4285f4; color: white; border: none; border-radius: 4px; }
-        #status { margin-top: 20px; padding: 10px; border-radius: 4px; }
-        .success { background: #e6f4ea; color: #0d652d; }
-        .error { background: #fce8e6; color: #d93025; }
+        button { 
+            padding: 12px 24px; 
+            background: #4285f4; 
+            color: white; 
+            border: none; 
+            border-radius: 6px;
+            font-size: 16px;
+            cursor: pointer;
+            margin: 10px;
+        }
+        #status {
+            margin-top: 20px;
+            padding: 15px;
+            border-radius: 6px;
+            background: #f1f3f4;
+        }
+        .success { color: #0d652d; }
+        .error { color: #d93025; }
     </style>
 </head>
 <body>
-    <h2>Обновление данных</h2>
-    <button id="introBtn">Установить ИНТРО (1)</button>
-    <button id="moBtn">Установить М0 (2)</button>
-    <div id="status">Ожидание действий...</div>
+    <h2>Обновление прогресса</h2>
+    <button id="updateBtn">Увеличить Progress +1</button>
+    <div id="status">Готов к работе. ID пользователя: <span id="userId"></span></div>
 
     <script>
-        // Инициализация NocoDB SDK
-        const nocoDB = new NocoDB({
-            baseURL: 'https://app.nocodb.com',
-            dbToken: 'bocQfycJpJsTG_tbwEf8ma8E5rhoig0njMDXFWtJ' // Получите новый токен!
-        });
+        // Конфигурация (ЗАМЕНИТЕ НА СВОИ!)
+        const config = {
+            apiUrl: 'https://app.nocodb.com/api/v2/tables/mc6qh91f060pv4y/records',
+            apiToken: 'bocQfycJpJsTG_tbwEf8ma8E5rhoig0njMDXFWtJ'
+        };
 
-        // Получаем user_id из cookie
+        // Элементы интерфейса
+        const updateBtn = document.getElementById('updateBtn');
+        const statusEl = document.getElementById('status');
+        const userIdEl = document.getElementById('userId');
+
+        // Получаем ID пользователя из cookie
         function getUserId() {
             const match = document.cookie.match(/tg_user_id=([^;]+)/);
             return match ? match[1] : null;
         }
 
-        // Обновляем статус
+        // Логирование статуса
         function updateStatus(message, isSuccess = true) {
-            const status = document.getElementById('status');
-            status.textContent = message;
-            status.className = isSuccess ? 'success' : 'error';
+            statusEl.innerHTML = `${isSuccess ? '✅' : '❌'} ${message}`;
+            statusEl.className = isSuccess ? 'success' : 'error';
         }
 
-        // Основная функция обновления с fallback
-        async function updateColumn(columnName, value) {
+        // Основная функция обновления
+        async function incrementProgress() {
             const userId = getUserId();
             if (!userId) {
                 updateStatus('Ошибка: ID пользователя не найден', false);
@@ -47,51 +63,68 @@
             }
 
             try {
-                // 1. Поиск записи через SDK
-                const { list } = await nocoDB.dbTableRow.list(
-                    'mc6qh91f060pv4y', 
-                    {
-                        where: `(tg_user_id,eq,${userId})`
-                    }
-                );
+                updateStatus('Поиск записи пользователя...');
+                
+                // 1. Находим текущую запись
+                const searchRes = await fetch(`${config.apiUrl}?where=(tg_user_id,eq,${userId})`, {
+                    headers: { 'xc-token': config.apiToken }
+                });
+                
+                if (!searchRes.ok) throw new Error(`Ошибка поиска: ${searchRes.status}`);
+                
+                const { list } = await searchRes.json();
+                if (!list?.length) throw new Error('Запись не найдена');
+                
+                const oldRecord = list[0];
+                const newProgress = (oldRecord.progress || 0) + 1;
+                
+                updateStatus(`Найдена запись ID ${oldRecord.Id}. Progress будет ${newProgress}`);
 
-                if (!list.length) throw new Error('Запись не найдена');
+                // 2. Удаляем старую запись
+                updateStatus('Удаление старой записи...');
+                const deleteRes = await fetch(`${config.apiUrl}/${oldRecord.Id}`, {
+                    method: 'DELETE',
+                    headers: { 'xc-token': config.apiToken }
+                });
+                
+                if (!deleteRes.ok) throw new Error(`Ошибка удаления: ${deleteRes.status}`);
 
-                // 2. Попытка обновления через SDK
-                try {
-                    await nocoDB.dbTableRow.update(
-                        'mc6qh91f060pv4y',
-                        list[0].Id,
-                        { [columnName]: value }
-                    );
-                    updateStatus(`Успешно обновлено: ${columnName} = ${value}`);
-                } catch (updateError) {
-                    // 3. Fallback: создание новой записи
-                    await nocoDB.dbTableRow.create(
-                        'mc6qh91f060pv4y',
-                        {
-                            ...list[0],
-                            [columnName]: value,
-                            Id: undefined // Сброс ID для новой записи
-                        }
-                    );
-                    updateStatus(`Создана новая запись с ${columnName} = ${value}`);
-                }
+                // 3. Создаём новую запись
+                updateStatus('Создание новой записи...');
+                const newRecord = {
+                    ...oldRecord,
+                    progress: newProgress,
+                    Id: undefined // Важно: убираем ID для новой записи
+                };
+                
+                const createRes = await fetch(config.apiUrl, {
+                    method: 'POST',
+                    headers: { 
+                        'Content-Type': 'application/json',
+                        'xc-token': config.apiToken 
+                    },
+                    body: JSON.stringify(newRecord)
+                });
+                
+                if (!createRes.ok) throw new Error(`Ошибка создания: ${createRes.status}`);
+                
+                const result = await createRes.json();
+                updateStatus(`Успешно! Новый Progress: ${result.progress}. ID новой записи: ${result.Id}`);
 
             } catch (error) {
                 console.error('Ошибка:', error);
-                updateStatus(`Ошибка: ${error.message}`, false);
+                updateStatus(`ОШИБКА: ${error.message}`, false);
             }
         }
 
-        // Назначение обработчиков
-        document.getElementById('introBtn').addEventListener('click', () => updateColumn('intro', '1'));
-        document.getElementById('moBtn').addEventListener('click', () => updateColumn('Mo', '2'));
-
-        // Проверка при загрузке
+        // Инициализация
         document.addEventListener('DOMContentLoaded', () => {
-            if (!getUserId()) {
-                updateStatus('Внимание: tg_user_id не найден в cookie', false);
+            const userId = getUserId();
+            if (userId) {
+                userIdEl.textContent = userId;
+                updateBtn.addEventListener('click', incrementProgress);
+            } else {
+                updateStatus('Ошибка: tg_user_id не найден в cookie', false);
             }
         });
     </script>
