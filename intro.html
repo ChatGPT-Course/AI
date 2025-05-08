@@ -830,7 +830,36 @@ function createConfetti() {
       const match = document.cookie.match(/tg_user_id=([^;]+)/);
       return match ? match[1] : null;
     }
+        // Функция для вибрации
+    function vibrate() {
+      // Проверяем поддержку вибрации
+      if ("vibrate" in navigator) {
+        // Вибрация на 50ms - короткий отклик
+        navigator.vibrate(50);
+      }
+    }
 
+    // Обработчик кнопки "Далее" с вибрацией
+    nextBtn.addEventListener('click', () => {
+      // Добавляем вибрацию
+      vibrate();
+      
+      if (currentBlockIndex < totalBlocks - 1) {
+        currentBlockIndex++;
+        addContentBlock(currentBlockIndex);
+        updateProgressBar();
+        
+        if (currentBlockIndex === 1) {
+          nextBtn.classList.remove('centered');
+          guideBtn.classList.add('show');
+        }
+        
+        if (currentBlockIndex === totalBlocks - 1) {
+          nextBtn.textContent = 'Завершить';
+          nextBtn.onclick = completeModule;
+        }
+      }
+    });
     // Функция обновления прогресса в NocoDB
     async function updateProgressInNocoDB() {
       const userId = getUserId();
