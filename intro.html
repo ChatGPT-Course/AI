@@ -1050,41 +1050,43 @@
       }
     }
 
-    // Обработчики событий
-    document.getElementById('startBtn').addEventListener('click', function() {
-      document.getElementById('splash').classList.add('hide');
-      setTimeout(() => {
-        document.getElementById('mainContent').classList.add('show');
-        addContentBlock(0);
-        updateProgressBar();
-        document.getElementById('nextBtn').classList.add('show');
-      }, 300);
-    });
+    // Инициализация при загрузке страницы
+    document.addEventListener('DOMContentLoaded', function() {
+      // Обработчики событий
+      document.getElementById('startBtn').addEventListener('click', function() {
+        document.getElementById('splash').classList.add('hide');
+        setTimeout(() => {
+          document.getElementById('mainContent').classList.add('show');
+          addContentBlock(0);
+          updateProgressBar();
+          document.getElementById('nextBtn').classList.add('show');
+          document.getElementById('nextBtn').addEventListener('click', nextBlock);
+        }, 300);
+      });
 
-    document.getElementById('splashExitBtn').addEventListener('click', function() {
-      window.location.href = 'index.html';
-    });
+      document.getElementById('splashExitBtn').addEventListener('click', function() {
+        window.location.href = 'index.html';
+      });
 
-    document.getElementById('exitBtn').addEventListener('click', showExitModal);
-    
-    document.getElementById('modalExitBtn').addEventListener('click', function() {
-      window.location.href = 'index.html';
-    });
+      document.getElementById('exitBtn').addEventListener('click', showExitModal);
+      
+      document.getElementById('modalExitBtn').addEventListener('click', function() {
+        window.location.href = 'index.html';
+      });
 
-    document.getElementById('modalStayBtn').addEventListener('click', hideExitModal);
+      document.getElementById('modalStayBtn').addEventListener('click', hideExitModal);
 
-    document.getElementById('completionBtn').addEventListener('click', function() {
-      window.location.href = 'index.html';
-    });
+      document.getElementById('completionBtn').addEventListener('click', function() {
+        window.location.href = 'index.html';
+      });
 
-    document.getElementById('reportBtn').addEventListener('click', function() {
-      alert('Сообщение о проблеме будет добавлено в ближайшее время');
-    });
+      document.getElementById('reportBtn').addEventListener('click', function() {
+        alert('Сообщение о проблеме будет добавлено в ближайшее время');
+      });
 
-    // Инициализация первого блока
-    if (!isFirstBlockAdded) {
+      // Инициализация первого блока
       addContentBlock(0);
-    }
+    });
   </script>
 </body>
 </html>
