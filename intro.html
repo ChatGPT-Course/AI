@@ -71,7 +71,28 @@
       border-left: 4px solid #17a2b8;
     }
     
-    /* Остальные существующие стили остаются без изменений */
+       .splash-btn {
+      padding: 1rem 2.5rem;
+      font-size: 1.2rem;
+      background: linear-gradient(90deg, var(--yellow), var(--orange));
+      color: var(--text);
+      border: none;
+      border-radius: 2rem;
+      cursor: pointer;
+      font-weight: 600;
+      box-shadow: 0 4px 24px #ff980055;
+      transition: all 0.3s;
+      animation: fadeInUp 1.5s;
+      text-decoration: none;
+      display: inline-block;
+      margin: 0.5rem;
+    }
+    
+    .splash-btn:hover {
+      background: linear-gradient(90deg, var(--orange), var(--yellow));
+      transform: scale(1.05);
+      color: var(--text);
+    }
     .splash {
       position: fixed;
       inset: 0;
@@ -507,6 +528,8 @@
       <button class="exit-btn" id="splashExitBtn" title="Выйти"><span>&#8592;</span></button>
     </div>
     <h1>Модуль 1:<br>Основы работы с ChatGPT</h1>
+    <a href="#" class="splash-btn" id="startBtn">Начать обучение</a>
+    <a href="#" class="splash-btn" id="guideBtnSplash">Детальный гайд</a>
     <button id="startBtn">Начать</button>
   </div>
 
@@ -550,7 +573,25 @@
   </div>
 
   <script>
-    // Конфигурация NocoDB
+    <script>
+    // Обработчики событий для кнопок на заставке
+    document.getElementById('startBtn').addEventListener('click', function(e) {
+      e.preventDefault();
+      splash.classList.add('hide');
+      setTimeout(() => {
+        mainContent.classList.add('show');
+        addContentBlock(0);
+        updateProgressBar();
+        nextBtn.classList.add('show');
+      }, 300);
+    });
+
+    // Пример обработки второй кнопки
+    document.getElementById('guideBtnSplash').addEventListener('click', function(e) {
+      e.preventDefault();
+      window.open('https://kurl.ru/btRup', '_blank');
+    });
+
     const config = {
       orgs: 'weamcfo6',
       projectName: 'p27jdsmk69wuimh',
