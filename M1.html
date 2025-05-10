@@ -949,80 +949,89 @@ const contentBlocks = [
     }
 
     // Функция добавления контентного блока
-    function addContentBlock(index) {
-      if (index === 0 && isFirstBlockAdded) return;
-      
-      if (emptySpace) {
-        emptySpace.remove();
-        emptySpace = null;
-      }
+function addContentBlock(index) {
+  if (index === 0 && isFirstBlockAdded) return;
+  
+  if (emptySpace) {
+    emptySpace.remove();
+    emptySpace = null;
+  }
 
-      const block = document.createElement('div');
-      block.className = 'content-block';
-      
-      const title = document.createElement('h2');
-      title.className = 'content-title';
-      title.innerHTML = `${contentBlocks[index].title}`;
-      block.appendChild(title);
-      
-      const content = document.createElement('div');
-      content.innerHTML = contentBlocks[index].content;
-      block.appendChild(content);
-      
-      document.getElementById('cardsContainer').appendChild(block);
-      
-      emptySpace = document.createElement('div');
-      emptySpace.className = 'empty-space';
-      document.getElementById('cardsContainer').appendChild(emptySpace);
-      
-      if (index === 0) isFirstBlockAdded = true;
-      
-      setTimeout(() => {
-        block.classList.add('visible');
-        
-        const headerHeight = document.querySelector('.header-bar').offsetHeight;
-        const blockTop = block.offsetTop;
-        
-        window.scrollTo({
-          top: blockTop - headerHeight,
-          behavior: 'smooth'
-        });
+  const block = document.createElement('div');
+  block.className = 'content-block';
+  
+  const title = document.createElement('h2');
+  title.className = 'content-title';
+  title.innerHTML = `${contentBlocks[index].title}`;
+  block.appendChild(title);
+  
+  // Добавляем изображение, если оно есть
+  if (contentBlocks[index].image) {
+    const img = document.createElement('img');
+    img.className = 'content-image';
+    img.src = `photo_course/${contentBlocks[index].image}`;
+    img.alt = contentBlocks[index].title;
+    block.appendChild(img);
+  }
+  
+  const content = document.createElement('div');
+  content.innerHTML = contentBlocks[index].content;
+  block.appendChild(content);
+  
+  document.getElementById('cardsContainer').appendChild(block);
+  
+  emptySpace = document.createElement('div');
+  emptySpace.className = 'empty-space';
+  document.getElementById('cardsContainer').appendChild(emptySpace);
+  
+  if (index === 0) isFirstBlockAdded = true;
+  
+  setTimeout(() => {
+    block.classList.add('visible');
+    
+    const headerHeight = document.querySelector('.header-bar').offsetHeight;
+    const blockTop = block.offsetTop;
+    
+    window.scrollTo({
+      top: blockTop - headerHeight,
+      behavior: 'smooth'
+    });
 
-        // Обработка теста (если есть)
-        if (contentBlocks[index].hasQuiz) {
-          const quizOptions = document.querySelectorAll('.quiz-option');
-          const nextBtn = document.getElementById('nextBtn');
+    // Обработка теста (если есть)
+    if (contentBlocks[index].hasQuiz) {
+      const quizOptions = document.querySelectorAll('.quiz-option');
+      const nextBtn = document.getElementById('nextBtn');
+      
+      nextBtn.disabled = true;
+      
+      quizOptions.forEach(option => {
+        option.addEventListener('click', function() {
+          const isCorrect = this.getAttribute('data-correct') === 'true';
           
-          nextBtn.disabled = true;
-          
-          quizOptions.forEach(option => {
-            option.addEventListener('click', function() {
-              const isCorrect = this.getAttribute('data-correct') === 'true';
-              
-              // Сбрасываем все стили
-              quizOptions.forEach(opt => {
-                opt.classList.remove('correct', 'incorrect');
-              });
-              
-              // Применяем соответствующий стиль
-              if (isCorrect) {
-                this.classList.add('correct');
-              } else {
-                this.classList.add('incorrect');
-                // Находим правильный ответ и подсвечиваем его
-                document.querySelector('.quiz-option[data-correct="true"]').classList.add('correct');
-              }
-              
-              // Показываем обратную связь
-              document.getElementById('quizFeedback').style.display = 'block';
-              
-              // Разблокируем кнопку "Далее"
-              nextBtn.disabled = false;
-            });
+          // Сбрасываем все стили
+          quizOptions.forEach(opt => {
+            opt.classList.remove('correct', 'incorrect');
           });
-        }
-      }, 50);
+          
+          // Применяем соответствующий стиль
+          if (isCorrect) {
+            this.classList.add('correct');
+          } else {
+            this.classList.add('incorrect');
+            // Находим правильный ответ и подсвечиваем его
+            document.querySelector('.quiz-option[data-correct="true"]').classList.add('correct');
+          }
+          
+          // Показываем обратную связь
+          document.getElementById('quizFeedback').style.display = 'block';
+          
+          // Разблокируем кнопку "Далее"
+          nextBtn.disabled = false;
+        });
+      });
     }
+  }, 50);
+}
 
     // Функция обновления прогресс-бара
     function updateProgressBar() {
