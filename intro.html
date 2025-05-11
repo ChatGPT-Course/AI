@@ -713,54 +713,60 @@
     // Функция обновления прогресса в NocoDB
 async function updateProgressInNocoDB() {
   const userId = getUserId();
-  console.log('User ID:', userId); // Логируем userId
-  if (!userId) return false;
+  if (!userId) {
+    console.error('User ID not found in cookies');
+    return false;
+  }
 
   try {
-    const searchUrl = `https://app.nocodb.com/api/v1/db/data/${config.orgs}/${config.projectName}/${config.tableName}?where=(tg_user_id,eq,${encodeURIComponent(userId)})`;
-    console.log('Search URL:', searchUrl); // Логируем URL
+    // 1. Находим запись пользователя (используем API v2)
+    const searchUrl = `https://app.nocodb.com/api/v2/tables/${config.tableName}/records?where=(tg_user_id,eq,${encodeURIComponent(userId)})`;
     
     const searchRes = await fetch(searchUrl, {
-      headers: { 'xc-token': config.apiToken }
+      method: 'GET',
+      headers: { 
+        'xc-token': config.apiToken,
+        'Content-Type': 'application/json'
+      }
     });
-    
-    console.log('Search response status:', searchRes.status); // Логируем статус
     
     if (!searchRes.ok) {
       console.error('Search failed:', await searchRes.text());
       return false;
     }
     
-    const data = await searchRes.json();
-    console.log('Search response data:', data); // Логируем данные
+    const searchData = await searchRes.json();
+    console.log('Search response:', searchData);
     
-    if (!data?.list?.length) {
+    if (!searchData.list || searchData.list.length === 0) {
       console.error('User record not found');
       return false;
     }
     
-    const record = data.list[0];
-    console.log('Found record:', record); // Логируем найденную запись
+    const record = searchData.list[0];
+    console.log('Found record:', record);
     
-    const updateUrl = `https://app.nocodb.com/api/v1/db/data/${config.orgs}/${config.projectName}/${config.tableName}/${record.Id}`;
-    console.log('Update URL:', updateUrl); // Логируем URL обновления
+    // 2. Обновляем запись (используем API v2)
+    const updateUrl = `https://app.nocodb.com/api/v2/tables/${config.tableName}/records/${record.id}`;
     
     const updateRes = await fetch(updateUrl, {
       method: 'PATCH',
       headers: {
-        'Content-Type': 'application/json',
-        'xc-token': config.apiToken
+        'xc-token': config.apiToken,
+        'Content-Type': 'application/json'
       },
-      body: JSON.stringify({ progress: 2 })
+      body: JSON.stringify({
+        progress: 2
+      })
     });
-    
-    console.log('Update response status:', updateRes.status); // Логируем статус
     
     if (!updateRes.ok) {
       console.error('Update failed:', await updateRes.text());
       return false;
     }
     
+    const updateData = await updateRes.json();
+    console.log('Update successful:', updateData);
     return true;
 
   } catch (error) {
