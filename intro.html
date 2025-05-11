@@ -759,76 +759,104 @@
     }
 
     // Функция обновления прогресса в NocoDB
-    async function updateProgressInNocoDB() {
-      const userId = getUserId();
-      if (!userId) {
-        showLogMessage('Ошибка: не найден ID пользователя', true);
-        return false;
+async function updateProgressInNocoDB() {
+  const userId = getUserId();
+  if (!userId) {
+    showLogMessage('Ошибка: не найден ID пользователя', true);
+    return false;
+  }
+
+  try {
+    showLogMessage('Обновление прогресса...');
+    
+    // 1. Находим запись пользователя
+    const searchUrl = `${config.baseUrl}/records?where=(tg_user_id,eq,${userId})`;
+    const searchRes = await fetch(searchUrl, {
+      headers: { 
+        'xc-token': config.apiToken,
+        'accept': 'application/json'
       }
-
-      try {
-        showLogMessage('Обновление прогресса...');
-        
-        // 1. Находим запись пользователя
-        const searchUrl = `${config.baseUrl}/records?where=(tg_user_id,eq,${userId})`;
-        const searchRes = await fetch(searchUrl, {
-          headers: { 
-            'xc-token': config.apiToken,
-            'accept': 'application/json'
-          }
-        });
-        
-        if (!searchRes.ok) {
-          const error = await searchRes.json();
-          showLogMessage(`Ошибка поиска: ${error.message || searchRes.status}`, true);
-          return false;
-        }
-        
-        const { list } = await searchRes.json();
-        if (!list?.length) {
-          showLogMessage('Запись пользователя не найдена', true);
-          return false;
-        }
-        
-        const record = list[0];
-        
-        // 2. Обновляем запись
-        const updateUrl = `${config.baseUrl}/records/${record.Id}`;
-        const updateRes = await fetch(updateUrl, {
-          method: 'PATCH',
-          headers: {
-            'Content-Type': 'application/json',
-            'xc-token': config.apiToken,
-            'accept': 'application/json'
-          },
-          body: JSON.stringify({ 
-            progress: 2,
-            // Включаем все обязательные поля для избежания ошибки 400
-            tg_user_id: record.tg_user_id,
-            name: record.name,
-            username: record.username,
-            oplata: record.oplata,
-            date_oplata: record.date_oplata
-          })
-        });
-        
-        if (!updateRes.ok) {
-          const error = await updateRes.json();
-          showLogMessage(`Ошибка обновления: ${error.message || updateRes.status}`, true);
-          return false;
-        }
-
-        const updatedRecord = await updateRes.json();
-        console.log('Успешно обновлено:', updatedRecord);
-        showLogMessage('Прогресс успешно сохранен!');
-        return true;
-
-      } catch (error) {
-        console.error('Ошибка при обновлении:', error);
-        showLogMessage(`Ошибка: ${error.message}`, true);
-        return false;
-      }
+    });
+    
+    if (!searchRes.ok) {
+      const error = await searchRes.json();
+      console.error('Ошибка поиска:', error);
+      showLogMessage(`Ошибка поиска: ${error.message || searchRes.status}`, true);
+      return false;
     }
+    
+    const { list } = await searchRes.json();
+    if (!list?.length) {
+      showLogMessage('Запись пользователя не найдена', true);
+      return false;
+    }
+    
+    const record = list[0];
+    console.log('Найдена запись:', record);
+    
+    // 2. Подготавливаем данные для обновления
+    const updateData = {
+      Id: record.Id, // Обязательное поле
+      progress: 2,
+      // Включаем все обязательные поля таблицы
+      tg_user_id: record.tg_user_id,
+      name: record.name || '', // Добавляем fallback значения
+      username: record.username || '',
+      oplata: record.oplata || 0,
+      date_oplata: record.date_oplata || new Date().toISOString(),
+      // Системные поля для NocoDB
+      fk_model_id: "mc6qh91f060pv4y",
+      row_id: record.Id
+    };
+
+    console.log('Данные для обновления:', updateData);
+    
+    // 3. Обновляем запись (пробуем оба метода)
+    const updateUrl = `${config.baseUrl}/records/${record.Id}`;
+    
+    // Сначала пробуем PATCH
+    let updateRes = await fetch(updateUrl, {
+      method: 'PATCH',
+      headers: {
+        'Content-Type': 'application/json',
+        'xc-token': config.apiToken,
+        'accept': 'application/json'
+      },
+      body: JSON.stringify(updateData)
+    });
+    
+    // Если PATCH не сработал, пробуем POST
+    if (!updateRes.ok) {
+      console.log('PATCH не сработал, пробуем POST...');
+      updateRes = await fetch(updateUrl, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'xc-token': config.apiToken,
+          'accept': 'application/json'
+        },
+        body: JSON.stringify(updateData)
+      });
+    }
+    
+    if (!updateRes.ok) {
+      const error = await updateRes.json();
+      console.error('Ошибка обновления:', error);
+      showLogMessage(`Ошибка сервера: ${error.message || updateRes.status}`, true);
+      return false;
+    }
+
+    const updatedRecord = await updateRes.json();
+    console.log('Успешно обновлено:', updatedRecord);
+    showLogMessage('Прогресс успешно сохранен!');
+    return true;
+
+  } catch (error) {
+    console.error('Ошибка при обновлении:', error);
+    showLogMessage(`Ошибка соединения: ${error.message}`, true);
+    return false;
+  }
+}
 
     // Функция добавления контентного блока
     function addContentBlock(index) {
