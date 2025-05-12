@@ -690,67 +690,72 @@
     let emptySpace = null;
     let isFirstBlockAdded = false;
 
-    // Функция для получения ID пользователя из cookie
-    function getUserId() {
-      const match = document.cookie.match(/tg_user_id=([^;]+)/);
-      return match ? match[1] : null;
-    }
-
-    // Функция обновления прогресса в NocoDB
+   // Улучшенная функция обновления прогресса в NocoDB
     async function updateProgressInNocoDB() {
       const userId = getUserId();
-      if (!userId) return { success: false, error: 'User ID not found' };
+      if (!userId) {
+        console.error('User ID not found in cookies');
+        return false;
+      }
 
       try {
-        // 1. Находим запись пользователя
-        const searchUrl = `https://app.nocodb.com/api/${config.apiVersion}/db/data/${config.orgs}/${config.projectName}/${config.tableName}?where=(tg_user_id,eq,${userId})`;
+        // 1. Получаем все записи из таблицы
+        const listUrl = `https://app.nocodb.com/api/${config.apiVersion}/db/data/${config.orgs}/${config.projectName}/${config.tableName}`;
         
-        const searchRes = await fetch(searchUrl, {
+        const listResponse = await fetch(listUrl, {
           headers: { 'xc-token': config.apiToken }
         });
-        
-        if (!searchRes.ok) {
-          const errorText = await searchRes.text();
-          return { success: false, error: `Search failed: ${searchRes.status}` };
+
+        if (!listResponse.ok) {
+          throw new Error(`Failed to fetch records: ${listResponse.status}`);
         }
+
+        const data = await listResponse.json();
+        const records = data.list || [];
+
+        // 2. Ищем запись с нужным tg_user_id
+        const userRecord = records.find(record => record.tg_user_id === userId);
         
-        const { list } = await searchRes.json();
-        if (!list?.length) return { success: false, error: 'Record not found' };
+        if (!userRecord) {
+          console.error('Record not found for user:', userId);
+          return false;
+        }
+
+        // 3. Обновляем найденную запись
+        const updateUrl = `https://app.nocodb.com/api/${config.apiVersion}/db/data/${config.orgs}/${config.projectName}/${config.tableName}/${userRecord.Id}`;
         
-        const record = list[0];
-        
-        // 2. Обновляем запись
-        const updateUrl = `https://app.nocodb.com/api/${config.apiVersion}/db/data/${config.orgs}/${config.projectName}/${config.tableName}/${record.Id}`;
-        const updateData = { progress: 2 }; // Устанавливаем прогресс на 2
-        
-        const updateRes = await fetch(updateUrl, {
+        const updateResponse = await fetch(updateUrl, {
           method: 'PATCH',
           headers: {
             'Content-Type': 'application/json',
             'xc-token': config.apiToken
           },
-          body: JSON.stringify(updateData)
+          body: JSON.stringify({ progress: 2 })
         });
-        
-        if (!updateRes.ok) {
-          const errorText = await updateRes.text();
-          return { success: false, error: `Update failed: ${updateRes.status}` };
+
+        if (!updateResponse.ok) {
+          throw new Error(`Failed to update record: ${updateResponse.status}`);
         }
-        
-        const result = await updateRes.json();
-        return { success: true, data: result };
+
+        const result = await updateResponse.json();
+        console.log('Progress updated successfully:', result);
+        return true;
 
       } catch (error) {
-        return { success: false, error: error.message };
+        console.error('Error updating progress:', error);
+        return false;
       }
     }
 
     // Функция завершения модуля
-    function completeModule() {
-      completionModal.classList.add('active');
+    async function completeModule() {
+      const success = await updateProgressInNocoDB();
       
-      // Обновляем прогресс в NocoDB
-      updateProgressInNocoDB();
+      if (success) {
+        completionModal.classList.add('active');
+      } else {
+        alert('Не удалось сохранить прогресс. Пожалуйста, попробуйте позже или свяжитесь с поддержкой.');
+      }
     }
 
     // Функции для работы с контентом
