@@ -403,56 +403,6 @@
       background: linear-gradient(90deg, var(--orange), var(--yellow));
       transform: scale(1.05);
     }
-    /* Стили для логов */
-    .log-container {
-      position: fixed;
-      bottom: 80px;
-      left: 0;
-      width: 100%;
-      max-height: 200px;
-      overflow-y: auto;
-      background: rgba(0,0,0,0.7);
-      color: white;
-      padding: 10px;
-      font-family: monospace;
-      font-size: 12px;
-      z-index: 100;
-      display: none;
-    }
-    .log-entry {
-      margin: 5px 0;
-      padding: 3px;
-      border-bottom: 1px solid #444;
-    }
-    .log-error {
-      color: #ff6b6b;
-    }
-    .log-success {
-      color: #6bff6b;
-    }
-    .log-warning {
-      color: #ffcc6b;
-    }
-    .log-info {
-      color: #6bc2ff;
-    }
-    .debug-btn {
-      position: fixed;
-      bottom: 20px;
-      right: 20px;
-      background: #333;
-      color: white;
-      border: none;
-      border-radius: 50%;
-      width: 40px;
-      height: 40px;
-      font-size: 20px;
-      cursor: pointer;
-      z-index: 101;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-    }
     @media (max-width: 600px) {
       .splash h1 {
         font-size: 1.5rem;
@@ -540,10 +490,6 @@
     </div>
   </div>
 
-  <!-- Контейнер для логов -->
-  <div class="log-container" id="logContainer"></div>
-  <button class="debug-btn" id="debugBtn">🐞</button>
-
   <script>
     // Конфигурация NocoDB
     const config = {
@@ -571,7 +517,6 @@
     const completionModal = document.getElementById('completionModal');
     const completionBtn = document.getElementById('completionBtn');
     const logContainer = document.getElementById('logContainer');
-    const debugBtn = document.getElementById('debugBtn');
 
     // Все контентные блоки
     const contentBlocks = [
@@ -744,18 +689,6 @@
     const totalBlocks = contentBlocks.length;
     let emptySpace = null;
     let isFirstBlockAdded = false;
-    let debugMode = false;
-
-    // Функция для логирования
-    function log(message, type = 'info') {
-      if (!debugMode) return;
-      
-      const entry = document.createElement('div');
-      entry.className = `log-entry log-${type}`;
-      entry.textContent = `[${new Date().toLocaleTimeString()}] ${message}`;
-      logContainer.appendChild(entry);
-      logContainer.scrollTop = logContainer.scrollHeight;
-    }
 
     // Функция для получения ID пользователя из cookie
     function getUserId() {
@@ -977,25 +910,6 @@
       window.location.href = 'index.html';
     });
 
-    debugBtn.addEventListener('click', () => {
-      debugMode = !debugMode;
-      logContainer.style.display = debugMode ? 'block' : 'none';
-      log(`Режим отладки ${debugMode ? 'включен' : 'выключен'}`);
-    });
-
-    // Инициализация
-    log('Инициализация модуля...');
-    if (!isFirstBlockAdded) {
-      addContentBlock(0);
-    }
-
-    // Проверяем, есть ли ID пользователя при загрузке
-    const userId = getUserId();
-    if (!userId) {
-      log('Внимание: tg_user_id не найден в cookie', 'warning');
-    } else {
-      log(`Пользователь идентифицирован: ${userId}`);
-    }
   </script>
 </body>
 </html>
