@@ -403,16 +403,6 @@
       background: linear-gradient(90deg, var(--orange), var(--yellow));
       transform: scale(1.05);
     }
-    /* Анимация конфетти */
-    .confetti {
-      position: fixed;
-      width: 10px;
-      height: 10px;
-      background-color: #f00;
-      opacity: 0;
-      z-index: 999;
-      animation: confetti-fall 3s linear forwards;
-    }
     /* Стили для логов */
     .log-container {
       position: fixed;
@@ -462,16 +452,6 @@
       display: flex;
       align-items: center;
       justify-content: center;
-    }
-    @keyframes confetti-fall {
-      0% {
-        transform: translateY(-100vh) rotate(0deg);
-        opacity: 1;
-      }
-      100% {
-        transform: translateY(100vh) rotate(360deg);
-        opacity: 0;
-      }
     }
     @media (max-width: 600px) {
       .splash h1 {
@@ -862,7 +842,6 @@
     function completeModule() {
       log('Завершение модуля...');
       completionModal.classList.add('active');
-      createConfetti();
       
       // Обновляем прогресс в NocoDB
       updateProgressInNocoDB().then(result => {
@@ -872,26 +851,6 @@
           log(`Ошибка при обновлении прогресса: ${result.error}`, 'error');
         }
       });
-    }
-
-    // Функция создания конфетти
-    function createConfetti() {
-      log('Создание эффекта конфетти...');
-      const colors = ['#f00', '#0f0', '#00f', '#ff0', '#f0f', '#0ff'];
-      
-      for (let i = 0; i < 100; i++) {
-        const confetti = document.createElement('div');
-        confetti.className = 'confetti';
-        confetti.style.backgroundColor = colors[Math.floor(Math.random() * colors.length)];
-        confetti.style.left = `${Math.random() * 100}vw`;
-        confetti.style.animationDuration = `${2 + Math.random() * 3}s`;
-        confetti.style.animationDelay = `${Math.random() * 0.5}s`;
-        document.body.appendChild(confetti);
-        
-        confetti.addEventListener('animationend', () => {
-          confetti.remove();
-        });
-      }
     }
 
     // Функции для работы с контентом
