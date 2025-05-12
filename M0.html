@@ -748,14 +748,11 @@
     }
 
     // Функция завершения модуля
-    async function completeModule() {
-      const success = await updateProgressInNocoDB();
+    function completeModule() {
+      completionModal.classList.add('active');
       
-      if (success) {
-        completionModal.classList.add('active');
-      } else {
-        alert('Не удалось сохранить прогресс. Пожалуйста, попробуйте позже или свяжитесь с поддержкой.');
-      }
+      // Обновляем прогресс в NocoDB
+      updateProgressInNocoDB();
     }
 
     // Функции для работы с контентом
