@@ -15,6 +15,10 @@
       --transition: 0.6s cubic-bezier(.77,0,.18,1);
       --disabled: #CCCCCC;
       --blue: #4285F4;
+      --success: #4CAF50;
+      --error: #F44336;
+      --warning: #FF9800;
+      --info: #2196F3;
     }
     body {
       margin: 0;
@@ -108,8 +112,8 @@
     .exit-btn {
       background: var(--white);
       border: none;
-      color: #FF0000;
-      font-size: 1.5rem;
+      color: var(--text);
+      font-size: 1.2rem;
       border-radius: 8px;
       width: 40px;
       height: 40px;
@@ -141,7 +145,7 @@
       margin-right: 0.5rem;
       overflow: hidden;
       border: 1px solid #ddd;
-      max-width: calc(100% - 100px);
+      max-width: calc(100% - 160px);
     }
     .progress-bar-inner {
       height: 100%;
@@ -285,6 +289,27 @@
       background: linear-gradient(90deg, #3367D6, var(--blue));
       transform: scale(1.05);
     }
+    .report-btn {
+      background: var(--white);
+      border: none;
+      color: var(--text);
+      font-size: 1.2rem;
+      border-radius: 8px;
+      width: 40px;
+      height: 40px;
+      cursor: pointer;
+      font-weight: 700;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: all 0.2s;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+      margin-left: 0.5rem;
+    }
+    .report-btn:hover {
+      background: #e0e0e0;
+      transform: scale(1.07);
+    }
     .content-image {
       width: 100%;
       max-width: 500px;
@@ -304,7 +329,7 @@
       height: 50vh;
       width: 100%;
     }
-    /* Модальное окно завершения модуля */
+    /* Новые стили для модального окна завершения */
     .completion-modal {
       position: fixed;
       top: 0;
@@ -378,6 +403,56 @@
       background: linear-gradient(90deg, var(--orange), var(--yellow));
       transform: scale(1.05);
     }
+    /* Стили для логов */
+    .log-container {
+      position: fixed;
+      bottom: 80px;
+      left: 0;
+      width: 100%;
+      max-height: 200px;
+      overflow-y: auto;
+      background: rgba(0,0,0,0.7);
+      color: white;
+      padding: 10px;
+      font-family: monospace;
+      font-size: 12px;
+      z-index: 100;
+      display: none;
+    }
+    .log-entry {
+      margin: 5px 0;
+      padding: 3px;
+      border-bottom: 1px solid #444;
+    }
+    .log-error {
+      color: #ff6b6b;
+    }
+    .log-success {
+      color: #6bff6b;
+    }
+    .log-warning {
+      color: #ffcc6b;
+    }
+    .log-info {
+      color: #6bc2ff;
+    }
+    .debug-btn {
+      position: fixed;
+      bottom: 20px;
+      right: 20px;
+      background: #333;
+      color: white;
+      border: none;
+      border-radius: 50%;
+      width: 40px;
+      height: 40px;
+      font-size: 20px;
+      cursor: pointer;
+      z-index: 101;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
     @media (max-width: 600px) {
       .splash h1 {
         font-size: 1.5rem;
@@ -389,7 +464,7 @@
       .header-bar {
         height: 48px;
       }
-      .exit-btn {
+      .exit-btn, .report-btn {
         width: 36px;
         height: 36px;
       }
@@ -431,6 +506,7 @@
       <div class="progress-bar">
         <div class="progress-bar-inner" id="progressBar"></div>
       </div>
+      <button class="report-btn" id="reportBtn" title="Сообщить о проблеме">🚩</button>
     </div>
     
     <div class="cards-container" id="cardsContainer"></div>
@@ -464,6 +540,10 @@
     </div>
   </div>
 
+  <!-- Контейнер для логов -->
+  <div class="log-container" id="logContainer"></div>
+  <button class="debug-btn" id="debugBtn">🐞</button>
+
   <script>
     // Конфигурация NocoDB
     const config = {
@@ -471,7 +551,7 @@
       projectName: 'p27jdsmk69wuimh',
       tableName: 'mc6qh91f060pv4y',
       apiToken: 'bocQfycJpJsTG_tbwEf8ma8E5rhoig0njMDXFWtJ',
-      apiVersion: 'v1'
+      apiVersion: 'v1' // Используем v1 API для совместимости
     };
 
     // Элементы
@@ -484,11 +564,14 @@
     const cardsContainer = document.getElementById('cardsContainer');
     const exitBtn = document.getElementById('exitBtn');
     const splashExitBtn = document.getElementById('splashExitBtn');
+    const reportBtn = document.getElementById('reportBtn');
     const exitModal = document.getElementById('exitModal');
     const modalExitBtn = document.getElementById('modalExitBtn');
     const modalStayBtn = document.getElementById('modalStayBtn');
     const completionModal = document.getElementById('completionModal');
     const completionBtn = document.getElementById('completionBtn');
+    const logContainer = document.getElementById('logContainer');
+    const debugBtn = document.getElementById('debugBtn');
 
     // Все контентные блоки
     const contentBlocks = [
@@ -661,61 +744,114 @@
     const totalBlocks = contentBlocks.length;
     let emptySpace = null;
     let isFirstBlockAdded = false;
+    let debugMode = false;
+
+    // Функция для логирования
+    function log(message, type = 'info') {
+      if (!debugMode) return;
+      
+      const entry = document.createElement('div');
+      entry.className = `log-entry log-${type}`;
+      entry.textContent = `[${new Date().toLocaleTimeString()}] ${message}`;
+      logContainer.appendChild(entry);
+      logContainer.scrollTop = logContainer.scrollHeight;
+    }
 
     // Функция для получения ID пользователя из cookie
     function getUserId() {
       const match = document.cookie.match(/tg_user_id=([^;]+)/);
-      return match ? match[1] : null;
+      const userId = match ? match[1] : null;
+      log(`Получение tg_user_id из cookie: ${userId || 'не найден'}`);
+      return userId;
     }
 
     // Функция обновления прогресса в NocoDB
+    // Функция обновления прогресса в NocoDB
     async function updateProgressInNocoDB() {
       const userId = getUserId();
-      if (!userId) return false;
+      if (!userId) {
+        log('Не удалось получить tg_user_id из cookie', 'error');
+        return { success: false, error: 'User ID not found' };
+      }
 
       try {
+        log(`Поиск записи пользователя ${userId} в NocoDB...`);
+        
         // 1. Находим запись пользователя
         const searchUrl = `https://app.nocodb.com/api/${config.apiVersion}/db/data/${config.orgs}/${config.projectName}/${config.tableName}?where=(tg_user_id,eq,${userId})`;
+        log(`Отправка запроса: GET ${searchUrl}`);
         
         const searchRes = await fetch(searchUrl, {
           headers: { 'xc-token': config.apiToken }
         });
         
-        if (!searchRes.ok) return false;
+        log(`Получен ответ: ${searchRes.status} ${searchRes.statusText}`);
+        
+        if (!searchRes.ok) {
+          const errorText = await searchRes.text();
+          log(`Ошибка поиска записи: ${errorText}`, 'error');
+          return { success: false, error: `Search failed: ${searchRes.status}` };
+        }
         
         const { list } = await searchRes.json();
-        if (!list?.length) return false;
+        log(`Найдено записей: ${list?.length || 0}`);
+        
+        if (!list?.length) {
+          log('Запись пользователя не найдена', 'error');
+          return { success: false, error: 'Record not found' };
+        }
         
         const record = list[0];
+        log(`Найдена запись: ID=${record.Id}, progress=${record.progress}`);
         
         // 2. Обновляем запись
         const updateUrl = `https://app.nocodb.com/api/${config.apiVersion}/db/data/${config.orgs}/${config.projectName}/${config.tableName}/${record.Id}`;
+        const updateData = { progress: 2 }; // Устанавливаем прогресс на 2
+        
+        log(`Отправка запроса: PATCH ${updateUrl}`, 'info');
+        log(`Данные для обновления: ${JSON.stringify(updateData)}`, 'info');
+        
         const updateRes = await fetch(updateUrl, {
           method: 'PATCH',
           headers: {
             'Content-Type': 'application/json',
             'xc-token': config.apiToken
           },
-          body: JSON.stringify({ progress: 2 })
+          body: JSON.stringify(updateData)
         });
         
-        return updateRes.ok;
+        log(`Получен ответ: ${updateRes.status} ${updateRes.statusText}`);
+        
+        if (!updateRes.ok) {
+          const errorText = await updateRes.text();
+          log(`Ошибка обновления: ${errorText}`, 'error');
+          return { success: false, error: `Update failed: ${updateRes.status}` };
+        }
+        
+        const result = await updateRes.json();
+        log(`Успешное обновление! Новое значение progress: ${result.progress}`, 'success');
+        return { success: true, data: result };
 
       } catch (error) {
-        return false;
+        log(`Критическая ошибка: ${error.message}`, 'error');
+        return { success: false, error: error.message };
       }
     }
 
     // Функция завершения модуля
     function completeModule() {
+      log('Завершение модуля...');
       completionModal.classList.add('active');
-      updateProgressInNocoDB();
+      
+      // Обновляем прогресс в NocoDB
+      updateProgressInNocoDB().then(result => {
+        if (result.success) {
+          log('Прогресс успешно обновлен в базе данных', 'success');
+        } else {
+          log(`Ошибка при обновлении прогресса: ${result.error}`, 'error');
+        }
+      });
     }
-
-    // Обработчик кнопки завершения
-    completionBtn.addEventListener('click', () => {
-      window.location.href = 'index.html';
-    });
 
     // Функции для работы с контентом
     function addContentBlock(index) {
@@ -770,10 +906,12 @@
     function updateProgressBar() {
       const percent = ((currentBlockIndex + 1) / totalBlocks) * 100;
       progressBar.style.width = percent + '%';
+      log(`Обновление прогресс-бара: ${percent.toFixed(1)}%`);
     }
 
     // Обработчики событий
     startBtn.addEventListener('click', () => {
+      log('Нажата кнопка "Начать"');
       splash.classList.add('hide');
       setTimeout(() => {
         mainContent.classList.add('show');
@@ -784,10 +922,12 @@
     });
 
     splashExitBtn.addEventListener('click', () => {
+      log('Нажата кнопка выхода из splash-экрана');
       window.location.href = 'index.html';
     });
 
     nextBtn.addEventListener('click', () => {
+      log(`Нажата кнопка "Далее". Текущий блок: ${currentBlockIndex}`);
       if (currentBlockIndex < totalBlocks - 1) {
         currentBlockIndex++;
         addContentBlock(currentBlockIndex);
@@ -796,41 +936,65 @@
         if (currentBlockIndex === 1) {
           nextBtn.classList.remove('centered');
           guideBtn.classList.add('show');
+          log('Активирована кнопка гайда');
         }
         
         if (currentBlockIndex === totalBlocks - 1) {
           nextBtn.textContent = 'Завершить';
-          nextBtn.disabled = true;
-          nextBtn.style.opacity = '0.7';
-          
-          setTimeout(() => {
-            nextBtn.disabled = false;
-            nextBtn.style.opacity = '1';
-            nextBtn.onclick = completeModule;
-          }, 2000);
+          nextBtn.onclick = completeModule;
+          log('Последний блок - изменена кнопка на "Завершить"');
         }
       }
     });
 
     exitBtn.addEventListener('click', () => {
+      log('Нажата кнопка выхода');
       exitModal.style.display = 'flex';
     });
 
     modalExitBtn.addEventListener('click', () => {
+      log('Подтвержден выход из модуля');
       window.location.href = 'index.html';
     });
 
     modalStayBtn.addEventListener('click', () => {
+      log('Отмена выхода из модуля');
       exitModal.style.display = 'none';
     });
 
     guideBtn.addEventListener('click', () => {
+      log('Открытие детального гайда');
       window.open('https://kurl.ru/btRup', '_blank');
     });
 
+    reportBtn.addEventListener('click', () => {
+      log('Сообщение о проблеме');
+      alert('Сообщение о проблеме будет добавлено в ближайшее время');
+    });
+
+    completionBtn.addEventListener('click', () => {
+      log('Завершение модуля - возврат в меню');
+      window.location.href = 'index.html';
+    });
+
+    debugBtn.addEventListener('click', () => {
+      debugMode = !debugMode;
+      logContainer.style.display = debugMode ? 'block' : 'none';
+      log(`Режим отладки ${debugMode ? 'включен' : 'выключен'}`);
+    });
+
     // Инициализация
+    log('Инициализация модуля...');
     if (!isFirstBlockAdded) {
       addContentBlock(0);
+    }
+
+    // Проверяем, есть ли ID пользователя при загрузке
+    const userId = getUserId();
+    if (!userId) {
+      log('Внимание: tg_user_id не найден в cookie', 'warning');
+    } else {
+      log(`Пользователь идентифицирован: ${userId}`);
     }
   </script>
 </body>
