@@ -167,8 +167,8 @@
       transition: all 0.2s ease;
       position: relative;
       cursor: default;
-      margin-top: 30px;
       z-index: 2;
+      overflow: hidden;
     }
 
     .module:active:not(.locked) {
@@ -190,12 +190,12 @@
 
     .module-label {
       position: absolute;
-      top: -20px;
+      top: 0;
       left: 0;
       background: var(--primary);
       color: white;
       padding: 8px 16px;
-      border-radius: 8px;
+      border-radius: 0 0 8px 0;
       font-size: 16px;
       font-weight: 500;
       z-index: 2;
@@ -211,6 +211,9 @@
 
     .module-content {
       position: relative;
+      height: 100%;
+      display: flex;
+      flex-direction: column;
     }
 
     .module-title {
@@ -218,6 +221,7 @@
       font-weight: 600;
       margin-bottom: 8px;
       color: var(--dark);
+      padding-top: 10px;
     }
 
     .module-desc {
@@ -225,18 +229,22 @@
       color: #666;
       margin-bottom: 20px;
       line-height: 1.4;
+      flex-grow: 1;
     }
 
     .module-btn {
       background: var(--primary);
       color: white;
       border: none;
-      padding: 12px 24px;
+      padding: 10px 16px;
       border-radius: 8px;
       font-weight: 600;
       cursor: pointer;
-      width: 100%;
       transition: background 0.2s, transform 0.1s;
+      align-self: flex-end;
+      width: auto;
+      min-width: 120px;
+      text-align: center;
     }
 
     .module-btn:active:not(:disabled) {
@@ -268,6 +276,15 @@
       color: var(--disabled);
     }
 
+    .module-icon {
+      position: absolute;
+      bottom: 10px;
+      left: 10px;
+      font-size: 60px;
+      opacity: 0.1;
+      z-index: 1;
+    }
+
     /* Progress line */
     .progress-line {
       position: absolute;
@@ -286,19 +303,6 @@
       background: var(--success);
       width: 0;
       transition: width 1s ease;
-    }
-
-    /* Connecting line */
-    .connecting-line {
-      position: absolute;
-      height: 2px;
-      background: #DDD;
-      left: 50%;
-      right: 50%;
-      bottom: -20px;
-      transform: translateX(-50%);
-      width: 80%;
-      z-index: 1;
     }
 
     /* Menu Button Styles */
@@ -751,11 +755,11 @@
     // Функция обновления интерфейса модулей
     function updateUI() {
       const modules = [
-        { id: -1, title: "Введение", desc: "Стартовая информация о курсе и основах ИИ", link: "intro.html" },
-        { id: 0, title: "Доступ к ChatGPT", desc: "Основы, история, примеры использования искусственного интеллекта", link: "M0.html" },
-        { id: 1, title: "Основы ChatGPT", desc: "Базовые принципы работы с ChatGPT, ключевые концепции", link: "M1.html" },
-        { id: 2, title: "ChatGPT PRO", desc: "Продвинутые техники и методы работы с ChatGPT", link: "M2.html" },
-        { id: 3, title: "ChatGPT MASTER", desc: "Экспертный уровень использования ChatGPT", link: "M3.html" }
+        { id: -1, title: "Введение", desc: "Стартовая информация о курсе и основах ИИ", link: "intro.html", icon: "📚" },
+        { id: 1, title: "Основы ChatGPT", desc: "Базовые принципы работы с ChatGPT, ключевые концепции", link: "M1.html", icon: "🔑" },
+        { id: 2, title: "ChatGPT PRO", desc: "Продвинутые техники и методы работы с ChatGPT", link: "M2.html", icon: "📊" },
+        { id: 3, title: "ChatGPT MASTER", desc: "Экспертный уровень использования ChatGPT", link: "M3.html", icon: "🎓" },
+        { id: 4, title: "ChatGPT EXPERT", desc: "Профессиональное применение ChatGPT в работе", link: "M4.html", icon: "🚀" }
       ];
 
       let html = '';
@@ -780,11 +784,11 @@
           buttonIcon = isCompleted ? '✔️' : '';
         } else {
           // Все остальные модули
-          const moduleAvailable = state.progress >= module.id + 1;
-          const nextModuleAvailable = state.progress >= module.id + 2;
+          const moduleAvailable = state.progress >= module.id;
+          const nextModuleAvailable = state.progress >= module.id + 1;
           
           isCompleted = nextModuleAvailable;
-          isCurrent = state.progress === module.id + 1;
+          isCurrent = state.progress === module.id;
           
           if (moduleAvailable) {
             buttonText = isCompleted ? 'Модуль пройден' : 'Изучить модуль';
@@ -797,7 +801,7 @@
           }
         }
 
-        // Проверка оплаты для модулей 1, 2, 3
+        // Проверка оплаты для модулей 1, 2, 3, 4
         if (module.id >= 1 && !state.isPaid) {
           isLocked = true;
           lockReason = 'oplata';
@@ -821,13 +825,15 @@
         html += `
           <div class="${cardClass}">
             <div class="${labelClass}">${module.id === -1 ? 'Введение' : 'Модуль ' + module.id}</div>
-            <h3 class="module-title">${module.title}</h3>
-            <div class="module-desc">${module.desc}</div>
-            <button class="${btnClass}" onclick="handleModuleClick('${module.link}', ${isLocked}, '${lockReason}', ${module.id}, ${isCompleted})">
-              ${buttonIcon ? buttonIcon + ' ' : ''}${buttonText}
-            </button>
-            ${lockIcon}
-            ${module.id === -1 ? '<div class="connecting-line"></div>' : ''}
+            <div class="module-content">
+              <h3 class="module-title">${module.title}</h3>
+              <div class="module-desc">${module.desc}</div>
+              <button class="${btnClass}" onclick="handleModuleClick('${module.link}', ${isLocked}, '${lockReason}', ${module.id}, ${isCompleted})">
+                ${buttonIcon ? buttonIcon + ' ' : ''}${buttonText}
+              </button>
+              ${lockIcon}
+              <div class="module-icon">${module.icon}</div>
+            </div>
           </div>
         `;
       });
