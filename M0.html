@@ -15,6 +15,10 @@
       --transition: 0.6s cubic-bezier(.77,0,.18,1);
       --disabled: #CCCCCC;
       --blue: #4285F4;
+      --success: #4CAF50;
+      --error: #F44336;
+      --warning: #FF9800;
+      --info: #2196F3;
     }
     body {
       margin: 0;
@@ -399,26 +403,6 @@
       background: linear-gradient(90deg, var(--orange), var(--yellow));
       transform: scale(1.05);
     }
-    /* Анимация конфетти */
-    .confetti {
-      position: fixed;
-      width: 10px;
-      height: 10px;
-      background-color: #f00;
-      opacity: 0;
-      z-index: 999;
-      animation: confetti-fall 3s linear forwards;
-    }
-    @keyframes confetti-fall {
-      0% {
-        transform: translateY(-100vh) rotate(0deg);
-        opacity: 1;
-      }
-      100% {
-        transform: translateY(100vh) rotate(360deg);
-        opacity: 0;
-      }
-    }
     @media (max-width: 600px) {
       .splash h1 {
         font-size: 1.5rem;
@@ -512,7 +496,8 @@
       orgs: 'weamcfo6',
       projectName: 'p27jdsmk69wuimh',
       tableName: 'mc6qh91f060pv4y',
-      apiToken: 'bocQfycJpJsTG_tbwEf8ma8E5rhoig0njMDXFWtJ'
+      apiToken: 'bocQfycJpJsTG_tbwEf8ma8E5rhoig0njMDXFWtJ',
+      apiVersion: 'v1'
     };
 
     // Элементы
@@ -532,7 +517,7 @@
     const completionModal = document.getElementById('completionModal');
     const completionBtn = document.getElementById('completionBtn');
 
-    // Все контентные блоки
+   // Все контентные блоки
     const contentBlocks = [
       {
         title: "ДАВАЙ НАЧНЕМ МОДУЛЬ 0",
@@ -699,6 +684,7 @@
       }
     ];
 
+
     let currentBlockIndex = 0;
     const totalBlocks = contentBlocks.length;
     let emptySpace = null;
@@ -713,51 +699,59 @@
     // Функция обновления прогресса в NocoDB
     async function updateProgressInNocoDB() {
       const userId = getUserId();
-      if (!userId) return false;
+      if (!userId) return { success: false, error: 'User ID not found' };
 
       try {
         // 1. Находим запись пользователя
-        const searchUrl = `https://app.nocodb.com/api/v1/db/data/${config.orgs}/${config.projectName}/${config.tableName}?where=(tg_user_id,eq,${userId})`;
+        const searchUrl = `https://app.nocodb.com/api/${config.apiVersion}/db/data/${config.orgs}/${config.projectName}/${config.tableName}?where=(tg_user_id,eq,${userId})`;
+        
         const searchRes = await fetch(searchUrl, {
           headers: { 'xc-token': config.apiToken }
         });
         
-        if (!searchRes.ok) return false;
+        if (!searchRes.ok) {
+          const errorText = await searchRes.text();
+          return { success: false, error: `Search failed: ${searchRes.status}` };
+        }
         
         const { list } = await searchRes.json();
-        if (!list?.length) return false;
+        if (!list?.length) return { success: false, error: 'Record not found' };
         
         const record = list[0];
         
         // 2. Обновляем запись
-        const updateUrl = `https://app.nocodb.com/api/v1/db/data/${config.orgs}/${config.projectName}/${config.tableName}/${record.Id}`;
+        const updateUrl = `https://app.nocodb.com/api/${config.apiVersion}/db/data/${config.orgs}/${config.projectName}/${config.tableName}/${record.Id}`;
+        const updateData = { progress: 2 }; // Устанавливаем прогресс на 2
+        
         const updateRes = await fetch(updateUrl, {
           method: 'PATCH',
           headers: {
             'Content-Type': 'application/json',
             'xc-token': config.apiToken
           },
-          body: JSON.stringify({ progress: 2 })
+          body: JSON.stringify(updateData)
         });
         
-        return updateRes.ok;
+        if (!updateRes.ok) {
+          const errorText = await updateRes.text();
+          return { success: false, error: `Update failed: ${updateRes.status}` };
+        }
+        
+        const result = await updateRes.json();
+        return { success: true, data: result };
 
       } catch (error) {
-        return false;
+        return { success: false, error: error.message };
       }
     }
 
     // Функция завершения модуля
     function completeModule() {
       completionModal.classList.add('active');
-      createConfetti();
+      
+      // Обновляем прогресс в NocoDB
       updateProgressInNocoDB();
     }
-
-    // Обработчик кнопки завершения
-    completionBtn.addEventListener('click', () => {
-      window.location.href = 'index.html';
-    });
 
     // Функции для работы с контентом
     function addContentBlock(index) {
@@ -865,6 +859,10 @@
 
     reportBtn.addEventListener('click', () => {
       alert('Сообщение о проблеме будет добавлено в ближайшее время');
+    });
+
+    completionBtn.addEventListener('click', () => {
+      window.location.href = 'index.html';
     });
 
     // Инициализация
