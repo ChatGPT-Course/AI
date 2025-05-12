@@ -15,10 +15,6 @@
       --transition: 0.6s cubic-bezier(.77,0,.18,1);
       --disabled: #CCCCCC;
       --blue: #4285F4;
-      --success: #4CAF50;
-      --error: #F44336;
-      --warning: #FF9800;
-      --info: #2196F3;
     }
     body {
       margin: 0;
@@ -112,8 +108,8 @@
     .exit-btn {
       background: var(--white);
       border: none;
-      color: var(--text);
-      font-size: 1.2rem;
+      color: #FF0000;
+      font-size: 1.5rem;
       border-radius: 8px;
       width: 40px;
       height: 40px;
@@ -145,7 +141,7 @@
       margin-right: 0.5rem;
       overflow: hidden;
       border: 1px solid #ddd;
-      max-width: calc(100% - 160px);
+      max-width: calc(100% - 100px);
     }
     .progress-bar-inner {
       height: 100%;
@@ -289,27 +285,6 @@
       background: linear-gradient(90deg, #3367D6, var(--blue));
       transform: scale(1.05);
     }
-    .report-btn {
-      background: var(--white);
-      border: none;
-      color: var(--text);
-      font-size: 1.2rem;
-      border-radius: 8px;
-      width: 40px;
-      height: 40px;
-      cursor: pointer;
-      font-weight: 700;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      transition: all 0.2s;
-      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-      margin-left: 0.5rem;
-    }
-    .report-btn:hover {
-      background: #e0e0e0;
-      transform: scale(1.07);
-    }
     .content-image {
       width: 100%;
       max-width: 500px;
@@ -329,7 +304,7 @@
       height: 50vh;
       width: 100%;
     }
-    /* Новые стили для модального окна завершения */
+    /* Модальное окно завершения модуля */
     .completion-modal {
       position: fixed;
       top: 0;
@@ -414,7 +389,7 @@
       .header-bar {
         height: 48px;
       }
-      .exit-btn, .report-btn {
+      .exit-btn {
         width: 36px;
         height: 36px;
       }
@@ -456,7 +431,6 @@
       <div class="progress-bar">
         <div class="progress-bar-inner" id="progressBar"></div>
       </div>
-      <button class="report-btn" id="reportBtn" title="Сообщить о проблеме">🚩</button>
     </div>
     
     <div class="cards-container" id="cardsContainer"></div>
@@ -497,7 +471,7 @@
       projectName: 'p27jdsmk69wuimh',
       tableName: 'mc6qh91f060pv4y',
       apiToken: 'bocQfycJpJsTG_tbwEf8ma8E5rhoig0njMDXFWtJ',
-      apiVersion: 'v1' // Используем v1 API для совместимости
+      apiVersion: 'v1'
     };
 
     // Элементы
@@ -510,13 +484,11 @@
     const cardsContainer = document.getElementById('cardsContainer');
     const exitBtn = document.getElementById('exitBtn');
     const splashExitBtn = document.getElementById('splashExitBtn');
-    const reportBtn = document.getElementById('reportBtn');
     const exitModal = document.getElementById('exitModal');
     const modalExitBtn = document.getElementById('modalExitBtn');
     const modalStayBtn = document.getElementById('modalStayBtn');
     const completionModal = document.getElementById('completionModal');
     const completionBtn = document.getElementById('completionBtn');
-
 
     // Все контентные блоки
     const contentBlocks = [
@@ -693,98 +665,57 @@
     // Функция для получения ID пользователя из cookie
     function getUserId() {
       const match = document.cookie.match(/tg_user_id=([^;]+)/);
-      const userId = match ? match[1] : null;
-      log(`Получение tg_user_id из cookie: ${userId || 'не найден'}`);
-      return userId;
+      return match ? match[1] : null;
     }
 
     // Функция обновления прогресса в NocoDB
-    // Функция обновления прогресса в NocoDB
     async function updateProgressInNocoDB() {
       const userId = getUserId();
-      if (!userId) {
-        log('Не удалось получить tg_user_id из cookie', 'error');
-        return { success: false, error: 'User ID not found' };
-      }
+      if (!userId) return false;
 
       try {
-        log(`Поиск записи пользователя ${userId} в NocoDB...`);
-        
         // 1. Находим запись пользователя
         const searchUrl = `https://app.nocodb.com/api/${config.apiVersion}/db/data/${config.orgs}/${config.projectName}/${config.tableName}?where=(tg_user_id,eq,${userId})`;
-        log(`Отправка запроса: GET ${searchUrl}`);
         
         const searchRes = await fetch(searchUrl, {
           headers: { 'xc-token': config.apiToken }
         });
         
-        log(`Получен ответ: ${searchRes.status} ${searchRes.statusText}`);
-        
-        if (!searchRes.ok) {
-          const errorText = await searchRes.text();
-          log(`Ошибка поиска записи: ${errorText}`, 'error');
-          return { success: false, error: `Search failed: ${searchRes.status}` };
-        }
+        if (!searchRes.ok) return false;
         
         const { list } = await searchRes.json();
-        log(`Найдено записей: ${list?.length || 0}`);
-        
-        if (!list?.length) {
-          log('Запись пользователя не найдена', 'error');
-          return { success: false, error: 'Record not found' };
-        }
+        if (!list?.length) return false;
         
         const record = list[0];
-        log(`Найдена запись: ID=${record.Id}, progress=${record.progress}`);
         
         // 2. Обновляем запись
         const updateUrl = `https://app.nocodb.com/api/${config.apiVersion}/db/data/${config.orgs}/${config.projectName}/${config.tableName}/${record.Id}`;
-        const updateData = { progress: 2 }; // Устанавливаем прогресс на 2
-        
-        log(`Отправка запроса: PATCH ${updateUrl}`, 'info');
-        log(`Данные для обновления: ${JSON.stringify(updateData)}`, 'info');
-        
         const updateRes = await fetch(updateUrl, {
           method: 'PATCH',
           headers: {
             'Content-Type': 'application/json',
             'xc-token': config.apiToken
           },
-          body: JSON.stringify(updateData)
+          body: JSON.stringify({ progress: 2 })
         });
         
-        log(`Получен ответ: ${updateRes.status} ${updateRes.statusText}`);
-        
-        if (!updateRes.ok) {
-          const errorText = await updateRes.text();
-          log(`Ошибка обновления: ${errorText}`, 'error');
-          return { success: false, error: `Update failed: ${updateRes.status}` };
-        }
-        
-        const result = await updateRes.json();
-        log(`Успешное обновление! Новое значение progress: ${result.progress}`, 'success');
-        return { success: true, data: result };
+        return updateRes.ok;
 
       } catch (error) {
-        log(`Критическая ошибка: ${error.message}`, 'error');
-        return { success: false, error: error.message };
+        return false;
       }
     }
 
     // Функция завершения модуля
     function completeModule() {
-      log('Завершение модуля...');
       completionModal.classList.add('active');
-      
-      // Обновляем прогресс в NocoDB
-      updateProgressInNocoDB().then(result => {
-        if (result.success) {
-          log('Прогресс успешно обновлен в базе данных', 'success');
-        } else {
-          log(`Ошибка при обновлении прогресса: ${result.error}`, 'error');
-        }
-      });
+      updateProgressInNocoDB();
     }
+
+    // Обработчик кнопки завершения
+    completionBtn.addEventListener('click', () => {
+      window.location.href = 'index.html';
+    });
 
     // Функции для работы с контентом
     function addContentBlock(index) {
@@ -839,12 +770,10 @@
     function updateProgressBar() {
       const percent = ((currentBlockIndex + 1) / totalBlocks) * 100;
       progressBar.style.width = percent + '%';
-      log(`Обновление прогресс-бара: ${percent.toFixed(1)}%`);
     }
 
     // Обработчики событий
     startBtn.addEventListener('click', () => {
-      log('Нажата кнопка "Начать"');
       splash.classList.add('hide');
       setTimeout(() => {
         mainContent.classList.add('show');
@@ -855,12 +784,10 @@
     });
 
     splashExitBtn.addEventListener('click', () => {
-      log('Нажата кнопка выхода из splash-экрана');
       window.location.href = 'index.html';
     });
 
     nextBtn.addEventListener('click', () => {
-      log(`Нажата кнопка "Далее". Текущий блок: ${currentBlockIndex}`);
       if (currentBlockIndex < totalBlocks - 1) {
         currentBlockIndex++;
         addContentBlock(currentBlockIndex);
@@ -869,47 +796,42 @@
         if (currentBlockIndex === 1) {
           nextBtn.classList.remove('centered');
           guideBtn.classList.add('show');
-          log('Активирована кнопка гайда');
         }
         
         if (currentBlockIndex === totalBlocks - 1) {
           nextBtn.textContent = 'Завершить';
-          nextBtn.onclick = completeModule;
-          log('Последний блок - изменена кнопка на "Завершить"');
+          nextBtn.disabled = true;
+          nextBtn.style.opacity = '0.7';
+          
+          setTimeout(() => {
+            nextBtn.disabled = false;
+            nextBtn.style.opacity = '1';
+            nextBtn.onclick = completeModule;
+          }, 2000);
         }
       }
     });
 
     exitBtn.addEventListener('click', () => {
-      log('Нажата кнопка выхода');
       exitModal.style.display = 'flex';
     });
 
     modalExitBtn.addEventListener('click', () => {
-      log('Подтвержден выход из модуля');
       window.location.href = 'index.html';
     });
 
     modalStayBtn.addEventListener('click', () => {
-      log('Отмена выхода из модуля');
       exitModal.style.display = 'none';
     });
 
     guideBtn.addEventListener('click', () => {
-      log('Открытие детального гайда');
       window.open('https://kurl.ru/btRup', '_blank');
     });
 
-    reportBtn.addEventListener('click', () => {
-      log('Сообщение о проблеме');
-      alert('Сообщение о проблеме будет добавлено в ближайшее время');
-    });
-
-    completionBtn.addEventListener('click', () => {
-      log('Завершение модуля - возврат в меню');
-      window.location.href = 'index.html';
-    });
-
+    // Инициализация
+    if (!isFirstBlockAdded) {
+      addContentBlock(0);
+    }
   </script>
 </body>
 </html>
