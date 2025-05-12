@@ -169,6 +169,9 @@
       cursor: default;
       z-index: 2;
       overflow: hidden;
+      min-height: 280px;
+      display: flex;
+      flex-direction: column;
     }
 
     .module:active:not(.locked) {
@@ -226,17 +229,21 @@
       }
     }
 
+    .module-header {
+      display: flex;
+      align-items: center;
+      margin-bottom: 16px;
+    }
+
     .module-label {
-      position: absolute;
-      top: 0;
-      left: 0;
       background: var(--primary);
       color: white;
-      padding: 8px 16px;
-      border-radius: 0 0 8px 0;
-      font-size: 16px;
-      font-weight: 500;
-      z-index: 2;
+      padding: 6px 12px;
+      border-radius: 6px;
+      font-size: 14px;
+      font-weight: 600;
+      margin-right: 12px;
+      flex-shrink: 0;
     }
 
     .module-label.completed {
@@ -247,19 +254,19 @@
       background: var(--disabled);
     }
 
-    .module-content {
-      position: relative;
-      height: 100%;
-      display: flex;
-      flex-direction: column;
+    .module-title {
+      font-size: 18px;
+      font-weight: 600;
+      color: var(--dark);
+      flex-grow: 1;
+      text-align: right;
     }
 
-    .module-title {
-      font-size: 20px;
-      font-weight: 600;
-      margin-bottom: 8px;
-      color: var(--dark);
-      padding-top: 10px;
+    .module-content {
+      position: relative;
+      flex-grow: 1;
+      display: flex;
+      flex-direction: column;
     }
 
     .module-desc {
@@ -274,14 +281,12 @@
       background: var(--primary);
       color: white;
       border: none;
-      padding: 10px 16px;
+      padding: 12px 16px;
       border-radius: 8px;
       font-weight: 600;
       cursor: pointer;
       transition: background 0.2s, transform 0.1s;
-      align-self: flex-end;
-      width: auto;
-      min-width: 120px;
+      width: 100%;
       text-align: center;
       display: flex;
       align-items: center;
@@ -312,18 +317,26 @@
 
     .module-icon {
       position: absolute;
-      bottom: 10px;
-      left: 10px;
-      font-size: 40px;
-      opacity: 0.7;
-      z-index: 1;
-      width: 50px;
-      height: 50px;
+      bottom: 8px;
+      left: 8px;
+      width: 28px;
+      height: 28px;
       border-radius: 50%;
-      background: rgba(255, 255, 255, 0.2);
+      background: var(--primary);
+      color: white;
       display: flex;
       align-items: center;
       justify-content: center;
+      font-size: 14px;
+      z-index: 1;
+    }
+
+    .module-icon.completed {
+      background: var(--success);
+    }
+
+    .module-icon.locked {
+      background: var(--disabled);
     }
 
     /* Progress line */
@@ -797,10 +810,10 @@
     function updateUI() {
       const modules = [
         { id: -1, title: "Введение", desc: "Стартовая информация о курсе и основах ИИ", link: "intro.html", icon: "📚", label: "Вступление" },
-        { id: 1, title: "Доступ к ChatGPT 🔑", desc: "Основы, история, примеры использования искусственного интеллекта", link: "M1.html", icon: "🔑", label: "Модуль 1" },
-        { id: 2, title: "Основы ChatGPT 📊", desc: "Базовые принципы работы с ChatGPT, ключевые концепции", link: "M2.html", icon: "📊", label: "Модуль 2" },
-        { id: 3, title: "ChatGPT PRO 🎓", desc: "Продвинутые техники и методы работы с ChatGPT", link: "M3.html", icon: "🎓", label: "Модуль 3" },
-        { id: 4, title: "ChatGPT MASTER 🚀", desc: "Экспертный уровень использования ChatGPT", link: "M4.html", icon: "🚀", label: "Модуль 4" }
+        { id: 1, title: "Доступ к ChatGPT", desc: "Основы, история, примеры использования искусственного интеллекта", link: "M1.html", icon: "🔑", label: "Модуль 1" },
+        { id: 2, title: "Основы ChatGPT", desc: "Базовые принципы работы с ChatGPT, ключевые концепции", link: "M2.html", icon: "📊", label: "Модуль 2" },
+        { id: 3, title: "ChatGPT PRO", desc: "Продвинутые техники и методы работы с ChatGPT", link: "M3.html", icon: "🎓", label: "Модуль 3" },
+        { id: 4, title: "ChatGPT MASTER", desc: "Экспертный уровень использования ChatGPT", link: "M4.html", icon: "🚀", label: "Модуль 4" }
       ];
 
       let html = '';
@@ -810,11 +823,11 @@
         let isCompleted = false;
         let isCurrent = false;
         let buttonText = 'Изучить модуль';
-        let buttonIcon = '';
+        let buttonIcon = '⚡';
         let cardClass = 'module';
         let btnClass = 'module-btn';
         let labelClass = 'module-label';
-        let lockIcon = '';
+        let iconClass = 'module-icon';
 
         // Определяем статус модуля
         if (module.id === -1) {
@@ -822,7 +835,7 @@
           isCompleted = state.progress >= 1;
           isCurrent = state.progress === 0;
           buttonText = isCompleted ? 'Модуль пройден' : 'Изучить модуль';
-          buttonIcon = isCompleted ? '✔️' : '';
+          buttonIcon = isCompleted ? '✔️' : '⚡';
         } else {
           // Все остальные модули
           const moduleAvailable = state.progress >= module.id;
@@ -833,11 +846,12 @@
           
           if (moduleAvailable) {
             buttonText = isCompleted ? 'Модуль пройден' : 'Изучить модуль';
-            buttonIcon = isCompleted ? '✔️' : '';
+            buttonIcon = isCompleted ? '✔️' : '⚡';
           } else {
             isLocked = true;
             lockReason = 'progress';
-            buttonText = 'Недоступен 🔒';
+            buttonText = 'Недоступен';
+            buttonIcon = '🔒';
           }
         }
 
@@ -845,7 +859,8 @@
         if (module.id >= 2 && !state.isPaid) {
           isLocked = true;
           lockReason = 'oplata';
-          buttonText = 'Недоступен 🔒';
+          buttonText = 'Недоступен';
+          buttonIcon = '🔒';
         }
 
         // Устанавливаем классы в зависимости от статуса
@@ -853,24 +868,28 @@
           cardClass += ' completed';
           btnClass += ' completed';
           labelClass += ' completed';
+          iconClass += ' completed';
         } else if (isLocked) {
           cardClass += ' locked';
           btnClass += ' locked';
           labelClass += ' locked';
+          iconClass += ' locked';
         } else if (isCurrent) {
           cardClass += ' current';
         }
 
         html += `
           <div class="${cardClass}">
-            <div class="${labelClass}">${module.label}</div>
+            <div class="module-header">
+              <div class="${labelClass}">${module.label}</div>
+              <div class="module-title">${module.title}</div>
+            </div>
             <div class="module-content">
-              <h3 class="module-title">${module.title}</h3>
               <div class="module-desc">${module.desc}</div>
               <button class="${btnClass}" onclick="handleModuleClick('${module.link}', ${isLocked}, '${lockReason}', ${module.id}, ${isCompleted})">
-                ${buttonIcon ? buttonIcon + ' ' : ''}${buttonText}
+                ${buttonIcon} ${buttonText}
               </button>
-              <div class="module-icon">${module.icon}</div>
+              <div class="${iconClass}">${module.icon}</div>
             </div>
           </div>
         `;
