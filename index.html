@@ -191,25 +191,29 @@
     }
 
     @keyframes pulse {
-      0%, 100% { 
+      0% { 
         transform: scale(1);
         box-shadow: 0 4px 16px rgba(255, 122, 0, 0.2);
       }
       50% { 
-        transform: scale(1.02);
-        box-shadow: 0 8px 24px rgba(255, 122, 0, 0.3);
+        transform: scale(0.99);
+        box-shadow: 0 6px 20px rgba(255, 122, 0, 0.3);
+      }
+      100% { 
+        transform: scale(1);
+        box-shadow: 0 4px 16px rgba(255, 122, 0, 0.2);
       }
     }
 
     .module.current::after {
       content: '';
       position: absolute;
-      top: -10px;
-      left: -10px;
-      right: -10px;
-      bottom: -10px;
-      border-radius: 26px;
-      border: 2px solid rgba(255, 122, 0, 0.3);
+      top: -5px;
+      left: -5px;
+      right: -5px;
+      bottom: -5px;
+      border-radius: 21px;
+      border: 2px solid rgba(255, 122, 0, 0.2);
       animation: ripple 3s infinite ease-out;
       pointer-events: none;
       z-index: -1;
@@ -217,8 +221,12 @@
 
     @keyframes ripple {
       0% {
-        opacity: 1;
+        opacity: 0.5;
         transform: scale(1);
+      }
+      70% {
+        opacity: 0;
+        transform: scale(1.05);
       }
       100% {
         opacity: 0;
@@ -226,17 +234,21 @@
       }
     }
 
+    .module-header {
+      display: flex;
+      align-items: center;
+      margin-bottom: 16px;
+    }
+
     .module-label {
-      position: absolute;
-      top: 0;
-      left: 0;
       background: var(--primary);
       color: white;
-      padding: 8px 16px;
-      border-radius: 0 0 8px 0;
-      font-size: 16px;
-      font-weight: 500;
-      z-index: 2;
+      padding: 6px 12px;
+      border-radius: 6px;
+      font-size: 14px;
+      font-weight: 600;
+      margin-right: 12px;
+      flex-shrink: 0;
     }
 
     .module-label.completed {
@@ -247,6 +259,12 @@
       background: var(--disabled);
     }
 
+    .module-title {
+      font-size: 18px;
+      font-weight: 600;
+      color: var(--dark);
+    }
+
     .module-content {
       position: relative;
       height: 100%;
@@ -254,20 +272,22 @@
       flex-direction: column;
     }
 
-    .module-title {
-      font-size: 20px;
-      font-weight: 600;
-      margin-bottom: 8px;
-      color: var(--dark);
-      padding-top: 10px;
-    }
-
     .module-desc {
       font-size: 14px;
       color: #666;
-      margin-bottom: 20px;
+      margin-bottom: 12px;
       line-height: 1.4;
       flex-grow: 1;
+    }
+
+    .module-blocks {
+      font-size: 12px;
+      color: #888;
+      margin-bottom: 16px;
+      padding: 4px 8px;
+      background: rgba(0,0,0,0.05);
+      border-radius: 4px;
+      display: inline-block;
     }
 
     .module-btn {
@@ -279,9 +299,7 @@
       font-weight: 600;
       cursor: pointer;
       transition: background 0.2s, transform 0.1s;
-      align-self: flex-end;
-      width: auto;
-      min-width: 120px;
+      width: 100%;
       text-align: center;
       display: flex;
       align-items: center;
@@ -312,18 +330,26 @@
 
     .module-icon {
       position: absolute;
-      bottom: 10px;
-      left: 10px;
-      font-size: 40px;
-      opacity: 0.7;
-      z-index: 1;
-      width: 50px;
-      height: 50px;
+      bottom: 16px;
+      left: 16px;
+      width: 36px;
+      height: 36px;
       border-radius: 50%;
-      background: rgba(255, 255, 255, 0.2);
+      background: var(--primary);
+      color: white;
       display: flex;
       align-items: center;
       justify-content: center;
+      font-size: 18px;
+      z-index: 1;
+    }
+
+    .module-icon.completed {
+      background: var(--success);
+    }
+
+    .module-icon.locked {
+      background: var(--disabled);
     }
 
     /* Progress line */
@@ -797,10 +823,10 @@
     function updateUI() {
       const modules = [
         { id: -1, title: "Введение", desc: "Стартовая информация о курсе и основах ИИ", link: "intro.html", icon: "📚", label: "Вступление" },
-        { id: 1, title: "Доступ к ChatGPT 🔑", desc: "Основы, история, примеры использования искусственного интеллекта", link: "M1.html", icon: "🔑", label: "Модуль 1" },
-        { id: 2, title: "Основы ChatGPT 📊", desc: "Базовые принципы работы с ChatGPT, ключевые концепции", link: "M2.html", icon: "📊", label: "Модуль 2" },
-        { id: 3, title: "ChatGPT PRO 🎓", desc: "Продвинутые техники и методы работы с ChatGPT", link: "M3.html", icon: "🎓", label: "Модуль 3" },
-        { id: 4, title: "ChatGPT MASTER 🚀", desc: "Экспертный уровень использования ChatGPT", link: "M4.html", icon: "🚀", label: "Модуль 4" }
+        { id: 1, title: "Доступ к ChatGPT", desc: "Основы, история, примеры использования искусственного интеллекта", link: "M1.html", icon: "🔑", label: "Модуль 1" },
+        { id: 2, title: "Основы ChatGPT", desc: "Базовые принципы работы с ChatGPT, ключевые концепции", link: "M2.html", icon: "📊", label: "Модуль 2" },
+        { id: 3, title: "ChatGPT PRO", desc: "Продвинутые техники и методы работы с ChatGPT", link: "M3.html", icon: "🎓", label: "Модуль 3" },
+        { id: 4, title: "ChatGPT MASTER", desc: "Экспертный уровень использования ChatGPT", link: "M4.html", icon: "🚀", label: "Модуль 4" }
       ];
 
       let html = '';
@@ -809,20 +835,19 @@
         let lockReason = '';
         let isCompleted = false;
         let isCurrent = false;
-        let buttonText = 'Изучить модуль';
+        let buttonText = 'Изучить модуль ⚡';
         let buttonIcon = '';
         let cardClass = 'module';
         let btnClass = 'module-btn';
         let labelClass = 'module-label';
-        let lockIcon = '';
+        let iconClass = 'module-icon';
 
         // Определяем статус модуля
         if (module.id === -1) {
           // Введение
           isCompleted = state.progress >= 1;
           isCurrent = state.progress === 0;
-          buttonText = isCompleted ? 'Модуль пройден' : 'Изучить модуль';
-          buttonIcon = isCompleted ? '✔️' : '';
+          buttonText = isCompleted ? 'Модуль пройден ✔️' : 'Изучить модуль ⚡';
         } else {
           // Все остальные модули
           const moduleAvailable = state.progress >= module.id;
@@ -832,8 +857,7 @@
           isCurrent = state.progress === module.id;
           
           if (moduleAvailable) {
-            buttonText = isCompleted ? 'Модуль пройден' : 'Изучить модуль';
-            buttonIcon = isCompleted ? '✔️' : '';
+            buttonText = isCompleted ? 'Модуль пройден ✔️' : 'Изучить модуль ⚡';
           } else {
             isLocked = true;
             lockReason = 'progress';
@@ -853,24 +877,29 @@
           cardClass += ' completed';
           btnClass += ' completed';
           labelClass += ' completed';
+          iconClass += ' completed';
         } else if (isLocked) {
           cardClass += ' locked';
           btnClass += ' locked';
           labelClass += ' locked';
+          iconClass += ' locked';
         } else if (isCurrent) {
           cardClass += ' current';
         }
 
         html += `
           <div class="${cardClass}">
-            <div class="${labelClass}">${module.label}</div>
+            <div class="module-header">
+              <div class="${labelClass}">${module.label}</div>
+              <div class="module-title">${module.title}</div>
+            </div>
             <div class="module-content">
-              <h3 class="module-title">${module.title}</h3>
               <div class="module-desc">${module.desc}</div>
+              <div class="module-blocks">Блоков: -</div>
               <button class="${btnClass}" onclick="handleModuleClick('${module.link}', ${isLocked}, '${lockReason}', ${module.id}, ${isCompleted})">
-                ${buttonIcon ? buttonIcon + ' ' : ''}${buttonText}
+                ${buttonText}
               </button>
-              <div class="module-icon">${module.icon}</div>
+              <div class="${iconClass}">${module.icon}</div>
             </div>
           </div>
         `;
