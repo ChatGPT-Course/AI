@@ -185,7 +185,45 @@
     }
 
     .module.current {
-      box-shadow: 0 4px 16px rgba(255, 122, 0, 0.2);
+      animation: pulse 2s infinite ease-in-out;
+      position: relative;
+      overflow: visible;
+    }
+
+    @keyframes pulse {
+      0%, 100% { 
+        transform: scale(1);
+        box-shadow: 0 4px 16px rgba(255, 122, 0, 0.2);
+      }
+      50% { 
+        transform: scale(1.02);
+        box-shadow: 0 8px 24px rgba(255, 122, 0, 0.3);
+      }
+    }
+
+    .module.current::after {
+      content: '';
+      position: absolute;
+      top: -10px;
+      left: -10px;
+      right: -10px;
+      bottom: -10px;
+      border-radius: 26px;
+      border: 2px solid rgba(255, 122, 0, 0.3);
+      animation: ripple 3s infinite ease-out;
+      pointer-events: none;
+      z-index: -1;
+    }
+
+    @keyframes ripple {
+      0% {
+        opacity: 1;
+        transform: scale(1);
+      }
+      100% {
+        opacity: 0;
+        transform: scale(1.1);
+      }
     }
 
     .module-label {
@@ -245,6 +283,10 @@
       width: auto;
       min-width: 120px;
       text-align: center;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
     }
 
     .module-btn:active:not(:disabled) {
@@ -268,21 +310,20 @@
       cursor: not-allowed;
     }
 
-    .lock-icon {
-      position: absolute;
-      top: 16px;
-      right: 16px;
-      font-size: 20px;
-      color: var(--disabled);
-    }
-
     .module-icon {
       position: absolute;
       bottom: 10px;
       left: 10px;
-      font-size: 60px;
-      opacity: 0.1;
+      font-size: 40px;
+      opacity: 0.7;
       z-index: 1;
+      width: 50px;
+      height: 50px;
+      border-radius: 50%;
+      background: rgba(255, 255, 255, 0.2);
+      display: flex;
+      align-items: center;
+      justify-content: center;
     }
 
     /* Progress line */
@@ -755,11 +796,11 @@
     // Функция обновления интерфейса модулей
     function updateUI() {
       const modules = [
-        { id: -1, title: "Введение", desc: "Стартовая информация о курсе и основах ИИ", link: "intro.html", icon: "📚" },
-        { id: 1, title: "Основы ChatGPT", desc: "Базовые принципы работы с ChatGPT, ключевые концепции", link: "M1.html", icon: "🔑" },
-        { id: 2, title: "ChatGPT PRO", desc: "Продвинутые техники и методы работы с ChatGPT", link: "M2.html", icon: "📊" },
-        { id: 3, title: "ChatGPT MASTER", desc: "Экспертный уровень использования ChatGPT", link: "M3.html", icon: "🎓" },
-        { id: 4, title: "ChatGPT EXPERT", desc: "Профессиональное применение ChatGPT в работе", link: "M4.html", icon: "🚀" }
+        { id: -1, title: "Введение", desc: "Стартовая информация о курсе и основах ИИ", link: "intro.html", icon: "📚", label: "Вступление" },
+        { id: 1, title: "Доступ к ChatGPT 🔑", desc: "Основы, история, примеры использования искусственного интеллекта", link: "M1.html", icon: "🔑", label: "Модуль 1" },
+        { id: 2, title: "Основы ChatGPT 📊", desc: "Базовые принципы работы с ChatGPT, ключевые концепции", link: "M2.html", icon: "📊", label: "Модуль 2" },
+        { id: 3, title: "ChatGPT PRO 🎓", desc: "Продвинутые техники и методы работы с ChatGPT", link: "M3.html", icon: "🎓", label: "Модуль 3" },
+        { id: 4, title: "ChatGPT MASTER 🚀", desc: "Экспертный уровень использования ChatGPT", link: "M4.html", icon: "🚀", label: "Модуль 4" }
       ];
 
       let html = '';
@@ -796,17 +837,15 @@
           } else {
             isLocked = true;
             lockReason = 'progress';
-            lockIcon = '<span class="lock-icon">🔒</span>';
-            buttonText = 'Недоступен';
+            buttonText = 'Недоступен 🔒';
           }
         }
 
-        // Проверка оплаты для модулей 1, 2, 3, 4
-        if (module.id >= 1 && !state.isPaid) {
+        // Проверка оплаты для модулей 2, 3, 4
+        if (module.id >= 2 && !state.isPaid) {
           isLocked = true;
           lockReason = 'oplata';
-          lockIcon = '<span class="lock-icon">🔒</span>';
-          buttonText = 'Недоступен';
+          buttonText = 'Недоступен 🔒';
         }
 
         // Устанавливаем классы в зависимости от статуса
@@ -824,14 +863,13 @@
 
         html += `
           <div class="${cardClass}">
-            <div class="${labelClass}">${module.id === -1 ? 'Введение' : 'Модуль ' + module.id}</div>
+            <div class="${labelClass}">${module.label}</div>
             <div class="module-content">
               <h3 class="module-title">${module.title}</h3>
               <div class="module-desc">${module.desc}</div>
               <button class="${btnClass}" onclick="handleModuleClick('${module.link}', ${isLocked}, '${lockReason}', ${module.id}, ${isCompleted})">
                 ${buttonIcon ? buttonIcon + ' ' : ''}${buttonText}
               </button>
-              ${lockIcon}
               <div class="module-icon">${module.icon}</div>
             </div>
           </div>
