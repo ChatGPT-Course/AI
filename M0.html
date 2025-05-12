@@ -15,10 +15,6 @@
       --transition: 0.6s cubic-bezier(.77,0,.18,1);
       --disabled: #CCCCCC;
       --blue: #4285F4;
-      --success: #4CAF50;
-      --error: #F44336;
-      --warning: #FF9800;
-      --info: #2196F3;
     }
     body {
       margin: 0;
@@ -403,6 +399,26 @@
       background: linear-gradient(90deg, var(--orange), var(--yellow));
       transform: scale(1.05);
     }
+    /* Анимация конфетти */
+    .confetti {
+      position: fixed;
+      width: 10px;
+      height: 10px;
+      background-color: #f00;
+      opacity: 0;
+      z-index: 999;
+      animation: confetti-fall 3s linear forwards;
+    }
+    @keyframes confetti-fall {
+      0% {
+        transform: translateY(-100vh) rotate(0deg);
+        opacity: 1;
+      }
+      100% {
+        transform: translateY(100vh) rotate(360deg);
+        opacity: 0;
+      }
+    }
     @media (max-width: 600px) {
       .splash h1 {
         font-size: 1.5rem;
@@ -491,15 +507,6 @@
   </div>
 
   <script>
-    // Конфигурация NocoDB
-    const config = {
-      orgs: 'weamcfo6',
-      projectName: 'p27jdsmk69wuimh',
-      tableName: 'mc6qh91f060pv4y',
-      apiToken: 'bocQfycJpJsTG_tbwEf8ma8E5rhoig0njMDXFWtJ',
-      apiVersion: 'v1'
-    };
-
     // Элементы
     const splash = document.getElementById('splash');
     const startBtn = document.getElementById('startBtn');
@@ -517,7 +524,7 @@
     const completionModal = document.getElementById('completionModal');
     const completionBtn = document.getElementById('completionBtn');
 
-   // Все контентные блоки
+    // Все контентные блоки
     const contentBlocks = [
       {
         title: "ДАВАЙ НАЧНЕМ МОДУЛЬ 0",
@@ -684,74 +691,97 @@
       }
     ];
 
-
     let currentBlockIndex = 0;
     const totalBlocks = contentBlocks.length;
     let emptySpace = null;
     let isFirstBlockAdded = false;
 
-    // Функция для получения ID пользователя из cookie
-    function getUserId() {
-      const match = document.cookie.match(/tg_user_id=([^;]+)/);
-      return match ? match[1] : null;
+    // Функция создания конфетти
+    function createConfetti() {
+      const colors = ['#ff0000', '#00ff00', '#0000ff', '#ffff00', '#ff00ff', '#00ffff'];
+      const confettiCount = 100;
+      
+      for (let i = 0; i < confettiCount; i++) {
+        const confetti = document.createElement('div');
+        confetti.className = 'confetti';
+        confetti.style.left = Math.random() * 100 + 'vw';
+        confetti.style.backgroundColor = colors[Math.floor(Math.random() * colors.length)];
+        confetti.style.width = Math.random() * 10 + 5 + 'px';
+        confetti.style.height = Math.random() * 10 + 5 + 'px';
+        confetti.style.animationDuration = Math.random() * 3 + 2 + 's';
+        confetti.style.animationDelay = Math.random() * 2 + 's';
+        document.body.appendChild(confetti);
+        
+        // Удаляем конфетти после анимации
+        setTimeout(() => {
+          confetti.remove();
+        }, 5000);
+      }
     }
 
     // Функция обновления прогресса в NocoDB
     async function updateProgressInNocoDB() {
       const userId = getUserId();
-      if (!userId) return { success: false, error: 'User ID not found' };
+      if (!userId) return;
 
       try {
+        // Конфигурация NocoDB
+        const config = {
+          apiUrl: 'https://app.nocodb.com/api/v1/db/data/v1/weamcfo6/p27jdsmk69wuimh/mc6qh91f060pv4y',
+          apiToken: 'bocQfycJpJsTG_tbwEf8ma8E5rhoig0njMDXFWtJ // Замените на реальный токен
+        };
+
         // 1. Находим запись пользователя
-        const searchUrl = `https://app.nocodb.com/api/${config.apiVersion}/db/data/${config.orgs}/${config.projectName}/${config.tableName}?where=(tg_user_id,eq,${userId})`;
-        
+        const searchUrl = `${config.apiUrl}?where=(tg_user_id,eq,${userId})`;
         const searchRes = await fetch(searchUrl, {
           headers: { 'xc-token': config.apiToken }
         });
         
-        if (!searchRes.ok) {
-          const errorText = await searchRes.text();
-          return { success: false, error: `Search failed: ${searchRes.status}` };
-        }
+        if (!searchRes.ok) throw new Error(`Ошибка поиска: ${searchRes.status}`);
         
         const { list } = await searchRes.json();
-        if (!list?.length) return { success: false, error: 'Record not found' };
+        if (!list?.length) throw new Error('Запись не найдена');
         
         const record = list[0];
         
         // 2. Обновляем запись
-        const updateUrl = `https://app.nocodb.com/api/${config.apiVersion}/db/data/${config.orgs}/${config.projectName}/${config.tableName}/${record.Id}`;
-        const updateData = { progress: 2 }; // Устанавливаем прогресс на 2
-        
+        const updateUrl = `${config.apiUrl}/${record.Id}`;
         const updateRes = await fetch(updateUrl, {
           method: 'PATCH',
           headers: {
             'Content-Type': 'application/json',
             'xc-token': config.apiToken
           },
-          body: JSON.stringify(updateData)
+          body: JSON.stringify({ progress: 2 }) // Устанавливаем progress = 2
         });
         
         if (!updateRes.ok) {
-          const errorText = await updateRes.text();
-          return { success: false, error: `Update failed: ${updateRes.status}` };
+          const errorDetails = await updateRes.json().catch(() => ({}));
+          throw new Error(errorDetails.message || `Ошибка ${updateRes.status}`);
         }
-        
-        const result = await updateRes.json();
-        return { success: true, data: result };
 
+        console.log('Прогресс успешно обновлен в NocoDB');
       } catch (error) {
-        return { success: false, error: error.message };
+        console.error('Ошибка при обновлении прогресса:', error);
       }
     }
 
     // Функция завершения модуля
     function completeModule() {
+      // Показываем модальное окно
       completionModal.classList.add('active');
+      
+      // Запускаем конфетти
+      createConfetti();
       
       // Обновляем прогресс в NocoDB
       updateProgressInNocoDB();
     }
+
+    // Обработчик кнопки завершения
+    completionBtn.addEventListener('click', () => {
+      window.location.href = 'index.html';
+    });
 
     // Функции для работы с контентом
     function addContentBlock(index) {
@@ -782,17 +812,22 @@
       content.innerHTML = contentBlocks[index].content;
       block.appendChild(content);
       
+      // Добавляем блок в контейнер
       cardsContainer.appendChild(block);
       
+      // Добавляем пустое пространство после блока
       emptySpace = document.createElement('div');
       emptySpace.className = 'empty-space';
       cardsContainer.appendChild(emptySpace);
       
+      // Помечаем первый блок как добавленный
       if (index === 0) isFirstBlockAdded = true;
       
+      // Показываем блок с анимацией
       setTimeout(() => {
         block.classList.add('visible');
         
+        // Прокручиваем так, чтобы заголовок блока был сразу под шапкой
         const headerHeight = document.querySelector('.header-bar').offsetHeight;
         const blockTop = block.offsetTop;
         
@@ -836,7 +871,7 @@
         
         if (currentBlockIndex === totalBlocks - 1) {
           nextBtn.textContent = 'Завершить';
-          nextBtn.onclick = completeModule;
+          nextBtn.onclick = completeModule; // Изменяем обработчик на завершение модуля
         }
       }
     });
@@ -861,14 +896,79 @@
       alert('Сообщение о проблеме будет добавлено в ближайшее время');
     });
 
-    completionBtn.addEventListener('click', () => {
-      window.location.href = 'index.html';
-    });
-
     // Инициализация
     if (!isFirstBlockAdded) {
       addContentBlock(0);
     }
+
+    // Функция для получения user_id из cookie
+    function getUserId() {
+      const cookies = document.cookie.split(';');
+      for (const cookie of cookies) {
+        const [name, value] = cookie.trim().split('=');
+        if (name === 'tg_user_id') return value;
+      }
+      return null;
+    }
+
+    // Функция для обновления прогресса в NocoDB
+    async function updateNocoDBProgress() {
+      const userId = getUserId();
+      if (!userId) return;
+
+      try {
+        // Конфигурация NocoDB API
+        const config = {
+          apiUrl: 'https://app.nocodb.com/api/v1/db/data/v1/weamcfo6/p27jdsmk69wuimh/mc6qh91f060pv4y',
+          apiToken: 'YOUR_API_TOKEN' // Замените на реальный токен
+        };
+
+        // 1. Находим запись пользователя
+        const searchUrl = `${config.apiUrl}?where=(tg_user_id,eq,${userId})`;
+        const searchRes = await fetch(searchUrl, {
+          headers: { 'xc-token': config.apiToken }
+        });
+
+        if (!searchRes.ok) throw new Error(`Ошибка поиска: ${searchRes.status}`);
+
+        const { list } = await searchRes.json();
+        if (!list?.length) throw new Error('Пользователь не найден');
+
+        // 2. Обновляем запись
+        const updateUrl = `${config.apiUrl}/${list[0].Id}`;
+        const updateRes = await fetch(updateUrl, {
+          method: 'PATCH',
+          headers: {
+            'Content-Type': 'application/json',
+            'xc-token': config.apiToken
+          },
+          body: JSON.stringify({ progress: 2 }) // Устанавливаем progress = 2
+        });
+
+        if (!updateRes.ok) throw new Error(`Ошибка обновления: ${updateRes.status}`);
+
+        console.log('Прогресс успешно обновлен в NocoDB');
+      } catch (error) {
+        console.error('Ошибка при обновлении прогресса:', error);
+      }
+    }
+
+    // Функция завершения модуля
+    function completeModule() {
+      // Показываем модальное окно завершения
+      completionModal.classList.add('active');
+      
+      // Запускаем анимацию конфетти
+      createConfetti();
+      
+      // Обновляем прогресс в NocoDB
+      updateNocoDBProgress();
+    }
+
+    // Обработчик кнопки в модальном окне завершения
+    completionBtn.addEventListener('click', () => {
+      window.location.href = 'index.html';
+    });
   </script>
 </body>
 </html>
