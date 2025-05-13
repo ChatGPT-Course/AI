@@ -362,6 +362,7 @@
     .access-denied {
       text-align: center;
       padding: 40px 20px;
+      display: none;
     }
     
     .access-denied h2 {
@@ -398,6 +399,27 @@
       padding: 40px 20px;
       color: #666;
     }
+    
+    .init-error {
+      text-align: center;
+      padding: 40px 20px;
+      display: none;
+    }
+    
+    .init-error h2 {
+      color: var(--error);
+      margin-bottom: 16px;
+    }
+    
+    .retry-button {
+      margin-top: 20px;
+      padding: 10px 20px;
+      background: var(--orange);
+      color: white;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+    }
   </style>
 </head>
 <body>
@@ -432,9 +454,16 @@
       </div>
     </div>
     
-    <div id="accessDenied" class="access-denied hidden">
+    <div id="accessDenied" class="access-denied">
       <h2>Доступ запрещен</h2>
       <p>У вас нет прав для просмотра этой страницы.</p>
+      <p id="accessErrorDetails" style="color: #888; font-size: 12px; margin-top: 10px;"></p>
+    </div>
+
+    <div id="initError" class="init-error">
+      <h2>Ошибка инициализации</h2>
+      <p id="initErrorText">Не удалось загрузить данные</p>
+      <button id="retryButton" class="retry-button">Попробовать снова</button>
     </div>
   </div>
   
@@ -489,12 +518,16 @@
       tableName: 'mc6qh91f060pv4y',
       apiToken: 'bocQfycJpJsTG_tbwEf8ma8E5rhoig0njMDXFWtJ',
       apiVersion: 'v1',
-      allowedAdminIds: [1515638372, 987654321] // Замените на реальные ID
+      allowedAdminIds: [123456789, 987654321] // Замените на реальные ID
     };
     
     // Элементы
     const adminContent = document.getElementById('adminContent');
     const accessDenied = document.getElementById('accessDenied');
+    const accessErrorDetails = document.getElementById('accessErrorDetails');
+    const initError = document.getElementById('initError');
+    const initErrorText = document.getElementById('initErrorText');
+    const retryButton = document.getElementById('retryButton');
     const usersContainer = document.getElementById('usersContainer');
     const searchInput = document.getElementById('searchInput');
     const sortBtn = document.getElementById('sortBtn');
@@ -517,31 +550,62 @@
     let currentSort = 'all';
     let currentEditingUserId = null;
     let currentEditingUserData = null;
-    
-    // Функция для получения Telegram ID из cookie
-    function getTelegramUserId() {
-      const match = document.cookie.match(/tg_user_id=([^;]+)/);
-      return match ? parseInt(match[1]) : null;
+    let refreshInterval = null;
+
+    // Проверка конфигурации
+    function validateConfig() {
+      try {
+        const required = ['orgs', 'projectName', 'tableName', 'apiToken', 'allowedAdminIds'];
+        const missing = required.filter(field => !config[field]);
+        if (missing.length > 0) {
+          throw new Error(`Отсутствуют обязательные поля конфигурации: ${missing.join(', ')}`);
+        }
+        
+        if (!Array.isArray(config.allowedAdminIds)) {
+          throw new Error("allowedAdminIds должен быть массивом");
+        }
+        
+        return true;
+      } catch (error) {
+        console.error("Ошибка валидации конфигурации:", error);
+        throw error;
+      }
     }
-    
+
+    // Получение Telegram ID из cookie
+    function getTelegramUserId() {
+      try {
+        const match = document.cookie.match(/tg_user_id=([^;]+)/);
+        return match ? parseInt(match[1]) : null;
+      } catch (error) {
+        console.error("Ошибка при получении Telegram ID:", error);
+        return null;
+      }
+    }
+
     // Проверка доступа
     function checkAccess() {
-      currentUserTelegramId = getTelegramUserId();
-      
-      if (!currentUserTelegramId) {
-        console.error('Telegram ID не найден');
+      try {
+        currentUserTelegramId = getTelegramUserId();
+        console.log("Текущий Telegram ID:", currentUserTelegramId);
+        
+        if (!currentUserTelegramId) {
+          throw new Error("Telegram ID не найден в cookies");
+        }
+        
+        if (!config.allowedAdminIds.includes(currentUserTelegramId)) {
+          throw new Error(`ID ${currentUserTelegramId} нет в списке разрешенных`);
+        }
+        
+        return true;
+      } catch (error) {
+        console.error("Ошибка проверки доступа:", error.message);
+        accessErrorDetails.textContent = error.message;
         return false;
       }
-      
-      if (!config.allowedAdminIds.includes(currentUserTelegramId)) {
-        console.error('Доступ запрещен для этого ID');
-        return false;
-      }
-      
-      return true;
     }
-    
-    // Функция для получения пользователей
+
+    // Загрузка пользователей
     async function fetchUsers() {
       try {
         const now = Date.now();
@@ -551,50 +615,63 @@
         const response = await fetch(
           `https://app.nocodb.com/api/${config.apiVersion}/db/data/${config.orgs}/${config.projectName}/${config.tableName}`,
           {
-            headers: { 'xc-token': config.apiToken }
+            headers: { 
+              'xc-token': config.apiToken,
+              'Content-Type': 'application/json'
+            }
           }
         );
         
         if (!response.ok) {
-          throw new Error(`Ошибка HTTP: ${response.status}`);
+          throw new Error(`HTTP ошибка: ${response.status}`);
         }
         
         const data = await response.json();
-        allUsers = data.list || [];
-        applyFilters();
-      } catch (error) {
-        console.error('Ошибка при загрузке пользователей:', error);
-        showError('Ошибка загрузки данных');
-      }
-    }
-    
-    // Функция для фильтрации и сортировки
-    function applyFilters() {
-      const searchTerm = searchInput.value.toLowerCase();
-      
-      filteredUsers = allUsers.filter(user => {
-        const matchesSearch = 
-          (user.name && user.name.toLowerCase().includes(searchTerm)) ||
-          (user.username && user.username.toLowerCase().includes(searchTerm));
-        
-        let matchesSort = true;
-        
-        if (currentSort === 'paid') {
-          matchesSort = user.oplata == 1;
-        } else if (currentSort === 'unpaid') {
-          matchesSort = user.oplata != 1;
-        } else if (currentSort.startsWith('progress-')) {
-          const progressLevel = parseInt(currentSort.split('-')[1]);
-          matchesSort = user.progress == progressLevel;
+        if (!data.list) {
+          throw new Error("Некорректный формат данных от сервера");
         }
         
-        return matchesSearch && matchesSort;
-      });
-      
-      renderUsers(filteredUsers);
+        allUsers = data.list;
+        applyFilters();
+      } catch (error) {
+        console.error("Ошибка при загрузке пользователей:", error);
+        showError(`Ошибка загрузки: ${error.message}`);
+        throw error;
+      }
     }
-    
-    // Функция для отображения ошибки
+
+    // Фильтрация и сортировка
+    function applyFilters() {
+      try {
+        const searchTerm = searchInput.value.toLowerCase();
+        
+        filteredUsers = allUsers.filter(user => {
+          const matchesSearch = 
+            (user.name && user.name.toLowerCase().includes(searchTerm)) ||
+            (user.username && user.username.toLowerCase().includes(searchTerm));
+          
+          let matchesSort = true;
+          
+          if (currentSort === 'paid') {
+            matchesSort = user.oplata == 1;
+          } else if (currentSort === 'unpaid') {
+            matchesSort = user.oplata != 1;
+          } else if (currentSort.startsWith('progress-')) {
+            const progressLevel = parseInt(currentSort.split('-')[1]);
+            matchesSort = user.progress == progressLevel;
+          }
+          
+          return matchesSearch && matchesSort;
+        });
+        
+        renderUsers(filteredUsers);
+      } catch (error) {
+        console.error("Ошибка при фильтрации:", error);
+        showError("Ошибка фильтрации данных");
+      }
+    }
+
+    // Отображение ошибки
     function showError(message) {
       usersContainer.innerHTML = `
         <div class="empty-state" style="color: var(--error);">
@@ -602,88 +679,98 @@
         </div>
       `;
     }
-    
-    // Функция для рендеринга пользователей
+
+    // Рендеринг пользователей
     function renderUsers(users) {
-      if (users.length === 0) {
-        usersContainer.innerHTML = `
-          <div class="empty-state">
-            Пользователи не найдены
-          </div>
-        `;
-        return;
-      }
-      
-      const fragment = document.createDocumentFragment();
-      
-      users.forEach(user => {
-        const userCard = document.createElement('div');
-        userCard.className = 'user-card';
+      try {
+        if (users.length === 0) {
+          usersContainer.innerHTML = `
+            <div class="empty-state">
+              Пользователи не найдены
+            </div>
+          `;
+          return;
+        }
         
-        // Информация о пользователе
-        const userInfo = document.createElement('div');
+        const fragment = document.createDocumentFragment();
         
-        const userName = document.createElement('div');
-        userName.className = 'user-name';
-        userName.textContent = user.name || 'Без имени';
-        userInfo.appendChild(userName);
-        
-        const userUsername = document.createElement('div');
-        userUsername.className = 'user-username';
-        userUsername.textContent = `@${user.username || 'без username'}`;
-        userInfo.appendChild(userUsername);
-        
-        const userProgress = document.createElement('div');
-        userProgress.className = 'user-progress';
-        userProgress.innerHTML = `Прогресс: <span class="progress-value">${user.progress || 0}/5</span>`;
-        userInfo.appendChild(userProgress);
-        
-        userCard.appendChild(userInfo);
-        
-        // Статус оплаты
-        const paymentStatus = document.createElement('div');
-        paymentStatus.className = `payment-status ${user.oplata == 1 ? 'paid' : 'unpaid'}`;
-        paymentStatus.textContent = user.oplata == 1 ? 'Оплачен' : 'Не оплачен';
-        userCard.appendChild(paymentStatus);
-        
-        // Кнопка настроек
-        const settingsBtn = document.createElement('button');
-        settingsBtn.className = 'settings-btn';
-        settingsBtn.innerHTML = '⚙️';
-        settingsBtn.addEventListener('click', (e) => {
-          e.stopPropagation();
-          openSettingsModal(user);
+        users.forEach(user => {
+          const userCard = document.createElement('div');
+          userCard.className = 'user-card';
+          
+          // Информация о пользователе
+          const userInfo = document.createElement('div');
+          
+          const userName = document.createElement('div');
+          userName.className = 'user-name';
+          userName.textContent = user.name || 'Без имени';
+          userInfo.appendChild(userName);
+          
+          const userUsername = document.createElement('div');
+          userUsername.className = 'user-username';
+          userUsername.textContent = `@${user.username || 'без username'}`;
+          userInfo.appendChild(userUsername);
+          
+          const userProgress = document.createElement('div');
+          userProgress.className = 'user-progress';
+          userProgress.innerHTML = `Прогресс: <span class="progress-value">${user.progress || 0}/5</span>`;
+          userInfo.appendChild(userProgress);
+          
+          userCard.appendChild(userInfo);
+          
+          // Статус оплаты
+          const paymentStatus = document.createElement('div');
+          paymentStatus.className = `payment-status ${user.oplata == 1 ? 'paid' : 'unpaid'}`;
+          paymentStatus.textContent = user.oplata == 1 ? 'Оплачен' : 'Не оплачен';
+          userCard.appendChild(paymentStatus);
+          
+          // Кнопка настроек
+          const settingsBtn = document.createElement('button');
+          settingsBtn.className = 'settings-btn';
+          settingsBtn.innerHTML = '⚙️';
+          settingsBtn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            openSettingsModal(user);
+          });
+          userCard.appendChild(settingsBtn);
+          
+          fragment.appendChild(userCard);
         });
-        userCard.appendChild(settingsBtn);
         
-        fragment.appendChild(userCard);
-      });
-      
-      usersContainer.innerHTML = '';
-      usersContainer.appendChild(fragment);
+        usersContainer.innerHTML = '';
+        usersContainer.appendChild(fragment);
+      } catch (error) {
+        console.error("Ошибка при рендеринге пользователей:", error);
+        showError("Ошибка отображения данных");
+      }
     }
-    
-    // Функция для открытия модального окна настроек
+
+    // Открытие модального окна настроек
     function openSettingsModal(user) {
-      currentEditingUserId = user.Id;
-      currentEditingUserData = {
-        name: user.name,
-        username: user.username,
-        oplata: user.oplata == 1,
-        progress: user.progress || 0
-      };
-      
-      modalUserName.textContent = user.name || 'Без имени';
-      modalUserUsername.textContent = `@${user.username || 'без username'}`;
-      paymentToggle.checked = currentEditingUserData.oplata;
-      paymentStatusText.textContent = currentEditingUserData.oplata ? 'Оплачено' : 'Не оплачено';
-      progressSlider.value = currentEditingUserData.progress;
-      currentProgressValue.textContent = currentEditingUserData.progress;
-      
-      settingsModal.classList.add('active');
+      try {
+        currentEditingUserId = user.Id;
+        currentEditingUserData = {
+          name: user.name,
+          username: user.username,
+          oplata: user.oplata == 1,
+          progress: user.progress || 0
+        };
+        
+        modalUserName.textContent = user.name || 'Без имени';
+        modalUserUsername.textContent = `@${user.username || 'без username'}`;
+        paymentToggle.checked = currentEditingUserData.oplata;
+        paymentStatusText.textContent = currentEditingUserData.oplata ? 'Оплачено' : 'Не оплачено';
+        progressSlider.value = currentEditingUserData.progress;
+        currentProgressValue.textContent = currentEditingUserData.progress;
+        
+        settingsModal.classList.add('active');
+      } catch (error) {
+        console.error("Ошибка при открытии настроек:", error);
+        alert("Не удалось открыть настройки пользователя");
+      }
     }
-    
-    // Функция для обновления пользователя
+
+    // Обновление данных пользователя
     async function updateUser(userId, data) {
       try {
         const response = await fetch(
@@ -702,7 +789,7 @@
         );
         
         if (!response.ok) {
-          throw new Error(`Ошибка HTTP: ${response.status}`);
+          throw new Error(`HTTP ошибка: ${response.status}`);
         }
         
         // Обновляем локальные данные
@@ -715,74 +802,114 @@
         applyFilters();
         return true;
       } catch (error) {
-        console.error('Ошибка при обновлении пользователя:', error);
-        alert('Не удалось обновить данные пользователя. Пожалуйста, попробуйте снова.');
+        console.error("Ошибка при обновлении пользователя:", error);
+        alert(`Не удалось обновить данные: ${error.message}`);
         return false;
       }
     }
-    
-    // Инициализация
-    document.addEventListener('DOMContentLoaded', async () => {
-      if (checkAccess()) {
-        adminContent.classList.remove('hidden');
+
+    // Автоматическое обновление
+    function startAutoRefresh() {
+      if (refreshInterval) clearInterval(refreshInterval);
+      refreshInterval = setInterval(fetchUsers, 1000);
+    }
+
+    // Инициализация приложения
+    async function initializeApp() {
+      try {
+        console.log("Инициализация приложения...");
         
-        // Загружаем данные сразу
-        await fetchUsers();
+        // Скрываем все состояния
+        adminContent.classList.add('hidden');
+        accessDenied.classList.add('hidden');
+        initError.classList.add('hidden');
         
-        // Автоматическое обновление каждую секунду
-        setInterval(fetchUsers, 1000);
+        // Валидация конфигурации
+        validateConfig();
         
-        // Обработчики фильтров
-        searchInput.addEventListener('input', applyFilters);
+        // Проверка доступа
+        const hasAccess = checkAccess();
         
-        // Обработчики сортировки
-        sortBtn.addEventListener('click', () => {
-          sortDropdown.classList.toggle('show');
-        });
+        if (hasAccess) {
+          adminContent.classList.remove('hidden');
+          await fetchUsers();
+          startAutoRefresh();
+        } else {
+          accessDenied.classList.remove('hidden');
+        }
         
-        document.querySelectorAll('.sort-option').forEach(option => {
-          option.addEventListener('click', () => {
-            currentSort = option.dataset.sort;
-            sortBtn.textContent = option.textContent;
-            sortDropdown.classList.remove('show');
-            applyFilters();
-          });
-        });
-        
-        // Закрытие dropdown при клике вне его
-        document.addEventListener('click', (e) => {
-          if (!sortBtn.contains(e.target) {
-            sortDropdown.classList.remove('show');
-          }
-        });
-        
-        // Обработчики модального окна
-        paymentToggle.addEventListener('change', () => {
-          paymentStatusText.textContent = paymentToggle.checked ? 'Оплачено' : 'Не оплачено';
-        });
-        
-        progressSlider.addEventListener('input', () => {
-          currentProgressValue.textContent = progressSlider.value;
-        });
-        
-        modalCancelBtn.addEventListener('click', () => {
-          settingsModal.classList.remove('active');
-        });
-        
-        modalSaveBtn.addEventListener('click', async () => {
-          const newData = {
-            oplata: paymentToggle.checked,
-            progress: parseInt(progressSlider.value)
-          };
-          
-          const success = await updateUser(currentEditingUserId, newData);
-          if (success) {
-            settingsModal.classList.remove('active');
-          }
-        });
-      } else {
-        accessDenied.classList.remove('hidden');
+      } catch (error) {
+        console.error("Ошибка инициализации:", error);
+        initErrorText.textContent = error.message;
+        initError.classList.remove('hidden');
       }
+    }
+
+    // Обработчики событий
+    function setupEventListeners() {
+      // Сортировка
+      sortBtn.addEventListener('click', () => {
+        sortDropdown.classList.toggle('show');
+      });
+      
+      document.querySelectorAll('.sort-option').forEach(option => {
+        option.addEventListener('click', () => {
+          currentSort = option.dataset.sort;
+          sortBtn.textContent = option.textContent;
+          sortDropdown.classList.remove('show');
+          applyFilters();
+        });
+      });
+      
+      document.addEventListener('click', (e) => {
+        if (!sortBtn.contains(e.target)) {
+          sortDropdown.classList.remove('show');
+        }
+      });
+      
+      // Поиск
+      searchInput.addEventListener('input', applyFilters);
+      
+      // Модальное окно
+      paymentToggle.addEventListener('change', () => {
+        paymentStatusText.textContent = paymentToggle.checked ? 'Оплачено' : 'Не оплачено';
+      });
+      
+      progressSlider.addEventListener('input', () => {
+        currentProgressValue.textContent = progressSlider.value;
+      });
+      
+      modalCancelBtn.addEventListener('click', () => {
+        settingsModal.classList.remove('active');
+      });
+      
+      modalSaveBtn.addEventListener('click', async () => {
+        const newData = {
+          oplata: paymentToggle.checked,
+          progress: parseInt(progressSlider.value)
+        };
+        
+        const success = await updateUser(currentEditingUserId, newData);
+        if (success) {
+          settingsModal.classList.remove('active');
+        }
+      });
+      
+      // Кнопка повтора
+      retryButton.addEventListener('click', initializeApp);
+      
+      // Глобальный обработчик ошибок
+      window.addEventListener('error', (error) => {
+        console.error("Глобальная ошибка:", error);
+        initErrorText.textContent = `Ошибка: ${error.message}`;
+        initError.classList.remove('hidden');
+      });
+    }
+
+    // Запуск приложения
+    document.addEventListener('DOMContentLoaded', () => {
+      setupEventListeners();
+      initializeApp();
     });
   </script>
 </body>
