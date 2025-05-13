@@ -256,7 +256,7 @@
       background: var(--primary);
       color: white;
       padding: 8px 16px;
-      border-radius: 0 0 8px 0;
+      border-radius: 0 0 16px 0;
       font-size: 16px;
       font-weight: 500;
       z-index: 2;
@@ -268,6 +268,18 @@
 
     .module-label.locked {
       background: var(--disabled);
+    }
+
+    .module-blocks {
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      background: rgba(0, 0, 0, 0.1);
+      color: var(--dark);
+      padding: 6px 12px;
+      border-radius: 0 16px 0 0;
+      font-size: 14px;
+      font-weight: 500;
     }
 
     .module-content {
@@ -282,9 +294,9 @@
       font-weight: 600;
       margin-bottom: 8px;
       color: var(--dark);
-      padding-top: 10px;
       text-align: right;
       padding-right: 10px;
+      margin-top: 8px;
     }
 
     .module-desc {
@@ -819,11 +831,11 @@
     // Функция обновления интерфейса модулей
     function updateUI() {
       const modules = [
-        { id: -1, title: "Введение", desc: "Узнайте, как освоить главный инструмент ИИ-революции и применять его для работы, учёбы и творчества", link: "intro.html", label: "Вступление" },
-        { id: 1, title: "Доступ к ChatGPT", desc: "Способы доступа, тарифы, ограничения бесплатной версии. Инструкция по обходу блокировок", link: "M1.html", label: "Модуль 1" },
-        { id: 2, title: "Основы ChatGPT", desc: "Язык общения с ИИ. синтаксис промптов, примеры запросов, практические упражнения", link: "M2.html", label: "Модуль 2" },
-        { id: 3, title: "ChatGPT PRO", desc: "Превращение ChatGPT в эксперта по вашей теме. Метод CRAFT. Формат и стилем ответов", link: "M3.html", label: "Модуль 3" },
-        { id: 4, title: "ChatGPT MASTER", desc: "Персонализация ChatGPT, специализированные GPTs-боты, нейросети для генерации контента", link: "M4.html", label: "Модуль 4" }
+        { id: -1, title: "Введение", desc: "Узнайте, как освоить главный инструмент ИИ-революции и применять его для работы, учёбы и творчества", link: "intro.html", label: "Вступление", blocks: 3 },
+        { id: 1, title: "Доступ к ChatGPT", desc: "Способы доступа, тарифы, ограничения бесплатной версии. Инструкция по обходу блокировок", link: "M1.html", label: "Модуль 1", blocks: 5 },
+        { id: 2, title: "Основы ChatGPT", desc: "Язык общения с ИИ. синтаксис промптов, примеры запросов, практические упражнения", link: "M2.html", label: "Модуль 2", blocks: 7 },
+        { id: 3, title: "ChatGPT PRO", desc: "Превращение ChatGPT в эксперта по вашей теме. Метод CRAFT. Формат и стилем ответов", link: "M3.html", label: "Модуль 3", blocks: 6 },
+        { id: 4, title: "ChatGPT MASTER", desc: "Персонализация ChatGPT, специализированные GPTs-боты, нейросети для генерации контента", link: "M4.html", label: "Модуль 4", blocks: 8 }
       ];
 
       let html = '';
@@ -887,6 +899,7 @@
         html += `
           <div class="${cardClass}">
             <div class="${labelClass}">${module.label}</div>
+            <div class="module-blocks">Блоков: ${module.blocks}</div>
             <div class="module-content">
               <h3 class="module-title">${module.title}</h3>
               <div class="module-desc">${module.desc}</div>
