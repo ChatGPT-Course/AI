@@ -25,16 +25,17 @@
       margin: 0;
       min-height: 100vh;
       font-family: 'Segoe UI', 'Roboto', Arial, sans-serif;
-      background: #FFF9E6;
+      background: linear-gradient(135deg, #FFF9E6, #FFF3E0, #FFECB3);
       color: var(--text);
       overflow-x: hidden;
       -webkit-tap-highlight-color: transparent;
       line-height: 1.6;
+      backdrop-filter: blur(2px);
     }
     .splash {
       position: fixed;
       inset: 0;
-      background: #FFF9E6;
+      background: linear-gradient(135deg, #FFF9E6, #FFF3E0, #FFECB3);
       display: flex;
       flex-direction: column;
       align-items: center;
@@ -42,6 +43,7 @@
       z-index: 10;
       transition: opacity var(--transition), visibility var(--transition);
       padding: 2rem 1rem;
+      backdrop-filter: blur(2px);
     }
     .splash.hide {
       opacity: 0;
@@ -78,7 +80,7 @@
       transform: scale(1.05);
     }
     .splash button:active {
-      transform: scale(0.95);
+      transform: scale(0.9);
     }
     @keyframes fadeIn {
       from { opacity: 0; transform: translateY(-30px);}
@@ -135,7 +137,7 @@
       transform: scale(1.07);
     }
     .exit-btn:active {
-      transform: scale(0.95);
+      transform: scale(0.85);
     }
     .exit-btn span {
       display: block;
@@ -184,9 +186,6 @@
       position: relative;
       box-sizing: border-box;
       transition-delay: 0.1s;
-      background-color: rgba(255, 255, 255, 0.8);
-      border-radius: 8px;
-      box-shadow: 0 2px 8px rgba(0,0,0,0.05);
     }
     .content-block.visible {
       opacity: 1;
@@ -244,7 +243,7 @@
     .next-btn {
       padding: 0.8rem 1.8rem;
       font-size: 1rem;
-      background: linear-gradient(90deg, var(--yellow), var(--orange));
+      background: linear-gradient(90deg, #FFEB3B, #FF9800);
       color: var(--text);
       border: none;
       border-radius: 2rem;
@@ -268,7 +267,7 @@
       transform: scale(1.05);
     }
     .next-btn:active {
-      transform: scale(0.95);
+      transform: scale(0.85);
     }
     .next-btn:disabled {
       background: var(--disabled);
@@ -278,29 +277,23 @@
     .guide-btn {
       padding: 0.8rem 1rem;
       font-size: 0.9rem;
-      background: var(--light-gray);
-      color: #666;
-      border: none;
-      border-radius: 2rem;
-      cursor: default;
-      font-weight: 600;
-      transition: all 0.3s;
-      opacity: 1;
-      pointer-events: none;
-      min-width: 120px;
-    }
-    .guide-btn.show {
       background: linear-gradient(90deg, var(--blue), #3367D6);
       color: white;
+      border: none;
+      border-radius: 2rem;
       cursor: pointer;
+      font-weight: 600;
+      box-shadow: 0 4px 12px rgba(66, 133, 244, 0.3);
+      transition: all 0.3s;
+      opacity: 1;
       pointer-events: auto;
-      animation: fadeIn 0.5s;
+      min-width: 120px;
     }
-    .guide-btn.show:hover {
+    .guide-btn:hover {
       transform: scale(1.05);
     }
-    .guide-btn.show:active {
-      transform: scale(0.95);
+    .guide-btn:active {
+      transform: scale(0.85);
     }
     .content-image {
       width: 100%;
@@ -342,7 +335,7 @@
       pointer-events: auto;
     }
     .completion-content {
-      background: rgba(245, 245, 245, 0.95);
+      background: rgba(240, 240, 240, 0.95);
       padding: 2rem;
       border-radius: 16px;
       text-align: center;
@@ -382,7 +375,7 @@
     }
     .completion-btn {
       padding: 0.8rem 2rem;
-      background: linear-gradient(90deg, var(--yellow), var(--orange));
+      background: linear-gradient(90deg, #FFEB3B, #FF9800);
       color: var(--text);
       border: none;
       border-radius: 2rem;
@@ -395,7 +388,7 @@
       transform: scale(1.05);
     }
     .completion-btn:active {
-      transform: scale(0.95);
+      transform: scale(0.85);
     }
     @media (max-width: 600px) {
       .splash h1 {
@@ -675,6 +668,7 @@
       }
     ];
 
+
     let currentBlockIndex = 0;
     const totalBlocks = contentBlocks.length;
     let emptySpace = null;
@@ -859,11 +853,6 @@
         addContentBlock(currentBlockIndex);
         updateProgressBar();
         
-        if (currentBlockIndex === 1) {
-          nextBtn.classList.remove('centered');
-          guideBtn.classList.add('show');
-        }
-        
         if (currentBlockIndex === totalBlocks - 1) {
           nextBtn.textContent = 'Завершить';
           nextBtn.onclick = completeModule;
@@ -884,9 +873,7 @@
     });
 
     guideBtn.addEventListener('click', () => {
-      if (guideBtn.classList.contains('show')) {
-        window.open('https://kurl.ru/btRup', '_blank');
-      }
+      window.open('https://kurl.ru/btRup', '_blank');
     });
 
     completionBtn.addEventListener('click', () => {
