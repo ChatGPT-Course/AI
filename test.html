@@ -25,16 +25,19 @@
       background: var(--light-gray);
       color: var(--text);
       line-height: 1.5;
+      overflow-x: hidden;
     }
     
     .container {
-      max-width: 1200px;
+      max-width: 100%;
       margin: 0 auto;
       padding: 20px;
+      box-sizing: border-box;
     }
     
     .header {
       margin-bottom: 20px;
+      text-align: center;
     }
     
     h1 {
@@ -49,6 +52,7 @@
       flex-direction: column;
       gap: 15px;
       margin-bottom: 20px;
+      max-width: 100%;
     }
     
     .search-input {
@@ -59,31 +63,66 @@
       font-size: 14px;
       outline: none;
       transition: border 0.3s;
+      box-sizing: border-box;
+      max-width: 100%;
     }
     
     .search-input:focus {
       border-color: var(--orange);
     }
     
-    .filter-buttons {
-      display: flex;
-      gap: 10px;
-      flex-wrap: wrap;
-    }
-    
-    .filter-btn {
-      padding: 8px 16px;
-      border-radius: 20px;
+    .sort-btn {
+      padding: 10px 15px;
+      border-radius: 8px;
       font-size: 14px;
       background: white;
       border: 1px solid var(--medium-gray);
       cursor: pointer;
       transition: all 0.3s;
+      width: 100%;
+      text-align: left;
+      position: relative;
     }
     
-    .filter-btn.active {
-      background: var(--yellow);
-      border-color: var(--orange);
+    .sort-btn::after {
+      content: "▼";
+      position: absolute;
+      right: 15px;
+      top: 50%;
+      transform: translateY(-50%);
+      font-size: 10px;
+    }
+    
+    .sort-dropdown {
+      position: absolute;
+      background: white;
+      border-radius: 8px;
+      box-shadow: var(--shadow);
+      z-index: 10;
+      width: 100%;
+      display: none;
+      margin-top: 5px;
+    }
+    
+    .sort-dropdown.show {
+      display: block;
+    }
+    
+    .sort-option {
+      padding: 10px 15px;
+      cursor: pointer;
+      transition: background 0.3s;
+    }
+    
+    .sort-option:hover {
+      background: var(--light-gray);
+    }
+    
+    .sort-group-title {
+      padding: 10px 15px;
+      font-weight: 600;
+      color: var(--orange);
+      border-bottom: 1px solid var(--medium-gray);
     }
     
     .users-list {
@@ -98,6 +137,7 @@
       padding: 16px;
       box-shadow: var(--shadow);
       transition: transform 0.3s, box-shadow 0.3s;
+      position: relative;
     }
     
     .user-card:hover {
@@ -119,18 +159,13 @@
     }
     
     .user-progress {
-      color: var(--orange);
-      font-weight: 500;
-      margin-left: 5px;
+      margin-top: 10px;
+      font-size: 14px;
     }
     
-    .payment-row {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      margin-top: 12px;
-      padding-top: 12px;
-      border-top: 1px solid var(--medium-gray);
+    .progress-value {
+      color: var(--orange);
+      font-weight: 500;
     }
     
     .payment-status {
@@ -138,9 +173,7 @@
       border-radius: 16px;
       font-weight: 500;
       font-size: 13px;
-      cursor: pointer;
       border: none;
-      transition: all 0.3s;
       min-width: 90px;
       text-align: center;
     }
@@ -155,156 +188,26 @@
       color: white;
     }
     
-    .progress-selector {
-      position: relative;
-    }
-    
-    .progress-btn {
-      padding: 6px 12px;
-      border-radius: 16px;
-      font-size: 13px;
-      background: var(--blue);
-      color: white;
-      border: none;
-      cursor: pointer;
-      transition: all 0.3s;
-    }
-    
-    .progress-btn:hover {
-      opacity: 0.9;
-    }
-    
-    .progress-dropdown {
+    .settings-btn {
       position: absolute;
-      right: 0;
-      top: 100%;
-      margin-top: 5px;
-      background: white;
-      border-radius: 8px;
-      box-shadow: 0 4px 12px rgba(0,0,0,0.15);
-      z-index: 10;
-      width: 180px;
-      padding: 8px 0;
-      display: none;
-    }
-    
-    .progress-dropdown.show {
-      display: block;
-    }
-    
-    .progress-option {
-      padding: 8px 16px;
-      cursor: pointer;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-    }
-    
-    .progress-option:hover {
-      background: var(--light-gray);
-    }
-    
-    .progress-checkbox {
-      width: 16px;
-      height: 16px;
-      border: 1px solid var(--medium-gray);
-      border-radius: 3px;
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-      margin-left: 10px;
-    }
-    
-    .progress-checkbox.checked {
-      background: var(--orange);
-      border-color: var(--orange);
-    }
-    
-    .progress-checkbox.checked::after {
-      content: "✓";
-      color: white;
-      font-size: 12px;
-    }
-    
-    .modal-overlay {
-      position: fixed;
-      top: 0;
-      left: 0;
-      right: 0;
-      bottom: 0;
-      background: rgba(0,0,0,0.5);
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      z-index: 1000;
-      opacity: 0;
-      visibility: hidden;
-      transition: opacity 0.3s;
-    }
-    
-    .modal-overlay.active {
-      opacity: 1;
-      visibility: visible;
-    }
-    
-    .modal-content {
-      background: white;
-      padding: 24px;
-      border-radius: 12px;
-      max-width: 400px;
-      width: 90%;
-      text-align: center;
-      box-shadow: 0 10px 25px rgba(0,0,0,0.2);
-      transform: translateY(-20px);
-      transition: transform 0.3s;
-    }
-    
-    .modal-overlay.active .modal-content {
-      transform: translateY(0);
-    }
-    
-    .modal-title {
-      margin: 0 0 20px 0;
-      color: var(--text);
-      font-size: 16px;
-      font-weight: 500;
-    }
-    
-    .modal-buttons {
-      display: flex;
-      justify-content: center;
-      gap: 12px;
-    }
-    
-    .modal-btn {
-      padding: 8px 16px;
-      border-radius: 6px;
+      right: 16px;
+      top: 16px;
+      background: none;
       border: none;
-      font-weight: 500;
-      font-size: 14px;
       cursor: pointer;
-      transition: all 0.3s;
-      flex: 1;
+      color: #666;
+      font-size: 18px;
+      transition: color 0.3s;
     }
     
-    .modal-btn.confirm {
-      background-color: var(--success);
-      color: white;
-    }
-    
-    .modal-btn.cancel {
-      background-color: var(--error);
-      color: white;
-    }
-    
-    .modal-btn:hover {
-      opacity: 0.9;
-      transform: translateY(-1px);
+    .settings-btn:hover {
+      color: var(--orange);
     }
     
     .access-denied {
       text-align: center;
       padding: 40px 20px;
+      display: none;
     }
     
     .access-denied h2 {
@@ -350,10 +253,19 @@
         <h1>Управление курсом</h1>
         <div class="controls">
           <input type="text" class="search-input" id="searchInput" placeholder="Поиск по имени или юзернейму...">
-          <div class="filter-buttons">
-            <button class="filter-btn active" data-filter="all">Все пользователи</button>
-            <button class="filter-btn" data-filter="paid">Оплаченные</button>
-            <button class="filter-btn" data-filter="unpaid">Неоплаченные</button>
+          
+          <div style="position: relative;">
+            <button class="sort-btn" id="sortBtn">Все пользователи</button>
+            <div class="sort-dropdown" id="sortDropdown">
+              <div class="sort-group-title">Фильтр по оплате</div>
+              <div class="sort-option" data-sort="all">Все пользователи</div>
+              <div class="sort-option" data-sort="paid">Оплаченные</div>
+              <div class="sort-option" data-sort="unpaid">Неоплаченные</div>
+              
+              <div class="sort-group-title">Сортировка по прогрессу</div>
+              <div class="sort-option" data-sort="progress-asc">По возрастанию</div>
+              <div class="sort-option" data-sort="progress-desc">По убыванию</div>
+            </div>
           </div>
         </div>
       </div>
@@ -365,19 +277,10 @@
       </div>
     </div>
     
-    <div id="accessDenied" class="access-denied hidden">
+    <div id="accessDenied" class="access-denied">
       <h2>Доступ запрещен</h2>
       <p>У вас нет прав для просмотра этой страницы.</p>
-    </div>
-  </div>
-  
-  <div class="modal-overlay" id="paymentModal">
-    <div class="modal-content">
-      <h3 class="modal-title" id="modalTitle"></h3>
-      <div class="modal-buttons">
-        <button class="modal-btn confirm" id="confirmBtn">Подтвердить</button>
-        <button class="modal-btn cancel" id="cancelBtn">Отмена</button>
-      </div>
+      <p id="accessErrorDetails" style="color: #888; font-size: 12px; margin-top: 10px;"></p>
     </div>
   </div>
 
@@ -389,61 +292,52 @@
       tableName: 'mc6qh91f060pv4y',
       apiToken: 'bocQfycJpJsTG_tbwEf8ma8E5rhoig0njMDXFWtJ',
       apiVersion: 'v1',
-      allowedAdminIds: [1515638372, 987654321] // Замените на реальные ID
+      allowedAdminIds: [1515638372] // Только ваш ID
     };
     
     // Элементы
     const adminContent = document.getElementById('adminContent');
     const accessDenied = document.getElementById('accessDenied');
+    const accessErrorDetails = document.getElementById('accessErrorDetails');
     const usersContainer = document.getElementById('usersContainer');
     const searchInput = document.getElementById('searchInput');
-    const filterButtons = document.querySelectorAll('.filter-btn');
-    const paymentModal = document.getElementById('paymentModal');
-    const modalTitle = document.getElementById('modalTitle');
-    const confirmBtn = document.getElementById('confirmBtn');
-    const cancelBtn = document.getElementById('cancelBtn');
+    const sortBtn = document.getElementById('sortBtn');
+    const sortDropdown = document.getElementById('sortDropdown');
     
     // Переменные состояния
-    let currentUserId = null;
-    let currentPaymentStatus = null;
     let allUsers = [];
     let filteredUsers = [];
     let currentUserTelegramId = null;
     let lastUpdateTime = 0;
-    let activeFilter = 'all';
-    const progressOptions = [
-      { id: 0, name: 'Нет прогресса' },
-      { id: 1, name: 'Вступление' },
-      { id: 2, name: 'Модуль 1' },
-      { id: 3, name: 'Модуль 2' },
-      { id: 4, name: 'Модуль 3' },
-      { id: 5, name: 'Модуль 4' }
-    ];
-    
-    // Функция для получения Telegram ID из cookie
+    let currentSort = 'all';
+    let refreshInterval = null;
+
+    // Получение Telegram ID из cookie
     function getTelegramUserId() {
       const match = document.cookie.match(/tg_user_id=([^;]+)/);
       return match ? parseInt(match[1]) : null;
     }
-    
+
     // Проверка доступа
     function checkAccess() {
       currentUserTelegramId = getTelegramUserId();
       
       if (!currentUserTelegramId) {
         console.error('Telegram ID не найден');
+        accessErrorDetails.textContent = "Telegram ID не найден в cookies";
         return false;
       }
       
       if (!config.allowedAdminIds.includes(currentUserTelegramId)) {
         console.error('Доступ запрещен для этого ID');
+        accessErrorDetails.textContent = `Ваш ID: ${currentUserTelegramId} не имеет доступа`;
         return false;
       }
       
       return true;
     }
-    
-    // Функция для получения пользователей
+
+    // Загрузка пользователей
     async function fetchUsers() {
       try {
         const now = Date.now();
@@ -469,28 +363,32 @@
         showError('Ошибка загрузки данных');
       }
     }
-    
-    // Функция для фильтрации
+
+    // Фильтрация и сортировка
     function applyFilters() {
       const searchTerm = searchInput.value.toLowerCase();
       
+      // Фильтрация по поиску
       filteredUsers = allUsers.filter(user => {
-        const matchesSearch = 
-          (user.name && user.name.toLowerCase().includes(searchTerm)) ||
-          (user.username && user.username.toLowerCase().includes(searchTerm));
-        
-        const matchesFilter = 
-          activeFilter === 'all' ||
-          (activeFilter === 'paid' && user.oplata == 1) ||
-          (activeFilter === 'unpaid' && user.oplata != 1);
-        
-        return matchesSearch && matchesFilter;
+        return (user.name && user.name.toLowerCase().includes(searchTerm)) ||
+               (user.username && user.username.toLowerCase().includes(searchTerm));
       });
+      
+      // Применение выбранной сортировки
+      if (currentSort === 'paid') {
+        filteredUsers = filteredUsers.filter(user => user.oplata == 1);
+      } else if (currentSort === 'unpaid') {
+        filteredUsers = filteredUsers.filter(user => user.oplata != 1);
+      } else if (currentSort === 'progress-asc') {
+        filteredUsers.sort((a, b) => (a.progress || 0) - (b.progress || 0));
+      } else if (currentSort === 'progress-desc') {
+        filteredUsers.sort((a, b) => (b.progress || 0) - (a.progress || 0));
+      }
       
       renderUsers(filteredUsers);
     }
-    
-    // Функция для отображения ошибки
+
+    // Отображение ошибки
     function showError(message) {
       usersContainer.innerHTML = `
         <div class="empty-state" style="color: var(--error);">
@@ -498,8 +396,8 @@
         </div>
       `;
     }
-    
-    // Функция для рендеринга пользователей
+
+    // Рендеринг пользователей
     function renderUsers(users) {
       if (users.length === 0) {
         usersContainer.innerHTML = `
@@ -521,7 +419,7 @@
         
         const userName = document.createElement('div');
         userName.className = 'user-name';
-        userName.innerHTML = `${user.name || 'Без имени'} <span class="user-progress">(${user.progress || 0})</span>`;
+        userName.textContent = user.name || 'Без имени';
         userInfo.appendChild(userName);
         
         const userUsername = document.createElement('div');
@@ -529,36 +427,29 @@
         userUsername.textContent = `@${user.username || 'без username'}`;
         userInfo.appendChild(userUsername);
         
+        const userProgress = document.createElement('div');
+        userProgress.className = 'user-progress';
+        userProgress.innerHTML = `Прогресс: <span class="progress-value">${user.progress || 0}/5</span>`;
+        userInfo.appendChild(userProgress);
+        
         userCard.appendChild(userInfo);
         
-        // Статус оплаты и прогресс
-        const paymentRow = document.createElement('div');
-        paymentRow.className = 'payment-row';
-        
-        const paymentStatus = document.createElement('button');
+        // Статус оплаты (только отображение)
+        const paymentStatus = document.createElement('div');
         paymentStatus.className = `payment-status ${user.oplata == 1 ? 'paid' : 'unpaid'}`;
         paymentStatus.textContent = user.oplata == 1 ? 'Оплачен' : 'Не оплачен';
-        paymentStatus.addEventListener('click', () => {
-          currentUserId = user.Id;
-          currentPaymentStatus = user.oplata;
-          showPaymentModal(user);
-        });
+        userCard.appendChild(paymentStatus);
         
-        const progressSelector = document.createElement('div');
-        progressSelector.className = 'progress-selector';
-        
-        const progressBtn = document.createElement('button');
-        progressBtn.className = 'progress-btn';
-        progressBtn.textContent = 'Прогресс';
-        progressBtn.addEventListener('click', (e) => {
+        // Кнопка шестеренки (пока без функционала)
+        const settingsBtn = document.createElement('button');
+        settingsBtn.className = 'settings-btn';
+        settingsBtn.innerHTML = '⚙️';
+        settingsBtn.addEventListener('click', (e) => {
           e.stopPropagation();
-          showProgressDropdown(progressSelector, user);
+          // Здесь будет открытие модального окна редактирования
+          console.log('Открыть настройки для пользователя:', user.Id);
         });
-        
-        progressSelector.appendChild(progressBtn);
-        paymentRow.appendChild(paymentStatus);
-        paymentRow.appendChild(progressSelector);
-        userCard.appendChild(paymentRow);
+        userCard.appendChild(settingsBtn);
         
         fragment.appendChild(userCard);
       });
@@ -566,177 +457,55 @@
       usersContainer.innerHTML = '';
       usersContainer.appendChild(fragment);
     }
-    
-    // Функция для показа выпадающего списка прогресса
-    function showProgressDropdown(container, user) {
-      // Закрываем все открытые dropdown
-      document.querySelectorAll('.progress-dropdown').forEach(d => d.classList.remove('show'));
-      
-      const dropdown = document.createElement('div');
-      dropdown.className = 'progress-dropdown show';
-      
-      progressOptions.forEach(option => {
-        const isChecked = user.progress >= option.id;
-        
-        const optionElement = document.createElement('div');
-        optionElement.className = 'progress-option';
-        optionElement.innerHTML = `
-          ${option.name}
-          <div class="progress-checkbox ${isChecked ? 'checked' : ''}" data-value="${option.id}"></div>
-        `;
-        
-        optionElement.addEventListener('click', async (e) => {
-          e.stopPropagation();
-          await updateProgress(user.Id, option.id);
-          dropdown.classList.remove('show');
-        });
-        
-        dropdown.appendChild(optionElement);
-      });
-      
-      // Добавляем кнопку сброса
-      const resetOption = document.createElement('div');
-      resetOption.className = 'progress-option';
-      resetOption.innerHTML = `
-        Сбросить
-        <div class="progress-checkbox" data-value="0"></div>
-      `;
-      
-      resetOption.addEventListener('click', async (e) => {
-        e.stopPropagation();
-        await updateProgress(user.Id, 0);
-        dropdown.classList.remove('show');
-      });
-      
-      dropdown.appendChild(resetOption);
-      
-      container.appendChild(dropdown);
-      
-      // Закрытие при клике вне dropdown
-      const closeHandler = (e) => {
-        if (!container.contains(e.target)) {
-          dropdown.classList.remove('show');
-          document.removeEventListener('click', closeHandler);
-        }
-      };
-      
-      setTimeout(() => {
-        document.addEventListener('click', closeHandler);
-      }, 10);
+
+    // Автоматическое обновление
+    function startAutoRefresh() {
+      if (refreshInterval) clearInterval(refreshInterval);
+      refreshInterval = setInterval(fetchUsers, 1000);
     }
-    
-    // Функция для показа модального окна
-    function showPaymentModal(user) {
-      if (user.oplata == 1) {
-        modalTitle.textContent = `Отозвать доступ для ${user.name || 'пользователя'}?`;
-      } else {
-        modalTitle.textContent = `Открыть полный доступ для ${user.name || 'пользователя'}?`;
-      }
-      paymentModal.classList.add('active');
-    }
-    
-    // Функция для обновления статуса оплаты
-    async function updatePaymentStatus(userId, newStatus) {
-      try {
-        const response = await fetch(
-          `https://app.nocodb.com/api/${config.apiVersion}/db/data/${config.orgs}/${config.projectName}/${config.tableName}/${userId}`,
-          {
-            method: 'PATCH',
-            headers: {
-              'Content-Type': 'application/json',
-              'xc-token': config.apiToken
-            },
-            body: JSON.stringify({ oplata: newStatus })
-          }
-        );
-        
-        if (!response.ok) {
-          throw new Error(`Ошибка HTTP: ${response.status}`);
-        }
-        
-        // Обновляем локальные данные
-        const userIndex = allUsers.findIndex(user => user.Id === userId);
-        if (userIndex !== -1) {
-          allUsers[userIndex].oplata = newStatus;
-        }
-        
-        applyFilters();
-        paymentModal.classList.remove('active');
-      } catch (error) {
-        console.error('Ошибка при обновлении статуса оплаты:', error);
-        alert('Не удалось обновить статус оплаты. Пожалуйста, попробуйте снова.');
-      }
-    }
-    
-    // Функция для обновления прогресса
-    async function updateProgress(userId, progress) {
-      try {
-        const response = await fetch(
-          `https://app.nocodb.com/api/${config.apiVersion}/db/data/${config.orgs}/${config.projectName}/${config.tableName}/${userId}`,
-          {
-            method: 'PATCH',
-            headers: {
-              'Content-Type': 'application/json',
-              'xc-token': config.apiToken
-            },
-            body: JSON.stringify({ progress: progress })
-          }
-        );
-        
-        if (!response.ok) {
-          throw new Error(`Ошибка HTTP: ${response.status}`);
-        }
-        
-        // Обновляем локальные данные
-        const userIndex = allUsers.findIndex(user => user.Id === userId);
-        if (userIndex !== -1) {
-          allUsers[userIndex].progress = progress;
-        }
-        
-        applyFilters();
-        return true;
-      } catch (error) {
-        console.error('Ошибка при обновлении прогресса:', error);
-        alert('Не удалось обновить прогресс. Пожалуйста, попробуйте снова.');
-        return false;
-      }
-    }
-    
-    // Инициализация
-    document.addEventListener('DOMContentLoaded', async () => {
+
+    // Инициализация приложения
+    function initializeApp() {
       if (checkAccess()) {
         adminContent.classList.remove('hidden');
-        
-        // Загружаем данные сразу
-        await fetchUsers();
-        
-        // Автоматическое обновление каждую секунду
-        setInterval(fetchUsers, 1000);
-        
-        // Обработчики фильтров
-        searchInput.addEventListener('input', applyFilters);
-        
-        filterButtons.forEach(btn => {
-          btn.addEventListener('click', () => {
-            filterButtons.forEach(b => b.classList.remove('active'));
-            btn.classList.add('active');
-            activeFilter = btn.dataset.filter;
-            applyFilters();
-          });
-        });
+        fetchUsers();
+        startAutoRefresh();
       } else {
         accessDenied.classList.remove('hidden');
       }
-    });
-    
-    // Обработчики событий модального окна
-    confirmBtn.addEventListener('click', () => {
-      const newStatus = currentPaymentStatus == 1 ? 0 : 1;
-      updatePaymentStatus(currentUserId, newStatus);
-    });
-    
-    cancelBtn.addEventListener('click', () => {
-      paymentModal.classList.remove('active');
+    }
+
+    // Обработчики событий
+    function setupEventListeners() {
+      // Сортировка
+      sortBtn.addEventListener('click', () => {
+        sortDropdown.classList.toggle('show');
+      });
+      
+      document.querySelectorAll('.sort-option').forEach(option => {
+        option.addEventListener('click', () => {
+          currentSort = option.dataset.sort;
+          sortBtn.textContent = option.textContent;
+          sortDropdown.classList.remove('show');
+          applyFilters();
+        });
+      });
+      
+      // Закрытие dropdown при клике вне его
+      document.addEventListener('click', (e) => {
+        if (!sortBtn.contains(e.target) && !sortDropdown.contains(e.target)) {
+          sortDropdown.classList.remove('show');
+        }
+      });
+      
+      // Поиск
+      searchInput.addEventListener('input', applyFilters);
+    }
+
+    // Запуск приложения
+    document.addEventListener('DOMContentLoaded', () => {
+      setupEventListeners();
+      initializeApp();
     });
   </script>
 </body>
