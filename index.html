@@ -2,7 +2,7 @@
 <html lang="ru">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
   <title>Основы ИИ — Онлайн курс</title>
   <script src="https://telegram.org/js/telegram-web-app.js"></script>
   <style>
@@ -25,6 +25,14 @@
       box-sizing: border-box;
       -webkit-tap-highlight-color: transparent;
       outline: none;
+      -webkit-overflow-scrolling: touch;
+    }
+
+    html, body {
+      width: 100%;
+      height: 100%;
+      overflow-x: hidden;
+      position: fixed;
     }
 
     body {
@@ -33,6 +41,9 @@
       background: linear-gradient(135deg, #FFF3E0 0%, #FFFFFF 100%);
       color: var(--dark);
       min-height: 100vh;
+      overflow-y: auto;
+      -webkit-font-smoothing: antialiased;
+      touch-action: pan-y;
     }
 
     /* Экран загрузки */
@@ -49,6 +60,7 @@
       justify-content: center;
       z-index: 1000;
       transition: opacity 0.5s ease;
+      will-change: opacity;
     }
 
     .loading-text {
@@ -68,6 +80,7 @@
       height: 16px;
       border-radius: 50%;
       animation: bounce 1s infinite ease-in-out;
+      will-change: transform;
     }
 
     .loading-ball:nth-child(1) {
@@ -93,6 +106,7 @@
     #app-content {
       opacity: 0;
       transition: opacity 0.5s ease;
+      will-change: opacity;
     }
 
     .header {
@@ -130,6 +144,7 @@
 
     .user-info {
       flex: 1;
+      min-width: 0;
     }
 
     .user-name {
@@ -138,11 +153,17 @@
       color: var(--white);
       margin-bottom: 4px;
       line-height: 1.2;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
     }
 
     .user-id {
       font-size: 14px;
       color: #DDD;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
     }
 
     .content {
@@ -150,6 +171,7 @@
       max-width: 1200px;
       margin: 0 auto;
       position: relative;
+      width: 100%;
     }
 
     .modules-grid {
@@ -164,11 +186,12 @@
       border-radius: 16px;
       padding: 24px;
       box-shadow: 0 4px 16px rgba(255, 122, 0, 0.1);
-      transition: all 0.2s ease;
+      transition: transform 0.2s ease, box-shadow 0.2s ease;
       position: relative;
       cursor: default;
       z-index: 2;
       overflow: hidden;
+      will-change: transform;
     }
 
     .module:active:not(.locked) {
@@ -289,6 +312,7 @@
       align-items: center;
       justify-content: center;
       gap: 8px;
+      will-change: transform;
     }
 
     .module-btn:active:not(:disabled) {
@@ -631,8 +655,19 @@
       }, 500);
     }
 
-    // Функция для выполнения запросов к NocoDB
+    // Кэш для запросов
+    const requestCache = new Map();
+    const CACHE_TTL = 2000; // 2 секунды
+
+    // Функция для выполнения запросов к NocoDB с кэшированием
     async function nocodbRequest(endpoint, method = 'GET', body = null) {
+      const cacheKey = `${method}:${endpoint}`;
+      const cached = requestCache.get(cacheKey);
+      
+      if (cached && Date.now() - cached.timestamp < CACHE_TTL) {
+        return cached.data;
+      }
+
       const headers = {
         'Content-Type': 'application/json',
         'xc-token': nocodbConfig.apiToken
@@ -652,7 +687,9 @@
         if (!response.ok) {
           throw new Error(`HTTP error! status: ${response.status}`);
         }
-        return await response.json();
+        const data = await response.json();
+        requestCache.set(cacheKey, { data, timestamp: Date.now() });
+        return data;
       } catch (error) {
         console.error('Ошибка при запросе к NocoDB:', error);
         throw error;
@@ -860,10 +897,13 @@
           </div>
         `;
       });
-      document.getElementById('modules-container').innerHTML = html;
       
-      // Обновляем прогресс-бар
-      updateProgressBar();
+      const container = document.getElementById('modules-container');
+      // Используем requestAnimationFrame для плавного обновления
+      requestAnimationFrame(() => {
+        container.innerHTML = html;
+        updateProgressBar();
+      });
     }
 
     // Обновление прогресс-бара
