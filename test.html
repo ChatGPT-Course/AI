@@ -11,89 +11,138 @@
       --white: #FFF;
       --text: #222;
       --gray: #F2F2F2;
-      --header-gray: #E0E0E0;
+      --dark-gray: #E0E0E0;
       --transition: 0.3s ease;
-      --disabled: #CCCCCC;
-      --blue: #4285F4;
       --success: #4CAF50;
       --error: #F44336;
-      --warning: #FF9800;
-      --info: #2196F3;
+      --blue: #4285F4;
+      --shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
     }
+    
     body {
       margin: 0;
-      font-family: 'Segoe UI', 'Roboto', Arial, sans-serif;
-      background: var(--white);
+      font-family: 'Segoe UI', Roboto, Arial, sans-serif;
+      background: #f5f7fa;
       color: var(--text);
-      overflow-x: hidden;
-      -webkit-tap-highlight-color: transparent;
       line-height: 1.6;
     }
+    
     .container {
       max-width: 1200px;
       margin: 0 auto;
       padding: 20px;
     }
+    
+    .header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 30px;
+      padding-bottom: 15px;
+      border-bottom: 1px solid var(--dark-gray);
+    }
+    
     h1 {
       color: var(--orange);
-      text-align: center;
-      margin-bottom: 30px;
+      margin: 0;
+      font-size: 24px;
     }
-    .users-list {
-      display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-      gap: 20px;
-    }
-    .user-card {
-      background: white;
-      border-radius: 10px;
-      padding: 15px;
-      box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+    
+    .refresh-btn {
+      background: var(--blue);
+      color: white;
+      border: none;
+      padding: 8px 16px;
+      border-radius: 20px;
+      cursor: pointer;
+      font-weight: 600;
       display: flex;
       align-items: center;
-      transition: transform 0.2s;
+      gap: 8px;
+      transition: all 0.3s;
     }
+    
+    .refresh-btn:hover {
+      background: #3367d6;
+      transform: translateY(-2px);
+    }
+    
+    .users-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+      gap: 20px;
+    }
+    
+    .user-card {
+      background: white;
+      border-radius: 12px;
+      padding: 16px;
+      box-shadow: var(--shadow);
+      display: flex;
+      align-items: center;
+      transition: all 0.3s;
+    }
+    
     .user-card:hover {
       transform: translateY(-5px);
+      box-shadow: 0 8px 15px rgba(0, 0, 0, 0.1);
     }
+    
     .user-avatar {
       width: 50px;
       height: 50px;
       border-radius: 50%;
       object-fit: cover;
-      margin-right: 15px;
+      margin-right: 16px;
       background-color: #eee;
+      border: 2px solid white;
+      box-shadow: var(--shadow);
     }
+    
     .user-info {
       flex: 1;
+      min-width: 0;
     }
+    
     .user-name {
       font-weight: 600;
-      margin: 0 0 5px 0;
+      margin: 0 0 4px 0;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
     }
+    
     .user-username {
       color: #666;
       margin: 0;
-      font-size: 0.9em;
+      font-size: 14px;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
     }
+    
     .payment-status {
-      margin-left: 15px;
-      padding: 8px 12px;
+      margin-left: 12px;
+      padding: 8px 16px;
       border-radius: 20px;
       font-weight: 600;
-      font-size: 0.9em;
+      font-size: 14px;
       cursor: pointer;
       border: none;
       transition: all 0.3s;
+      min-width: 100px;
     }
+    
     .payment-status.paid {
       background-color: var(--success);
       color: white;
     }
+    
     .payment-status.unpaid {
       background-color: var(--error);
       color: white;
     }
+    
     .modal-overlay {
       position: fixed;
       top: 0;
@@ -109,67 +158,127 @@
       visibility: hidden;
       transition: var(--transition);
     }
+    
     .modal-overlay.active {
       opacity: 1;
       visibility: visible;
     }
+    
     .modal-content {
       background: white;
       padding: 25px;
-      border-radius: 10px;
+      border-radius: 12px;
       max-width: 400px;
       width: 90%;
       text-align: center;
+      box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+      transform: translateY(-20px);
+      transition: all 0.3s;
     }
+    
+    .modal-overlay.active .modal-content {
+      transform: translateY(0);
+    }
+    
     .modal-title {
-      margin-top: 0;
+      margin: 0 0 20px 0;
       color: var(--text);
+      font-size: 18px;
     }
+    
     .modal-buttons {
       display: flex;
       justify-content: center;
       gap: 15px;
-      margin-top: 20px;
     }
+    
     .modal-btn {
-      padding: 8px 20px;
-      border-radius: 5px;
+      padding: 10px 20px;
+      border-radius: 20px;
       border: none;
       font-weight: 600;
       cursor: pointer;
       transition: var(--transition);
+      flex: 1;
+      max-width: 120px;
     }
+    
     .modal-btn.confirm {
       background-color: var(--success);
       color: white;
     }
+    
     .modal-btn.cancel {
       background-color: var(--error);
       color: white;
     }
-    .last-update {
-      text-align: center;
-      margin-top: 20px;
-      color: #666;
-      font-size: 0.9em;
+    
+    .modal-btn:hover {
+      opacity: 0.9;
+      transform: translateY(-2px);
     }
-    .loading {
+    
+    .access-denied {
       text-align: center;
-      padding: 20px;
-      font-size: 1.2em;
-      color: var(--orange);
+      padding: 40px 20px;
+    }
+    
+    .access-denied h2 {
+      color: var(--error);
+      margin-bottom: 20px;
+    }
+    
+    .loading {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 200px;
+    }
+    
+    .spinner {
+      width: 40px;
+      height: 40px;
+      border: 4px solid rgba(0, 0, 0, 0.1);
+      border-radius: 50%;
+      border-top-color: var(--orange);
+      animation: spin 1s ease-in-out infinite;
+    }
+    
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+    
+    .hidden {
+      display: none;
     }
   </style>
 </head>
 <body>
   <div class="container">
-    <h1>Админ-панель управления курсом</h1>
-    
-    <div id="usersContainer" class="users-list">
-      <div class="loading">Загрузка данных...</div>
+    <div id="adminContent" class="hidden">
+      <div class="header">
+        <h1>Управление доступом к курсу</h1>
+        <button class="refresh-btn" id="refreshBtn">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <polyline points="23 4 23 10 17 10"></polyline>
+            <polyline points="1 20 1 14 7 14"></polyline>
+            <path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"></path>
+          </svg>
+          Обновить
+        </button>
+      </div>
+      
+      <div id="usersContainer" class="users-grid">
+        <div class="loading">
+          <div class="spinner"></div>
+        </div>
+      </div>
     </div>
     
-    <div class="last-update" id="lastUpdate"></div>
+    <div id="accessDenied" class="access-denied hidden">
+      <h2>Доступ запрещен</h2>
+      <p>У вас нет прав для просмотра этой страницы.</p>
+    </div>
   </div>
   
   <div class="modal-overlay" id="paymentModal">
@@ -183,36 +292,65 @@
   </div>
 
   <script>
-    // Конфигурация NocoDB
+    // Конфигурация
     const config = {
       orgs: 'weamcfo6',
       projectName: 'p27jdsmk69wuimh',
       tableName: 'mc6qh91f060pv4y',
       apiToken: 'bocQfycJpJsTG_tbwEf8ma8E5rhoig0njMDXFWtJ',
-      apiVersion: 'v1'
+      apiVersion: 'v1',
+      // Добавьте сюда ID Telegram пользователей, которые имеют доступ к админке
+      allowedAdminIds: [123456789, 987654321] // Замените на реальные ID
     };
     
     // Элементы
+    const adminContent = document.getElementById('adminContent');
+    const accessDenied = document.getElementById('accessDenied');
     const usersContainer = document.getElementById('usersContainer');
+    const refreshBtn = document.getElementById('refreshBtn');
     const paymentModal = document.getElementById('paymentModal');
     const modalTitle = document.getElementById('modalTitle');
     const confirmBtn = document.getElementById('confirmBtn');
     const cancelBtn = document.getElementById('cancelBtn');
-    const lastUpdate = document.getElementById('lastUpdate');
     
     // Переменные состояния
     let currentUserId = null;
     let currentPaymentStatus = null;
     let allUsers = [];
+    let currentUserTelegramId = null;
     
-    // Функция для форматирования даты
-    function formatDate(date) {
-      return new Date(date).toLocaleString('ru-RU');
+    // Функция для получения Telegram ID из cookie
+    function getTelegramUserId() {
+      const match = document.cookie.match(/tg_user_id=([^;]+)/);
+      return match ? parseInt(match[1]) : null;
+    }
+    
+    // Проверка доступа
+    function checkAccess() {
+      currentUserTelegramId = getTelegramUserId();
+      
+      if (!currentUserTelegramId) {
+        console.error('Telegram ID не найден');
+        return false;
+      }
+      
+      if (!config.allowedAdminIds.includes(currentUserTelegramId)) {
+        console.error('Доступ запрещен для этого ID');
+        return false;
+      }
+      
+      return true;
     }
     
     // Функция для получения пользователей
     async function fetchUsers() {
       try {
+        usersContainer.innerHTML = `
+          <div class="loading">
+            <div class="spinner"></div>
+          </div>
+        `;
+        
         const response = await fetch(
           `https://app.nocodb.com/api/${config.apiVersion}/db/data/${config.orgs}/${config.projectName}/${config.tableName}`,
           {
@@ -227,31 +365,38 @@
         const data = await response.json();
         allUsers = data.list;
         renderUsers(allUsers);
-        lastUpdate.textContent = `Последнее обновление: ${formatDate(new Date())}`;
       } catch (error) {
         console.error('Ошибка при загрузке пользователей:', error);
-        usersContainer.innerHTML = `<div class="error">Ошибка загрузки данных. Попробуйте обновить страницу.</div>`;
+        usersContainer.innerHTML = `
+          <div class="error" style="grid-column: 1/-1; text-align: center; padding: 20px; color: var(--error);">
+            Ошибка загрузки данных. Попробуйте обновить страницу.
+          </div>
+        `;
       }
     }
     
-    // Функция для рендеринга пользователей
+    // Функция для плавного обновления пользователей
     function renderUsers(users) {
       if (users.length === 0) {
-        usersContainer.innerHTML = '<div>Пользователи не найдены</div>';
+        usersContainer.innerHTML = '<div style="grid-column: 1/-1; text-align: center;">Пользователи не найдены</div>';
         return;
       }
       
-      usersContainer.innerHTML = '';
+      // Создаем новый контейнер для плавного обновления
+      const newContainer = document.createElement('div');
+      newContainer.className = 'users-grid';
       
       users.forEach(user => {
         const userCard = document.createElement('div');
         userCard.className = 'user-card';
         
-        // Аватарка (если есть)
+        // Аватарка
         const avatarImg = document.createElement('img');
         avatarImg.className = 'user-avatar';
-        avatarImg.src = user.avatar || 'https://via.placeholder.com/50';
+        avatarImg.src = user.avatar || 'https://ui-avatars.com/api/?name=' + 
+          encodeURIComponent(user.name || 'U') + '&background=random';
         avatarImg.alt = `${user.name}'s avatar`;
+        avatarImg.loading = 'lazy';
         userCard.appendChild(avatarImg);
         
         // Информация о пользователе
@@ -281,16 +426,20 @@
         });
         userCard.appendChild(paymentBtn);
         
-        usersContainer.appendChild(userCard);
+        newContainer.appendChild(userCard);
       });
+      
+      // Плавная замена контейнера
+      usersContainer.replaceWith(newContainer);
+      usersContainer = newContainer;
     }
     
     // Функция для показа модального окна
     function showPaymentModal(user) {
       if (user.oplata == 1) {
-        modalTitle.textContent = `Отозвать доступ к курсу для ${user.name} (@${user.username})?`;
+        modalTitle.textContent = `Отозвать доступ для ${user.name || 'пользователя'}?`;
       } else {
-        modalTitle.textContent = `Выдать полную версию курса для ${user.name} (@${user.username})?`;
+        modalTitle.textContent = `Открыть полный доступ для ${user.name || 'пользователя'}?`;
       }
       paymentModal.classList.add('active');
     }
@@ -333,7 +482,22 @@
       }
     }
     
+    // Инициализация
+    document.addEventListener('DOMContentLoaded', async () => {
+      if (checkAccess()) {
+        adminContent.classList.remove('hidden');
+        await fetchUsers();
+        
+        // Автоматическое обновление каждые 5 секунд
+        setInterval(fetchUsers, 5000);
+      } else {
+        accessDenied.classList.remove('hidden');
+      }
+    });
+    
     // Обработчики событий
+    refreshBtn.addEventListener('click', fetchUsers);
+    
     confirmBtn.addEventListener('click', async () => {
       const newStatus = currentPaymentStatus == 1 ? 0 : 1;
       const success = await updatePaymentStatus(currentUserId, newStatus);
@@ -344,13 +508,6 @@
     
     cancelBtn.addEventListener('click', () => {
       paymentModal.classList.remove('active');
-    });
-    
-    // Загрузка данных при загрузке страницы
-    document.addEventListener('DOMContentLoaded', () => {
-      fetchUsers();
-      // Обновляем данные каждую секунду
-      setInterval(fetchUsers, 1000);
     });
   </script>
 </body>
