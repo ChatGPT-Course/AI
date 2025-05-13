@@ -19,23 +19,21 @@
       --error: #F44336;
       --warning: #FF9800;
       --info: #2196F3;
-      --light-gray: #E0E0E0;
     }
     body {
       margin: 0;
       min-height: 100vh;
       font-family: 'Segoe UI', 'Roboto', Arial, sans-serif;
-      background: linear-gradient(135deg, #FFF9E6, #FFF3E0, #FFECB3);
+      background: var(--white);
       color: var(--text);
       overflow-x: hidden;
       -webkit-tap-highlight-color: transparent;
       line-height: 1.6;
-      backdrop-filter: blur(2px);
     }
     .splash {
       position: fixed;
       inset: 0;
-      background: linear-gradient(135deg, #FFF9E6, #FFF3E0, #FFECB3);
+      background: var(--white);
       display: flex;
       flex-direction: column;
       align-items: center;
@@ -43,7 +41,6 @@
       z-index: 10;
       transition: opacity var(--transition), visibility var(--transition);
       padding: 2rem 1rem;
-      backdrop-filter: blur(2px);
     }
     .splash.hide {
       opacity: 0;
@@ -72,15 +69,12 @@
       cursor: pointer;
       font-weight: 600;
       box-shadow: 0 4px 24px #ff980055;
-      transition: all 0.3s;
+      transition: background 0.3s, transform 0.2s;
       animation: fadeInUp 1.5s;
     }
     .splash button:hover {
       background: linear-gradient(90deg, var(--orange), var(--yellow));
       transform: scale(1.05);
-    }
-    .splash button:active {
-      transform: scale(0.9);
     }
     @keyframes fadeIn {
       from { opacity: 0; transform: translateY(-30px);}
@@ -116,9 +110,9 @@
       padding: 0 0.5rem;
     }
     .exit-btn {
-      background: #FF5252;
+      background: var(--white);
       border: none;
-      color: white;
+      color: var(--text);
       font-size: 1.2rem;
       border-radius: 8px;
       width: 40px;
@@ -133,11 +127,8 @@
       box-shadow: 0 2px 4px rgba(0,0,0,0.1);
     }
     .exit-btn:hover {
-      background: #FF1744;
+      background: #e0e0e0;
       transform: scale(1.07);
-    }
-    .exit-btn:active {
-      transform: scale(0.85);
     }
     .exit-btn span {
       display: block;
@@ -147,14 +138,14 @@
     .progress-bar {
       flex: 1;
       height: 12px;
-      background: white;
+      background: #fff3;
       border-radius: 6px;
       position: relative;
       margin-left: 0.5rem;
       margin-right: 0.5rem;
       overflow: hidden;
       border: 1px solid #ddd;
-      max-width: calc(80% - 60px);
+      max-width: calc(100% - 160px);
     }
     .progress-bar-inner {
       height: 100%;
@@ -243,7 +234,7 @@
     .next-btn {
       padding: 0.8rem 1.8rem;
       font-size: 1rem;
-      background: linear-gradient(90deg, #FFEB3B, #FF9800);
+      background: linear-gradient(90deg, var(--yellow), var(--orange));
       color: var(--text);
       border: none;
       border-radius: 2rem;
@@ -251,8 +242,8 @@
       font-weight: 600;
       box-shadow: 0 4px 12px rgba(255, 152, 0, 0.3);
       transition: all 0.3s;
-      opacity: 1;
-      pointer-events: auto;
+      opacity: 0;
+      pointer-events: none;
       min-width: 120px;
       position: relative;
       overflow: hidden;
@@ -261,13 +252,13 @@
       margin: 0 auto;
     }
     .next-btn.show {
+      opacity: 1;
+      pointer-events: auto;
       animation: fadeInUp 1s;
     }
-    .next-btn:hover {
+    .next-btn:hover:not(:disabled) {
+      background: linear-gradient(90deg, var(--orange), var(--yellow));
       transform: scale(1.05);
-    }
-    .next-btn:active {
-      transform: scale(0.85);
     }
     .next-btn:disabled {
       background: var(--disabled);
@@ -285,15 +276,39 @@
       font-weight: 600;
       box-shadow: 0 4px 12px rgba(66, 133, 244, 0.3);
       transition: all 0.3s;
-      opacity: 1;
-      pointer-events: auto;
+      opacity: 0;
+      pointer-events: none;
       min-width: 120px;
     }
+    .guide-btn.show {
+      opacity: 1;
+      pointer-events: auto;
+      animation: fadeInUp 1s;
+    }
     .guide-btn:hover {
+      background: linear-gradient(90deg, #3367D6, var(--blue));
       transform: scale(1.05);
     }
-    .guide-btn:active {
-      transform: scale(0.85);
+    .report-btn {
+      background: var(--white);
+      border: none;
+      color: var(--text);
+      font-size: 1.2rem;
+      border-radius: 8px;
+      width: 40px;
+      height: 40px;
+      cursor: pointer;
+      font-weight: 700;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: all 0.2s;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+      margin-left: 0.5rem;
+    }
+    .report-btn:hover {
+      background: #e0e0e0;
+      transform: scale(1.07);
     }
     .content-image {
       width: 100%;
@@ -320,8 +335,7 @@
       left: 0;
       width: 100%;
       height: 100%;
-      background: rgba(0,0,0,0.8);
-      backdrop-filter: blur(8px);
+      background: rgba(0,0,0,0.7);
       display: flex;
       justify-content: center;
       align-items: center;
@@ -335,7 +349,7 @@
       pointer-events: auto;
     }
     .completion-content {
-      background: rgba(240, 240, 240, 0.95);
+      background: white;
       padding: 2rem;
       border-radius: 16px;
       text-align: center;
@@ -375,7 +389,7 @@
     }
     .completion-btn {
       padding: 0.8rem 2rem;
-      background: linear-gradient(90deg, #FFEB3B, #FF9800);
+      background: linear-gradient(90deg, var(--yellow), var(--orange));
       color: var(--text);
       border: none;
       border-radius: 2rem;
@@ -385,10 +399,8 @@
       transition: all 0.3s;
     }
     .completion-btn:hover {
+      background: linear-gradient(90deg, var(--orange), var(--yellow));
       transform: scale(1.05);
-    }
-    .completion-btn:active {
-      transform: scale(0.85);
     }
     @media (max-width: 600px) {
       .splash h1 {
@@ -401,7 +413,7 @@
       .header-bar {
         height: 48px;
       }
-      .exit-btn {
+      .exit-btn, .report-btn {
         width: 36px;
         height: 36px;
       }
@@ -431,18 +443,19 @@
 <body>
   <div class="splash" id="splash">
     <div style="position: absolute; top: 0.5rem; left: 0.5rem; width: 100%; display: flex;">
-      <button class="exit-btn" id="splashExitBtn" title="Выйти"><span>&lt;</span></button>
+      <button class="exit-btn" id="splashExitBtn" title="Выйти"><span>&#8592;</span></button>
     </div>
-    <h1>Модуль 1:<br>Доступ к ChatGPT</h1>
+    <h1>Модуль 0:<br>Доступ к ChatGPT</h1>
     <button id="startBtn">Начать</button>
   </div>
 
   <div class="main-content" id="mainContent">
     <div class="header-bar">
-      <button class="exit-btn" id="exitBtn" title="Выйти"><span>&lt;</span></button>
+      <button class="exit-btn" id="exitBtn" title="Выйти"><span>&#8592;</span></button>
       <div class="progress-bar">
         <div class="progress-bar-inner" id="progressBar"></div>
       </div>
+      <button class="report-btn" id="reportBtn" title="Сообщить о проблеме">🚩</button>
     </div>
     
     <div class="cards-container" id="cardsContainer"></div>
@@ -470,7 +483,7 @@
           <div class="checkmark-icon">✓</div>
         </div>
       </div>
-      <div class="completion-title">Модуль 1 пройден!</div>
+      <div class="completion-title">Модуль 0 пройден!</div>
       <button class="completion-btn" id="completionBtn">Вернуться в меню</button>
     </div>
   </div>
@@ -495,6 +508,7 @@
     const cardsContainer = document.getElementById('cardsContainer');
     const exitBtn = document.getElementById('exitBtn');
     const splashExitBtn = document.getElementById('splashExitBtn');
+    const reportBtn = document.getElementById('reportBtn');
     const exitModal = document.getElementById('exitModal');
     const modalExitBtn = document.getElementById('modalExitBtn');
     const modalStayBtn = document.getElementById('modalStayBtn');
@@ -668,13 +682,11 @@
       }
     ];
 
-
     let currentBlockIndex = 0;
     const totalBlocks = contentBlocks.length;
     let emptySpace = null;
     let isFirstBlockAdded = false;
     let userRecordId = null;
-    let isCompleting = false;
 
     // Функция для получения ID пользователя из cookie
     function getUserId() {
@@ -757,24 +769,11 @@
 
     // Функция завершения модуля
     async function completeModule() {
-      if (isCompleting) return;
-      
-      isCompleting = true;
-      nextBtn.disabled = true;
-      nextBtn.textContent = 'Завершение...';
-      
       const success = await updateProgress();
-      
       if (success) {
-        setTimeout(() => {
-          completionModal.classList.add('active');
-          isCompleting = false;
-        }, 1000);
+        completionModal.classList.add('active');
       } else {
         alert('Не удалось сохранить прогресс. Пожалуйста, попробуйте позже.');
-        nextBtn.disabled = false;
-        nextBtn.textContent = 'Завершить';
-        isCompleting = false;
       }
     }
 
@@ -840,6 +839,7 @@
         mainContent.classList.add('show');
         addContentBlock(0);
         updateProgressBar();
+        nextBtn.classList.add('show');
       }, 300);
     });
 
@@ -852,6 +852,11 @@
         currentBlockIndex++;
         addContentBlock(currentBlockIndex);
         updateProgressBar();
+        
+        if (currentBlockIndex === 1) {
+          nextBtn.classList.remove('centered');
+          guideBtn.classList.add('show');
+        }
         
         if (currentBlockIndex === totalBlocks - 1) {
           nextBtn.textContent = 'Завершить';
@@ -874,6 +879,10 @@
 
     guideBtn.addEventListener('click', () => {
       window.open('https://kurl.ru/btRup', '_blank');
+    });
+
+    reportBtn.addEventListener('click', () => {
+      alert('Сообщение о проблеме будет добавлено в ближайшее время');
     });
 
     completionBtn.addEventListener('click', () => {
