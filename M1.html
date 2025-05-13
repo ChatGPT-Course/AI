@@ -2,7 +2,7 @@
 <html lang="ru">
 <head>
   <meta charset="UTF-8">
-  <title>Модуль 0: Доступ к ChatGPT</title>
+  <title>Модуль 1: Доступ к ChatGPT</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <style>
     :root {
@@ -19,12 +19,13 @@
       --error: #F44336;
       --warning: #FF9800;
       --info: #2196F3;
+      --light-gray: #E0E0E0;
     }
     body {
       margin: 0;
       min-height: 100vh;
       font-family: 'Segoe UI', 'Roboto', Arial, sans-serif;
-      background: var(--white);
+      background: #FFF9E6;
       color: var(--text);
       overflow-x: hidden;
       -webkit-tap-highlight-color: transparent;
@@ -33,7 +34,7 @@
     .splash {
       position: fixed;
       inset: 0;
-      background: var(--white);
+      background: #FFF9E6;
       display: flex;
       flex-direction: column;
       align-items: center;
@@ -69,12 +70,15 @@
       cursor: pointer;
       font-weight: 600;
       box-shadow: 0 4px 24px #ff980055;
-      transition: background 0.3s, transform 0.2s;
+      transition: all 0.3s;
       animation: fadeInUp 1.5s;
     }
     .splash button:hover {
       background: linear-gradient(90deg, var(--orange), var(--yellow));
       transform: scale(1.05);
+    }
+    .splash button:active {
+      transform: scale(0.95);
     }
     @keyframes fadeIn {
       from { opacity: 0; transform: translateY(-30px);}
@@ -130,6 +134,9 @@
       background: #FF1744;
       transform: scale(1.07);
     }
+    .exit-btn:active {
+      transform: scale(0.95);
+    }
     .exit-btn span {
       display: block;
       line-height: 1;
@@ -138,14 +145,14 @@
     .progress-bar {
       flex: 1;
       height: 12px;
-      background: #fff3;
+      background: white;
       border-radius: 6px;
       position: relative;
       margin-left: 0.5rem;
       margin-right: 0.5rem;
       overflow: hidden;
       border: 1px solid #ddd;
-      max-width: calc(100% - 60px);
+      max-width: calc(80% - 60px);
     }
     .progress-bar-inner {
       height: 100%;
@@ -177,6 +184,9 @@
       position: relative;
       box-sizing: border-box;
       transition-delay: 0.1s;
+      background-color: rgba(255, 255, 255, 0.8);
+      border-radius: 8px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.05);
     }
     .content-block.visible {
       opacity: 1;
@@ -242,8 +252,8 @@
       font-weight: 600;
       box-shadow: 0 4px 12px rgba(255, 152, 0, 0.3);
       transition: all 0.3s;
-      opacity: 0;
-      pointer-events: none;
+      opacity: 1;
+      pointer-events: auto;
       min-width: 120px;
       position: relative;
       overflow: hidden;
@@ -252,13 +262,13 @@
       margin: 0 auto;
     }
     .next-btn.show {
-      opacity: 1;
-      pointer-events: auto;
       animation: fadeInUp 1s;
     }
-    .next-btn:hover:not(:disabled) {
-      background: linear-gradient(90deg, var(--orange), var(--yellow));
+    .next-btn:hover {
       transform: scale(1.05);
+    }
+    .next-btn:active {
+      transform: scale(0.95);
     }
     .next-btn:disabled {
       background: var(--disabled);
@@ -268,26 +278,29 @@
     .guide-btn {
       padding: 0.8rem 1rem;
       font-size: 0.9rem;
-      background: linear-gradient(90deg, var(--blue), #3367D6);
-      color: white;
+      background: var(--light-gray);
+      color: #666;
       border: none;
       border-radius: 2rem;
-      cursor: pointer;
+      cursor: default;
       font-weight: 600;
-      box-shadow: 0 4px 12px rgba(66, 133, 244, 0.3);
       transition: all 0.3s;
-      opacity: 0;
+      opacity: 1;
       pointer-events: none;
       min-width: 120px;
     }
     .guide-btn.show {
-      opacity: 1;
+      background: linear-gradient(90deg, var(--blue), #3367D6);
+      color: white;
+      cursor: pointer;
       pointer-events: auto;
-      animation: fadeInUp 1s;
+      animation: fadeIn 0.5s;
     }
-    .guide-btn:hover {
-      background: linear-gradient(90deg, #3367D6, var(--blue));
+    .guide-btn.show:hover {
       transform: scale(1.05);
+    }
+    .guide-btn.show:active {
+      transform: scale(0.95);
     }
     .content-image {
       width: 100%;
@@ -329,7 +342,7 @@
       pointer-events: auto;
     }
     .completion-content {
-      background: white;
+      background: rgba(245, 245, 245, 0.95);
       padding: 2rem;
       border-radius: 16px;
       text-align: center;
@@ -379,8 +392,10 @@
       transition: all 0.3s;
     }
     .completion-btn:hover {
-      background: linear-gradient(90deg, var(--orange), var(--yellow));
       transform: scale(1.05);
+    }
+    .completion-btn:active {
+      transform: scale(0.95);
     }
     @media (max-width: 600px) {
       .splash h1 {
@@ -425,7 +440,7 @@
     <div style="position: absolute; top: 0.5rem; left: 0.5rem; width: 100%; display: flex;">
       <button class="exit-btn" id="splashExitBtn" title="Выйти"><span>&lt;</span></button>
     </div>
-    <h1>Модуль 0:<br>Доступ к ChatGPT</h1>
+    <h1>Модуль 1:<br>Доступ к ChatGPT</h1>
     <button id="startBtn">Начать</button>
   </div>
 
@@ -462,7 +477,7 @@
           <div class="checkmark-icon">✓</div>
         </div>
       </div>
-      <div class="completion-title">Модуль 0 пройден!</div>
+      <div class="completion-title">Модуль 1 пройден!</div>
       <button class="completion-btn" id="completionBtn">Вернуться в меню</button>
     </div>
   </div>
@@ -492,7 +507,6 @@
     const modalStayBtn = document.getElementById('modalStayBtn');
     const completionModal = document.getElementById('completionModal');
     const completionBtn = document.getElementById('completionBtn');
-
 
    // Все контентные блоки
     const contentBlocks = [
@@ -666,6 +680,7 @@
     let emptySpace = null;
     let isFirstBlockAdded = false;
     let userRecordId = null;
+    let isCompleting = false;
 
     // Функция для получения ID пользователя из cookie
     function getUserId() {
@@ -748,11 +763,24 @@
 
     // Функция завершения модуля
     async function completeModule() {
+      if (isCompleting) return;
+      
+      isCompleting = true;
+      nextBtn.disabled = true;
+      nextBtn.textContent = 'Завершение...';
+      
       const success = await updateProgress();
+      
       if (success) {
-        completionModal.classList.add('active');
+        setTimeout(() => {
+          completionModal.classList.add('active');
+          isCompleting = false;
+        }, 1000);
       } else {
         alert('Не удалось сохранить прогресс. Пожалуйста, попробуйте позже.');
+        nextBtn.disabled = false;
+        nextBtn.textContent = 'Завершить';
+        isCompleting = false;
       }
     }
 
@@ -818,7 +846,6 @@
         mainContent.classList.add('show');
         addContentBlock(0);
         updateProgressBar();
-        nextBtn.classList.add('show');
       }, 300);
     });
 
@@ -857,7 +884,9 @@
     });
 
     guideBtn.addEventListener('click', () => {
-      window.open('https://kurl.ru/btRup', '_blank');
+      if (guideBtn.classList.contains('show')) {
+        window.open('https://kurl.ru/btRup', '_blank');
+      }
     });
 
     completionBtn.addEventListener('click', () => {
