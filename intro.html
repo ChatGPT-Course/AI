@@ -244,8 +244,6 @@
       font-weight: 600;
       box-shadow: 0 4px 12px rgba(255, 152, 0, 0.3);
       transition: all 0.3s;
-      opacity: 0;
-      pointer-events: none;
       min-width: 120px;
       position: relative;
       overflow: hidden;
@@ -283,7 +281,6 @@
     .guide-btn.show {
       opacity: 1;
       pointer-events: auto;
-      animation: none;
     }
     .guide-btn:hover {
       transform: scale(1.05);
@@ -297,6 +294,7 @@
       min-width: 120px;
       opacity: 1;
       pointer-events: none;
+      visibility: hidden;
     }
     .report-btn {
       background: var(--white);
@@ -436,8 +434,8 @@
       padding: 2rem;
       border-radius: 16px;
       text-align: center;
-      max-width: 90%;
-      width: 350px;
+      max-width: 85%;
+      width: 320px;
       box-shadow: 0 10px 25px rgba(0,0,0,0.2);
       transform: scale(0.9);
       transition: transform 0.3s ease;
@@ -459,11 +457,23 @@
     .feedback-option {
       font-size: 2rem;
       cursor: pointer;
-      transition: transform 0.2s;
+      transition: all 0.2s;
       padding: 0.5rem;
       border-radius: 50%;
+      width: 50px;
+      height: 50px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background-color: #f5f5f5;
+      border: 2px solid #e0e0e0;
     }
     .feedback-option:hover {
+      transform: scale(1.1);
+    }
+    .feedback-option.selected {
+      background-color: #e8f5e9;
+      border-color: #4CAF50;
       transform: scale(1.2);
     }
     .feedback-text {
@@ -476,18 +486,39 @@
       resize: none;
       font-family: inherit;
     }
+    .feedback-buttons {
+      display: flex;
+      justify-content: space-between;
+      gap: 1rem;
+    }
     .feedback-submit {
-      padding: 0.8rem 2rem;
-      background: linear-gradient(90deg, var(--yellow), var(--orange));
+      padding: 0.8rem 1.5rem;
+      background: linear-gradient(90deg, var(--blue), #3367D6);
+      color: white;
+      border: none;
+      border-radius: 2rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.3s;
+      flex: 1;
+    }
+    .feedback-skip {
+      padding: 0.8rem 1.5rem;
+      background: #f5f5f5;
       color: var(--text);
       border: none;
       border-radius: 2rem;
       font-weight: 600;
       cursor: pointer;
       transition: all 0.3s;
+      flex: 1;
     }
     .feedback-submit:hover {
       transform: scale(1.05);
+    }
+    .feedback-skip:hover {
+      transform: scale(1.05);
+      background: #e0e0e0;
     }
     .feedback-success {
       font-size: 1.2rem;
@@ -530,6 +561,11 @@
       }
       .checkmark-icon {
         font-size: 40px;
+      }
+      .feedback-option {
+        width: 40px;
+        height: 40px;
+        font-size: 1.5rem;
       }
     }
   </style>
@@ -593,7 +629,10 @@
         <div class="feedback-option" data-reaction="👌">👌</div>
       </div>
       <textarea class="feedback-text" id="feedbackText" placeholder="Ваш отзыв (необязательно)"></textarea>
-      <button class="feedback-submit" id="feedbackSubmit">Отправить</button>
+      <div class="feedback-buttons">
+        <button class="feedback-skip" id="feedbackSkip">Пропустить</button>
+        <button class="feedback-submit" id="feedbackSubmit">Отправить</button>
+      </div>
       <div class="feedback-success" id="feedbackSuccess">Спасибо за ваш отзыв!</div>
     </div>
   </div>
@@ -629,6 +668,7 @@
     const feedbackOptions = document.querySelectorAll('.feedback-option');
     const feedbackText = document.getElementById('feedbackText');
     const feedbackSubmit = document.getElementById('feedbackSubmit');
+    const feedbackSkip = document.getElementById('feedbackSkip');
     const feedbackSuccess = document.getElementById('feedbackSuccess');
 
     // Все контентные блоки
@@ -920,7 +960,9 @@
     async function completeModule() {
       const success = await updateProgress();
       if (success) {
-        feedbackModal.classList.add('active');
+        setTimeout(() => {
+          feedbackModal.classList.add('active');
+        }, 2000);
       } else {
         alert('Не удалось сохранить прогресс. Пожалуйста, попробуйте позже.');
       }
@@ -1013,9 +1055,7 @@
           nextBtn.onclick = function() {
             nextBtn.disabled = true;
             nextBtn.style.background = 'var(--disabled)';
-            setTimeout(() => {
-              completeModule();
-            }, 3000);
+            completeModule();
           };
         }
       }
@@ -1048,8 +1088,8 @@
     // Обработчики для отзывов
     feedbackOptions.forEach(option => {
       option.addEventListener('click', () => {
-        feedbackOptions.forEach(opt => opt.style.backgroundColor = 'transparent');
-        option.style.backgroundColor = 'rgba(0,0,0,0.1)';
+        feedbackOptions.forEach(opt => opt.classList.remove('selected'));
+        option.classList.add('selected');
         selectedReaction = option.dataset.reaction;
       });
     });
@@ -1066,6 +1106,7 @@
       if (success) {
         feedbackSuccess.style.display = 'block';
         feedbackSubmit.style.display = 'none';
+        feedbackSkip.style.display = 'none';
         
         setTimeout(() => {
           feedbackModal.classList.remove('active');
@@ -1074,6 +1115,11 @@
       } else {
         alert('Не удалось отправить отзыв. Пожалуйста, попробуйте позже.');
       }
+    });
+
+    feedbackSkip.addEventListener('click', () => {
+      feedbackModal.classList.remove('active');
+      completionModal.classList.add('active');
     });
 
     // Инициализация
