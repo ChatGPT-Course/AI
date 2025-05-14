@@ -247,14 +247,14 @@
       color: var(--orange);
     }
     
-  .user-progress {
-    position: absolute;
-    right: 44px; /* Сдвигаем влево от шестеренки */
-    top: 44px; /* Выравниваем по вертикали с шестеренкой */
-    color: var(--orange);
-    font-weight: 500;
-    font-size: 14px;
-  }
+    .user-progress {
+      position: absolute;
+      right: 16px;
+      bottom: 16px;
+      color: var(--orange);
+      font-weight: 500;
+      font-size: 14px;
+    }
     
     .modal-overlay {
       position: fixed;
@@ -875,9 +875,11 @@
         // Прогресс
         const userProgress = document.createElement('div');
         userProgress.className = 'user-progress';
-        userProgress.textContent = `${user.progress || 0}/5`; // Только цифры без "Прогресс: "
+        userProgress.textContent = `Прогресс: ${user.progress || 0}/5`;
         userCard.appendChild(userProgress);
-    });
+        
+        fragment.appendChild(userCard);
+      });
       
       usersContainer.innerHTML = '';
       usersContainer.appendChild(fragment);
