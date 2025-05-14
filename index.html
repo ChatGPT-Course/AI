@@ -612,7 +612,7 @@
     </div>
   </div>
 
-  <script>
+<script>
     // Конфигурация NocoDB
     const nocodbConfig = {
       apiUrl: 'https://app.nocodb.com/api/v2/tables/mc6qh91f060pv4y/records',
@@ -638,7 +638,7 @@
       const date = new Date();
       date.setTime(date.getTime() + (days * 24 * 60 * 60 * 1000));
       const expires = "expires=" + date.toUTCString();
-      document.cookie = name + "=" + value + ";" + expires + ";path=/";
+      document.cookie = name + "=" + encodeURIComponent(value) + ";" + expires + ";path=/";
     }
 
     // Функция для получения cookie
@@ -1019,12 +1019,13 @@
         state.userId = user.id.toString();
         state.username = user.username || null;
 
-        // Сохраняем ID пользователя в cookie
+        // Сохраняем данные пользователя в cookie
         setCookie('tg_user_id', state.userId, 30);
+        setCookie('tg_username', user.username || '', 30);
+        setCookie('tg_name', [user.first_name, user.last_name].filter(Boolean).join(' ') || 'Пользователь', 30);
 
         // Устанавливаем данные пользователя из Telegram
-        document.getElementById('userName').textContent = 
-          [user.first_name, user.last_name].filter(Boolean).join(' ') || 'Пользователь';
+        document.getElementById('userName').textContent = getCookie('tg_name') || 'Пользователь';
         document.getElementById('userId').textContent = `ID: ${state.userId}`;
 
         // Устанавливаем аватар
@@ -1064,6 +1065,11 @@
       };
       
       state.userId = testUser.id;
+      // Сохраняем тестовые данные в cookie
+      setCookie('tg_user_id', testUser.id, 30);
+      setCookie('tg_username', testUser.username, 30);
+      setCookie('tg_name', [testUser.first_name, testUser.last_name].join(' '), 30);
+      
       document.getElementById('userName').textContent = 'Тестовый пользователь';
       document.getElementById('userId').textContent = 'ID: test-user';
       document.getElementById('avatar-fallback').textContent = 'T';
