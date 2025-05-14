@@ -199,49 +199,35 @@
       margin-bottom: 15px;
     }
     
-    .user-header {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      margin-bottom: 8px;
-    }
-    
     .user-name {
       font-weight: 500;
-      margin: 0;
+      margin: 0 0 4px 0;
       font-size: 15px;
       color: var(--text);
     }
     
-    .user-progress {
-      color: var(--orange);
-      font-weight: 500;
-      font-size: 15px;
-    }
-    
     .user-username {
       color: #666;
-      margin: 0 0 10px 0;
+      margin: 0;
       font-size: 14px;
     }
     
-    .payment-status {
-      padding: 6px 12px;
-      border-radius: 16px;
+    .user-payment-status {
+      position: absolute;
+      top: 16px;
+      right: 16px;
+      padding: 4px 8px;
+      border-radius: 12px;
       font-weight: 500;
-      font-size: 13px;
-      border: none;
-      min-width: 90px;
-      text-align: center;
-      display: inline-block;
+      font-size: 12px;
     }
     
-    .payment-status.paid {
+    .user-payment-status.paid {
       background-color: var(--success);
       color: white;
     }
     
-    .payment-status.unpaid {
+    .user-payment-status.unpaid {
       background-color: var(--error);
       color: white;
     }
@@ -249,7 +235,7 @@
     .settings-btn {
       position: absolute;
       right: 16px;
-      top: 16px;
+      top: 44px;
       background: none;
       border: none;
       cursor: pointer;
@@ -259,6 +245,15 @@
     
     .settings-btn:hover {
       color: var(--orange);
+    }
+    
+    .user-progress {
+      position: absolute;
+      right: 16px;
+      bottom: 16px;
+      color: var(--orange);
+      font-weight: 500;
+      font-size: 14px;
     }
     
     .modal-overlay {
@@ -317,7 +312,7 @@
     
     .modal-value {
       font-weight: 500;
-      padding: 8px 0;
+      padding: 4px 0;
     }
     
     .payment-control {
@@ -340,22 +335,39 @@
     .payment-checkbox input {
       width: 18px;
       height: 18px;
-      accent-color: var(--orange);
+      accent-color: var(--success);
     }
     
     .progress-container {
       position: relative;
       margin: 25px 0 35px;
+      height: 20px;
+      display: flex;
+      align-items: center;
+    }
+    
+    .progress-line {
+      position: absolute;
+      width: 100%;
+      height: 4px;
+      background: var(--medium-gray);
+      border-radius: 2px;
+    }
+    
+    .progress-filled {
+      position: absolute;
+      height: 4px;
+      background: var(--blue);
+      border-radius: 2px;
+      left: 0;
     }
     
     .progress-slider {
       width: 100%;
       margin: 0;
       -webkit-appearance: none;
-      height: 6px;
-      background: var(--medium-gray);
-      border-radius: 3px;
-      outline: none;
+      height: 20px;
+      background: transparent;
       position: relative;
       z-index: 2;
     }
@@ -365,21 +377,10 @@
       width: 20px;
       height: 20px;
       border-radius: 50%;
-      background: var(--orange);
+      background: var(--blue);
       cursor: pointer;
       position: relative;
       z-index: 3;
-    }
-    
-    .progress-track {
-      position: absolute;
-      top: 50%;
-      left: 0;
-      height: 6px;
-      background: var(--blue);
-      border-radius: 3px;
-      transform: translateY(-50%);
-      z-index: 1;
     }
     
     .progress-marks {
@@ -409,7 +410,7 @@
     .progress-mark::after {
       content: attr(data-value);
       position: absolute;
-      top: 25px;
+      top: 20px;
       left: 50%;
       transform: translateX(-50%);
       font-size: 12px;
@@ -449,7 +450,7 @@
     }
     
     .modal-btn.save {
-      background-color: var(--orange);
+      background-color: var(--success);
       color: white;
     }
     
@@ -520,8 +521,10 @@
     .notification {
       position: fixed;
       top: 20px;
-      left: 50%;
-      transform: translateX(-50%);
+      left: 0;
+      right: 0;
+      margin: 0 auto;
+      max-width: 400px;
       background: var(--success);
       color: white;
       padding: 12px 24px;
@@ -530,6 +533,7 @@
       z-index: 1100;
       opacity: 0;
       transition: opacity 0.3s;
+      text-align: center;
     }
     
     .notification.show {
@@ -599,12 +603,12 @@
       
       <div class="modal-field">
         <div class="modal-label">Имя</div>
-        <div class="modal-value" id="modalUserName"></div>
+        <div class="modal-value">Имя: <span id="modalUserName"></span></div>
       </div>
       
       <div class="modal-field">
         <div class="modal-label">Юзернейм</div>
-        <div class="modal-value" id="modalUserUsername"></div>
+        <div class="modal-value">Юзернейм: <span id="modalUserUsername"></span></div>
       </div>
       
       <div class="modal-field">
@@ -621,7 +625,8 @@
       <div class="modal-field">
         <div class="modal-label">Прогресс</div>
         <div class="progress-container">
-          <div class="progress-track" id="progressTrack"></div>
+          <div class="progress-line"></div>
+          <div class="progress-filled" id="progressFilled"></div>
           <input type="range" min="0" max="5" value="0" class="progress-slider" id="progressSlider" step="1">
           <div class="progress-marks" id="progressMarks"></div>
         </div>
@@ -664,7 +669,7 @@
     const paymentStatusText = document.getElementById('paymentStatusText');
     const paymentCheckbox = document.getElementById('paymentCheckbox');
     const progressSlider = document.getElementById('progressSlider');
-    const progressTrack = document.getElementById('progressTrack');
+    const progressFilled = document.getElementById('progressFilled');
     const progressMarks = document.getElementById('progressMarks');
     const progressHint = document.getElementById('progressHint');
     const modalCancelBtn = document.getElementById('modalCancelBtn');
@@ -716,9 +721,9 @@
         }
       });
       
-      // Обновление трека прогресса
+      // Обновление заполненной линии
       const percent = (value / 5) * 100;
-      progressTrack.style.width = `${percent}%`;
+      progressFilled.style.width = `${percent}%`;
     }
 
     // Показ уведомления
@@ -839,21 +844,11 @@
         const userCard = document.createElement('div');
         userCard.className = 'user-card';
         
-        // Заголовок с именем и прогрессом
-        const userHeader = document.createElement('div');
-        userHeader.className = 'user-header';
-        
+        // Имя пользователя
         const userName = document.createElement('div');
         userName.className = 'user-name';
         userName.textContent = user.name || 'Без имени';
-        userHeader.appendChild(userName);
-        
-        const userProgress = document.createElement('div');
-        userProgress.className = 'user-progress';
-        userProgress.textContent = `${user.progress || 0}/5`;
-        userHeader.appendChild(userProgress);
-        
-        userCard.appendChild(userHeader);
+        userCard.appendChild(userName);
         
         // Юзернейм
         const userUsername = document.createElement('div');
@@ -863,7 +858,7 @@
         
         // Статус оплаты
         const paymentStatus = document.createElement('div');
-        paymentStatus.className = `payment-status ${user.oplata == 1 ? 'paid' : 'unpaid'}`;
+        paymentStatus.className = `user-payment-status ${user.oplata == 1 ? 'paid' : 'unpaid'}`;
         paymentStatus.textContent = user.oplata == 1 ? 'Оплачен' : 'Не оплачен';
         userCard.appendChild(paymentStatus);
         
@@ -876,6 +871,12 @@
           openSettingsModal(user);
         });
         userCard.appendChild(settingsBtn);
+        
+        // Прогресс
+        const userProgress = document.createElement('div');
+        userProgress.className = 'user-progress';
+        userProgress.textContent = `Прогресс: ${user.progress || 0}/5`;
+        userCard.appendChild(userProgress);
         
         fragment.appendChild(userCard);
       });
@@ -1072,13 +1073,6 @@
       // Чекбокс оплаты в модальном окне
       paymentCheckbox.addEventListener('change', () => {
         currentEditingUserData.oplata = paymentCheckbox.checked;
-        if (paymentCheckbox.checked) {
-          paymentStatusText.textContent = 'Оплачен';
-          paymentStatusText.style.color = 'var(--success)';
-        } else {
-          paymentStatusText.textContent = 'Не оплачен';
-          paymentStatusText.style.color = 'var(--error)';
-        }
       });
       
       // Ползунок прогресса
