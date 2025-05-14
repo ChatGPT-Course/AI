@@ -58,11 +58,6 @@
       text-align: center;
       word-break: break-word;
       line-height: 1.2;
-      opacity: 0;
-      transition: opacity 1s ease;
-    }
-    .splash.show h1 {
-      opacity: 1;
     }
     .splash button {
       padding: 1rem 2.5rem;
@@ -75,11 +70,6 @@
       font-weight: 600;
       box-shadow: 0 4px 24px #ff980055;
       transition: transform 0.2s;
-      opacity: 0;
-      transition: opacity 1s ease;
-    }
-    .splash.show button {
-      opacity: 1;
     }
     .splash button:hover {
       transform: scale(1.05);
@@ -245,15 +235,6 @@
       box-shadow: 0 4px 12px rgba(255, 152, 0, 0.3);
       transition: all 0.3s;
       min-width: 120px;
-      position: relative;
-      overflow: hidden;
-    }
-    .next-btn.centered {
-      margin: 0 auto;
-    }
-    .next-btn.show {
-      opacity: 1;
-      pointer-events: auto;
     }
     .next-btn:hover:not(:disabled) {
       transform: scale(1.05);
@@ -274,27 +255,10 @@
       font-weight: 600;
       box-shadow: 0 4px 12px rgba(66, 133, 244, 0.3);
       transition: all 0.3s;
-      opacity: 0;
-      pointer-events: none;
       min-width: 120px;
-    }
-    .guide-btn.show {
-      opacity: 1;
-      pointer-events: auto;
     }
     .guide-btn:hover {
       transform: scale(1.05);
-    }
-    .guide-btn-placeholder {
-      padding: 0.8rem 1rem;
-      font-size: 0.9rem;
-      background: var(--disabled);
-      border: none;
-      border-radius: 2rem;
-      min-width: 120px;
-      opacity: 1;
-      pointer-events: none;
-      visibility: hidden;
     }
     .report-btn {
       background: var(--white);
@@ -591,8 +555,7 @@
     <div class="cards-container" id="cardsContainer"></div>
     
     <div class="buttons-container">
-      <button class="next-btn centered" id="nextBtn">Далее</button>
-      <div class="guide-btn-placeholder" id="guidePlaceholder"></div>
+      <button class="next-btn" id="nextBtn">Далее</button>
       <button class="guide-btn" id="guideBtn"><span class="emoji">🔗</span> Детальный гайд</button>
     </div>
     
@@ -653,7 +616,6 @@
     const mainContent = document.getElementById('mainContent');
     const nextBtn = document.getElementById('nextBtn');
     const guideBtn = document.getElementById('guideBtn');
-    const guidePlaceholder = document.getElementById('guidePlaceholder');
     const progressBar = document.getElementById('progressBar');
     const cardsContainer = document.getElementById('cardsContainer');
     const exitBtn = document.getElementById('exitBtn');
@@ -671,10 +633,10 @@
     const feedbackSkip = document.getElementById('feedbackSkip');
     const feedbackSuccess = document.getElementById('feedbackSuccess');
 
-    // Все контентные блоки
+   // Все контентные блоки
     const contentBlocks = [
       {
-        title: "ДАВАЙ НАЧНЕМ МОДУЛЬ 1",
+        title: "ДАВАЙ НАЧНЕМ МОДУЛЬ 0",
         image: "1.jpg",
         content: `Со следующего экрана и далее в этом модуле ты будешь видеть <b>вторую кнопку с полным и подробным гайдом</b>, чтобы можно было перейти в него когда удобно.<br><br>
         <b>СОВЕТ:</b> сначала пролистай этот модуль целиком для ознакомления, потому что может случится так, что гайд тебе и не понадобится`
@@ -824,7 +786,7 @@
         Подробная инструкция по установке в гайде`
       },
       {
-        title: "МОДУЛЬ-1 пройден",
+        title: "МОДУЛЬ-0 пройден",
         image: "9.jpg",
         content: `Наши поздравления! Ты только что завершил подготовительный блок, в котором мы разобрали способы доступа к ChatGPT в обход всех блокировок.<br><br>
         В следующем модуле «Основы ChatGPT» мы разберемся, как заставить нейросеть выполнять твои задачи, какие у неё есть ограничения и как получить максимально полезные ответы<br><br>
@@ -837,6 +799,7 @@
         Выдели время и получи доступ в ChatGPT любым удобным способом из данного модуля. Поверь, когда ты начнешь им пользоваться - ты кайфонешь и всё поймешь <span class="emoji">🙏😌</span>`
       }
     ];
+
 
     let currentBlockIndex = 0;
     const totalBlocks = contentBlocks.length;
@@ -1030,7 +993,6 @@
         mainContent.classList.add('show');
         addContentBlock(0);
         updateProgressBar();
-        nextBtn.classList.add('show');
       }, 300);
     });
 
@@ -1043,12 +1005,6 @@
         currentBlockIndex++;
         addContentBlock(currentBlockIndex);
         updateProgressBar();
-        
-        if (currentBlockIndex === 1) {
-          nextBtn.classList.remove('centered');
-          guidePlaceholder.style.display = 'none';
-          guideBtn.classList.add('show');
-        }
         
         if (currentBlockIndex === totalBlocks - 1) {
           nextBtn.textContent = 'Завершить';
@@ -1123,10 +1079,6 @@
     });
 
     // Инициализация
-    setTimeout(() => {
-      splash.classList.add('show');
-    }, 100);
-
     if (!isFirstBlockAdded) {
       addContentBlock(0);
     }
