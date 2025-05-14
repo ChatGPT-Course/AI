@@ -151,20 +151,42 @@
       font-size: 12px;
     }
     
-    .reset-filter {
+    .filter-actions {
+      display: flex;
+      justify-content: space-between;
       padding: 10px 15px;
-      color: var(--orange);
-      font-weight: 600;
-      text-align: center;
-      cursor: pointer;
       border-top: 1px solid var(--medium-gray);
-      margin-top: 5px;
+    }
+    
+    .filter-btn {
+      padding: 8px 16px;
+      border-radius: 6px;
+      font-size: 14px;
+      font-weight: 500;
+      cursor: pointer;
+      border: none;
+    }
+    
+    .filter-btn.reset {
+      background: var(--medium-gray);
+      color: var(--text);
+    }
+    
+    .filter-btn.apply {
+      background: var(--orange);
+      color: white;
+    }
+    
+    .divider {
+      height: 1px;
+      background: var(--medium-gray);
+      margin: 10px 0;
     }
     
     .users-list {
       display: grid;
       grid-template-columns: 1fr;
-      gap: 20px;
+      gap: 15px;
     }
     
     .user-card {
@@ -173,29 +195,33 @@
       padding: 16px;
       box-shadow: var(--shadow);
       position: relative;
+      margin-bottom: 15px;
+    }
+    
+    .user-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 8px;
     }
     
     .user-name {
       font-weight: 500;
-      margin: 0 0 4px 0;
+      margin: 0;
       font-size: 15px;
       color: var(--text);
     }
     
-    .user-username {
-      color: #666;
-      margin: 0;
-      font-size: 14px;
-    }
-    
     .user-progress {
-      margin-top: 10px;
-      font-size: 14px;
-    }
-    
-    .progress-value {
       color: var(--orange);
       font-weight: 500;
+      font-size: 14px;
+    }
+    
+    .user-username {
+      color: #666;
+      margin: 0 0 10px 0;
+      font-size: 14px;
     }
     
     .payment-status {
@@ -318,14 +344,67 @@
       color: white;
     }
     
+    .progress-container {
+      position: relative;
+      margin: 25px 0 35px;
+    }
+    
     .progress-slider {
       width: 100%;
-      margin: 15px 0;
+      margin: 0;
+      -webkit-appearance: none;
+      height: 6px;
+      background: var(--medium-gray);
+      border-radius: 3px;
+      outline: none;
+    }
+    
+    .progress-slider::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      width: 20px;
+      height: 20px;
+      border-radius: 50%;
+      background: var(--orange);
+      cursor: pointer;
+      position: relative;
+      z-index: 2;
+    }
+    
+    .progress-marks {
+      position: absolute;
+      top: -7px;
+      left: 0;
+      right: 0;
+      display: flex;
+      justify-content: space-between;
+      pointer-events: none;
+    }
+    
+    .progress-mark {
+      width: 16px;
+      height: 16px;
+      border-radius: 50%;
+      background: var(--medium-gray);
+      position: relative;
+    }
+    
+    .progress-mark.active {
+      background: var(--blue);
+    }
+    
+    .progress-mark::after {
+      content: attr(data-value);
+      position: absolute;
+      top: 20px;
+      left: 50%;
+      transform: translateX(-50%);
+      font-size: 11px;
+      color: #666;
     }
     
     .progress-hint {
       text-align: center;
-      margin-top: 5px;
+      margin-top: 25px;
       font-size: 13px;
       color: #666;
       min-height: 20px;
@@ -428,13 +507,9 @@
           <input type="text" class="search-input" id="searchInput" placeholder="Поиск по имени или юзернейму...">
           
           <div style="position: relative;">
-            <button class="sort-btn" id="sortBtn">Все пользователи</button>
+            <button class="sort-btn" id="sortBtn">Фильтр пользователей</button>
             <div class="sort-dropdown" id="sortDropdown">
               <div class="sort-group-title">Фильтр по оплате</div>
-              <div class="sort-option" data-sort="all">
-                <span>Все пользователи</span>
-                <div class="sort-checkbox checked" data-sort="all"></div>
-              </div>
               <div class="sort-option" data-sort="paid">
                 <span>Оплаченные</span>
                 <div class="sort-checkbox" data-sort="paid"></div>
@@ -443,6 +518,8 @@
                 <span>Неоплаченные</span>
                 <div class="sort-checkbox" data-sort="unpaid"></div>
               </div>
+              
+              <div class="divider"></div>
               
               <div class="sort-group-title">Фильтр по прогрессу</div>
               <div class="sort-option" data-sort="progress-asc">
@@ -454,7 +531,10 @@
                 <div class="sort-checkbox" data-sort="progress-desc"></div>
               </div>
               
-              <div class="reset-filter" id="resetFilter">Сбросить фильтр</div>
+              <div class="filter-actions">
+                <button class="filter-btn reset" id="resetFilter">Сбросить</button>
+                <button class="filter-btn apply" id="applyFilter">Применить</button>
+              </div>
             </div>
           </div>
         </div>
@@ -498,7 +578,10 @@
       
       <div class="modal-field">
         <div class="modal-label">Прогресс</div>
-        <input type="range" min="0" max="4" value="0" class="progress-slider" id="progressSlider" step="1">
+        <div class="progress-container">
+          <input type="range" min="0" max="5" value="0" class="progress-slider" id="progressSlider" step="1">
+          <div class="progress-marks" id="progressMarks"></div>
+        </div>
         <div class="progress-hint" id="progressHint"></div>
       </div>
       
@@ -529,12 +612,14 @@
     const sortBtn = document.getElementById('sortBtn');
     const sortDropdown = document.getElementById('sortDropdown');
     const resetFilter = document.getElementById('resetFilter');
+    const applyFilter = document.getElementById('applyFilter');
     const settingsModal = document.getElementById('settingsModal');
     const modalUserName = document.getElementById('modalUserName');
     const modalUserUsername = document.getElementById('modalUserUsername');
     const grantPaymentBtn = document.getElementById('grantPaymentBtn');
     const revokePaymentBtn = document.getElementById('revokePaymentBtn');
     const progressSlider = document.getElementById('progressSlider');
+    const progressMarks = document.getElementById('progressMarks');
     const progressHint = document.getElementById('progressHint');
     const modalCancelBtn = document.getElementById('modalCancelBtn');
     const modalSaveBtn = document.getElementById('modalSaveBtn');
@@ -544,7 +629,7 @@
     let filteredUsers = [];
     let currentUserTelegramId = null;
     let lastUpdateTime = 0;
-    let currentSort = 'all';
+    let currentSort = null;
     let refreshInterval = null;
     let currentEditingUserId = null;
     let currentEditingUserData = null;
@@ -556,8 +641,34 @@
       "Пройдено вступление, предстоит пройти Модуль 1",
       "Пройден Модуль 1, предстоит пройти Модуль 2",
       "Пройден Модуль 2, предстоит пройти Модуль 3",
-      "Пройден Модуль 3, курс завершен"
+      "Пройден Модуль 3, предстоит пройти Модуль 4",
+      "Пройден Модуль 4, курс завершен"
     ];
+
+    // Создание меток для прогресса
+    function createProgressMarks() {
+      progressMarks.innerHTML = '';
+      for (let i = 0; i <= 5; i++) {
+        const mark = document.createElement('div');
+        mark.className = 'progress-mark';
+        mark.dataset.value = i;
+        mark.innerHTML = `<span data-value="${i}"></span>`;
+        progressMarks.appendChild(mark);
+      }
+      updateProgressMarks(0);
+    }
+
+    // Обновление меток прогресса
+    function updateProgressMarks(value) {
+      const marks = progressMarks.querySelectorAll('.progress-mark');
+      marks.forEach((mark, index) => {
+        if (index <= value) {
+          mark.classList.add('active');
+        } else {
+          mark.classList.remove('active');
+        }
+      });
+    }
 
     // Получение Telegram ID из cookie
     function getTelegramUserId() {
@@ -633,7 +744,6 @@
       }
       
       renderUsers(filteredUsers);
-      updateSortCheckboxes();
     }
 
     // Обновление чекбоксов сортировки
@@ -669,27 +779,29 @@
         const userCard = document.createElement('div');
         userCard.className = 'user-card';
         
-        // Информация о пользователе
-        const userInfo = document.createElement('div');
+        // Заголовок с именем и прогрессом
+        const userHeader = document.createElement('div');
+        userHeader.className = 'user-header';
         
         const userName = document.createElement('div');
         userName.className = 'user-name';
         userName.textContent = user.name || 'Без имени';
-        userInfo.appendChild(userName);
-        
-        const userUsername = document.createElement('div');
-        userUsername.className = 'user-username';
-        userUsername.textContent = `@${user.username || 'без username'}`;
-        userInfo.appendChild(userUsername);
+        userHeader.appendChild(userName);
         
         const userProgress = document.createElement('div');
         userProgress.className = 'user-progress';
-        userProgress.innerHTML = `Прогресс: <span class="progress-value">${user.progress || 0}/4</span>`;
-        userInfo.appendChild(userProgress);
+        userProgress.textContent = `${user.progress || 0}/5`;
+        userHeader.appendChild(userProgress);
         
-        userCard.appendChild(userInfo);
+        userCard.appendChild(userHeader);
         
-        // Статус оплаты (только отображение)
+        // Юзернейм
+        const userUsername = document.createElement('div');
+        userUsername.className = 'user-username';
+        userUsername.textContent = `@${user.username || 'без username'}`;
+        userCard.appendChild(userUsername);
+        
+        // Статус оплаты
         const paymentStatus = document.createElement('div');
         paymentStatus.className = `payment-status ${user.oplata == 1 ? 'paid' : 'unpaid'}`;
         paymentStatus.textContent = user.oplata == 1 ? 'Оплачен' : 'Не оплачен';
@@ -736,6 +848,7 @@
       
       // Настройка ползунка прогресса
       progressSlider.value = currentEditingUserData.progress;
+      updateProgressMarks(currentEditingUserData.progress);
       updateProgressHint(currentEditingUserData.progress);
       
       settingsModal.classList.add('active');
@@ -804,6 +917,7 @@
     function initializeApp() {
       if (checkAccess()) {
         adminContent.classList.remove('hidden');
+        createProgressMarks();
         fetchUsers();
         startAutoRefresh();
       } else {
@@ -819,18 +933,39 @@
       });
       
       document.querySelectorAll('.sort-option').forEach(option => {
-        option.addEventListener('click', () => {
-          currentSort = option.dataset.sort;
-          sortBtn.textContent = option.querySelector('span').textContent;
-          sortDropdown.classList.remove('show');
-          applyFilters();
+        option.addEventListener('click', (e) => {
+          const sortType = option.dataset.sort;
+          const checkbox = option.querySelector('.sort-checkbox');
+          
+          // Сбрасываем все чекбоксы в группе
+          const group = option.closest('.sort-group-title')?.nextElementSibling;
+          if (group) {
+            group.querySelectorAll('.sort-checkbox').forEach(cb => {
+              cb.classList.remove('checked');
+            });
+          }
+          
+          // Переключаем текущий чекбокс
+          if (checkbox.classList.contains('checked')) {
+            checkbox.classList.remove('checked');
+            currentSort = null;
+          } else {
+            checkbox.classList.add('checked');
+            currentSort = sortType;
+          }
         });
       });
       
       // Сброс фильтра
       resetFilter.addEventListener('click', () => {
-        currentSort = 'all';
-        sortBtn.textContent = 'Все пользователи';
+        document.querySelectorAll('.sort-checkbox').forEach(checkbox => {
+          checkbox.classList.remove('checked');
+        });
+        currentSort = null;
+      });
+      
+      // Применение фильтра
+      applyFilter.addEventListener('click', () => {
         sortDropdown.classList.remove('show');
         applyFilters();
       });
@@ -861,6 +996,7 @@
       progressSlider.addEventListener('input', () => {
         const progress = parseInt(progressSlider.value);
         currentEditingUserData.progress = progress;
+        updateProgressMarks(progress);
         updateProgressHint(progress);
       });
       
