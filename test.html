@@ -17,6 +17,7 @@
       --error: #F44336;
       --blue: #4285F4;
       --shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+      --filter-bg: #f0f2f5;
     }
     
     body {
@@ -95,7 +96,7 @@
     
     .sort-dropdown {
       position: absolute;
-      background: white;
+      background: var(--filter-bg);
       border-radius: 8px;
       box-shadow: var(--shadow);
       z-index: 10;
@@ -127,7 +128,7 @@
     }
     
     .sort-option:hover {
-      background: var(--light-gray);
+      background: rgba(0, 0, 0, 0.05);
     }
     
     .sort-checkbox {
@@ -215,7 +216,7 @@
     .user-progress {
       color: var(--orange);
       font-weight: 500;
-      font-size: 14px;
+      font-size: 15px;
     }
     
     .user-username {
@@ -319,29 +320,27 @@
       padding: 8px 0;
     }
     
-    .payment-controls {
+    .payment-control {
       display: flex;
-      gap: 10px;
+      align-items: center;
+      justify-content: space-between;
     }
     
-    .payment-btn {
-      padding: 8px 12px;
-      border-radius: 6px;
-      border: none;
+    .payment-label {
       font-weight: 500;
       font-size: 14px;
-      cursor: pointer;
-      transition: all 0.3s;
     }
     
-    .payment-btn.grant {
-      background-color: var(--success);
-      color: white;
+    .payment-checkbox {
+      display: flex;
+      align-items: center;
+      gap: 8px;
     }
     
-    .payment-btn.revoke {
-      background-color: var(--error);
-      color: white;
+    .payment-checkbox input {
+      width: 18px;
+      height: 18px;
+      accent-color: var(--orange);
     }
     
     .progress-container {
@@ -357,6 +356,8 @@
       background: var(--medium-gray);
       border-radius: 3px;
       outline: none;
+      position: relative;
+      z-index: 2;
     }
     
     .progress-slider::-webkit-slider-thumb {
@@ -367,17 +368,30 @@
       background: var(--orange);
       cursor: pointer;
       position: relative;
-      z-index: 2;
+      z-index: 3;
+    }
+    
+    .progress-track {
+      position: absolute;
+      top: 50%;
+      left: 0;
+      height: 6px;
+      background: var(--blue);
+      border-radius: 3px;
+      transform: translateY(-50%);
+      z-index: 1;
     }
     
     .progress-marks {
       position: absolute;
-      top: -7px;
+      top: 50%;
       left: 0;
       right: 0;
       display: flex;
       justify-content: space-between;
       pointer-events: none;
+      transform: translateY(-50%);
+      z-index: 1;
     }
     
     .progress-mark {
@@ -395,11 +409,17 @@
     .progress-mark::after {
       content: attr(data-value);
       position: absolute;
-      top: 20px;
+      top: 25px;
       left: 50%;
       transform: translateX(-50%);
-      font-size: 11px;
+      font-size: 12px;
       color: #666;
+    }
+    
+    .progress-mark.active::after {
+      font-weight: bold;
+      font-size: 14px;
+      color: var(--blue);
     }
     
     .progress-hint {
@@ -496,6 +516,25 @@
       padding: 40px 20px;
       color: #666;
     }
+    
+    .notification {
+      position: fixed;
+      top: 20px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: var(--success);
+      color: white;
+      padding: 12px 24px;
+      border-radius: 8px;
+      box-shadow: var(--shadow);
+      z-index: 1100;
+      opacity: 0;
+      transition: opacity 0.3s;
+    }
+    
+    .notification.show {
+      opacity: 1;
+    }
   </style>
 </head>
 <body>
@@ -570,15 +609,19 @@
       
       <div class="modal-field">
         <div class="modal-label">Оплата</div>
-        <div class="payment-controls">
-          <button class="payment-btn grant" id="grantPaymentBtn">Выдать оплату</button>
-          <button class="payment-btn revoke" id="revokePaymentBtn">Отозвать оплату</button>
+        <div class="payment-control">
+          <div class="payment-label" id="paymentStatusText">Не оплачен</div>
+          <div class="payment-checkbox">
+            <span>Оплатить курс</span>
+            <input type="checkbox" id="paymentCheckbox">
+          </div>
         </div>
       </div>
       
       <div class="modal-field">
         <div class="modal-label">Прогресс</div>
         <div class="progress-container">
+          <div class="progress-track" id="progressTrack"></div>
           <input type="range" min="0" max="5" value="0" class="progress-slider" id="progressSlider" step="1">
           <div class="progress-marks" id="progressMarks"></div>
         </div>
@@ -591,6 +634,8 @@
       </div>
     </div>
   </div>
+
+  <div class="notification" id="notification">Настройки успешно сохранены</div>
 
   <script>
     // Конфигурация
@@ -616,13 +661,15 @@
     const settingsModal = document.getElementById('settingsModal');
     const modalUserName = document.getElementById('modalUserName');
     const modalUserUsername = document.getElementById('modalUserUsername');
-    const grantPaymentBtn = document.getElementById('grantPaymentBtn');
-    const revokePaymentBtn = document.getElementById('revokePaymentBtn');
+    const paymentStatusText = document.getElementById('paymentStatusText');
+    const paymentCheckbox = document.getElementById('paymentCheckbox');
     const progressSlider = document.getElementById('progressSlider');
+    const progressTrack = document.getElementById('progressTrack');
     const progressMarks = document.getElementById('progressMarks');
     const progressHint = document.getElementById('progressHint');
     const modalCancelBtn = document.getElementById('modalCancelBtn');
     const modalSaveBtn = document.getElementById('modalSaveBtn');
+    const notification = document.getElementById('notification');
     
     // Переменные состояния
     let allUsers = [];
@@ -668,6 +715,19 @@
           mark.classList.remove('active');
         }
       });
+      
+      // Обновление трека прогресса
+      const percent = (value / 5) * 100;
+      progressTrack.style.width = `${percent}%`;
+    }
+
+    // Показ уведомления
+    function showNotification(message) {
+      notification.textContent = message;
+      notification.classList.add('show');
+      setTimeout(() => {
+        notification.classList.remove('show');
+      }, 3000);
     }
 
     // Получение Telegram ID из cookie
@@ -837,13 +897,15 @@
       modalUserName.textContent = user.name || 'Без имени';
       modalUserUsername.textContent = `@${user.username || 'без username'}`;
       
-      // Настройка кнопок оплаты
+      // Настройка статуса оплаты
       if (currentEditingUserData.oplata) {
-        grantPaymentBtn.style.display = 'none';
-        revokePaymentBtn.style.display = 'block';
+        paymentStatusText.textContent = 'Оплачен';
+        paymentStatusText.style.color = 'var(--success)';
+        paymentCheckbox.checked = true;
       } else {
-        grantPaymentBtn.style.display = 'block';
-        revokePaymentBtn.style.display = 'none';
+        paymentStatusText.textContent = 'Не оплачен';
+        paymentStatusText.style.color = 'var(--error)';
+        paymentCheckbox.checked = false;
       }
       
       // Настройка ползунка прогресса
@@ -894,10 +956,11 @@
         }
         
         applyFilters();
+        showNotification('Настройки успешно сохранены');
         return true;
       } catch (error) {
         console.error("Ошибка при обновлении пользователя:", error);
-        alert(`Не удалось обновить данные: ${error.message}`);
+        showNotification(`Ошибка: ${error.message}`);
         return false;
       } finally {
         isSaving = false;
@@ -932,25 +995,49 @@
         sortDropdown.classList.toggle('show');
       });
       
-      document.querySelectorAll('.sort-option').forEach(option => {
+      // Обработка выбора фильтра оплаты
+      document.querySelectorAll('[data-sort="paid"], [data-sort="unpaid"]').forEach(option => {
         option.addEventListener('click', (e) => {
           const sortType = option.dataset.sort;
+          
+          // Сбрасываем все чекбоксы в группе оплаты
+          document.querySelectorAll('[data-sort="paid"], [data-sort="unpaid"] .sort-checkbox').forEach(cb => {
+            cb.classList.remove('checked');
+          });
+          
+          // Устанавливаем текущий чекбокс
           const checkbox = option.querySelector('.sort-checkbox');
+          checkbox.classList.add('checked');
           
-          // Сбрасываем все чекбоксы в группе
-          const group = option.closest('.sort-group-title')?.nextElementSibling;
-          if (group) {
-            group.querySelectorAll('.sort-checkbox').forEach(cb => {
-              cb.classList.remove('checked');
-            });
-          }
-          
-          // Переключаем текущий чекбокс
-          if (checkbox.classList.contains('checked')) {
+          // Обновляем текущую сортировку
+          if (currentSort === sortType) {
             checkbox.classList.remove('checked');
             currentSort = null;
           } else {
-            checkbox.classList.add('checked');
+            currentSort = sortType;
+          }
+        });
+      });
+      
+      // Обработка выбора фильтра прогресса
+      document.querySelectorAll('[data-sort="progress-asc"], [data-sort="progress-desc"]').forEach(option => {
+        option.addEventListener('click', (e) => {
+          const sortType = option.dataset.sort;
+          
+          // Сбрасываем все чекбоксы в группе прогресса
+          document.querySelectorAll('[data-sort="progress-asc"], [data-sort="progress-desc"] .sort-checkbox').forEach(cb => {
+            cb.classList.remove('checked');
+          });
+          
+          // Устанавливаем текущий чекбокс
+          const checkbox = option.querySelector('.sort-checkbox');
+          checkbox.classList.add('checked');
+          
+          // Обновляем текущую сортировку
+          if (currentSort === sortType) {
+            checkbox.classList.remove('checked');
+            currentSort = null;
+          } else {
             currentSort = sortType;
           }
         });
@@ -962,6 +1049,8 @@
           checkbox.classList.remove('checked');
         });
         currentSort = null;
+        sortDropdown.classList.remove('show');
+        applyFilters();
       });
       
       // Применение фильтра
@@ -980,19 +1069,19 @@
       // Поиск
       searchInput.addEventListener('input', applyFilters);
       
-      // Модальное окно
-      grantPaymentBtn.addEventListener('click', () => {
-        currentEditingUserData.oplata = true;
-        grantPaymentBtn.style.display = 'none';
-        revokePaymentBtn.style.display = 'block';
+      // Чекбокс оплаты в модальном окне
+      paymentCheckbox.addEventListener('change', () => {
+        currentEditingUserData.oplata = paymentCheckbox.checked;
+        if (paymentCheckbox.checked) {
+          paymentStatusText.textContent = 'Оплачен';
+          paymentStatusText.style.color = 'var(--success)';
+        } else {
+          paymentStatusText.textContent = 'Не оплачен';
+          paymentStatusText.style.color = 'var(--error)';
+        }
       });
       
-      revokePaymentBtn.addEventListener('click', () => {
-        currentEditingUserData.oplata = false;
-        grantPaymentBtn.style.display = 'block';
-        revokePaymentBtn.style.display = 'none';
-      });
-      
+      // Ползунок прогресса
       progressSlider.addEventListener('input', () => {
         const progress = parseInt(progressSlider.value);
         currentEditingUserData.progress = progress;
@@ -1000,12 +1089,14 @@
         updateProgressHint(progress);
       });
       
+      // Кнопка отмены
       modalCancelBtn.addEventListener('click', () => {
         if (!isSaving) {
           settingsModal.classList.remove('active');
         }
       });
       
+      // Кнопка сохранения
       modalSaveBtn.addEventListener('click', async () => {
         if (isSaving) return;
         
