@@ -204,6 +204,16 @@
       margin: 0 0 4px 0;
       font-size: 15px;
       color: var(--text);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    
+    .user-link {
+      color: var(--blue);
+      text-decoration: none;
+      font-size: 14px;
+      cursor: pointer;
     }
     
     .user-username {
@@ -249,8 +259,8 @@
     
     .user-progress {
       position: absolute;
-      right: 16px;
-      bottom: 16px;
+      right: 44px;
+      top: 44px;
       color: var(--orange);
       font-weight: 500;
       font-size: 14px;
@@ -303,16 +313,20 @@
       margin-bottom: 20px;
     }
     
-    .modal-label {
-      display: block;
-      margin-bottom: 5px;
+    .modal-info {
+      padding: 8px 0;
       font-size: 14px;
-      color: #666;
     }
     
-    .modal-value {
-      font-weight: 500;
-      padding: 4px 0;
+    .modal-info-label {
+      color: #666;
+      margin-right: 8px;
+    }
+    
+    .modal-divider {
+      height: 1px;
+      background: var(--medium-gray);
+      margin: 20px 0;
     }
     
     .payment-control {
@@ -602,14 +616,17 @@
       <h3 class="modal-title">Редактирование пользователя</h3>
       
       <div class="modal-field">
-        <div class="modal-label">Имя</div>
-        <div class="modal-value">Имя: <span id="modalUserName"></span></div>
+        <div class="modal-info">
+          <span class="modal-info-label">Имя:</span>
+          <span id="modalUserName"></span>
+        </div>
+        <div class="modal-info">
+          <span class="modal-info-label">Юзернейм:</span>
+          <span id="modalUserUsername"></span>
+        </div>
       </div>
       
-      <div class="modal-field">
-        <div class="modal-label">Юзернейм</div>
-        <div class="modal-value">Юзернейм: <span id="modalUserUsername"></span></div>
-      </div>
+      <div class="modal-divider"></div>
       
       <div class="modal-field">
         <div class="modal-label">Оплата</div>
@@ -844,10 +861,20 @@
         const userCard = document.createElement('div');
         userCard.className = 'user-card';
         
-        // Имя пользователя
+        // Имя пользователя с ссылкой
         const userName = document.createElement('div');
         userName.className = 'user-name';
         userName.textContent = user.name || 'Без имени';
+        
+        if (user.tg_id) {
+          const userLink = document.createElement('a');
+          userLink.className = 'user-link';
+          userLink.innerHTML = '🔗';
+          userLink.href = `tg://user?id=${user.tg_id}`;
+          userLink.target = '_blank';
+          userName.appendChild(userLink);
+        }
+        
         userCard.appendChild(userName);
         
         // Юзернейм
@@ -862,6 +889,12 @@
         paymentStatus.textContent = user.oplata == 1 ? 'Оплачен' : 'Не оплачен';
         userCard.appendChild(paymentStatus);
         
+        // Прогресс
+        const userProgress = document.createElement('div');
+        userProgress.className = 'user-progress';
+        userProgress.textContent = `${user.progress || 0}/5`;
+        userCard.appendChild(userProgress);
+        
         // Кнопка шестеренки
         const settingsBtn = document.createElement('button');
         settingsBtn.className = 'settings-btn';
@@ -871,12 +904,6 @@
           openSettingsModal(user);
         });
         userCard.appendChild(settingsBtn);
-        
-        // Прогресс
-        const userProgress = document.createElement('div');
-        userProgress.className = 'user-progress';
-        userProgress.textContent = `Прогресс: ${user.progress || 0}/5`;
-        userCard.appendChild(userProgress);
         
         fragment.appendChild(userCard);
       });
@@ -996,49 +1023,32 @@
         sortDropdown.classList.toggle('show');
       });
       
-      // Обработка выбора фильтра оплаты
-      document.querySelectorAll('[data-sort="paid"], [data-sort="unpaid"]').forEach(option => {
+      // Обработка выбора фильтра (вся строка кликабельна)
+      document.querySelectorAll('.sort-option').forEach(option => {
         option.addEventListener('click', (e) => {
           const sortType = option.dataset.sort;
-          
-          // Сбрасываем все чекбоксы в группе оплаты
-          document.querySelectorAll('[data-sort="paid"], [data-sort="unpaid"] .sort-checkbox').forEach(cb => {
-            cb.classList.remove('checked');
-          });
-          
-          // Устанавливаем текущий чекбокс
           const checkbox = option.querySelector('.sort-checkbox');
-          checkbox.classList.add('checked');
           
-          // Обновляем текущую сортировку
-          if (currentSort === sortType) {
-            checkbox.classList.remove('checked');
-            currentSort = null;
+          // Определяем группу (оплата или прогресс)
+          const isPaymentGroup = sortType === 'paid' || sortType === 'unpaid';
+          
+          // Сбрасываем все чекбоксы в соответствующей группе
+          if (isPaymentGroup) {
+            document.querySelectorAll('[data-sort="paid"], [data-sort="unpaid"] .sort-checkbox').forEach(cb => {
+              cb.classList.remove('checked');
+            });
           } else {
-            currentSort = sortType;
+            document.querySelectorAll('[data-sort="progress-asc"], [data-sort="progress-desc"] .sort-checkbox').forEach(cb => {
+              cb.classList.remove('checked');
+            });
           }
-        });
-      });
-      
-      // Обработка выбора фильтра прогресса
-      document.querySelectorAll('[data-sort="progress-asc"], [data-sort="progress-desc"]').forEach(option => {
-        option.addEventListener('click', (e) => {
-          const sortType = option.dataset.sort;
           
-          // Сбрасываем все чекбоксы в группе прогресса
-          document.querySelectorAll('[data-sort="progress-asc"], [data-sort="progress-desc"] .sort-checkbox').forEach(cb => {
-            cb.classList.remove('checked');
-          });
-          
-          // Устанавливаем текущий чекбокс
-          const checkbox = option.querySelector('.sort-checkbox');
-          checkbox.classList.add('checked');
-          
-          // Обновляем текущую сортировку
-          if (currentSort === sortType) {
+          // Переключаем текущий чекбокс
+          if (checkbox.classList.contains('checked')) {
             checkbox.classList.remove('checked');
             currentSort = null;
           } else {
+            checkbox.classList.add('checked');
             currentSort = sortType;
           }
         });
