@@ -252,11 +252,11 @@
     .module-label {
       position: absolute;
       top: 0;
-      left: 0;
+      right: 0;
       background: var(--primary);
       color: white;
       padding: 8px 16px;
-      border-radius: 0 0 16px 0;
+      border-radius: 0 0 0 16px;
       font-size: 16px;
       font-weight: 500;
       z-index: 2;
@@ -268,18 +268,6 @@
 
     .module-label.locked {
       background: var(--disabled);
-    }
-
-    .module-blocks {
-      position: absolute;
-      bottom: 0;
-      left: 0;
-      background: rgba(0, 0, 0, 0.1);
-      color: var(--dark);
-      padding: 6px 12px;
-      border-radius: 0 16px 0 0;
-      font-size: 14px;
-      font-weight: 500;
     }
 
     .module-content {
@@ -294,17 +282,25 @@
       font-weight: 600;
       margin-bottom: 8px;
       color: var(--dark);
-      text-align: right;
-      padding-right: 10px;
-      margin-top: 8px;
+      text-align: left;
+      padding-right: 80px;
     }
 
     .module-desc {
       font-size: 14px;
       color: #666;
-      margin-bottom: 20px;
+      margin-bottom: 12px;
       line-height: 1.4;
       flex-grow: 1;
+    }
+
+    .module-blocks {
+      font-size: 14px;
+      color: #666;
+      font-weight: bold;
+      font-style: italic;
+      margin-bottom: 16px;
+      align-self: flex-start;
     }
 
     .module-btn {
@@ -899,10 +895,10 @@
         html += `
           <div class="${cardClass}">
             <div class="${labelClass}">${module.label}</div>
-            <div class="module-blocks">Блоков: ${module.blocks}</div>
             <div class="module-content">
               <h3 class="module-title">${module.title}</h3>
               <div class="module-desc">${module.desc}</div>
+              <div class="module-blocks">Блоков: ${module.blocks}</div>
               <button class="${btnClass}" onclick="handleModuleClick('${module.link}', ${isLocked}, '${lockReason}', ${module.id}, ${isCompleted})">
                 ${buttonIcon ? buttonIcon + ' ' : ''}${buttonText}
               </button>
