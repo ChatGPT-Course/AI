@@ -1100,6 +1100,7 @@
       window.location.href = 'index.html';
     });
 
+
     // Обработчики для отзывов
     feedbackOptions.forEach(option => {
       option.addEventListener('click', () => {
@@ -1122,6 +1123,11 @@
       });
     });
 
+    // Инициализация модального окна отзыва
+    feedbackText.style.display = 'none';
+    feedbackSubmit.style.display = 'none';
+    feedbackSkip.style.display = 'block';
+
     feedbackSubmit.addEventListener('click', async () => {
       if (!selectedReaction) {
         alert('Пожалуйста, выберите реакцию');
@@ -1135,6 +1141,7 @@
         feedbackSuccess.style.display = 'block';
         feedbackSubmit.style.display = 'none';
         feedbackText.style.display = 'none';
+        feedbackSkip.style.display = 'none';
         
         setTimeout(() => {
           feedbackModal.classList.remove('active');
