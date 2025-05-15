@@ -606,8 +606,8 @@
     const config = {
       orgs: 'weamcfo6',
       projectName: 'p27jdsmk69wuimh',
-      tableName: 'mc6qh91f060pv4y', // Основная таблица пользователей
-      feedbackTableName: 'mroqzljwv09ghb1', // Таблица для отзывов
+      tableName: 'mc6qh91f060pv4y',
+      feedbackTableName: 'mroqzljwv09ghb1',
       apiToken: 'bocQfycJpJsTG_tbwEf8ma8E5rhoig0njMDXFWtJ',
       apiVersion: 'v1'
     };
@@ -634,7 +634,6 @@
     const feedbackSubmit = document.getElementById('feedbackSubmit');
     const feedbackSkip = document.getElementById('feedbackSkip');
     const feedbackSuccess = document.getElementById('feedbackSuccess');
-
    // Все контентные блоки
     const contentBlocks = [
       {
@@ -801,7 +800,6 @@
         Выдели время и получи доступ в ChatGPT любым удобным способом из данного модуля. Поверь, когда ты начнешь им пользоваться - ты кайфонешь и всё поймешь <span class="emoji">🙏😌</span>`
       }
     ];
-
     let currentBlockIndex = 0;
     const totalBlocks = contentBlocks.length;
     let emptySpace = null;
@@ -809,6 +807,7 @@
     let userRecordId = null;
     let selectedReaction = null;
     let userProgress = 0;
+    let isFeedbackSubmitted = false;
 
     // Проверка оплаты перед загрузкой контента
     async function checkPayment() {
@@ -827,9 +826,7 @@
           }
         );
 
-        if (!response.ok) {
-          throw new Error(`HTTP error! status: ${response.status}`);
-        }
+        if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
 
         const data = await response.json();
         const userRecord = data.list.find(record => record.tg_user_id === userId);
@@ -839,10 +836,8 @@
           return false;
         }
 
-        // Сохраняем текущий прогресс пользователя
         userProgress = userRecord.progress || 0;
         return true;
-
       } catch (error) {
         console.error('Error checking payment:', error);
         window.location.href = 'index.html';
@@ -850,13 +845,11 @@
       }
     }
 
-    // Функция для получения ID пользователя из cookie
     function getUserId() {
       const match = document.cookie.match(/tg_user_id=([^;]+)/);
       return match ? match[1] : null;
     }
 
-    // Функция для поиска записи пользователя
     async function findUserRecord() {
       const userId = getUserId();
       if (!userId) {
@@ -872,27 +865,17 @@
           }
         );
 
-        if (!response.ok) {
-          throw new Error(`HTTP error! status: ${response.status}`);
-        }
-
+        if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+        
         const data = await response.json();
         const userRecord = data.list.find(record => record.tg_user_id === userId);
-
-        if (!userRecord) {
-          console.error('User record not found');
-          return null;
-        }
-
-        return userRecord.Id;
-
+        return userRecord?.Id;
       } catch (error) {
         console.error('Error finding user record:', error);
         return null;
       }
     }
 
-    // Функция для обновления прогресса
     async function updateProgress() {
       if (!userRecordId) {
         userRecordId = await findUserRecord();
@@ -915,21 +898,14 @@
           }
         );
 
-        if (!response.ok) {
-          throw new Error(`HTTP error! status: ${response.status}`);
-        }
-
-        const result = await response.json();
-        console.log('Progress updated successfully:', result);
+        if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
         return true;
-
       } catch (error) {
         console.error('Error updating progress:', error);
         return false;
       }
     }
 
-    // Функция для отправки отзыва
     async function sendFeedback(reaction, text) {
       const userId = getUserId();
       if (!userId) return false;
@@ -951,38 +927,49 @@
           }
         );
 
-        if (!response.ok) {
-          throw new Error(`HTTP error! status: ${response.status}`);
-        }
-
-        const result = await response.json();
-        console.log('Feedback sent successfully:', result);
+        if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
         return true;
-
       } catch (error) {
         console.error('Error sending feedback:', error);
         return false;
       }
     }
 
-    // Функция завершения модуля
+    function lockFeedbackForm() {
+      isFeedbackSubmitted = true;
+      feedbackOptions.forEach(opt => {
+        opt.style.pointerEvents = 'none';
+        opt.style.opacity = '0.6';
+      });
+      feedbackText.disabled = true;
+      feedbackSubmit.disabled = true;
+      feedbackSkip.disabled = true;
+    }
+
+    function unlockFeedbackForm() {
+      isFeedbackSubmitted = false;
+      feedbackOptions.forEach(opt => {
+        opt.style.pointerEvents = '';
+        opt.style.opacity = '';
+      });
+      feedbackText.disabled = false;
+      feedbackSubmit.disabled = false;
+      feedbackSkip.disabled = false;
+    }
+
     async function completeModule() {
-      // Если прогресс пользователя уже 2 или больше - сразу переходим в меню
       if (userProgress >= 2) {
         window.location.href = 'index.html';
         return;
       }
 
-      // Обновляем прогресс
       const success = await updateProgress();
       if (success) {
-        // Показываем окно отзыва только если это первый проход (progress был 1)
         if (userProgress === 1) {
           setTimeout(() => {
             feedbackModal.classList.add('active');
           }, 1000);
         } else {
-          // Если это новый пользователь (progress был 0), просто переходим в меню
           window.location.href = 'index.html';
         }
       } else {
@@ -990,14 +977,11 @@
       }
     }
 
-    // Функции для работы с контентом
     function addContentBlock(index) {
       if (index === 0 && isFirstBlockAdded) return;
       
-      if (emptySpace) {
-        emptySpace.remove();
-        emptySpace = null;
-      }
+      if (emptySpace) emptySpace.remove();
+      emptySpace = null;
 
       const block = document.createElement('div');
       block.className = 'content-block';
@@ -1020,7 +1004,6 @@
       block.appendChild(content);
       
       cardsContainer.appendChild(block);
-      
       emptySpace = document.createElement('div');
       emptySpace.className = 'empty-space';
       cardsContainer.appendChild(emptySpace);
@@ -1029,20 +1012,15 @@
       
       setTimeout(() => {
         block.classList.add('visible');
-        
-        const headerHeight = document.querySelector('.header-bar').offsetHeight;
-        const blockTop = block.offsetTop;
-        
         window.scrollTo({
-          top: blockTop - headerHeight,
+          top: block.offsetTop - document.querySelector('.header-bar').offsetHeight,
           behavior: 'smooth'
         });
       }, 50);
     }
 
     function updateProgressBar() {
-      const percent = ((currentBlockIndex + 1) / totalBlocks) * 100;
-      progressBar.style.width = percent + '%';
+      progressBar.style.width = ((currentBlockIndex + 1) / totalBlocks) * 100 + '%';
     }
 
     // Обработчики событий
@@ -1055,9 +1033,13 @@
       }, 300);
     });
 
-    splashExitBtn.addEventListener('click', () => {
-      window.location.href = 'index.html';
-    });
+    splashExitBtn.addEventListener('click', () => window.location.href = 'index.html');
+    exitBtn.addEventListener('click', () => exitModal.style.display = 'flex');
+    modalExitBtn.addEventListener('click', () => window.location.href = 'index.html');
+    modalStayBtn.addEventListener('click', () => exitModal.style.display = 'none');
+    guideBtn.addEventListener('click', () => window.open('https://kurl.ru/btRup', '_blank'));
+    reportBtn.addEventListener('click', () => alert('Сообщение о проблеме будет добавлено в ближайшее время'));
+    completionBtn.addEventListener('click', () => window.location.href = 'index.html');
 
     nextBtn.addEventListener('click', () => {
       if (currentBlockIndex < totalBlocks - 1) {
@@ -1076,43 +1058,18 @@
       }
     });
 
-    exitBtn.addEventListener('click', () => {
-      exitModal.style.display = 'flex';
-    });
-
-    modalExitBtn.addEventListener('click', () => {
-      window.location.href = 'index.html';
-    });
-
-    modalStayBtn.addEventListener('click', () => {
-      exitModal.style.display = 'none';
-    });
-
-    guideBtn.addEventListener('click', () => {
-      window.open('https://kurl.ru/btRup', '_blank');
-    });
-
-    reportBtn.addEventListener('click', () => {
-      alert('Сообщение о проблеме будет добавлено в ближайшее время');
-    });
-
-    completionBtn.addEventListener('click', () => {
-      window.location.href = 'index.html';
-    });
-
-
     // Обработчики для отзывов
     feedbackOptions.forEach(option => {
       option.addEventListener('click', () => {
+        if (isFeedbackSubmitted) return;
+        
         if (option.classList.contains('selected')) {
-          // Если кликаем на уже выбранный эмоджи - снимаем выбор
           option.classList.remove('selected');
           selectedReaction = null;
           feedbackText.style.display = 'none';
           feedbackSubmit.style.display = 'none';
           feedbackSkip.style.display = 'block';
         } else {
-          // Выбираем новый эмоджи
           feedbackOptions.forEach(opt => opt.classList.remove('selected'));
           option.classList.add('selected');
           selectedReaction = option.dataset.reaction;
@@ -1129,13 +1086,10 @@
     feedbackSkip.style.display = 'block';
 
     feedbackSubmit.addEventListener('click', async () => {
-      if (!selectedReaction) {
-        alert('Пожалуйста, выберите реакцию');
-        return;
-      }
-
-      const feedbackTextValue = feedbackText.value.trim();
-      const success = await sendFeedback(selectedReaction, feedbackTextValue);
+      if (!selectedReaction || isFeedbackSubmitted) return;
+      
+      lockFeedbackForm();
+      const success = await sendFeedback(selectedReaction, feedbackText.value.trim());
       
       if (success) {
         feedbackSuccess.style.display = 'block';
@@ -1146,13 +1100,16 @@
         setTimeout(() => {
           feedbackModal.classList.remove('active');
           completionModal.classList.add('active');
+          unlockFeedbackForm();
         }, 1500);
       } else {
         alert('Не удалось отправить отзыв. Пожалуйста, попробуйте позже.');
+        unlockFeedbackForm();
       }
     });
 
     feedbackSkip.addEventListener('click', () => {
+      if (isFeedbackSubmitted) return;
       feedbackModal.classList.remove('active');
       completionModal.classList.add('active');
     });
@@ -1160,10 +1117,8 @@
     // Инициализация
     (async function init() {
       const paymentValid = await checkPayment();
-      if (paymentValid) {
-        if (!isFirstBlockAdded) {
-          addContentBlock(0);
-        }
+      if (paymentValid && !isFirstBlockAdded) {
+        addContentBlock(0);
       }
     })();
 </script>
