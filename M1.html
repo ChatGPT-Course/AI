@@ -19,6 +19,7 @@
       --error: #F44336;
       --warning: #FF9800;
       --info: #2196F3;
+      --red: #F44336;
     }
     body {
       margin: 0;
@@ -54,7 +55,6 @@
       letter-spacing: 1px;
       text-shadow: 0 2px 16px #ff980044;
       font-weight: 700;
-      animation: fadeIn 1.2s;
       text-align: center;
       word-break: break-word;
       line-height: 1.2;
@@ -69,20 +69,10 @@
       cursor: pointer;
       font-weight: 600;
       box-shadow: 0 4px 24px #ff980055;
-      transition: background 0.3s, transform 0.2s;
-      animation: fadeInUp 1.5s;
+      transition: transform 0.2s;
     }
     .splash button:hover {
-      background: linear-gradient(90deg, var(--orange), var(--yellow));
       transform: scale(1.05);
-    }
-    @keyframes fadeIn {
-      from { opacity: 0; transform: translateY(-30px);}
-      to { opacity: 1; transform: translateY(0);}
-    }
-    @keyframes fadeInUp {
-      from { opacity: 0; transform: translateY(30px);}
-      to { opacity: 1; transform: translateY(0);}
     }
     .main-content {
       opacity: 0;
@@ -110,9 +100,9 @@
       padding: 0 0.5rem;
     }
     .exit-btn {
-      background: var(--white);
+      background: var(--red);
       border: none;
-      color: var(--text);
+      color: var(--white);
       font-size: 1.2rem;
       border-radius: 8px;
       width: 40px;
@@ -127,13 +117,15 @@
       box-shadow: 0 2px 4px rgba(0,0,0,0.1);
     }
     .exit-btn:hover {
-      background: #e0e0e0;
+      background: #d32f2f;
       transform: scale(1.07);
     }
     .exit-btn span {
       display: block;
       line-height: 1;
       transform: translateX(-1px);
+      color: white;
+      font-weight: bold;
     }
     .progress-bar {
       flex: 1;
@@ -242,22 +234,9 @@
       font-weight: 600;
       box-shadow: 0 4px 12px rgba(255, 152, 0, 0.3);
       transition: all 0.3s;
-      opacity: 0;
-      pointer-events: none;
       min-width: 120px;
-      position: relative;
-      overflow: hidden;
-    }
-    .next-btn.centered {
-      margin: 0 auto;
-    }
-    .next-btn.show {
-      opacity: 1;
-      pointer-events: auto;
-      animation: fadeInUp 1s;
     }
     .next-btn:hover:not(:disabled) {
-      background: linear-gradient(90deg, var(--orange), var(--yellow));
       transform: scale(1.05);
     }
     .next-btn:disabled {
@@ -276,17 +255,9 @@
       font-weight: 600;
       box-shadow: 0 4px 12px rgba(66, 133, 244, 0.3);
       transition: all 0.3s;
-      opacity: 0;
-      pointer-events: none;
       min-width: 120px;
     }
-    .guide-btn.show {
-      opacity: 1;
-      pointer-events: auto;
-      animation: fadeInUp 1s;
-    }
     .guide-btn:hover {
-      background: linear-gradient(90deg, #3367D6, var(--blue));
       transform: scale(1.05);
     }
     .report-btn {
@@ -399,9 +370,145 @@
       transition: all 0.3s;
     }
     .completion-btn:hover {
-      background: linear-gradient(90deg, var(--orange), var(--yellow));
       transform: scale(1.05);
     }
+    
+    /* Feedback modal styles */
+    .feedback-modal {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0,0,0,0.7);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      z-index: 1001;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.3s ease;
+    }
+    .feedback-modal.active {
+      opacity: 1;
+      pointer-events: auto;
+    }
+    .feedback-content {
+      background: white;
+      padding: 1.5rem;
+      border-radius: 16px;
+      text-align: center;
+      max-width: 90%;
+      width: 300px;
+      box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+      transform: scale(0.9);
+      transition: transform 0.3s ease;
+      box-sizing: border-box;
+    }
+    .feedback-modal.active .feedback-content {
+      transform: scale(1);
+    }
+    .feedback-title {
+      font-size: 1.3rem;
+      font-weight: 700;
+      margin-bottom: 1.5rem;
+      color: #333;
+    }
+    .feedback-options {
+      display: flex;
+      justify-content: space-around;
+      margin-bottom: 1.5rem;
+    }
+    .feedback-option {
+      font-size: 2rem;
+      cursor: pointer;
+      transition: all 0.2s;
+      padding: 0.5rem;
+      border-radius: 50%;
+      width: 50px;
+      height: 50px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background-color: #f5f5f5;
+      border: 2px solid #e0e0e0;
+    }
+    .feedback-option:hover {
+      transform: scale(1.1);
+    }
+    .feedback-option.selected {
+      background-color: #e8f5e9;
+      border-color: #4CAF50;
+      transform: scale(1.2);
+    }
+    .feedback-text {
+      width: calc(100% - 1.6rem);
+      height: 100px;
+      padding: 0.8rem;
+      border: 1px solid #ddd;
+      border-radius: 8px;
+      margin-bottom: 1.5rem;
+      resize: none;
+      font-family: inherit;
+      display: none;
+      box-sizing: border-box;
+    }
+    .feedback-text.visible {
+      display: block;
+    }
+    .feedback-buttons {
+      display: flex;
+      justify-content: space-between;
+      gap: 1rem;
+      width: 100%;
+    }
+    .feedback-submit {
+      padding: 0.8rem 1.5rem;
+      background: var(--disabled);
+      color: white;
+      border: none;
+      border-radius: 2rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.3s;
+      flex: 1;
+      pointer-events: none;
+    }
+    .feedback-submit.active {
+      background: linear-gradient(90deg, var(--blue), #3367D6);
+      pointer-events: auto;
+    }
+    .feedback-submit.full-width {
+      flex: 0 0 100%;
+    }
+    .feedback-skip {
+      padding: 0.8rem 1.5rem;
+      background: #f5f5f5;
+      color: var(--text);
+      border: none;
+      border-radius: 2rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.3s;
+      flex: 1;
+    }
+    .feedback-skip.hidden {
+      display: none;
+    }
+    .feedback-submit:hover {
+      transform: scale(1.05);
+    }
+    .feedback-skip:hover {
+      transform: scale(1.05);
+      background: #e0e0e0;
+    }
+    .feedback-success {
+      font-size: 1.2rem;
+      color: var(--success);
+      margin-top: 1rem;
+      display: none;
+    }
+
     @media (max-width: 600px) {
       .splash h1 {
         font-size: 1.5rem;
@@ -427,8 +534,9 @@
       .empty-space {
         height: 40vh;
       }
-      .completion-content {
-        padding: 1.5rem;
+      .completion-content, .feedback-content {
+        padding: 1.2rem;
+        width: 280px;
       }
       .checkmark {
         width: 60px;
@@ -437,21 +545,26 @@
       .checkmark-icon {
         font-size: 40px;
       }
+      .feedback-option {
+        width: 40px;
+        height: 40px;
+        font-size: 1.5rem;
+      }
     }
   </style>
 </head>
 <body>
   <div class="splash" id="splash">
     <div style="position: absolute; top: 0.5rem; left: 0.5rem; width: 100%; display: flex;">
-      <button class="exit-btn" id="splashExitBtn" title="Выйти"><span>&#8592;</span></button>
+      <button class="exit-btn" id="splashExitBtn" title="Выйти"><span>←</span></button>
     </div>
-    <h1>Модуль 0:<br>Доступ к ChatGPT</h1>
+    <h1>Модуль 1:<br>Доступ к ChatGPT</h1>
     <button id="startBtn">Начать</button>
   </div>
 
   <div class="main-content" id="mainContent">
     <div class="header-bar">
-      <button class="exit-btn" id="exitBtn" title="Выйти"><span>&#8592;</span></button>
+      <button class="exit-btn" id="exitBtn" title="Выйти"><span>←</span></button>
       <div class="progress-bar">
         <div class="progress-bar-inner" id="progressBar"></div>
       </div>
@@ -461,7 +574,7 @@
     <div class="cards-container" id="cardsContainer"></div>
     
     <div class="buttons-container">
-      <button class="next-btn centered" id="nextBtn">Далее</button>
+      <button class="next-btn" id="nextBtn">Далее</button>
       <button class="guide-btn" id="guideBtn"><span class="emoji">🔗</span> Детальный гайд</button>
     </div>
     
@@ -483,8 +596,26 @@
           <div class="checkmark-icon">✓</div>
         </div>
       </div>
-      <div class="completion-title">Модуль 0 пройден!</div>
+      <div class="completion-title">Модуль 1 пройден!</div>
       <button class="completion-btn" id="completionBtn">Вернуться в меню</button>
+    </div>
+  </div>
+
+  <!-- Feedback Modal -->
+  <div class="feedback-modal" id="feedbackModal">
+    <div class="feedback-content">
+      <div class="feedback-title">Оставь свой отзыв по модулю №1</div>
+      <div class="feedback-options">
+        <div class="feedback-option" data-reaction="👍">👍</div>
+        <div class="feedback-option" data-reaction="👎">👎</div>
+        <div class="feedback-option" data-reaction="👌">👌</div>
+      </div>
+      <textarea class="feedback-text" id="feedbackText" placeholder="Ваш отзыв (необязательно)"></textarea>
+      <div class="feedback-buttons">
+        <button class="feedback-skip" id="feedbackSkip">Пропустить</button>
+        <button class="feedback-submit" id="feedbackSubmit">Отправить</button>
+      </div>
+      <div class="feedback-success" id="feedbackSuccess">Спасибо за ваш отзыв!</div>
     </div>
   </div>
 
@@ -514,11 +645,17 @@
     const modalStayBtn = document.getElementById('modalStayBtn');
     const completionModal = document.getElementById('completionModal');
     const completionBtn = document.getElementById('completionBtn');
+    const feedbackModal = document.getElementById('feedbackModal');
+    const feedbackOptions = document.querySelectorAll('.feedback-option');
+    const feedbackText = document.getElementById('feedbackText');
+    const feedbackSubmit = document.getElementById('feedbackSubmit');
+    const feedbackSkip = document.getElementById('feedbackSkip');
+    const feedbackSuccess = document.getElementById('feedbackSuccess');
 
-   // Все контентные блоки
+    // Все контентные блоки
     const contentBlocks = [
       {
-        title: "ДАВАЙ НАЧНЕМ МОДУЛЬ 0",
+        title: "ДАВАЙ НАЧНЕМ МОДУЛЬ 1",
         image: "1.jpg",
         content: `Со следующего экрана и далее в этом модуле ты будешь видеть <b>вторую кнопку с полным и подробным гайдом</b>, чтобы можно было перейти в него когда удобно.<br><br>
         <b>СОВЕТ:</b> сначала пролистай этот модуль целиком для ознакомления, потому что может случится так, что гайд тебе и не понадобится`
@@ -668,7 +805,7 @@
         Подробная инструкция по установке в гайде`
       },
       {
-        title: "МОДУЛЬ-0 пройден",
+        title: "МОДУЛЬ-1 пройден",
         image: "9.jpg",
         content: `Наши поздравления! Ты только что завершил подготовительный блок, в котором мы разобрали способы доступа к ChatGPT в обход всех блокировок.<br><br>
         В следующем модуле «Основы ChatGPT» мы разберемся, как заставить нейросеть выполнять твои задачи, какие у неё есть ограничения и как получить максимально полезные ответы<br><br>
@@ -687,6 +824,45 @@
     let emptySpace = null;
     let isFirstBlockAdded = false;
     let userRecordId = null;
+    let selectedReaction = null;
+
+    // Проверка оплаты перед загрузкой контента
+    async function checkPayment() {
+      const userId = getUserId();
+      if (!userId) {
+        console.error('User ID not found in cookies');
+        window.location.href = 'index.html';
+        return false;
+      }
+
+      try {
+        const response = await fetch(
+          `https://app.nocodb.com/api/${config.apiVersion}/db/data/${config.orgs}/${config.projectName}/${config.tableName}`,
+          {
+            headers: { 'xc-token': config.apiToken }
+          }
+        );
+
+        if (!response.ok) {
+          throw new Error(`HTTP error! status: ${response.status}`);
+        }
+
+        const data = await response.json();
+        const userRecord = data.list.find(record => record.tg_user_id === userId);
+
+        if (!userRecord || userRecord.oplata !== 1) {
+          window.location.href = 'index.html';
+          return false;
+        }
+
+        return true;
+
+      } catch (error) {
+        console.error('Error checking payment:', error);
+        window.location.href = 'index.html';
+        return false;
+      }
+    }
 
     // Функция для получения ID пользователя из cookie
     function getUserId() {
@@ -767,11 +943,45 @@
       }
     }
 
+    // Функция для отправки отзыва
+    async function sendFeedback(reaction, text) {
+      try {
+        const response = await fetch(
+          `https://app.nocodb.com/api/${config.apiVersion}/db/data/${config.orgs}/${config.projectName}/${config.tableName}`,
+          {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              'xc-token': config.apiToken
+            },
+            body: JSON.stringify({
+              tg_user_id: "ОТЗЫВ М1",
+              date_oplata: `${reaction}: ${text}`
+            })
+          }
+        );
+
+        if (!response.ok) {
+          throw new Error(`HTTP error! status: ${response.status}`);
+        }
+
+        const result = await response.json();
+        console.log('Feedback sent successfully:', result);
+        return true;
+
+      } catch (error) {
+        console.error('Error sending feedback:', error);
+        return false;
+      }
+    }
+
     // Функция завершения модуля
     async function completeModule() {
       const success = await updateProgress();
       if (success) {
-        completionModal.classList.add('active');
+        setTimeout(() => {
+          feedbackModal.classList.add('active');
+        }, 1000); // Показываем окно отзыва через 1 секунду
       } else {
         alert('Не удалось сохранить прогресс. Пожалуйста, попробуйте позже.');
       }
@@ -839,7 +1049,6 @@
         mainContent.classList.add('show');
         addContentBlock(0);
         updateProgressBar();
-        nextBtn.classList.add('show');
       }, 300);
     });
 
@@ -853,14 +1062,13 @@
         addContentBlock(currentBlockIndex);
         updateProgressBar();
         
-        if (currentBlockIndex === 1) {
-          nextBtn.classList.remove('centered');
-          guideBtn.classList.add('show');
-        }
-        
         if (currentBlockIndex === totalBlocks - 1) {
           nextBtn.textContent = 'Завершить';
-          nextBtn.onclick = completeModule;
+          nextBtn.onclick = function() {
+            nextBtn.disabled = true;
+            nextBtn.style.background = 'var(--disabled)';
+            completeModule();
+          };
         }
       }
     });
@@ -889,10 +1097,67 @@
       window.location.href = 'index.html';
     });
 
+    // Обработчики для отзывов
+    feedbackOptions.forEach(option => {
+      option.addEventListener('click', () => {
+        if (option.classList.contains('selected')) {
+          // Если кликнули на уже выбранный эмоджи - снимаем выбор
+          option.classList.remove('selected');
+          selectedReaction = null;
+          feedbackText.classList.remove('visible');
+          feedbackSubmit.classList.remove('active');
+          feedbackSubmit.classList.remove('full-width');
+          feedbackSkip.classList.remove('hidden');
+        } else {
+          // Выбираем новый эмоджи
+          feedbackOptions.forEach(opt => opt.classList.remove('selected'));
+          option.classList.add('selected');
+          selectedReaction = option.dataset.reaction;
+          feedbackText.classList.add('visible');
+          feedbackSubmit.classList.add('active');
+          feedbackSubmit.classList.add('full-width');
+          feedbackSkip.classList.add('hidden');
+        }
+      });
+    });
+
+    feedbackSubmit.addEventListener('click', async () => {
+      if (!selectedReaction) {
+        alert('Пожалуйста, выберите реакцию');
+        return;
+      }
+
+      const feedbackTextValue = feedbackText.value.trim();
+      const success = await sendFeedback(selectedReaction, feedbackTextValue);
+      
+      if (success) {
+        feedbackSuccess.style.display = 'block';
+        feedbackSubmit.style.display = 'none';
+        feedbackSkip.style.display = 'none';
+        
+        setTimeout(() => {
+          feedbackModal.classList.remove('active');
+          completionModal.classList.add('active');
+        }, 1500);
+      } else {
+        alert('Не удалось отправить отзыв. Пожалуйста, попробуйте позже.');
+      }
+    });
+
+    feedbackSkip.addEventListener('click', () => {
+      feedbackModal.classList.remove('active');
+      completionModal.classList.add('active');
+    });
+
     // Инициализация
-    if (!isFirstBlockAdded) {
-      addContentBlock(0);
-    }
+    (async function init() {
+      const paymentValid = await checkPayment();
+      if (paymentValid) {
+        if (!isFirstBlockAdded) {
+          addContentBlock(0);
+        }
+      }
+    })();
   </script>
 </body>
 </html>
