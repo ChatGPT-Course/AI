@@ -1133,7 +1133,67 @@
         alert('Пожалуйста, выберите реакцию');
         return;
       }
+      // Блокируем интерфейс
+      feedbackModal.classList.add('submitted');
+      feedbackText.disabled = true;
+      feedbackOptions.forEach(opt => {
+        opt.style.pointerEvents = 'none';
+        opt.style.opacity = '0.6';
+      });
+      feedbackSubmit.disabled = true;
+      feedbackSkip.disabled = true;
 
+      const feedbackTextValue = feedbackText.value.trim();
+      const success = await sendFeedback(selectedReaction, feedbackTextValue);
+      
+      if (success) {
+        feedbackSuccess.style.display = 'block';
+        feedbackSubmit.style.display = 'none';
+        feedbackText.style.display = 'none';
+        feedbackSkip.style.display = 'none';
+        
+        setTimeout(() => {
+          feedbackModal.classList.remove('active');
+          completionModal.classList.add('active');
+          
+          // Сбрасываем состояние при закрытии
+          feedbackModal.classList.remove('submitted');
+          feedbackOptions.forEach(opt => {
+            opt.classList.remove('selected');
+            opt.style.pointerEvents = '';
+            opt.style.opacity = '';
+          });
+          feedbackText.disabled = false;
+          feedbackText.value = '';
+          feedbackSubmit.disabled = false;
+          feedbackSkip.disabled = false;
+          feedbackSuccess.style.display = 'none';
+        }, 1500);
+      } else {
+        alert('Не удалось отправить отзыв. Пожалуйста, попробуйте позже.');
+        // Разблокируем интерфейс при ошибке
+        feedbackModal.classList.remove('submitted');
+        feedbackText.disabled = false;
+        feedbackOptions.forEach(opt => {
+          opt.style.pointerEvents = '';
+          opt.style.opacity = '';
+        });
+        feedbackSubmit.disabled = false;
+        feedbackSkip.disabled = false;
+      }
+    });
+
+    feedbackSkip.addEventListener('click', () => {
+      feedbackModal.classList.remove('active');
+      completionModal.classList.add('active');
+      
+      // Сбрасываем состояние при закрытии
+      feedbackOptions.forEach(opt => opt.classList.remove('selected'));
+      feedbackText.value = '';
+      feedbackText.style.display = 'none';
+      feedbackSubmit.style.display = 'none';
+      feedbackSkip.style.display = 'block';
+    });
       const feedbackTextValue = feedbackText.value.trim();
       const success = await sendFeedback(selectedReaction, feedbackTextValue);
       
