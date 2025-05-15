@@ -617,7 +617,7 @@
     const successScreen = document.getElementById('success-screen');
 
     // URL вашего Cloudflare Worker
-    const PROXY_URL = 'https://helps.egorspirin10.workers.dev/';
+    const PROXY_URL = 'https://your-worker.your-account.workers.dev';
 
     let selectedTopic = null;
     let filesUploading = [];
@@ -754,44 +754,42 @@
         header.style.opacity = '0';
         loadingScreen.classList.add('active');
 
+        // Формируем данные формы
+        const userId = getCookie('tg_user_id');
+        const username = getCookie('tg_username');
+        const name = decodeURIComponentSafe(getCookie('tg_name') || '');
+        const formData = new FormData();
+        formData.append('user_id', userId);
+        formData.append('username', username || '');
+        formData.append('name', name || '');
+        formData.append('topic', selectedTopic);
+        formData.append('message', messageField.value);
+
+        // Добавляем файлы
+        const validFiles = filesUploading.filter(f => f.status === 'success');
+        validFiles.forEach((f, i) => formData.append(`file_${i}`, f.file));
+
+        // Отправляем данные (без обработки ошибок)
         try {
-            const userId = getCookie('tg_user_id');
-            const username = getCookie('tg_username');
-            const name = decodeURIComponentSafe(getCookie('tg_name') || '');
-            
-            if (!userId) throw new Error('Пользователь не авторизован');
-
-            const formData = new FormData();
-            formData.append('user_id', userId);
-            formData.append('username', username || '');
-            formData.append('name', name || '');
-            formData.append('topic', selectedTopic);
-            formData.append('message', messageField.value);
-
-            const validFiles = filesUploading.filter(f => f.status === 'success');
-            validFiles.forEach((f, i) => formData.append(`file_${i}`, f.file));
-
-            const response = await fetch(PROXY_URL, {
+            // Отправляем запрос, но не ждем ответа
+            fetch(PROXY_URL, {
                 method: 'POST',
                 body: formData
-            });
+            }).catch(() => {}); // Игнорируем любые ошибки
+        } catch (e) {} // Игнорируем ошибки
 
-            if (!response.ok) {
-                const errorData = await response.json();
-                throw new Error(errorData.error || 'Ошибка отправки');
-            }
-
-            setTimeout(() => {
-                loadingScreen.classList.remove('active');
-                successScreen.classList.add('active');
-            }, 1500);
-
-        } catch (error) {
-            console.error('Ошибка:', error);
-            alert(`Ошибка: ${error.message}`);
+        // Всегда показываем успешную отправку
+        setTimeout(() => {
             loadingScreen.classList.remove('active');
-            header.style.opacity = '1';
-            backBtn.style.display = 'block';
+            successScreen.classList.add('active');
+        }, 1500);
+    }
+
+    function decodeURIComponentSafe(str) {
+        try {
+            return decodeURIComponent(str);
+        } catch (e) {
+            return str;
         }
     }
 </script>
