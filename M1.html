@@ -601,7 +601,7 @@
     </div>
   </div>
 
-  <script>
+<script>
     // Конфигурация NocoDB
     const config = {
       orgs: 'weamcfo6',
@@ -635,10 +635,10 @@
     const feedbackSkip = document.getElementById('feedbackSkip');
     const feedbackSuccess = document.getElementById('feedbackSuccess');
 
-    // Все контентные блоки
+   // Все контентные блоки
     const contentBlocks = [
       {
-        title: "ДАВАЙ НАЧНЕМ МОДУЛЬ 1",
+        title: "ДАВАЙ НАЧНЕМ МОДУЛЬ 0",
         image: "1.jpg",
         content: `Со следующего экрана и далее в этом модуле ты будешь видеть <b>вторую кнопку с полным и подробным гайдом</b>, чтобы можно было перейти в него когда удобно.<br><br>
         <b>СОВЕТ:</b> сначала пролистай этот модуль целиком для ознакомления, потому что может случится так, что гайд тебе и не понадобится`
@@ -788,7 +788,7 @@
         Подробная инструкция по установке в гайде`
       },
       {
-        title: "МОДУЛЬ-1 пройден",
+        title: "МОДУЛЬ-0 пройден",
         image: "9.jpg",
         content: `Наши поздравления! Ты только что завершил подготовительный блок, в котором мы разобрали способы доступа к ChatGPT в обход всех блокировок.<br><br>
         В следующем модуле «Основы ChatGPT» мы разберемся, как заставить нейросеть выполнять твои задачи, какие у неё есть ограничения и как получить максимально полезные ответы<br><br>
@@ -1103,13 +1103,22 @@
     // Обработчики для отзывов
     feedbackOptions.forEach(option => {
       option.addEventListener('click', () => {
-        feedbackOptions.forEach(opt => opt.classList.remove('selected'));
-        option.classList.add('selected');
-        selectedReaction = option.dataset.reaction;
-        
-        // Показываем кнопку Отправить и скрываем Пропустить
-        feedbackSubmit.classList.add('active');
-        feedbackSkip.style.display = 'none';
+        if (option.classList.contains('selected')) {
+          // Если кликаем на уже выбранный эмоджи - снимаем выбор
+          option.classList.remove('selected');
+          selectedReaction = null;
+          feedbackText.style.display = 'none';
+          feedbackSubmit.style.display = 'none';
+          feedbackSkip.style.display = 'block';
+        } else {
+          // Выбираем новый эмоджи
+          feedbackOptions.forEach(opt => opt.classList.remove('selected'));
+          option.classList.add('selected');
+          selectedReaction = option.dataset.reaction;
+          feedbackText.style.display = 'block';
+          feedbackSubmit.style.display = 'block';
+          feedbackSkip.style.display = 'none';
+        }
       });
     });
 
@@ -1150,6 +1159,6 @@
         }
       }
     })();
-  </script>
+</script>
 </body>
 </html>
