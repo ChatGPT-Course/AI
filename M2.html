@@ -657,7 +657,7 @@
           <div class="checkmark-icon">✓</div>
         </div>
       </div>
-      <div class="completion-title">Модуль 1 пройден!</div>
+      <div class="completion-title">Модуль 2 пройден!</div>
       <button class="completion-btn" id="completionBtn">Вернуться в меню</button>
     </div>
   </div>
@@ -1083,14 +1083,14 @@
     }
 
     async function completeModule() {
-      // Если прогресс уже 2 или больше - просто выходим
-      if (userProgress >= 2) {
+      // Если прогресс уже 3 или больше - просто выходим
+      if (userProgress >= 3) {
         window.location.href = 'index.html';
         return;
       }
 
-      // Если прогресс был 1 - показываем отзыв
-      if (userProgress === 1) {
+      // Если прогресс был 2 - показываем отзыв
+      if (userProgress === 2) {
         const success = await updateProgress();
         if (success) {
           setTimeout(() => {
