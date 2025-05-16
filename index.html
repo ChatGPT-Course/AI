@@ -213,6 +213,10 @@
       overflow: visible;
     }
 
+    .module.current.locked {
+      animation: pulse-disabled 2s infinite ease-in-out;
+    }
+
     @keyframes pulse {
       0%, 100% { 
         transform: scale(1);
@@ -221,6 +225,17 @@
       50% { 
         transform: scale(1.02);
         box-shadow: 0 8px 24px rgba(255, 122, 0, 0.3);
+      }
+    }
+
+    @keyframes pulse-disabled {
+      0%, 100% { 
+        transform: scale(1);
+        box-shadow: 0 4px 16px rgba(158, 158, 158, 0.2);
+      }
+      50% { 
+        transform: scale(1.02);
+        box-shadow: 0 8px 24px rgba(158, 158, 158, 0.3);
       }
     }
 
@@ -236,6 +251,10 @@
       animation: ripple 3s infinite ease-out;
       pointer-events: none;
       z-index: -1;
+    }
+
+    .module.current.locked::after {
+      border-color: rgba(158, 158, 158, 0.3);
     }
 
     @keyframes ripple {
@@ -1055,57 +1074,3 @@
       }
     }
 
-    // Инициализация тестового режима
-    async function initTestMode() {
-      const testUser = {
-        id: "test-user",
-        first_name: "Тестовый",
-        last_name: "Пользователь",
-        username: "test"
-      };
-      
-      state.userId = testUser.id;
-      // Сохраняем тестовые данные в cookie
-      setCookie('tg_user_id', testUser.id, 30);
-      setCookie('tg_username', testUser.username, 30);
-      setCookie('tg_name', [testUser.first_name, testUser.last_name].join(' '), 30);
-      
-      document.getElementById('userName').textContent = 'Тестовый пользователь';
-      document.getElementById('userId').textContent = 'ID: test-user';
-      document.getElementById('avatar-fallback').textContent = 'T';
-      
-      // Проверяем и создаем тестового пользователя в NocoDB
-      await checkAndCreateUser(testUser);
-    }
-
-    // Основная функция инициализации
-    document.addEventListener('DOMContentLoaded', async () => {
-      try {
-        // Показываем экран загрузки
-        document.getElementById('loading-screen').style.display = 'flex';
-        document.getElementById('app-content').style.opacity = '0';
-
-        // Инициализация меню
-        document.getElementById('menuButton').addEventListener('click', toggleMenu);
-        document.getElementById('supportButton').addEventListener('click', () => {
-          window.location.href = 'help.html';
-        });
-
-        if (window.Telegram?.WebApp) {
-          await initTelegramApp();
-        } else {
-          await initTestMode();
-        }
-      } catch (error) {
-        console.error('Ошибка инициализации:', error);
-        // В случае любой ошибки все равно скрываем экран загрузки
-        state.isLoaded = true;
-        hideLoadingScreen();
-      }
-    });
-
-    // Глобальные функции
-    window.handleModuleClick = handleModuleClick;
-  </script>
-</body>
-</html>
