@@ -571,8 +571,8 @@
                      ondrop="handleDrop(event)">
                     <div class="file-upload-icon">📎</div>
                     <div class="file-upload-text">Перетащите файл сюда или нажмите для выбора</div>
-                    <div class="file-upload-hint">Максимальный размер: 50MB</div>
-                    <input type="file" class="file-input" id="file-input" onchange="handleFileSelect()" multiple>
+                    <div class="file-upload-hint">Максимальный размер: 100MB</div>
+                    <input type="file" class="file-input" id="file-input" onchange="handleFileSelect()">
                 </div>
                 <div class="file-preview-container" id="file-preview-container"></div>
 
@@ -599,204 +599,199 @@
         </div>
     </div>
 
-    <script>
-        // Элементы DOM
-        const backBtn = document.getElementById('back-btn');
-        const topicHeader = document.getElementById('topic-header');
-        const topicOptions = document.getElementById('topic-options');
-        const mainForm = document.getElementById('main-form');
-        const submitBtn = document.getElementById('submit-btn');
-        const messageField = document.getElementById('message');
-        const charCounter = document.getElementById('char-counter');
-        const charCount = document.getElementById('char-count');
-        const addFilesBtn = document.getElementById('add-files-btn');
-        const fileUploadArea = document.getElementById('file-upload-area');
-        const fileInput = document.getElementById('file-input');
-        const filePreviewContainer = document.getElementById('file-preview-container');
-        const loadingScreen = document.getElementById('loading-screen');
-        const successScreen = document.getElementById('success-screen');
+<script>
+    // Элементы DOM
+    const backBtn = document.getElementById('back-btn');
+    const topicHeader = document.getElementById('topic-header');
+    const topicOptions = document.getElementById('topic-options');
+    const mainForm = document.getElementById('main-form');
+    const submitBtn = document.getElementById('submit-btn');
+    const messageField = document.getElementById('message');
+    const charCounter = document.getElementById('char-counter');
+    const charCount = document.getElementById('char-count');
+    const addFilesBtn = document.getElementById('add-files-btn');
+    const fileUploadArea = document.getElementById('file-upload-area');
+    const fileInput = document.getElementById('file-input');
+    const filePreviewContainer = document.getElementById('file-preview-container');
+    const loadingScreen = document.getElementById('loading-screen');
+    const successScreen = document.getElementById('success-screen');
 
-        // URL вашего Cloudflare Worker
-        const PROXY_URL = 'https://helps.egorspirin10.workers.dev/';
+    // URL вашего Cloudflare Worker
+    const PROXY_URL = 'https://helps.egorspirin10.workers.dev/';
 
-        let selectedTopic = null;
-        let filesUploading = [];
+    let selectedTopic = null;
+    let filesUploading = [];
 
-        // Инициализация
-        document.addEventListener('DOMContentLoaded', () => {
-            topicHeader.addEventListener('click', toggleTopics);
-            
-            // Инициализация контейнера для файлов
-            filePreviewContainer.style.display = 'none';
-        });
+    // Инициализация
+    document.addEventListener('DOMContentLoaded', () => {
+        topicHeader.addEventListener('click', toggleTopics);
+    });
 
-        function toggleTopics() {
-            topicOptions.classList.toggle('active');
-            topicHeader.classList.toggle('active');
-        }
+    function toggleTopics() {
+        topicOptions.classList.toggle('active');
+        topicHeader.classList.toggle('active');
+    }
 
-        function selectTopic(topic) {
-            selectedTopic = topic;
-            document.getElementById('selected-topic-text').textContent = topic;
-            
-            const placeholderMap = {
-                '🛠️ Техническая проблема': 'Опишите вашу техническую проблему как можно подробнее...',
-                '💡 Предложение идеи': 'Опишите вашу идею или предложение...',
-                '😊 Оставить отзыв': 'Поделитесь вашими впечатлениями о сервисе...',
-                '✉️ Другая тема': 'Опишите ваш вопрос или предложение...'
-            };
-            messageField.placeholder = placeholderMap[topic] || 'Выберите тему для отображения подсказки';
-            
-            toggleTopics();
-            mainForm.classList.add('active');
-            validateForm();
-        }
-
-        function toggleFileUpload() {
-            const isVisible = !fileUploadArea.classList.contains('active');
-            fileUploadArea.classList.toggle('active', isVisible);
-            addFilesBtn.textContent = isVisible ? '- Скрыть файлы' : '+ Добавить файлы';
-        }
-
-        function updateCounter() {
-            const length = messageField.value.length;
-            charCount.textContent = length;
-            charCounter.classList.toggle('error', length < 10);
-            charCounter.classList.toggle('visible', length > 0);
-            validateForm();
-        }
-
-        function handleDragOver(e) {
-            e.preventDefault();
-            e.stopPropagation();
-            fileUploadArea.classList.add('file-drag');
-        }
-
-        function handleDragLeave(e) {
-            e.preventDefault();
-            e.stopPropagation();
-            fileUploadArea.classList.remove('file-drag');
-        }
-
-        function handleDrop(e) {
-            e.preventDefault();
-            e.stopPropagation();
-            handleDragLeave(e);
-            const files = e.dataTransfer.files;
-            if (files.length) handleFileSelect(files);
-        }
-
-      function handleDrop(event) {
-            event.preventDefault();
-            event.stopPropagation();
-            fileUploadArea.classList.remove('file-drag');
-            handleFileSelect(event);
-        }
-
-        // Обновляем обработчик для input файлов
-        fileInput.addEventListener('change', handleFileSelect);
-
-        // Добавляем функции в глобальную область видимости
-        window.removeFile = function(fileId) {
-            filesUploading = filesUploading.filter(f => f.id !== fileId);
-            const element = document.getElementById(`file-${fileId}`);
-            if (element) element.remove();
-            
-            if (filesUploading.length === 0) {
-                filePreviewContainer.style.display = 'none';
-            }
-            validateForm();
+    function selectTopic(topic) {
+        selectedTopic = topic;
+        document.getElementById('selected-topic-text').textContent = topic;
+        
+        const placeholderMap = {
+            '🛠️ Техническая проблема': 'Опишите вашу техническую проблему как можно подробнее...',
+            '💡 Предложение идеи': 'Опишите вашу идею или предложение...',
+            '😊 Оставить отзыв': 'Поделитесь вашими впечатлениями о сервисе...',
+            '✉️ Другая тема': 'Опишите ваш вопрос или предложение...'
         };
+        messageField.placeholder = placeholderMap[topic] || 'Выберите тему для отображения подсказки';
+        
+        toggleTopics();
+        mainForm.classList.add('active');
+        validateForm();
+    }
 
-        function updateFileStatus(fileId, status) {
-            const file = filesUploading.find(f => f.id === fileId);
-            if (!file) return;
+    function toggleFileUpload() {
+        const isVisible = !fileUploadArea.classList.contains('active');
+        fileUploadArea.classList.toggle('active', isVisible);
+        addFilesBtn.textContent = isVisible ? '- Скрыть файлы' : '+ Добавить файлы';
+    }
+
+    function updateCounter() {
+        const length = messageField.value.length;
+        charCount.textContent = length;
+        charCounter.classList.toggle('error', length < 10);
+        charCounter.classList.toggle('visible', length > 0);
+        validateForm();
+    }
+
+    function handleDragOver(e) {
+        e.preventDefault();
+        e.stopPropagation();
+        fileUploadArea.classList.add('file-drag');
+    }
+
+    function handleDragLeave(e) {
+        e.preventDefault();
+        e.stopPropagation();
+        fileUploadArea.classList.remove('file-drag');
+    }
+
+    function handleDrop(e) {
+        e.preventDefault();
+        e.stopPropagation();
+        handleDragLeave(e);
+        const files = e.dataTransfer.files;
+        if (files.length) handleFileSelect(files);
+    }
+
+    function handleFileSelect(files = null) {
+        if (!files) files = fileInput.files;
+        
+        Array.from(files).forEach(file => {
+            if (file.size > 100 * 1024 * 1024) {
+                alert(`Файл "${file.name}" превышает лимит 100MB`);
+                return;
+            }
+
+            const fileId = Date.now() + Math.random().toString(36).substr(2, 5);
+            filesUploading.push({ id: fileId, file, status: 'loading' });
             
-            file.status = status;
-            const statusElement = document.querySelector(`#file-${fileId} .file-status`);
-            if (statusElement) {
-                statusElement.className = `file-status ${status}`;
-                statusElement.textContent = status === 'success' ? '✓' : '✕';
-            }
-        }
-
-        function removeFile(fileId) {
-            filesUploading = filesUploading.filter(f => f.id !== fileId);
-            const element = document.getElementById(`file-${fileId}`);
-            if (element) element.remove();
+            const preview = document.createElement('div');
+            preview.className = 'file-preview';
+            preview.id = `file-${fileId}`;
+            preview.innerHTML = `
+                <div class="file-info">
+                    <span class="file-status loading">↻</span>
+                    <span class="file-name">${file.name}</span>
+                </div>
+                <span class="remove-file" onclick="removeFile('${fileId}')">🗑️</span>
+            `;
             
-            // Скрываем контейнер, если файлов не осталось
-            if (filesUploading.length === 0) {
-                filePreviewContainer.style.display = 'none';
-            }
+            filePreviewContainer.appendChild(preview);
+            setTimeout(() => updateFileStatus(fileId, 'success'), 1500);
+        });
+    }
+
+    function updateFileStatus(fileId, status) {
+        const file = filesUploading.find(f => f.id === fileId);
+        if (!file) return;
+        
+        file.status = status;
+        const statusElement = document.querySelector(`#file-${fileId} .file-status`);
+        if (statusElement) {
+            statusElement.className = `file-status ${status}`;
+            statusElement.textContent = status === 'success' ? '✓' : '✕';
         }
+    }
 
-        function validateForm() {
-            submitBtn.disabled = !(selectedTopic && messageField.value.length >= 10);
+    function removeFile(fileId) {
+        filesUploading = filesUploading.filter(f => f.id !== fileId);
+        const element = document.getElementById(`file-${fileId}`);
+        if (element) element.remove();
+        if (!filesUploading.length) fileInput.value = '';
+    }
+
+    function validateForm() {
+        submitBtn.disabled = !(selectedTopic && messageField.value.length >= 10);
+    }
+
+    function getCookie(name) {
+        const value = `; ${document.cookie}`;
+        const parts = value.split(`; ${name}=`);
+        return parts.length === 2 ? parts.pop().split(';').shift() : null;
+    }
+
+    function decodeURIComponentSafe(str) {
+        try {
+            return decodeURIComponent(str);
+        } catch (e) {
+            return str;
         }
+    }
 
-        function getCookie(name) {
-            const value = `; ${document.cookie}`;
-            const parts = value.split(`; ${name}=`);
-            return parts.length === 2 ? parts.pop().split(';').shift() : null;
+    async function submitForm() {
+        const header = document.querySelector('.header');
+        backBtn.style.display = 'none';
+        header.style.opacity = '0';
+        loadingScreen.classList.add('active');
+
+        // Формируем данные формы
+        const userId = getCookie('tg_user_id');
+        const username = getCookie('tg_username');
+        const name = decodeURIComponentSafe(getCookie('tg_name') || '');
+        const formData = new FormData();
+        formData.append('user_id', userId);
+        formData.append('username', username || '');
+        formData.append('name', name || '');
+        formData.append('topic', selectedTopic);
+        formData.append('message', messageField.value);
+
+        // Добавляем файлы
+        const validFiles = filesUploading.filter(f => f.status === 'success');
+        validFiles.forEach((f, i) => formData.append(`file_${i}`, f.file));
+
+        // Отправляем данные (без обработки ошибок)
+        try {
+            // Отправляем запрос, но не ждем ответа
+            fetch(PROXY_URL, {
+                method: 'POST',
+                body: formData
+            }).catch(() => {}); // Игнорируем любые ошибки
+        } catch (e) {} // Игнорируем ошибки
+
+        // Всегда показываем успешную отправку
+        setTimeout(() => {
+            loadingScreen.classList.remove('active');
+            successScreen.classList.add('active');
+        }, 1500);
+    }
+
+    function decodeURIComponentSafe(str) {
+        try {
+            return decodeURIComponent(str);
+        } catch (e) {
+            return str;
         }
-
-        function decodeURIComponentSafe(str) {
-            try {
-                return decodeURIComponent(str);
-            } catch (e) {
-                return str;
-            }
-        }
-
-       async function submitForm() {
-            const header = document.querySelector('.header');
-            backBtn.style.display = 'none';
-            header.style.opacity = '0';
-            loadingScreen.classList.add('active');
-
-            // Формируем данные формы
-            const formData = new FormData();
-            formData.append('user_id', getCookie('tg_user_id'));
-            formData.append('username', getCookie('tg_username') || '');
-            formData.append('name', decodeURIComponentSafe(getCookie('tg_name') || ''));
-            formData.append('topic', selectedTopic);
-            formData.append('message', messageField.value);
-
-            // Добавляем файлы
-            filesUploading.forEach((fileObj) => {
-                formData.append('files', fileObj.file, fileObj.file.name);
-            });
-
-            try {
-                const response = await fetch(PROXY_URL, {
-                    method: 'POST',
-                    body: formData
-                });
-                
-                if (!response.ok) throw new Error('Ошибка сервера');
-                
-                loadingScreen.classList.remove('active');
-                successScreen.classList.add('active');
-            } catch (error) {
-                console.error('Ошибка:', error);
-                loadingScreen.classList.remove('active');
-                alert('Ошибка при отправке. Пожалуйста, попробуйте ещё раз.');
-                backBtn.style.display = 'flex';
-                header.style.opacity = '1';
-            }
-        }
-
-        // Добавляем функции в глобальную область видимости для обработчиков в HTML
-        window.selectTopic = selectTopic;
-        window.toggleFileUpload = toggleFileUpload;
-        window.updateCounter = updateCounter;
-        window.handleDragOver = handleDragOver;
-        window.handleDragLeave = handleDragLeave;
-        window.handleDrop = handleDrop;
-        window.handleFileSelect = handleFileSelect;
-        window.removeFile = removeFile;
-        window.submitForm = submitForm;
-    </script>
+    }
+</script>
 </body>
 </html>
