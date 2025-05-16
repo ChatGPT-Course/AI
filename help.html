@@ -707,7 +707,7 @@
             `;
             
             filePreviewContainer.appendChild(preview);
-            setTimeout(() => updateFileStatus(fileId, 'success'), 1500);
+            updateFileStatus(fileId, 'success');
         });
     }
 
@@ -740,14 +740,6 @@
         return parts.length === 2 ? parts.pop().split(';').shift() : null;
     }
 
-    function decodeURIComponentSafe(str) {
-        try {
-            return decodeURIComponent(str);
-        } catch (e) {
-            return str;
-        }
-    }
-
     async function submitForm() {
         const header = document.querySelector('.header');
         backBtn.style.display = 'none';
@@ -759,30 +751,34 @@
         const username = getCookie('tg_username');
         const name = decodeURIComponentSafe(getCookie('tg_name') || '');
         const formData = new FormData();
-        formData.append('user_id', userId);
-        formData.append('username', username || '');
-        formData.append('name', name || '');
+        formData.append('user_id', userId || 'неизвестен');
+        formData.append('username', username || 'неизвестен');
+        formData.append('name', name || 'неизвестен');
         formData.append('topic', selectedTopic);
         formData.append('message', messageField.value);
 
         // Добавляем файлы
-        const validFiles = filesUploading.filter(f => f.status === 'success');
-        validFiles.forEach((f, i) => formData.append(`file_${i}`, f.file));
+        filesUploading.forEach((f, i) => {
+            formData.append(`file_${i}`, f.file);
+        });
 
-        // Отправляем данные (без обработки ошибок)
         try {
-            // Отправляем запрос, но не ждем ответа
-            fetch(PROXY_URL, {
+            const response = await fetch(PROXY_URL, {
                 method: 'POST',
                 body: formData
-            }).catch(() => {}); // Игнорируем любые ошибки
-        } catch (e) {} // Игнорируем ошибки
-
-        // Всегда показываем успешную отправку
-        setTimeout(() => {
+            });
+            
+            if (!response.ok) throw new Error('Ошибка отправки');
+            
             loadingScreen.classList.remove('active');
             successScreen.classList.add('active');
-        }, 1500);
+        } catch (error) {
+            console.error('Ошибка:', error);
+            loadingScreen.classList.remove('active');
+            alert('Произошла ошибка при отправке. Пожалуйста, попробуйте позже.');
+            backBtn.style.display = 'flex';
+            header.style.opacity = '1';
+        }
     }
 
     function decodeURIComponentSafe(str) {
