@@ -137,7 +137,7 @@
       margin-right: 0.5rem;
       overflow: hidden;
       border: 1px solid #ddd;
-      max-width: calc(100% - 160px);
+      max-width: calc(100% - 100px);
     }
     .progress-bar-inner {
       height: 100%;
@@ -259,27 +259,6 @@
     }
     .guide-btn:hover {
       transform: scale(1.05);
-    }
-    .report-btn {
-      background: var(--white);
-      border: none;
-      color: var(--text);
-      font-size: 1.2rem;
-      border-radius: 8px;
-      width: 40px;
-      height: 40px;
-      cursor: pointer;
-      font-weight: 700;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      transition: all 0.2s;
-      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-      margin-left: 0.5rem;
-    }
-    .report-btn:hover {
-      background: #e0e0e0;
-      transform: scale(1.07);
     }
     .content-image {
       width: 100%;
@@ -502,7 +481,7 @@
       .header-bar {
         height: 48px;
       }
-      .exit-btn, .report-btn {
+      .exit-btn {
         width: 36px;
         height: 36px;
       }
@@ -550,7 +529,6 @@
       <div class="progress-bar">
         <div class="progress-bar-inner" id="progressBar"></div>
       </div>
-      <button class="report-btn" id="reportBtn" title="Сообщить о проблеме">🚩</button>
     </div>
     
     <div class="cards-container" id="cardsContainer"></div>
@@ -622,7 +600,6 @@
     const cardsContainer = document.getElementById('cardsContainer');
     const exitBtn = document.getElementById('exitBtn');
     const splashExitBtn = document.getElementById('splashExitBtn');
-    const reportBtn = document.getElementById('reportBtn');
     const exitModal = document.getElementById('exitModal');
     const modalExitBtn = document.getElementById('modalExitBtn');
     const modalStayBtn = document.getElementById('modalStayBtn');
@@ -810,12 +787,22 @@
     let selectedReaction = null;
     let userProgress = 0;
     let isFeedbackSubmitted = false;
+    let nextBtnCooldown = false;
+
+    // Декодирование URL-encoded строки
+    function decodeURIComponentSafe(str) {
+      try {
+        return decodeURIComponent(str || '');
+      } catch (e) {
+        return str || '';
+      }
+    }
 
     // Получение данных пользователя из cookie
     function getUserData() {
       const getCookie = (name) => {
         const match = document.cookie.match(new RegExp(`${name}=([^;]+)`));
-        return match ? match[1] : null;
+        return match ? decodeURIComponentSafe(match[1]) : null;
       };
 
       return {
@@ -1065,10 +1052,14 @@
     modalExitBtn.addEventListener('click', () => window.location.href = 'index.html');
     modalStayBtn.addEventListener('click', () => exitModal.style.display = 'none');
     guideBtn.addEventListener('click', () => window.open('https://kurl.ru/btRup', '_blank'));
-    reportBtn.addEventListener('click', () => alert('Сообщение о проблеме будет добавлено в ближайшее время'));
     completionBtn.addEventListener('click', () => window.location.href = 'index.html');
 
     nextBtn.addEventListener('click', () => {
+      if (nextBtnCooldown) return;
+      
+      nextBtnCooldown = true;
+      nextBtn.disabled = true;
+      
       if (currentBlockIndex < totalBlocks - 1) {
         currentBlockIndex++;
         addContentBlock(currentBlockIndex);
@@ -1083,6 +1074,11 @@
           };
         }
       }
+      
+      setTimeout(() => {
+        nextBtnCooldown = false;
+        nextBtn.disabled = false;
+      }, 500);
     });
 
     // Обработчики для отзывов
