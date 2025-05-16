@@ -684,7 +684,11 @@
         }
 
         function handleFileSelect(files = null) {
-            if (!files) files = fileInput.files;
+            if (!files) {
+                files = fileInput.files;
+                // Сбрасываем значение input, чтобы можно было загрузить тот же файл снова
+                fileInput.value = '';
+            }
             
             Array.from(files).forEach(file => {
                 if (file.size > 50 * 1024 * 1024) {
@@ -702,13 +706,19 @@
                     <div class="file-info">
                         <span class="file-status loading">↻</span>
                         <span class="file-name">${file.name}</span>
+                        <span class="file-size">(${(file.size / 1024 / 1024).toFixed(2)} MB)</span>
                     </div>
                     <span class="remove-file" onclick="removeFile('${fileId}')">🗑️</span>
                 `;
                 
                 filePreviewContainer.appendChild(preview);
-                setTimeout(() => updateFileStatus(fileId, 'success'), 1500);
+                updateFileStatus(fileId, 'success');
             });
+            
+            // Показываем контейнер с файлами, если есть хотя бы один файл
+            if (filesUploading.length > 0) {
+                filePreviewContainer.style.display = 'flex';
+            }
         }
 
         function updateFileStatus(fileId, status) {
@@ -727,7 +737,11 @@
             filesUploading = filesUploading.filter(f => f.id !== fileId);
             const element = document.getElementById(`file-${fileId}`);
             if (element) element.remove();
-            if (!filesUploading.length) fileInput.value = '';
+            
+            // Скрываем контейнер, если файлов не осталось
+            if (filesUploading.length === 0) {
+                filePreviewContainer.style.display = 'none';
+            }
         }
 
         function validateForm() {
@@ -767,14 +781,20 @@
 
             // Добавляем файлы
             const validFiles = filesUploading.filter(f => f.status === 'success');
-            validFiles.forEach((f) => formData.append('files', f.file));
+            validFiles.forEach((f) => {
+                formData.append('files', f.file, f.file.name);
+            });
 
             try {
                 // Отправляем запрос
-                await fetch(PROXY_URL, {
+                const response = await fetch(PROXY_URL, {
                     method: 'POST',
                     body: formData
                 });
+                
+                if (!response.ok) {
+                    throw new Error('Ошибка сервера');
+                }
                 
                 // Показываем успешную отправку
                 setTimeout(() => {
@@ -783,11 +803,23 @@
                 }, 1500);
             } catch (e) {
                 console.error('Ошибка отправки:', e);
-                // В случае ошибки всё равно показываем успех (для UX)
+                alert('Произошла ошибка при отправке. Пожалуйста, попробуйте ещё раз.');
                 loadingScreen.classList.remove('active');
-                successScreen.classList.add('active');
+                backBtn.style.display = 'flex';
+                header.style.opacity = '1';
             }
         }
+
+        // Добавляем функции в глобальную область видимости для обработчиков в HTML
+        window.selectTopic = selectTopic;
+        window.toggleFileUpload = toggleFileUpload;
+        window.updateCounter = updateCounter;
+        window.handleDragOver = handleDragOver;
+        window.handleDragLeave = handleDragLeave;
+        window.handleDrop = handleDrop;
+        window.handleFileSelect = handleFileSelect;
+        window.removeFile = removeFile;
+        window.submitForm = submitForm;
     </script>
 </body>
 </html>
