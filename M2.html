@@ -774,4 +774,436 @@
       {
         title: "Попробуем на практике",
         content: `✏️ Представьте, что у вас в холодильнике есть только три продукта. Спросите у ChatGPT, что можно из них приготовить.<br><br>
-        ✅
+        ✅ Сначала задайте простой промт:<br>
+        Придумай рецепт из хлеба, сыра и помидоров<br><br>
+        🟠 А потом уточните:<br>
+        Добавь в рецепт соус и немного зелени<br><br>
+        📌 Сравните, какой из ответов получился интереснее, полезнее и вкуснее 😋<br><br>
+        Не бойтесь экспериментировать – ChatGPT легко подстраивается под ваши уточнения и меняет ответ на ходу.`
+      },
+      {
+        title: "Лайфхак — если лень писать",
+        content: `😎 Не хочется перечислять, что у вас в холодильнике? Можно просто сфотографировать его содержимое и скинуть фото в ChatGPT вместе с запросом:<br><br>
+        Придумай рецепт на основе продуктов на этом фото<br><br>
+        🔥 ChatGPT сам проанализирует изображение и предложит вам подходящий рецепт*<br><br>
+        <i>*не будет работать во встроенном в курс ChatGPT – нужно использовать свой</i>`
+      },
+      {
+        title: "Закрепляем навык",
+        content: `🎯 Попробуйте сейчас задать ChatGPT один из запросов ниже или придумайте свой. После чего уточните его по ходу диалога.<br><br>
+        ✏️ Выберите любой вариант:<br>
+        - Придумай идею для весеннего поста в Instagram<br>
+        - Составь план занятий спортом на неделю<br>
+        - Предложи идеи подарков для коллеги на юбилей<br><br>
+        ✏️ ✏️ А теперь добавьте уточнение:<br>
+        - Сделай пост с юмором на языке пиратов<br>
+        - Добавь упражнения без тренажеров<br>
+        - Укажи подарок в пределах 10’000 рублей<br><br>
+        📌 Таким образом вы убедитесь, что ChatGPT становится точнее не за счет магии, а благодаря вашим уточнениям 😌<br><br>
+        Это универсальный навык, который пригодится в любой сфере использования ChatGPT: работа, учеба, творчество, повседневные задачи.`
+      },
+      {
+        title: "Модуль 1 пройден 🎯",
+        content: `🎉 Ура! Вы сделали первый шаг и отныне можете уверенно держать ChatGPT в руках. Вы не просто «попробовали», а действительно научились с ним взаимодействовать.<br><br>
+        Теперь вы:<br>
+        ✅ Понимаете как «думает» ChatGPT и почему отвечает именно так<br>
+        ✅ Умеете понятно формулировать запросы (промты)<br>
+        ✅ Знаете, что запросы нужно уточнять, а не составлять с нуля<br>
+        ✅ Видите в ChatGPT не волшебную кнопку, а умного помощника<br>
+        ✅ Можете использовать его в жизни для разнообразных задач`
+      },
+      {
+        title: "Что дальше?",
+        content: `🚀В следующем модуле вы освоите продвинутые техники работы с ChatGPT: ролевые модели, контекст, цепочки мыслей, примеры и более узкие и специализированниые задачи.<br><br>
+        Дальше — еще интересней 😍<br><br>
+        Во втором модуле вы научитесь управлять ChatGPT по-настоящему: задавать роли, добавлять примеры, использовать контекст и строить цепочки мыслей, чтобы решать более сложные и точные задачи 💪`
+      }
+    ];
+
+    // Элементы
+    const splash = document.getElementById('splash');
+    const startBtn = document.getElementById('startBtn');
+    const mainContent = document.getElementById('mainContent');
+    const nextBtn = document.getElementById('nextBtn');
+    const guideBtn = document.getElementById('guideBtn');
+    const progressBar = document.getElementById('progressBar');
+    const cardsContainer = document.getElementById('cardsContainer');
+    const exitBtn = document.getElementById('exitBtn');
+    const splashExitBtn = document.getElementById('splashExitBtn');
+    const exitModal = document.getElementById('exitModal');
+    const modalExitBtn = document.getElementById('modalExitBtn');
+    const modalStayBtn = document.getElementById('modalStayBtn');
+    const completionModal = document.getElementById('completionModal');
+    const completionBtn = document.getElementById('completionBtn');
+    const feedbackModal = document.getElementById('feedbackModal');
+    const feedbackOptions = document.querySelectorAll('.feedback-option');
+    const feedbackText = document.getElementById('feedbackText');
+    const feedbackSubmit = document.getElementById('feedbackSubmit');
+    const feedbackSkip = document.getElementById('feedbackSkip');
+    const feedbackSuccess = document.getElementById('feedbackSuccess');
+
+    let currentBlockIndex = 0;
+    const totalBlocks = contentBlocks.length;
+    let emptySpace = null;
+    let isFirstBlockAdded = false;
+    let userRecordId = null;
+    let selectedReaction = null;
+    let userProgress = 0;
+    let isFeedbackSubmitted = false;
+    let nextBtnCooldown = false;
+
+    // Декодирование URL-encoded строки
+    function decodeURIComponentSafe(str) {
+      try {
+        return decodeURIComponent(str || '');
+      } catch (e) {
+        return str || '';
+      }
+    }
+
+    // Получение данных пользователя из cookie
+    function getUserData() {
+      const getCookie = (name) => {
+        const match = document.cookie.match(new RegExp(`${name}=([^;]+)`));
+        return match ? decodeURIComponentSafe(match[1]) : null;
+      };
+
+      return {
+        id: getCookie('tg_user_id'),
+        name: getCookie('tg_name'),
+        username: getCookie('tg_username')
+      };
+    }
+
+    // Форматирование текущей даты
+    function getCurrentDate() {
+      const now = new Date();
+      const day = String(now.getDate()).padStart(2, '0');
+      const month = String(now.getMonth() + 1).padStart(2, '0');
+      const year = now.getFullYear();
+      const hours = String(now.getHours()).padStart(2, '0');
+      const minutes = String(now.getMinutes()).padStart(2, '0');
+      
+      return `${day}.${month}.${year} ${hours}:${minutes}`;
+    }
+
+    async function findUserRecord() {
+      const userData = getUserData();
+      if (!userData.id) {
+        console.error('User ID not found in cookies');
+        return null;
+      }
+
+      try {
+        const response = await fetch(
+          `https://app.nocodb.com/api/${config.apiVersion}/db/data/${config.orgs}/${config.projectName}/${config.tableName}`,
+          {
+            headers: { 'xc-token': config.apiToken }
+          }
+        );
+
+        if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+        
+        const data = await response.json();
+        const userRecord = data.list.find(record => record.tg_user_id === userData.id);
+        return userRecord?.Id;
+      } catch (error) {
+        console.error('Error finding user record:', error);
+        return null;
+      }
+    }
+
+    async function updateProgress() {
+      if (!userRecordId) {
+        userRecordId = await findUserRecord();
+        if (!userRecordId) {
+          console.error('Failed to get user record ID');
+          return false;
+        }
+      }
+
+      try {
+        const response = await fetch(
+          `https://app.nocodb.com/api/${config.apiVersion}/db/data/${config.orgs}/${config.projectName}/${config.tableName}/${userRecordId}`,
+          {
+            method: 'PATCH',
+            headers: {
+              'Content-Type': 'application/json',
+              'xc-token': config.apiToken
+            },
+            body: JSON.stringify({ progress: 3 }) // Устанавливаем прогресс = 3 для модуля 2
+          }
+        );
+
+        if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+        return true;
+      } catch (error) {
+        console.error('Error updating progress:', error);
+        return false;
+      }
+    }
+
+    async function sendFeedback(reaction, text) {
+      const userData = getUserData();
+      if (!userData.id) return false;
+
+      try {
+        const response = await fetch(
+          `https://app.nocodb.com/api/${config.apiVersion}/db/data/${config.orgs}/${config.projectName}/${config.feedbackTableName}`,
+          {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              'xc-token': config.apiToken
+            },
+            body: JSON.stringify({
+              user_id: userData.id,
+              name: userData.name || 'Не указано',
+              username: userData.username || 'Не указан',
+              emoji: reaction,
+              description: text,
+              date: getCurrentDate(),
+              вспомогательное_окно: 'Модуль 2'
+            })
+          }
+        );
+
+        if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+        return true;
+      } catch (error) {
+        console.error('Error sending feedback:', error);
+        return false;
+      }
+    }
+
+    function lockFeedbackForm() {
+      isFeedbackSubmitted = true;
+      feedbackOptions.forEach(opt => {
+        opt.style.pointerEvents = 'none';
+        opt.style.opacity = '0.6';
+      });
+      feedbackText.disabled = true;
+      feedbackSubmit.disabled = true;
+      feedbackSkip.disabled = true;
+    }
+
+    function unlockFeedbackForm() {
+      isFeedbackSubmitted = false;
+      feedbackOptions.forEach(opt => {
+        opt.style.pointerEvents = '';
+        opt.style.opacity = '';
+      });
+      feedbackText.disabled = false;
+      feedbackSubmit.disabled = false;
+      feedbackSkip.disabled = false;
+    }
+
+    async function completeModule() {
+      // Обновляем прогресс до 3 для модуля 2
+      const success = await updateProgress();
+      if (success) {
+        setTimeout(() => {
+          feedbackModal.classList.add('active');
+        }, 1000);
+      } else {
+        alert('Не удалось сохранить прогресс. Пожалуйста, попробуйте позже.');
+      }
+    }
+
+    function addContentBlock(index) {
+      if (index === 0 && isFirstBlockAdded) return;
+      
+      if (emptySpace) emptySpace.remove();
+      emptySpace = null;
+
+      const block = document.createElement('div');
+      block.className = 'content-block';
+      
+      const title = document.createElement('h2');
+      title.className = 'content-title';
+      title.innerHTML = `${contentBlocks[index].title}`;
+      block.appendChild(title);
+      
+      const content = document.createElement('div');
+      content.innerHTML = contentBlocks[index].content;
+      block.appendChild(content);
+      
+      cardsContainer.appendChild(block);
+      emptySpace = document.createElement('div');
+      emptySpace.className = 'empty-space';
+      cardsContainer.appendChild(emptySpace);
+      
+      if (index === 0) isFirstBlockAdded = true;
+      
+      setTimeout(() => {
+        block.classList.add('visible');
+        window.scrollTo({
+          top: block.offsetTop - document.querySelector('.header-bar').offsetHeight,
+          behavior: 'smooth'
+        });
+
+        // Обработка теста (если есть)
+        if (contentBlocks[index].hasQuiz) {
+          const quizOptions = document.querySelectorAll('.quiz-option');
+          const nextBtn = document.getElementById('nextBtn');
+          
+          nextBtn.disabled = true;
+          
+          quizOptions.forEach(option => {
+            option.addEventListener('click', function() {
+              const isCorrect = this.getAttribute('data-correct') === 'true';
+              
+              // Сбрасываем все стили
+              quizOptions.forEach(opt => {
+                opt.classList.remove('correct', 'incorrect');
+              });
+              
+              // Применяем соответствующий стиль
+              if (isCorrect) {
+                this.classList.add('correct');
+              } else {
+                this.classList.add('incorrect');
+                // Находим правильный ответ и подсвечиваем его
+                document.querySelector('.quiz-option[data-correct="true"]').classList.add('correct');
+              }
+              
+              // Показываем обратную связь
+              document.getElementById('quizFeedback').style.display = 'block';
+              
+              // Разблокируем кнопку "Далее"
+              nextBtn.disabled = false;
+            });
+          });
+        }
+      }, 50);
+    }
+
+    function updateProgressBar() {
+      progressBar.style.width = ((currentBlockIndex + 1) / totalBlocks) * 100 + '%';
+    }
+
+    // Обработчики событий
+    startBtn.addEventListener('click', () => {
+      splash.classList.add('hide');
+      setTimeout(() => {
+        mainContent.classList.add('show');
+        addContentBlock(0);
+        updateProgressBar();
+      }, 300);
+    });
+
+    splashExitBtn.addEventListener('click', () => window.location.href = 'index.html');
+    exitBtn.addEventListener('click', () => exitModal.style.display = 'flex');
+    modalExitBtn.addEventListener('click', () => window.location.href = 'index.html');
+    modalStayBtn.addEventListener('click', () => exitModal.style.display = 'none');
+    guideBtn.addEventListener('click', () => window.open('https://kurl.ru/btRup', '_blank'));
+    completionBtn.addEventListener('click', () => window.location.href = 'index.html');
+
+    nextBtn.addEventListener('click', () => {
+      if (nextBtnCooldown) return;
+      
+      nextBtnCooldown = true;
+      nextBtn.disabled = true;
+      
+      if (currentBlockIndex < totalBlocks - 1) {
+        currentBlockIndex++;
+        addContentBlock(currentBlockIndex);
+        updateProgressBar();
+        
+        if (currentBlockIndex === totalBlocks - 1) {
+          nextBtn.textContent = 'Завершить';
+          nextBtn.onclick = function() {
+            nextBtn.disabled = true;
+            nextBtn.style.background = 'var(--disabled)';
+            completeModule();
+          };
+        }
+      }
+      
+      setTimeout(() => {
+        nextBtnCooldown = false;
+        nextBtn.disabled = false;
+      }, 500);
+    });
+
+    // Обработчики для отзывов
+    feedbackOptions.forEach(option => {
+      option.addEventListener('click', () => {
+        if (isFeedbackSubmitted) return;
+        
+        if (option.classList.contains('selected')) {
+          option.classList.remove('selected');
+          selectedReaction = null;
+          feedbackText.style.display = 'none';
+          feedbackSubmit.style.display = 'none';
+          feedbackSkip.style.display = 'block';
+        } else {
+          feedbackOptions.forEach(opt => opt.classList.remove('selected'));
+          option.classList.add('selected');
+          selectedReaction = option.dataset.reaction;
+          feedbackText.style.display = 'block';
+          feedbackSubmit.style.display = 'block';
+          feedbackSkip.style.display = 'none';
+        }
+      });
+    });
+
+    // Инициализация модального окна отзыва
+    feedbackText.style.display = 'none';
+    feedbackSubmit.style.display = 'none';
+    feedbackSkip.style.display = 'block';
+
+    feedbackSubmit.addEventListener('click', async () => {
+      if (!selectedReaction || isFeedbackSubmitted) return;
+      
+      lockFeedbackForm();
+      const success = await sendFeedback(selectedReaction, feedbackText.value.trim());
+      
+      if (success) {
+        feedbackSuccess.style.display = 'block';
+        feedbackSubmit.style.display = 'none';
+        feedbackText.style.display = 'none';
+        feedbackSkip.style.display = 'none';
+        
+        setTimeout(() => {
+          feedbackModal.classList.remove('active');
+          completionModal.classList.add('active');
+          unlockFeedbackForm();
+        }, 1500);
+      } else {
+        alert('Не удалось отправить отзыв. Пожалуйста, попробуйте позже.');
+        unlockFeedbackForm();
+      }
+    });
+
+    feedbackSkip.addEventListener('click', () => {
+      if (isFeedbackSubmitted) return;
+      feedbackModal.classList.remove('active');
+      completionModal.classList.add('active');
+    });
+
+    // Инициализация
+    (async function init() {
+      // Получаем текущий прогресс пользователя
+      userRecordId = await findUserRecord();
+      if (userRecordId) {
+        const response = await fetch(
+          `https://app.nocodb.com/api/${config.apiVersion}/db/data/${config.orgs}/${config.projectName}/${config.tableName}/${userRecordId}`,
+          {
+            headers: { 'xc-token': config.apiToken }
+          }
+        );
+        if (response.ok) {
+          const data = await response.json();
+          userProgress = data.progress || 0;
+        }
+      }
+      
+      // Показываем контент в любом случае
+      if (!isFirstBlockAdded) {
+        addContentBlock(0);
+      }
+    })();
+  </script>
+</body>
+</html>
