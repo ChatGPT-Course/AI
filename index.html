@@ -213,10 +213,6 @@
       overflow: visible;
     }
 
-    .module.current.locked {
-      animation: pulse-disabled 2s infinite ease-in-out;
-    }
-
     @keyframes pulse {
       0%, 100% { 
         transform: scale(1);
@@ -225,17 +221,6 @@
       50% { 
         transform: scale(1.02);
         box-shadow: 0 8px 24px rgba(255, 122, 0, 0.3);
-      }
-    }
-
-    @keyframes pulse-disabled {
-      0%, 100% { 
-        transform: scale(1);
-        box-shadow: 0 4px 16px rgba(158, 158, 158, 0.2);
-      }
-      50% { 
-        transform: scale(1.02);
-        box-shadow: 0 8px 24px rgba(158, 158, 158, 0.3);
       }
     }
 
@@ -251,10 +236,6 @@
       animation: ripple 3s infinite ease-out;
       pointer-events: none;
       z-index: -1;
-    }
-
-    .module.current.locked::after {
-      border-color: rgba(158, 158, 158, 0.3);
     }
 
     @keyframes ripple {
