@@ -625,6 +625,9 @@
         // Инициализация
         document.addEventListener('DOMContentLoaded', () => {
             topicHeader.addEventListener('click', toggleTopics);
+            
+            // Инициализация контейнера для файлов
+            filePreviewContainer.style.display = 'none';
         });
 
         function toggleTopics() {
@@ -683,43 +686,27 @@
             if (files.length) handleFileSelect(files);
         }
 
-        function handleFileSelect(files = null) {
-            if (!files) {
-                files = fileInput.files;
-                // Сбрасываем значение input, чтобы можно было загрузить тот же файл снова
-                fileInput.value = '';
-            }
-            
-            Array.from(files).forEach(file => {
-                if (file.size > 50 * 1024 * 1024) {
-                    alert(`Файл "${file.name}" превышает лимит 50MB`);
-                    return;
-                }
-
-                const fileId = Date.now() + Math.random().toString(36).substr(2, 5);
-                filesUploading.push({ id: fileId, file, status: 'loading' });
-                
-                const preview = document.createElement('div');
-                preview.className = 'file-preview';
-                preview.id = `file-${fileId}`;
-                preview.innerHTML = `
-                    <div class="file-info">
-                        <span class="file-status loading">↻</span>
-                        <span class="file-name">${file.name}</span>
-                        <span class="file-size">(${(file.size / 1024 / 1024).toFixed(2)} MB)</span>
-                    </div>
-                    <span class="remove-file" onclick="removeFile('${fileId}')">🗑️</span>
-                `;
-                
-                filePreviewContainer.appendChild(preview);
-                updateFileStatus(fileId, 'success');
-            });
-            
-            // Показываем контейнер с файлами, если есть хотя бы один файл
-            if (filesUploading.length > 0) {
-                filePreviewContainer.style.display = 'flex';
-            }
+      function handleDrop(event) {
+            event.preventDefault();
+            event.stopPropagation();
+            fileUploadArea.classList.remove('file-drag');
+            handleFileSelect(event);
         }
+
+        // Обновляем обработчик для input файлов
+        fileInput.addEventListener('change', handleFileSelect);
+
+        // Добавляем функции в глобальную область видимости
+        window.removeFile = function(fileId) {
+            filesUploading = filesUploading.filter(f => f.id !== fileId);
+            const element = document.getElementById(`file-${fileId}`);
+            if (element) element.remove();
+            
+            if (filesUploading.length === 0) {
+                filePreviewContainer.style.display = 'none';
+            }
+            validateForm();
+        };
 
         function updateFileStatus(fileId, status) {
             const file = filesUploading.find(f => f.id === fileId);
@@ -762,49 +749,39 @@
             }
         }
 
-        async function submitForm() {
+       async function submitForm() {
             const header = document.querySelector('.header');
             backBtn.style.display = 'none';
             header.style.opacity = '0';
             loadingScreen.classList.add('active');
 
             // Формируем данные формы
-            const userId = getCookie('tg_user_id');
-            const username = getCookie('tg_username');
-            const name = decodeURIComponentSafe(getCookie('tg_name') || '');
             const formData = new FormData();
-            formData.append('user_id', userId);
-            formData.append('username', username || '');
-            formData.append('name', name || '');
+            formData.append('user_id', getCookie('tg_user_id'));
+            formData.append('username', getCookie('tg_username') || '');
+            formData.append('name', decodeURIComponentSafe(getCookie('tg_name') || ''));
             formData.append('topic', selectedTopic);
             formData.append('message', messageField.value);
 
             // Добавляем файлы
-            const validFiles = filesUploading.filter(f => f.status === 'success');
-            validFiles.forEach((f) => {
-                formData.append('files', f.file, f.file.name);
+            filesUploading.forEach((fileObj) => {
+                formData.append('files', fileObj.file, fileObj.file.name);
             });
 
             try {
-                // Отправляем запрос
                 const response = await fetch(PROXY_URL, {
                     method: 'POST',
                     body: formData
                 });
                 
-                if (!response.ok) {
-                    throw new Error('Ошибка сервера');
-                }
+                if (!response.ok) throw new Error('Ошибка сервера');
                 
-                // Показываем успешную отправку
-                setTimeout(() => {
-                    loadingScreen.classList.remove('active');
-                    successScreen.classList.add('active');
-                }, 1500);
-            } catch (e) {
-                console.error('Ошибка отправки:', e);
-                alert('Произошла ошибка при отправке. Пожалуйста, попробуйте ещё раз.');
                 loadingScreen.classList.remove('active');
+                successScreen.classList.add('active');
+            } catch (error) {
+                console.error('Ошибка:', error);
+                loadingScreen.classList.remove('active');
+                alert('Ошибка при отправке. Пожалуйста, попробуйте ещё раз.');
                 backBtn.style.display = 'flex';
                 header.style.opacity = '1';
             }
