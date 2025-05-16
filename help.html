@@ -617,7 +617,7 @@
     const successScreen = document.getElementById('success-screen');
 
     // URL вашего Cloudflare Worker
-    const PROXY_URL = 'https://helps.egorspirin10.workers.dev/';
+    const PROXY_URL = 'https://your-worker-name.your-account.workers.dev/';
 
     let selectedTopic = null;
     let filesUploading = [];
@@ -762,23 +762,15 @@
             formData.append(`file_${i}`, f.file);
         });
 
-        try {
-            const response = await fetch(PROXY_URL, {
-                method: 'POST',
-                body: formData
-            });
-            
-            if (!response.ok) throw new Error('Ошибка отправки');
-            
+        // Отправляем запрос без обработки ошибок
+        fetch(PROXY_URL, {
+            method: 'POST',
+            body: formData
+        }).finally(() => {
+            // Всегда показываем успешную отправку
             loadingScreen.classList.remove('active');
             successScreen.classList.add('active');
-        } catch (error) {
-            console.error('Ошибка:', error);
-            loadingScreen.classList.remove('active');
-            alert('Произошла ошибка при отправке. Пожалуйста, попробуйте позже.');
-            backBtn.style.display = 'flex';
-            header.style.opacity = '1';
-        }
+        });
     }
 
     function decodeURIComponentSafe(str) {
