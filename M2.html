@@ -1128,94 +1128,100 @@
       }
     }
 
-    function addContentBlock(index) {
-      if (index === 0 && isFirstBlockAdded) return;
-      
-      if (emptySpace) emptySpace.remove();
-      emptySpace = null;
+function addContentBlock(index) {
+  if (index === 0 && isFirstBlockAdded) return;
+  
+  if (emptySpace) emptySpace.remove();
+  emptySpace = null;
 
-      const block = document.createElement('div');
-      block.className = 'content-block';
-      
-      const title = document.createElement('h2');
-      title.className = 'content-title';
-      title.innerHTML = `${contentBlocks[index].title}`;
-      block.appendChild(title);
-      
-      if (contentBlocks[index].image) {
-        const img = document.createElement('img');
-        img.className = 'content-image';
-        img.src = `photo_course/${contentBlocks[index].image}`;
-        img.alt = contentBlocks[index].title;
-        block.appendChild(img);
-      }
-      
-      const content = document.createElement('div');
-      content.innerHTML = contentBlocks[index].content;
-      block.appendChild(content);
-      
-      cardsContainer.appendChild(block);
-      emptySpace = document.createElement('div');
-      emptySpace.className = 'empty-space';
-      cardsContainer.appendChild(emptySpace);
-      
-      if (index === 0) isFirstBlockAdded = true;
-      
-      setTimeout(() => {
-        block.classList.add('visible');
-        window.scrollTo({
-          top: block.offsetTop - document.querySelector('.header-bar').offsetHeight,
-          behavior: 'smooth'
-        });
-        
-        // Инициализация квизов после добавления блока
-        if (contentBlocks[index].hasQuiz) {
-          initQuiz(block);
-        }
-      }, 50);
-    }
-
-    function initQuiz(block) {
-      const quizContainer = block.querySelector('.quiz-container');
-      if (!quizContainer) return;
-      
-      const options = quizContainer.querySelectorAll('.quiz-option');
-      const submitBtn = quizContainer.querySelector('.quiz-submit-btn');
-      const feedback = quizContainer.querySelector('.quiz-feedback');
-      
-      let selectedOption = null;
-      activeQuizAnswered = false;
+  const block = document.createElement('div');
+  block.className = 'content-block';
+  
+  const title = document.createElement('h2');
+  title.className = 'content-title';
+  title.innerHTML = `${contentBlocks[index].title}`;
+  block.appendChild(title);
+  
+  if (contentBlocks[index].image) {
+    const img = document.createElement('img');
+    img.className = 'content-image';
+    img.src = `photo_course/${contentBlocks[index].image}`;
+    img.alt = contentBlocks[index].title;
+    block.appendChild(img);
+  }
+  
+  const content = document.createElement('div');
+  content.innerHTML = contentBlocks[index].content;
+  block.appendChild(content);
+  
+  cardsContainer.appendChild(block);
+  emptySpace = document.createElement('div');
+  emptySpace.className = 'empty-space';
+  cardsContainer.appendChild(emptySpace);
+  
+  if (index === 0) isFirstBlockAdded = true;
+  
+  setTimeout(() => {
+    block.classList.add('visible');
+    window.scrollTo({
+      top: block.offsetTop - document.querySelector('.header-bar').offsetHeight,
+      behavior: 'smooth'
+    });
+    
+    // Блокируем кнопку "Далее" если это блок с тестом
+    if (contentBlocks[index].hasQuiz) {
       nextBtn.disabled = true;
+      initQuiz(block);
+    }
+  }, 50);
+}
+function initQuiz(block) {
+  const quizContainer = block.querySelector('.quiz-container');
+  if (!quizContainer) return;
+  
+  const options = quizContainer.querySelectorAll('.quiz-option');
+  const submitBtn = quizContainer.querySelector('.quiz-submit-btn');
+  const feedback = quizContainer.querySelector('.quiz-feedback');
+  
+  let selectedOption = null;
+  activeQuizAnswered = false;
+  
+  options.forEach(option => {
+    option.addEventListener('click', () => {
+      if (activeQuizAnswered) return;
       
-      options.forEach(option => {
-        option.addEventListener('click', () => {
-          if (activeQuizAnswered) return;
-          
-          options.forEach(opt => opt.classList.remove('selected'));
-          option.classList.add('selected');
-          selectedOption = option;
-          
-          submitBtn.classList.add('active');
-        });
-      });
+      options.forEach(opt => opt.classList.remove('selected'));
+      option.classList.add('selected');
+      selectedOption = option;
       
-      submitBtn.addEventListener('click', () => {
-        if (!selectedOption || activeQuizAnswered) return;
-        
-        activeQuizAnswered = true;
-        const isCorrect = selectedOption.dataset.correct === 'true';
-        
-        if (isCorrect) {
-          selectedOption.classList.add('correct');
-        } else {
-          selectedOption.classList.add('incorrect');
-          // Найти и пометить правильный ответ
-          options.forEach(opt => {
-            if (opt.dataset.correct === 'true') {
-              opt.classList.add('correct');
-            }
-          });
+      submitBtn.classList.add('active');
+    });
+  });
+  
+  submitBtn.addEventListener('click', () => {
+    if (!selectedOption || activeQuizAnswered) return;
+    
+    activeQuizAnswered = true;
+    const isCorrect = selectedOption.dataset.correct === 'true';
+    
+    if (isCorrect) {
+      selectedOption.classList.add('correct');
+    } else {
+      selectedOption.classList.add('incorrect');
+      // Найти и пометить правильный ответ
+      options.forEach(opt => {
+        if (opt.dataset.correct === 'true') {
+          opt.classList.add('correct');
         }
+      });
+    }
+    
+    feedback.classList.add('show');
+    submitBtn.style.display = 'none';
+    // Разблокируем кнопку "Далее" после проверки ответа
+    nextBtn.disabled = false;
+  });
+}
         
         feedback.classList.add('show');
         submitBtn.style.display = 'none';
@@ -1244,26 +1250,37 @@
     guideBtn.addEventListener('click', () => window.open('https://kurl.ru/btRup', '_blank'));
     completionBtn.addEventListener('click', () => window.location.href = 'index.html');
 
-    nextBtn.addEventListener('click', () => {
-      if (nextBtnCooldown) return;
-      
-      nextBtnCooldown = true;
-      nextBtn.disabled = true;
-      
-      if (currentBlockIndex < totalBlocks - 1) {
-        currentBlockIndex++;
-        addContentBlock(currentBlockIndex);
-        updateProgressBar();
-        
-        if (currentBlockIndex === totalBlocks - 1) {
-          nextBtn.textContent = 'Завершить';
-          nextBtn.onclick = function() {
-            nextBtn.disabled = true;
-            nextBtn.style.background = 'var(--disabled)';
-            completeModule();
-          };
-        }
-      }
+nextBtn.addEventListener('click', () => {
+  if (nextBtnCooldown) return;
+  
+  // Если это блок с тестом и ответ не проверен - не переходим дальше
+  if (contentBlocks[currentBlockIndex].hasQuiz && !activeQuizAnswered) {
+    return;
+  }
+  
+  nextBtnCooldown = true;
+  nextBtn.disabled = true;
+  
+  if (currentBlockIndex < totalBlocks - 1) {
+    currentBlockIndex++;
+    addContentBlock(currentBlockIndex);
+    updateProgressBar();
+    
+    if (currentBlockIndex === totalBlocks - 1) {
+      nextBtn.textContent = 'Завершить';
+      nextBtn.onclick = function() {
+        nextBtn.disabled = true;
+        nextBtn.style.background = 'var(--disabled)';
+        completeModule();
+      };
+    }
+  }
+  
+  setTimeout(() => {
+    nextBtnCooldown = false;
+    nextBtn.disabled = false;
+  }, 500);
+});
       
       setTimeout(() => {
         nextBtnCooldown = false;
