@@ -29,7 +29,7 @@
     .agent-container {
       width: 90%;
       max-width: 500px;
-      height: 80vh; /* Увеличили высоту */
+      height: 80vh;
       background: white;
       border-radius: 16px;
       overflow: hidden;
@@ -116,7 +116,7 @@
       padding: 0.8rem 1rem;
       border-radius: 12px;
       line-height: 1.4;
-      font-size: 0.9rem; /* Уменьшенный размер текста */
+      font-size: 0.9rem;
     }
     
     .message-ai {
@@ -203,6 +203,12 @@
       0%, 60%, 100% { transform: translateY(0); }
       30% { transform: translateY(-5px); }
     }
+    
+    .error-message {
+      color: #f44336;
+      font-size: 0.8rem;
+      margin-top: 0.5rem;
+    }
   </style>
 </head>
 <body>
@@ -217,7 +223,7 @@
         <div class="message-container">
           <div class="avatar avatar-ai">AI</div>
           <div class="message-content">
-            <div class="message message-ai">Привет! Задай свой вопрос</div>
+            <div class="message message-ai">Привет! Я ваш AI ассистент. Задайте мне любой вопрос.</div>
           </div>
         </div>
       </div>
@@ -240,33 +246,13 @@
     const agentInput = document.getElementById('agentInput');
     const agentSend = document.getElementById('agentSend');
     
+    // URL вашего Cloudflare Worker
+    const WORKER_URL = 'https://openai-proxy.egorspirin10.workers.dev/';
+    
     // Закрытие агента
     agentClose.addEventListener('click', () => {
       window.parent.postMessage('closeAgent', '*');
     });
-    
-    // Отправка сообщения в Cloudflare Worker
-    async function sendToWorker(message) {
-      try {
-        const response = await fetch('https://openai-proxy.egorspirin10.workers.dev/', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json'
-          },
-          body: JSON.stringify({
-            message: message
-          })
-        });
-        
-        if (!response.ok) throw new Error('Ошибка сети');
-        
-        const data = await response.json();
-        return data.response;
-      } catch (error) {
-        console.error('Ошибка:', error);
-        return null;
-      }
-    }
     
     // Показать индикатор набора сообщения
     function showTypingIndicator() {
@@ -306,6 +292,21 @@
       }
     }
     
+    // Показать сообщение об ошибке
+    function showError(message) {
+      const errorContainer = document.createElement('div');
+      errorContainer.className = 'message-container';
+      errorContainer.innerHTML = `
+        <div class="avatar avatar-ai">AI</div>
+        <div class="message-content">
+          <div class="message message-ai">${message}</div>
+          <div class="error-message">Попробуйте еще раз позже</div>
+        </div>
+      `;
+      agentMessages.appendChild(errorContainer);
+      agentMessages.scrollTop = agentMessages.scrollHeight;
+    }
+    
     // Отправка сообщения
     async function sendMessage() {
       const message = agentInput.value.trim();
@@ -324,6 +325,8 @@
       
       // Очищаем поле ввода
       agentInput.value = '';
+      agentInput.disabled = true;
+      agentSend.disabled = true;
       
       // Прокручиваем вниз
       agentMessages.scrollTop = agentMessages.scrollHeight;
@@ -333,10 +336,27 @@
       
       try {
         // Отправляем сообщение в Cloudflare Worker
-        const aiResponse = await sendToWorker(message);
+        const response = await fetch(WORKER_URL, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({
+            message: message
+          })
+        });
         
         // Удаляем индикатор набора
         removeTypingIndicator(typingIndicator);
+        
+        if (!response.ok) {
+          const errorData = await response.json();
+          console.error('Ошибка API:', errorData);
+          showError('Произошла ошибка при обработке запроса');
+          return;
+        }
+        
+        const data = await response.json();
         
         // Добавляем ответ ИИ
         const aiMessageContainer = document.createElement('div');
@@ -344,7 +364,7 @@
         aiMessageContainer.innerHTML = `
           <div class="avatar avatar-ai">AI</div>
           <div class="message-content">
-            <div class="message message-ai">${aiResponse || 'Не удалось получить ответ'}</div>
+            <div class="message message-ai">${data.response || 'Не удалось получить ответ'}</div>
           </div>
         `;
         agentMessages.appendChild(aiMessageContainer);
@@ -352,17 +372,12 @@
       } catch (error) {
         // Удаляем индикатор набора
         removeTypingIndicator(typingIndicator);
-        
-        // Добавляем сообщение об ошибке
-        const errorMessageContainer = document.createElement('div');
-        errorMessageContainer.className = 'message-container';
-        errorMessageContainer.innerHTML = `
-          <div class="avatar avatar-ai">AI</div>
-          <div class="message-content">
-            <div class="message message-ai">Ошибка соединения с сервером</div>
-          </div>
-        `;
-        agentMessages.appendChild(errorMessageContainer);
+        console.error('Ошибка:', error);
+        showError('Ошибка соединения с сервером');
+      } finally {
+        agentInput.disabled = false;
+        agentSend.disabled = false;
+        agentInput.focus();
       }
       
       // Прокручиваем вниз
