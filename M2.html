@@ -17,8 +17,6 @@
       --blue: #4285F4;
       --success: #4CAF50;
       --error: #F44336;
-      --warning: #FF9800;
-      --info: #2196F3;
       --red: #F44336;
     }
     body {
@@ -268,12 +266,6 @@
       box-shadow: 0 2px 8px rgba(0,0,0,0.1);
       border: 1px solid #eee;
       display: block;
-    }
-    .divider {
-      height: 1px;
-      background-color: #ddd;
-      margin: 1.5rem 0;
-      width: 100%;
     }
     .empty-space {
       height: 50vh;
@@ -533,18 +525,6 @@
       top: 50%;
       transform: translateY(-50%);
       font-size: 1.2rem;
-    }
-    .quiz-option.selected::before {
-      content: '◉';
-      color: var(--orange);
-    }
-    .quiz-option.correct::before {
-      content: '✓';
-      color: var(--success);
-    }
-    .quiz-option.incorrect::before {
-      content: '✕';
-      color: var(--error);
     }
     .quiz-feedback {
       margin-top: 1rem;
@@ -1104,8 +1084,7 @@
         return;
       }
 
-      // Если прогресс был 2 - показываем отзыв
-      if (userProgress === 2) {
+      if (userProgress === 2 || userProgress === 0) {
         const success = await updateProgress();
         if (success) {
           setTimeout(() => {
@@ -1114,7 +1093,7 @@
         } else {
           alert('Не удалось сохранить прогресс. Пожалуйста, попробуйте позже.');
         }
-      } 
+      }
       // Если прогресс был 0 (новый пользователь) - тоже показываем отзыв
       else if (userProgress === 0) {
         const success = await updateProgress();
