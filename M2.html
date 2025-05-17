@@ -1115,7 +1115,7 @@
 
     function addContentBlock(index) {
       if (index === 0 && isFirstBlockAdded) return;
-      activeQuizAnswered = false;
+      
       if (emptySpace) emptySpace.remove();
       emptySpace = null;
 
@@ -1160,53 +1160,53 @@
       }, 50);
     }
 
-function initQuiz(block) {
-  const quizContainer = block.querySelector('.quiz-container');
-  if (!quizContainer) return;
-  
-  const options = quizContainer.querySelectorAll('.quiz-option');
-  const submitBtn = quizContainer.querySelector('.quiz-submit-btn');
-  const feedback = quizContainer.querySelector('.quiz-feedback');
-  
-  let selectedOption = null;
-  activeQuizAnswered = false;
-  nextBtn.disabled = true; // Блокируем кнопку "Далее" при появлении теста
-  
-  options.forEach(option => {
-    option.addEventListener('click', () => {
-      if (activeQuizAnswered) return;
+    function initQuiz(block) {
+      const quizContainer = block.querySelector('.quiz-container');
+      if (!quizContainer) return;
       
-      options.forEach(opt => opt.classList.remove('selected'));
-      option.classList.add('selected');
-      selectedOption = option;
+      const options = quizContainer.querySelectorAll('.quiz-option');
+      const submitBtn = quizContainer.querySelector('.quiz-submit-btn');
+      const feedback = quizContainer.querySelector('.quiz-feedback');
       
-      submitBtn.classList.add('active');
-    });
-  });
-  
-  submitBtn.addEventListener('click', () => {
-    if (!selectedOption || activeQuizAnswered) return;
-    
-    activeQuizAnswered = true;
-    const isCorrect = selectedOption.dataset.correct === 'true';
-    
-    if (isCorrect) {
-      selectedOption.classList.add('correct');
-    } else {
-      selectedOption.classList.add('incorrect');
-      // Найти и пометить правильный ответ
-      options.forEach(opt => {
-        if (opt.dataset.correct === 'true') {
-          opt.classList.add('correct');
+      let selectedOption = null;
+      activeQuizAnswered = false;
+      nextBtn.disabled = true;
+      
+      options.forEach(option => {
+        option.addEventListener('click', () => {
+          if (activeQuizAnswered) return;
+          
+          options.forEach(opt => opt.classList.remove('selected'));
+          option.classList.add('selected');
+          selectedOption = option;
+          
+          submitBtn.classList.add('active');
+        });
+      });
+      
+      submitBtn.addEventListener('click', () => {
+        if (!selectedOption || activeQuizAnswered) return;
+        
+        activeQuizAnswered = true;
+        const isCorrect = selectedOption.dataset.correct === 'true';
+        
+        if (isCorrect) {
+          selectedOption.classList.add('correct');
+        } else {
+          selectedOption.classList.add('incorrect');
+          // Найти и пометить правильный ответ
+          options.forEach(opt => {
+            if (opt.dataset.correct === 'true') {
+              opt.classList.add('correct');
+            }
+          });
         }
+        
+        feedback.classList.add('show');
+        submitBtn.style.display = 'none';
+        nextBtn.disabled = false;
       });
     }
-    
-    feedback.classList.add('show');
-    submitBtn.style.display = 'none';
-    nextBtn.disabled = false; // Разблокируем кнопку "Далее" после проверки ответа
-  });
-}
 
     function updateProgressBar() {
       progressBar.style.width = ((currentBlockIndex + 1) / totalBlocks) * 100 + '%';
