@@ -17,6 +17,8 @@
       --blue: #4285F4;
       --success: #4CAF50;
       --error: #F44336;
+      --warning: #FF9800;
+      --info: #2196F3;
       --red: #F44336;
     }
     body {
@@ -267,6 +269,12 @@
       border: 1px solid #eee;
       display: block;
     }
+    .divider {
+      height: 1px;
+      background-color: #ddd;
+      margin: 1.5rem 0;
+      width: 100%;
+    }
     .empty-space {
       height: 50vh;
       width: 100%;
@@ -470,18 +478,6 @@
       margin: 1.5rem 0;
       position: relative;
     }
-    .quiz-label {
-      position: absolute;
-      top: -10px;
-      right: 15px;
-      background: var(--orange);
-      color: white;
-      padding: 4px 12px;
-      border-radius: 20px;
-      font-size: 0.8rem;
-      font-weight: bold;
-      box-shadow: 0 2px 4px rgba(0,0,0,0.2);
-    }
     .quiz-question {
       font-weight: 600;
       margin-bottom: 1rem;
@@ -491,7 +487,6 @@
       display: flex;
       flex-direction: column;
       gap: 0.8rem;
-      margin-bottom: 1.5rem;
     }
     .quiz-option {
       padding: 0.8rem 1rem;
@@ -526,6 +521,18 @@
       transform: translateY(-50%);
       font-size: 1.2rem;
     }
+    .quiz-option.selected::before {
+      content: '◉';
+      color: var(--orange);
+    }
+    .quiz-option.correct::before {
+      content: '✓';
+      color: var(--success);
+    }
+    .quiz-option.incorrect::before {
+      content: '✕';
+      color: var(--error);
+    }
     .quiz-feedback {
       margin-top: 1rem;
       padding: 0.8rem;
@@ -538,6 +545,9 @@
       display: block;
     }
     .quiz-submit-btn {
+      position: absolute;
+      right: 1.2rem;
+      bottom: 1.2rem;
       padding: 0.6rem 1.2rem;
       background: var(--disabled);
       color: white;
@@ -546,8 +556,6 @@
       font-weight: 600;
       cursor: pointer;
       transition: all 0.3s;
-      float: right;
-      margin-top: 0.5rem;
     }
     .quiz-submit-btn.active {
       background: var(--success);
@@ -746,7 +754,6 @@
       {
         title: "Давайте закрепим",
         content: `<div class="quiz-container" id="quizBlock1">
-          <div class="quiz-label">ТЕСТ</div>
           <div class="quiz-question"><b>В каком из вариантов ChatGPT может быть реально полезен в повседневной жизни?</b></div>
           <div class="quiz-options">
             <div class="quiz-option" data-correct="false">Только для написания научных статей</div>
@@ -775,7 +782,6 @@
         content: `📌 Чем понятнее ваш запрос, тем точнее будет его ответ. Если формулировка слишком общая или расплывчатая, ChatGPT может ошибиться или даже выдумать информацию, которой не существует.<br><br>
         
         <div class="quiz-container" id="quizBlock">
-          <div class="quiz-label">ТЕСТ</div>
           <div class="quiz-question">🎯 Что сделает ChatGPT, если ваш запрос будет нечетким или неточным?</div>
           <div class="quiz-options">
             <div class="quiz-option" data-correct="false">Ответит случайно</div>
@@ -857,7 +863,6 @@
       {
         title: "Давайте закрепим",
         content: `<div class="quiz-container" id="quizBlock2">
-          <div class="quiz-label">ТЕСТ</div>
           <div class="quiz-question"><b>Что лучше всего делать, если ChatGPT дал неточный ответ?</b></div>
           <div class="quiz-options">
             <div class="quiz-option" data-correct="false">Остановить диалог и начать заново</div>
@@ -1084,7 +1089,8 @@
         return;
       }
 
-      if (userProgress === 2 || userProgress === 0) {
+      // Если прогресс был 2 - показываем отзыв
+      if (userProgress === 2) {
         const success = await updateProgress();
         if (success) {
           setTimeout(() => {
@@ -1093,7 +1099,7 @@
         } else {
           alert('Не удалось сохранить прогресс. Пожалуйста, попробуйте позже.');
         }
-      }
+      } 
       // Если прогресс был 0 (новый пользователь) - тоже показываем отзыв
       else if (userProgress === 0) {
         const success = await updateProgress();
