@@ -1352,6 +1352,9 @@
       setTimeout(() => {
         nextBtnCooldown = false;
         nextBtn.disabled = false;
+        if (!document.querySelector('.quiz-container:not(.answered)')) {
+          nextBtn.disabled = false;
+        }
       }, 500);
     });
 
