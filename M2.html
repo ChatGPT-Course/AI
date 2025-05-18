@@ -1238,6 +1238,7 @@
     }
 
     function initQuiz(block) {
+      nextBtn.disabled = true; // Блокируем кнопку "Далее" при появлении теста
       const quizContainer = block.querySelector('.quiz-container');
       if (!quizContainer) return;
       
