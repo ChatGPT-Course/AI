@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>ChatGPT mini test app</title>
+  <title>AI Assistant</title>
   <style>
     * {
       box-sizing: border-box;
@@ -12,30 +12,19 @@
       font-family: 'Segoe UI', 'Roboto', Arial, sans-serif;
     }
     
-    .agent-overlay {
-      position: fixed;
-      top: 0;
-      left: 0;
-      right: 0;
-      bottom: 0;
-      background: rgba(0, 0, 0, 0.5);
-      backdrop-filter: blur(5px);
-      z-index: 1000;
-      display: flex;
-      justify-content: center;
-      align-items: center;
+    body {
+      background: transparent;
+      height: 100vh;
+      overflow: hidden;
     }
     
     .agent-container {
-      width: 90%;
-      max-width: 500px;
-      height: 80vh;
+      width: 100%;
+      height: 100vh;
       background: white;
-      border-radius: 16px;
-      overflow: hidden;
       display: flex;
       flex-direction: column;
-      box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+      position: relative;
     }
     
     .agent-header {
@@ -45,6 +34,9 @@
       display: flex;
       justify-content: space-between;
       align-items: center;
+      position: sticky;
+      top: 0;
+      z-index: 10;
     }
     
     .agent-title {
@@ -58,8 +50,8 @@
       color: white;
       font-size: 1.5rem;
       cursor: pointer;
-      width: 30px;
-      height: 30px;
+      width: 36px;
+      height: 36px;
       display: flex;
       align-items: center;
       justify-content: center;
@@ -78,6 +70,7 @@
       display: flex;
       flex-direction: column;
       gap: 1rem;
+      background: #f9f9f9;
     }
     
     .message-container {
@@ -87,8 +80,8 @@
     }
     
     .avatar {
-      width: 32px;
-      height: 32px;
+      width: 36px;
+      height: 36px;
       border-radius: 50%;
       flex-shrink: 0;
       display: flex;
@@ -100,7 +93,7 @@
     
     .avatar-ai {
       background: linear-gradient(135deg, #00d2ff, #3a7bd5);
-      color: #FF9800;
+      color: white;
     }
     
     .avatar-user {
@@ -109,19 +102,20 @@
     }
     
     .message-content {
-      max-width: calc(100% - 40px);
+      max-width: calc(100% - 50px);
     }
     
     .message {
       padding: 0.8rem 1rem;
       border-radius: 12px;
       line-height: 1.4;
-      font-size: 0.9rem;
+      font-size: 0.95rem;
     }
     
     .message-ai {
-      background: #f1f1f1;
-      border-bottom-left-radius: 4px;
+      background: white;
+      border: 1px solid #eee;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.05);
     }
     
     .message-user {
@@ -135,6 +129,9 @@
       border-top: 1px solid #eee;
       display: flex;
       gap: 0.5rem;
+      background: white;
+      position: sticky;
+      bottom: 0;
     }
     
     .agent-input {
@@ -142,7 +139,7 @@
       padding: 0.8rem 1rem;
       border: 1px solid #ddd;
       border-radius: 24px;
-      font-size: 0.9rem;
+      font-size: 0.95rem;
       outline: none;
     }
     
@@ -155,13 +152,14 @@
       color: white;
       border: none;
       border-radius: 50%;
-      width: 44px;
-      height: 44px;
+      width: 48px;
+      height: 48px;
       display: flex;
       align-items: center;
       justify-content: center;
       cursor: pointer;
       transition: background 0.2s;
+      flex-shrink: 0;
     }
     
     .agent-send:hover {
@@ -169,8 +167,8 @@
     }
     
     .agent-send svg {
-      width: 20px;
-      height: 20px;
+      width: 22px;
+      height: 22px;
     }
     
     .typing-indicator {
@@ -212,31 +210,29 @@
   </style>
 </head>
 <body>
-  <div class="agent-overlay">
-    <div class="agent-container">
-      <div class="agent-header">
-        <div class="agent-title">ChatGPT mini test app</div>
-        <button class="agent-close" id="agentClose">×</button>
-      </div>
-      
-      <div class="agent-messages" id="agentMessages">
-        <div class="message-container">
-          <div class="avatar avatar-ai">AI</div>
-          <div class="message-content">
-            <div class="message message-ai">Привет! Я ваш AI ассистент. Задайте мне любой вопрос.</div>
-          </div>
+  <div class="agent-container">
+    <div class="agent-header">
+      <div class="agent-title">AI Assistant</div>
+      <button class="agent-close" id="agentClose">×</button>
+    </div>
+    
+    <div class="agent-messages" id="agentMessages">
+      <div class="message-container">
+        <div class="avatar avatar-ai">AI</div>
+        <div class="message-content">
+          <div class="message message-ai">Привет! Я ваш AI ассистент. Задайте мне любой вопрос.</div>
         </div>
       </div>
-      
-      <div class="agent-input-container">
-        <input type="text" class="agent-input" id="agentInput" placeholder="Напишите сообщение..." autocomplete="off">
-        <button class="agent-send" id="agentSend">
-          <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-            <path d="M22 2L11 13" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-            <path d="M22 2L15 22L11 13L2 9L22 2Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-          </svg>
-        </button>
-      </div>
+    </div>
+    
+    <div class="agent-input-container">
+      <input type="text" class="agent-input" id="agentInput" placeholder="Напишите сообщение..." autocomplete="off">
+      <button class="agent-send" id="agentSend">
+        <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <path d="M22 2L11 13" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+          <path d="M22 2L15 22L11 13L2 9L22 2Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+      </button>
     </div>
   </div>
 
@@ -248,6 +244,53 @@
     
     // URL вашего Cloudflare Worker
     const WORKER_URL = 'https://openai-proxy.egorspirin10.workers.dev/';
+    
+    // Сохраняем историю сообщений
+    let chatHistory = [];
+    
+    // Загрузка истории при открытии
+    function loadChatHistory() {
+      const savedHistory = localStorage.getItem('aiChatHistory');
+      if (savedHistory) {
+        chatHistory = JSON.parse(savedHistory);
+        renderChatHistory();
+      }
+    }
+    
+    // Сохранение истории
+    function saveChatHistory() {
+      localStorage.setItem('aiChatHistory', JSON.stringify(chatHistory));
+    }
+    
+    // Отрисовка истории
+    function renderChatHistory() {
+      agentMessages.innerHTML = '';
+      chatHistory.forEach(msg => {
+        const messageContainer = document.createElement('div');
+        messageContainer.className = 'message-container';
+        
+        if (msg.role === 'ai') {
+          messageContainer.innerHTML = `
+            <div class="avatar avatar-ai">AI</div>
+            <div class="message-content">
+              <div class="message message-ai">${msg.content}</div>
+            </div>
+          `;
+        } else {
+          messageContainer.innerHTML = `
+            <div class="avatar avatar-user">Вы</div>
+            <div class="message-content">
+              <div class="message message-user">${msg.content}</div>
+            </div>
+          `;
+        }
+        
+        agentMessages.appendChild(messageContainer);
+      });
+      
+      // Прокручиваем вниз
+      agentMessages.scrollTop = agentMessages.scrollHeight;
+    }
     
     // Закрытие агента
     agentClose.addEventListener('click', () => {
@@ -305,6 +348,13 @@
       `;
       agentMessages.appendChild(errorContainer);
       agentMessages.scrollTop = agentMessages.scrollHeight;
+      
+      // Добавляем в историю
+      chatHistory.push({
+        role: 'ai',
+        content: `${message} (Ошибка: Попробуйте еще раз позже)`
+      });
+      saveChatHistory();
     }
     
     // Отправка сообщения
@@ -322,6 +372,13 @@
         </div>
       `;
       agentMessages.appendChild(userMessageContainer);
+      
+      // Добавляем в историю
+      chatHistory.push({
+        role: 'user',
+        content: message
+      });
+      saveChatHistory();
       
       // Очищаем поле ввода
       agentInput.value = '';
@@ -342,7 +399,8 @@
             'Content-Type': 'application/json'
           },
           body: JSON.stringify({
-            message: message
+            message: message,
+            history: chatHistory.filter(msg => msg.role === 'user' || msg.role === 'ai')
           })
         });
         
@@ -369,6 +427,13 @@
         `;
         agentMessages.appendChild(aiMessageContainer);
         
+        // Добавляем в историю
+        chatHistory.push({
+          role: 'ai',
+          content: data.response || 'Не удалось получить ответ'
+        });
+        saveChatHistory();
+        
       } catch (error) {
         // Удаляем индикатор набора
         removeTypingIndicator(typingIndicator);
@@ -393,8 +458,11 @@
       }
     });
     
-    // Фокус на поле ввода при загрузке
-    agentInput.focus();
+    // Загружаем историю при загрузке
+    document.addEventListener('DOMContentLoaded', () => {
+      loadChatHistory();
+      agentInput.focus();
+    });
   </script>
 </body>
 </html>
