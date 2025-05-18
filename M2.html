@@ -218,7 +218,6 @@
       width: 100%;
       display: flex;
       justify-content: center;
-      gap: 0.8rem;
       z-index: 2;
       padding: 0 1rem;
       box-sizing: border-box;
@@ -243,22 +242,6 @@
       background: var(--disabled);
       cursor: not-allowed;
       transform: none !important;
-    }
-    .guide-btn {
-      padding: 0.8rem 1rem;
-      font-size: 0.9rem;
-      background: linear-gradient(90deg, var(--blue), #3367D6);
-      color: white;
-      border: none;
-      border-radius: 2rem;
-      cursor: pointer;
-      font-weight: 600;
-      box-shadow: 0 4px 12px rgba(66, 133, 244, 0.3);
-      transition: all 0.3s;
-      min-width: 120px;
-    }
-    .guide-btn:hover {
-      transform: scale(1.05);
     }
     .content-image {
       width: 100%;
@@ -706,7 +689,6 @@
     
     <div class="buttons-container">
       <button class="next-btn" id="nextBtn">Далее</button>
-      <button class="guide-btn" id="guideBtn"><span class="emoji">🔗</span> Детальный гайд</button>
     </div>
     
     <div id="exitModal" style="display:none; position:fixed; z-index:100; left:0; top:0; width:100vw; height:100vh; background:rgba(0,0,0,0.25); align-items:center; justify-content:center;">
@@ -1335,7 +1317,6 @@
     exitBtn.addEventListener('click', () => exitModal.style.display = 'flex');
     modalExitBtn.addEventListener('click', () => window.location.href = 'index.html');
     modalStayBtn.addEventListener('click', () => exitModal.style.display = 'none');
-    guideBtn.addEventListener('click', () => window.open('https://kurl.ru/btRup', '_blank'));
     completionBtn.addEventListener('click', () => window.location.href = 'index.html');
     aiChatClose.addEventListener('click', closeAIChat);
 
