@@ -455,12 +455,13 @@
 
     /* Quiz styles */
     .quiz-container {
-      background: #f5f5f5;
-      border-radius: 12px;
-      padding: 1.2rem;
-      margin: 1.5rem 0;
-      position: relative;
-    }
+    background: #f5f5f5;
+    border-radius: 12px;
+    padding: 1.2rem;
+    margin: 1.5rem 0;
+    position: relative;
+    padding-bottom: 3rem; /* Добавлено - место для кнопки */
+  }
     .quiz-question {
       font-weight: 600;
       margin-bottom: 1rem;
@@ -531,7 +532,7 @@
       position: absolute;
       right: 1.2rem;
       bottom: 1.2rem;
-      padding: 0.6rem 1.2rem;
+      padding: 0.5rem 1rem;
       background: var(--disabled);
       color: white;
       border: none;
@@ -539,6 +540,8 @@
       font-weight: 600;
       cursor: pointer;
       transition: all 0.3s;
+      margin-top: 1rem; /* Добавлено */
+      float: right; /* Добавлено */
     }
     .quiz-submit-btn.active {
       background: var(--success);
