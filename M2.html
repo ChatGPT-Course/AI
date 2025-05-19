@@ -459,8 +459,7 @@
       border-radius: 12px;
       padding: 1.2rem;
       margin: 1.5rem 0;
-      display: flex;
-      flex-direction: column;
+      position: relative;
     }
     .quiz-question {
       font-weight: 600;
@@ -529,11 +528,9 @@
       display: block;
     }
     .quiz-submit-btn {
-      align-self: flex-end;
-      margin: 1rem 0 0 0;
-      position: static;
-      right: auto;
-      bottom: auto;
+      position: absolute;
+      right: 1.2rem;
+      bottom: 1.2rem;
       padding: 0.6rem 1.2rem;
       background: var(--disabled);
       color: white;
@@ -614,171 +611,6 @@
       align-items: center;
       justify-content: center;
       box-shadow: 0 2px 10px rgba(0,0,0,0.2);
-    }
-
-    /* AI Agent Styles */
-    .agent-container {
-      width: 100%;
-      height: 100vh;
-      background: white;
-      display: flex;
-      flex-direction: column;
-      position: relative;
-    }
-    .agent-header {
-      padding: 1rem;
-      background: #4285F4;
-      color: white;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      position: sticky;
-      top: 0;
-      z-index: 10;
-    }
-    .agent-title {
-      font-weight: 600;
-      font-size: 1.2rem;
-    }
-    .agent-close {
-      background: none;
-      border: none;
-      color: white;
-      font-size: 1.5rem;
-      cursor: pointer;
-      width: 36px;
-      height: 36px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      border-radius: 50%;
-      transition: background 0.2s;
-    }
-    .agent-close:hover {
-      background: rgba(255,255,255,0.2);
-    }
-    .agent-messages {
-      flex: 1;
-      padding: 1rem;
-      overflow-y: auto;
-      display: flex;
-      flex-direction: column;
-      gap: 1rem;
-      background: #f9f9f9;
-    }
-    .message-container {
-      display: flex;
-      gap: 0.8rem;
-      max-width: 100%;
-    }
-    .avatar {
-      width: 36px;
-      height: 36px;
-      border-radius: 50%;
-      flex-shrink: 0;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-weight: bold;
-      font-size: 14px;
-    }
-    .avatar-ai {
-      background: linear-gradient(135deg, #00d2ff, #3a7bd5);
-      color: white;
-    }
-    .avatar-user {
-      background: #e0e0e0;
-      color: #333;
-    }
-    .message-content {
-      max-width: calc(100% - 50px);
-    }
-    .message {
-      padding: 0.8rem 1rem;
-      border-radius: 12px;
-      line-height: 1.4;
-      font-size: 0.95rem;
-    }
-    .message-ai {
-      background: white;
-      border: 1px solid #eee;
-      box-shadow: 0 1px 3px rgba(0,0,0,0.05);
-    }
-    .message-user {
-      background: #4285F4;
-      color: white;
-      border-bottom-right-radius: 4px;
-    }
-    .agent-input-container {
-      padding: 1rem;
-      border-top: 1px solid #eee;
-      display: flex;
-      gap: 0.5rem;
-      background: white;
-      position: sticky;
-      bottom: 0;
-    }
-    .agent-input {
-      flex: 1;
-      padding: 0.8rem 1rem;
-      border: 1px solid #ddd;
-      border-radius: 24px;
-      font-size: 0.95rem;
-      outline: none;
-    }
-    .agent-input:focus {
-      border-color: #4285F4;
-    }
-    .agent-send {
-      background: #4285F4;
-      color: white;
-      border: none;
-      border-radius: 50%;
-      width: 48px;
-      height: 48px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      cursor: pointer;
-      transition: background 0.2s;
-      flex-shrink: 0;
-    }
-    .agent-send:hover {
-      background: #3367d6;
-    }
-    .agent-send svg {
-      width: 22px;
-      height: 22px;
-    }
-    .typing-indicator {
-      display: inline-flex;
-      gap: 4px;
-      align-items: center;
-    }
-    .typing-dot {
-      width: 8px;
-      height: 8px;
-      background: #888;
-      border-radius: 50%;
-      animation: typingAnimation 1.4s infinite ease-in-out;
-    }
-    .typing-dot:nth-child(1) {
-      animation-delay: 0s;
-    }
-    .typing-dot:nth-child(2) {
-      animation-delay: 0.2s;
-    }
-    .typing-dot:nth-child(3) {
-      animation-delay: 0.4s;
-    }
-    @keyframes typingAnimation {
-      0%, 60%, 100% { transform: translateY(0); }
-      30% { transform: translateY(-5px); }
-    }
-    .error-message {
-      color: #f44336;
-      font-size: 0.8rem;
-      margin-top: 0.5rem;
     }
 
     @media (max-width: 600px) {
@@ -902,31 +734,8 @@
 
   <!-- AI Chat Modal -->
   <div class="ai-chat-modal" id="aiChatModal">
-    <div class="agent-container">
-      <div class="agent-header">
-        <div class="agent-title">AI Assistant</div>
-        <button class="agent-close" id="agentClose">×</button>
-      </div>
-      
-      <div class="agent-messages" id="agentMessages">
-        <div class="message-container">
-          <div class="avatar avatar-ai">AI</div>
-          <div class="message-content">
-            <div class="message message-ai">Привет! Я ваш AI ассистент. Задайте мне любой вопрос.</div>
-          </div>
-        </div>
-      </div>
-      
-      <div class="agent-input-container">
-        <input type="text" class="agent-input" id="agentInput" placeholder="Напишите сообщение..." autocomplete="off">
-        <button class="agent-send" id="agentSend">
-          <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-            <path d="M22 2L11 13" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-            <path d="M22 2L15 22L11 13L2 9L22 2Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-          </svg>
-        </button>
-      </div>
-    </div>
+    <iframe class="ai-chat-iframe" id="aiChatIframe" src="about:blank"></iframe>
+    <button class="ai-chat-close" id="aiChatClose">×</button>
   </div>
 
 <script>
@@ -962,10 +771,8 @@
     const feedbackSkip = document.getElementById('feedbackSkip');
     const feedbackSuccess = document.getElementById('feedbackSuccess');
     const aiChatModal = document.getElementById('aiChatModal');
-    const agentClose = document.getElementById('agentClose');
-    const agentMessages = document.getElementById('agentMessages');
-    const agentInput = document.getElementById('agentInput');
-    const agentSend = document.getElementById('agentSend');
+    const aiChatIframe = document.getElementById('aiChatIframe');
+    const aiChatClose = document.getElementById('aiChatClose');
 
     // Все контентные блоки
     const contentBlocks = [
@@ -1430,252 +1237,105 @@
       }, 50);
     }
 
-    function initQuiz(block) {
-      nextBtn.disabled = true; // Блокируем кнопку "Далее" при появлении теста
-      const quizContainer = block.querySelector('.quiz-container');
-      if (!quizContainer) return;
+function initQuiz(block) {
+  nextBtn.disabled = true; // Блокируем кнопку "Далее" при появлении теста
+  const quizContainer = block.querySelector('.quiz-container');
+  if (!quizContainer) return;
+  
+  const options = quizContainer.querySelectorAll('.quiz-option');
+  const submitBtn = quizContainer.querySelector('.quiz-submit-btn');
+  const feedback = quizContainer.querySelector('.quiz-feedback');
+  
+  let selectedOption = null;
+  activeQuizAnswered = false;
+  
+  options.forEach(option => {
+    option.addEventListener('click', () => {
+      if (activeQuizAnswered) return;
       
-      const options = quizContainer.querySelectorAll('.quiz-option');
-      const submitBtn = quizContainer.querySelector('.quiz-submit-btn');
-      const feedback = quizContainer.querySelector('.quiz-feedback');
+      options.forEach(opt => opt.classList.remove('selected'));
+      option.classList.add('selected');
+      selectedOption = option;
       
-      let selectedOption = null;
-      activeQuizAnswered = false;
-      
-      options.forEach(option => {
-        option.addEventListener('click', () => {
-          if (activeQuizAnswered) return;
-          
-          options.forEach(opt => opt.classList.remove('selected'));
-          option.classList.add('selected');
-          selectedOption = option;
-          
-          submitBtn.classList.add('active');
-        });
-      });
-      
-      submitBtn.addEventListener('click', () => {
-        if (!selectedOption || activeQuizAnswered) return;
-        
-        activeQuizAnswered = true;
-        const isCorrect = selectedOption.dataset.correct === 'true';
-        
-        if (isCorrect) {
-          selectedOption.classList.add('correct');
-        } else {
-          selectedOption.classList.add('incorrect');
-          // Найти и пометить правильный ответ
-          options.forEach(opt => {
-            if (opt.dataset.correct === 'true') {
-              opt.classList.add('correct');
-            }
-          });
+      submitBtn.classList.add('active');
+    });
+  });
+  
+  submitBtn.addEventListener('click', () => {
+    if (!selectedOption || activeQuizAnswered) return;
+    
+    activeQuizAnswered = true;
+    const isCorrect = selectedOption.dataset.correct === 'true';
+    
+    if (isCorrect) {
+      selectedOption.classList.add('correct');
+    } else {
+      selectedOption.classList.add('incorrect');
+      // Найти и пометить правильный ответ
+      options.forEach(opt => {
+        if (opt.dataset.correct === 'true') {
+          opt.classList.add('correct');
         }
-        
-        feedback.classList.add('show');
-        submitBtn.style.display = 'none';
-        nextBtn.disabled = false; // Разблокируем только после ответа
       });
     }
+    
+    feedback.classList.add('show');
+    submitBtn.style.display = 'none';
+    nextBtn.disabled = false; // Разблокируем только после ответа
+  });
+}
 
-    // AI Chat Agent Logic
-    let chatHistory = [];
-    const WORKER_URL = 'https://openai-proxy.egorspirin10.workers.dev/';
+nextBtn.addEventListener('click', () => {
+  if (nextBtnCooldown || nextBtn.disabled) return;
+  
+  // Проверяем, есть ли активный тест, на который не ответили
+  const activeQuiz = document.querySelector('.quiz-container:not(.answered)');
+  if (activeQuiz && !activeQuizAnswered) {
+    return;
+  }
+  
+  nextBtnCooldown = true;
+  nextBtn.disabled = true;
+  
+  if (currentBlockIndex < totalBlocks - 1) {
+    currentBlockIndex++;
+    addContentBlock(currentBlockIndex);
+    updateProgressBar();
+    
+    if (currentBlockIndex === totalBlocks - 1) {
+      nextBtn.textContent = 'Завершить';
+      nextBtn.onclick = function() {
+        nextBtn.disabled = true;
+        nextBtn.style.background = 'var(--disabled)';
+        completeModule();
+      };
+    }
+  }
+  
+  setTimeout(() => {
+    nextBtnCooldown = false;
+    // Не разблокируем кнопку, если есть активный тест без ответа
+    const hasUnansweredQuiz = document.querySelector('.quiz-container:not(.answered)') && !activeQuizAnswered;
+    nextBtn.disabled = hasUnansweredQuiz;
+  }, 500);
+});
 
-    // Загрузка истории чата
-    function loadChatHistory() {
-      const savedHistory = localStorage.getItem('aiChatHistory');
-      if (savedHistory) {
-        chatHistory = JSON.parse(savedHistory);
-        renderChatHistory();
-      }
+    function updateProgressBar() {
+      progressBar.style.width = ((currentBlockIndex + 1) / totalBlocks) * 100 + '%';
     }
 
-    // Сохранение истории чата
-    function saveChatHistory() {
-      localStorage.setItem('aiChatHistory', JSON.stringify(chatHistory));
+    // Функция для открытия чата ИИ
+    function openAIChat() {
+      aiChatIframe.src = 'agent.html';
+      aiChatModal.classList.add('active');
+      document.body.style.overflow = 'hidden';
     }
 
-    // Отрисовка истории чата
-    function renderChatHistory() {
-      agentMessages.innerHTML = '';
-      chatHistory.forEach(msg => {
-        const messageContainer = document.createElement('div');
-        messageContainer.className = 'message-container';
-        
-        if (msg.role === 'ai') {
-          messageContainer.innerHTML = `
-            <div class="avatar avatar-ai">AI</div>
-            <div class="message-content">
-              <div class="message message-ai">${msg.content}</div>
-            </div>
-          `;
-        } else {
-          messageContainer.innerHTML = `
-            <div class="avatar avatar-user">Вы</div>
-            <div class="message-content">
-              <div class="message message-user">${msg.content}</div>
-            </div>
-          `;
-        }
-        
-        agentMessages.appendChild(messageContainer);
-      });
-      
-      // Прокручиваем вниз
-      agentMessages.scrollTop = agentMessages.scrollHeight;
-    }
-
-    // Показать индикатор набора сообщения
-    function showTypingIndicator() {
-      const typingElement = document.createElement('div');
-      typingElement.className = 'typing-indicator';
-      typingElement.innerHTML = `
-        <div class="typing-dot"></div>
-        <div class="typing-dot"></div>
-        <div class="typing-dot"></div>
-      `;
-      
-      const messageElement = document.createElement('div');
-      messageElement.className = 'message message-ai';
-      messageElement.appendChild(typingElement);
-      
-      const messageContainer = document.createElement('div');
-      messageContainer.className = 'message-container';
-      messageContainer.innerHTML = '<div class="avatar avatar-ai">AI</div>';
-      
-      const messageContent = document.createElement('div');
-      messageContent.className = 'message-content';
-      messageContent.appendChild(messageElement);
-      
-      messageContainer.appendChild(messageContent);
-      agentMessages.appendChild(messageContainer);
-      
-      // Прокручиваем вниз
-      agentMessages.scrollTop = agentMessages.scrollHeight;
-      
-      return messageContainer;
-    }
-
-    // Удалить индикатор набора сообщения
-    function removeTypingIndicator(container) {
-      if (container && container.parentNode) {
-        container.remove();
-      }
-    }
-
-    // Показать сообщение об ошибке
-    function showError(message) {
-      const errorContainer = document.createElement('div');
-      errorContainer.className = 'message-container';
-      errorContainer.innerHTML = `
-        <div class="avatar avatar-ai">AI</div>
-        <div class="message-content">
-          <div class="message message-ai">${message}</div>
-          <div class="error-message">Попробуйте еще раз позже</div>
-        </div>
-      `;
-      agentMessages.appendChild(errorContainer);
-      agentMessages.scrollTop = agentMessages.scrollHeight;
-      
-      // Добавляем в историю
-      chatHistory.push({
-        role: 'ai',
-        content: `${message} (Ошибка: Попробуйте еще раз позже)`
-      });
-      saveChatHistory();
-    }
-
-    // Отправка сообщения в AI чат
-    async function sendAIMessage() {
-      const message = agentInput.value.trim();
-      if (!message) return;
-      
-      // Добавляем сообщение пользователя
-      const userMessageContainer = document.createElement('div');
-      userMessageContainer.className = 'message-container';
-      userMessageContainer.innerHTML = `
-        <div class="avatar avatar-user">Вы</div>
-        <div class="message-content">
-          <div class="message message-user">${message}</div>
-        </div>
-      `;
-      agentMessages.appendChild(userMessageContainer);
-      
-      // Добавляем в историю
-      chatHistory.push({
-        role: 'user',
-        content: message
-      });
-      saveChatHistory();
-      
-      // Очищаем поле ввода
-      agentInput.value = '';
-      agentInput.disabled = true;
-      agentSend.disabled = true;
-      
-      // Прокручиваем вниз
-      agentMessages.scrollTop = agentMessages.scrollHeight;
-      
-      // Показываем индикатор набора
-      const typingIndicator = showTypingIndicator();
-      
-      try {
-        // Отправляем сообщение в Cloudflare Worker
-        const response = await fetch(WORKER_URL, {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json'
-          },
-          body: JSON.stringify({
-            message: message,
-            history: chatHistory.filter(msg => msg.role === 'user' || msg.role === 'ai')
-          })
-        });
-        
-        // Удаляем индикатор набора
-        removeTypingIndicator(typingIndicator);
-        
-        if (!response.ok) {
-          const errorData = await response.json();
-          console.error('Ошибка API:', errorData);
-          showError('Произошла ошибка при обработке запроса');
-          return;
-        }
-        
-        const data = await response.json();
-        
-        // Добавляем ответ ИИ
-        const aiMessageContainer = document.createElement('div');
-        aiMessageContainer.className = 'message-container';
-        aiMessageContainer.innerHTML = `
-          <div class="avatar avatar-ai">AI</div>
-          <div class="message-content">
-            <div class="message message-ai">${data.response || 'Не удалось получить ответ'}</div>
-          </div>
-        `;
-        agentMessages.appendChild(aiMessageContainer);
-        
-        // Добавляем в историю
-        chatHistory.push({
-          role: 'ai',
-          content: data.response || 'Не удалось получить ответ'
-        });
-        saveChatHistory();
-        
-      } catch (error) {
-        // Удаляем индикатор набора
-        removeTypingIndicator(typingIndicator);
-        console.error('Ошибка:', error);
-        showError('Ошибка соединения с сервером');
-      } finally {
-        agentInput.disabled = false;
-        agentSend.disabled = false;
-        agentInput.focus();
-      }
-      
-      // Прокручиваем вниз
-      agentMessages.scrollTop = agentMessages.scrollHeight;
+    // Функция для закрытия чата ИИ
+    function closeAIChat() {
+      aiChatModal.classList.remove('active');
+      aiChatIframe.src = 'about:blank';
+      document.body.style.overflow = '';
     }
 
     // Обработчики событий
@@ -1693,13 +1353,12 @@
     modalExitBtn.addEventListener('click', () => window.location.href = 'index.html');
     modalStayBtn.addEventListener('click', () => exitModal.style.display = 'none');
     completionBtn.addEventListener('click', () => window.location.href = 'index.html');
-    agentClose.addEventListener('click', () => aiChatModal.classList.remove('active'));
+    aiChatClose.addEventListener('click', closeAIChat);
 
     // Обработчики для кнопок чата ИИ
     document.addEventListener('click', (e) => {
       if (e.target.classList.contains('ai-chat-btn')) {
-        aiChatModal.classList.add('active');
-        loadChatHistory();
+        openAIChat();
       }
     });
 
@@ -1787,14 +1446,6 @@
       if (isFeedbackSubmitted) return;
       feedbackModal.classList.remove('active');
       completionModal.classList.add('active');
-    });
-
-    // Обработчики для AI чата
-    agentSend.addEventListener('click', sendAIMessage);
-    agentInput.addEventListener('keypress', (e) => {
-      if (e.key === 'Enter') {
-        sendAIMessage();
-      }
     });
 
     // Инициализация
