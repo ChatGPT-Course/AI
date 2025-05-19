@@ -346,83 +346,67 @@
     }
     
     // Отправка сообщения
-// Обновите функцию sendMessage
-async function sendMessage() {
-    const message = agentInput.value.trim();
-    if (!message) return;
-    
-    // Добавляем сообщение пользователя
-    const userMessageContainer = document.createElement('div');
-    userMessageContainer.className = 'message-container';
-    userMessageContainer.innerHTML = `
+    async function sendMessage() {
+      const message = agentInput.value.trim();
+      if (!message) return;
+      
+      // Добавляем сообщение пользователя
+      const userMessageContainer = document.createElement('div');
+      userMessageContainer.className = 'message-container';
+      userMessageContainer.innerHTML = `
         <div class="avatar avatar-user">Вы</div>
         <div class="message-content">
-            <div class="message message-user">${message}</div>
+          <div class="message message-user">${message}</div>
         </div>
-    `;
-    agentMessages.appendChild(userMessageContainer);
-    
-    // Добавляем в историю
-    chatHistory.push({
+      `;
+      agentMessages.appendChild(userMessageContainer);
+      
+      // Добавляем в историю
+      chatHistory.push({
         role: 'user',
         content: message
-    });
-    
-    // Обновляем историю в родительском окне
-    if (window.parent !== window) {
+      });
+      
+      // Обновляем историю в родительском окне
+      if (window.parent !== window) {
         window.parent.postMessage({
-            type: 'chatHistoryUpdate',
-            history: chatHistory
+          type: 'chatHistoryUpdate',
+          history: chatHistory
         }, '*');
-    }
-    
-    // Очищаем поле ввода
-    agentInput.value = '';
-    agentInput.disabled = true;
-    agentSend.disabled = true;
-    
-    // Прокручиваем вниз
-    agentMessages.scrollTop = agentMessages.scrollHeight;
-    
-    // Показываем индикатор набора с прогрессом
-    const typingIndicator = showTypingIndicator();
-    typingIndicator.progressContainer.style.display = 'block';
-    
-    // Симуляция прогресса
-    let progress = 0;
-    const progressInterval = setInterval(() => {
-        progress += Math.random() * 10;
-        if (progress > 90) progress = 90; // Не доходим до 100% пока не получим ответ
-        typingIndicator.progressBar.style.width = `${progress}%`;
-    }, 300);
-    
-    try {
+      }
+      
+      // Очищаем поле ввода
+      agentInput.value = '';
+      agentInput.disabled = true;
+      agentSend.disabled = true;
+      
+      // Прокручиваем вниз
+      agentMessages.scrollTop = agentMessages.scrollHeight;
+      
+      // Показываем индикатор набора
+      const typingIndicator = showTypingIndicator();
+      
+      try {
         // Отправляем сообщение в Cloudflare Worker
-        const startTime = Date.now();
         const response = await fetch(WORKER_URL, {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify({
-                message: message,
-                history: chatHistory.filter(msg => msg.role === 'user' || msg.role === 'ai')
-            })
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({
+            message: message,
+            history: chatHistory.filter(msg => msg.role === 'user' || msg.role === 'ai')
+          })
         });
         
-        const responseTime = Date.now() - startTime;
-        console.log(`Время ответа: ${responseTime}ms`);
-        
         // Удаляем индикатор набора
-        clearInterval(progressInterval);
-        typingIndicator.progressBar.style.width = '100%';
-        typingIndicator.typingInfo.textContent = `Готово (${responseTime}мс)`;
+        removeTypingIndicator(typingIndicator);
         
         if (!response.ok) {
-            const errorData = await response.json();
-            console.error('Ошибка API:', errorData);
-            showError('Произошла ошибка при обработке запроса');
-            return;
+          const errorData = await response.json();
+          console.error('Ошибка API:', errorData);
+          showError('Произошла ошибка при обработке запроса');
+          return;
         }
         
         const data = await response.json();
@@ -431,44 +415,41 @@ async function sendMessage() {
         const aiMessageContainer = document.createElement('div');
         aiMessageContainer.className = 'message-container';
         aiMessageContainer.innerHTML = `
-            <div class="avatar avatar-ai">AI</div>
-            <div class="message-content">
-                <div class="message message-ai">${formatMessage(data.response || 'Не удалось получить ответ')}</div>
-            </div>
+          <div class="avatar avatar-ai">AI</div>
+          <div class="message-content">
+            <div class="message message-ai">${formatMessage(data.response || 'Не удалось получить ответ')}</div>
+          </div>
         `;
-        
-        // Заменяем индикатор набора на окончательный ответ
-        typingIndicator.container.replaceWith(aiMessageContainer);
+        agentMessages.appendChild(aiMessageContainer);
         
         // Добавляем в историю
         chatHistory.push({
-            role: 'ai',
-            content: data.response || 'Не удалось получить ответ'
+          role: 'ai',
+          content: data.response || 'Не удалось получить ответ'
         });
         
         // Обновляем историю в родительском окне
         if (window.parent !== window) {
-            window.parent.postMessage({
-                type: 'chatHistoryUpdate',
-                history: chatHistory
-            }, '*');
+          window.parent.postMessage({
+            type: 'chatHistoryUpdate',
+            history: chatHistory
+          }, '*');
         }
         
-    } catch (error) {
+      } catch (error) {
         // Удаляем индикатор набора
-        clearInterval(progressInterval);
-        typingIndicator.container.remove();
+        removeTypingIndicator(typingIndicator);
         console.error('Ошибка:', error);
         showError('Ошибка соединения с сервером');
-    } finally {
+      } finally {
         agentInput.disabled = false;
         agentSend.disabled = false;
         agentInput.focus();
+      }
+      
+      // Прокручиваем вниз
+      agentMessages.scrollTop = agentMessages.scrollHeight;
     }
-    
-    // Прокручиваем вниз
-    agentMessages.scrollTop = agentMessages.scrollHeight;
-}
     
     // Обработчики событий
     agentSend.addEventListener('click', sendMessage);
