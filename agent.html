@@ -30,7 +30,6 @@
     .agent-header {
       padding: 0.5rem 1rem;
       background: #4285F4;
-      height: 40px;
       color: white;
       display: flex;
       justify-content: space-between;
@@ -38,58 +37,40 @@
       position: sticky;
       top: 0;
       z-index: 10;
+      height: 40px;
     }
     
     .agent-title {
       font-weight: 600;
-      font-size: 1.2rem;
-    }
-    
-    .agent-close {
-      background: none;
-      border: none;
-      color: white;
-      font-size: 1.5rem;
-      cursor: pointer;
-      width: 36px;
-      height: 36px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      border-radius: 50%;
-      transition: background 0.2s;
-    }
-    
-    .agent-close:hover {
-      background: rgba(255,255,255,0.2);
+      font-size: 1.1rem;
     }
     
     .agent-messages {
       flex: 1;
-      padding: 1rem;
+      padding: 0.8rem;
       overflow-y: auto;
       display: flex;
       flex-direction: column;
-      gap: 1rem;
+      gap: 0.8rem;
       background: #f9f9f9;
     }
     
     .message-container {
       display: flex;
-      gap: 0.8rem;
+      gap: 0.6rem;
       max-width: 100%;
     }
     
     .avatar {
-      width: 36px;
-      height: 36px;
+      width: 32px;
+      height: 32px;
       border-radius: 50%;
       flex-shrink: 0;
       display: flex;
       align-items: center;
       justify-content: center;
       font-weight: bold;
-      font-size: 14px;
+      font-size: 13px;
     }
     
     .avatar-ai {
@@ -126,7 +107,7 @@
     }
     
     .agent-input-container {
-      padding: 1rem;
+      padding: 0.8rem;
       border-top: 1px solid #eee;
       display: flex;
       gap: 0.5rem;
@@ -137,10 +118,10 @@
     
     .agent-input {
       flex: 1;
-      padding: 0.8rem 1rem;
+      padding: 0.7rem 1rem;
       border: 1px solid #ddd;
       border-radius: 24px;
-      font-size: 0.95rem;
+      font-size: 0.9rem;
       outline: none;
     }
     
@@ -153,8 +134,8 @@
       color: white;
       border: none;
       border-radius: 50%;
-      width: 48px;
-      height: 48px;
+      width: 42px;
+      height: 42px;
       display: flex;
       align-items: center;
       justify-content: center;
@@ -168,8 +149,8 @@
     }
     
     .agent-send svg {
-      width: 22px;
-      height: 22px;
+      width: 20px;
+      height: 20px;
     }
     
     .typing-indicator {
@@ -179,8 +160,8 @@
     }
     
     .typing-dot {
-      width: 8px;
-      height: 8px;
+      width: 7px;
+      height: 7px;
       background: #888;
       border-radius: 50%;
       animation: typingAnimation 1.4s infinite ease-in-out;
@@ -200,13 +181,17 @@
     
     @keyframes typingAnimation {
       0%, 60%, 100% { transform: translateY(0); }
-      30% { transform: translateY(-5px); }
+      30% { transform: translateY(-4px); }
     }
     
     .error-message {
       color: #f44336;
-      font-size: 0.8rem;
-      margin-top: 0.5rem;
+      font-size: 0.75rem;
+      margin-top: 0.4rem;
+    }
+    
+    .message-ai strong {
+      font-weight: 600;
     }
   </style>
 </head>
@@ -214,7 +199,6 @@
   <div class="agent-container">
     <div class="agent-header">
       <div class="agent-title">AI Assistant</div>
-      <button class="agent-close" id="agentClose">×</button>
     </div>
     
     <div class="agent-messages" id="agentMessages">
@@ -238,7 +222,6 @@
   </div>
 
   <script>
-    const agentClose = document.getElementById('agentClose');
     const agentMessages = document.getElementById('agentMessages');
     const agentInput = document.getElementById('agentInput');
     const agentSend = document.getElementById('agentSend');
@@ -246,8 +229,24 @@
     // URL вашего Cloudflare Worker
     const WORKER_URL = 'https://openai-proxy.egorspirin10.workers.dev/';
     
-    // Сохраняем историю сообщений
-    let chatHistory = [];
+    // Сохраняем историю сообщений (только в памяти)
+    let chatHistory = [
+      {
+        role: 'ai',
+        content: 'Привет! Я ваш AI ассистент. Задайте мне любой вопрос.'
+      }
+    ];
+    
+    // Функция для форматирования сообщений
+    function formatMessage(text) {
+      // Обработка жирного текста **текст**
+      text = text.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
+      
+      // Обработка переносов строк
+      text = text.replace(/\n/g, '<br>');
+      
+      return text;
+    }
     
     // Отрисовка истории
     function renderChatHistory() {
@@ -260,7 +259,7 @@
           messageContainer.innerHTML = `
             <div class="avatar avatar-ai">AI</div>
             <div class="message-content">
-              <div class="message message-ai">${msg.content}</div>
+              <div class="message message-ai">${formatMessage(msg.content)}</div>
             </div>
           `;
         } else {
@@ -279,19 +278,6 @@
       agentMessages.scrollTop = agentMessages.scrollHeight;
     }
     
-    // Закрытие агента
-    agentClose.addEventListener('click', () => {
-      window.parent.postMessage('closeAgent', '*');
-    });
-    function formatMessage(text) {
-      // Обработка жирного текста **текст**
-      text = text.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
-      
-      // Обработка переносов строк
-      text = text.replace(/\n/g, '<br>');
-      
-      return text;
-    }
     // Показать индикатор набора сообщения
     function showTypingIndicator() {
       const typingElement = document.createElement('div');
@@ -337,7 +323,7 @@
       errorContainer.innerHTML = `
         <div class="avatar avatar-ai">AI</div>
         <div class="message-content">
-          <div class="message message-ai">${message}</div>
+          <div class="message message-ai">${formatMessage(message)}</div>
           <div class="error-message">Попробуйте еще раз позже</div>
         </div>
       `;
@@ -349,6 +335,14 @@
         role: 'ai',
         content: `${message} (Ошибка: Попробуйте еще раз позже)`
       });
+      
+      // Обновляем историю в родительском окне
+      if (window.parent !== window) {
+        window.parent.postMessage({
+          type: 'chatHistoryUpdate',
+          history: chatHistory
+        }, '*');
+      }
     }
     
     // Отправка сообщения
@@ -372,6 +366,14 @@
         role: 'user',
         content: message
       });
+      
+      // Обновляем историю в родительском окне
+      if (window.parent !== window) {
+        window.parent.postMessage({
+          type: 'chatHistoryUpdate',
+          history: chatHistory
+        }, '*');
+      }
       
       // Очищаем поле ввода
       agentInput.value = '';
@@ -415,7 +417,7 @@
         aiMessageContainer.innerHTML = `
           <div class="avatar avatar-ai">AI</div>
           <div class="message-content">
-            <div class="message message-ai">${data.response || 'Не удалось получить ответ'}</div>
+            <div class="message message-ai">${formatMessage(data.response || 'Не удалось получить ответ')}</div>
           </div>
         `;
         agentMessages.appendChild(aiMessageContainer);
@@ -425,6 +427,14 @@
           role: 'ai',
           content: data.response || 'Не удалось получить ответ'
         });
+        
+        // Обновляем историю в родительском окне
+        if (window.parent !== window) {
+          window.parent.postMessage({
+            type: 'chatHistoryUpdate',
+            history: chatHistory
+          }, '*');
+        }
         
       } catch (error) {
         // Удаляем индикатор набора
@@ -450,8 +460,23 @@
       }
     });
     
-    // Загружаем историю при загрузке
+    // Обработчик сообщений от родительского окна
+    window.addEventListener('message', function(event) {
+      if (event.data.type === 'chatHistory') {
+        // Получаем историю чата от родительского окна
+        chatHistory = event.data.history || [
+          {
+            role: 'ai',
+            content: 'Привет! Я ваш AI ассистент. Задайте мне любой вопрос.'
+          }
+        ];
+        renderChatHistory();
+      }
+    });
+    
+    // Инициализация при загрузке
     document.addEventListener('DOMContentLoaded', () => {
+      renderChatHistory();
       agentInput.focus();
     });
   </script>
