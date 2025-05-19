@@ -1326,6 +1326,28 @@ nextBtn.addEventListener('click', () => {
 
     // Функция для открытия чата ИИ
     function openAIChat() {
+      // В функции openAIChat() добавляем:
+      function openAIChat() {
+        const chatWindow = aiChatIframe.contentWindow || aiChatIframe.contentDocument.defaultView;
+        aiChatIframe.src = 'agent.html';
+        aiChatModal.classList.add('active');
+        document.body.style.overflow = 'hidden';
+        
+        // После загрузки iframe передаем историю
+        aiChatIframe.onload = function() {
+          chatWindow.postMessage({
+            type: 'chatHistory',
+            history: chatHistory
+          }, '*');
+        };
+      }
+
+// Добавляем обработчик сообщений от iframe
+window.addEventListener('message', function(event) {
+  if (event.data.type === 'chatHistoryUpdate') {
+    chatHistory = event.data.history;
+  }
+});
       aiChatIframe.src = 'agent.html';
       aiChatModal.classList.add('active');
       document.body.style.overflow = 'hidden';
