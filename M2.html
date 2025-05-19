@@ -1011,6 +1011,39 @@
     let isFeedbackSubmitted = false;
     let nextBtnCooldown = false;
     let activeQuizAnswered = false;
+    
+    // Добавляем переменную для хранения истории чата
+    let chatHistory = [];
+
+    // Функция для открытия чата ИИ
+    function openAIChat() {
+      aiChatIframe.src = 'agent.html';
+      aiChatModal.classList.add('active');
+      document.body.style.overflow = 'hidden';
+      
+      // После загрузки iframe передаем историю
+      aiChatIframe.onload = function() {
+        const chatWindow = aiChatIframe.contentWindow || aiChatIframe.contentDocument.defaultView;
+        chatWindow.postMessage({
+          type: 'chatHistory',
+          history: chatHistory
+        }, '*');
+      };
+    }
+
+    // Функция для закрытия чата ИИ
+    function closeAIChat() {
+      aiChatModal.classList.remove('active');
+      aiChatIframe.src = 'about:blank';
+      document.body.style.overflow = '';
+    }
+
+    // Обработчик сообщений от iframe
+    window.addEventListener('message', function(event) {
+      if (event.data && event.data.type === 'chatHistoryUpdate') {
+        chatHistory = event.data.history;
+      }
+    });
 
     // Декодирование URL-encoded строки
     function decodeURIComponentSafe(str) {
@@ -1160,13 +1193,11 @@
     }
 
     async function completeModule() {
-      // Если прогресс уже 3 или больше - просто выходим
       if (userProgress >= 3) {
         window.location.href = 'index.html';
         return;
       }
 
-      // Если прогресс был 2 - показываем отзыв
       if (userProgress === 2) {
         const success = await updateProgress();
         if (success) {
@@ -1176,9 +1207,7 @@
         } else {
           alert('Не удалось сохранить прогресс. Пожалуйста, попробуйте позже.');
         }
-      } 
-      // Если прогресс был 0 (новый пользователь) - тоже показываем отзыв
-      else if (userProgress === 0) {
+      } else if (userProgress === 0) {
         const success = await updateProgress();
         if (success) {
           setTimeout(() => {
@@ -1230,134 +1259,61 @@
           behavior: 'smooth'
         });
         
-        // Инициализация квизов после добавления блока
         if (contentBlocks[index].hasQuiz) {
           initQuiz(block);
         }
       }, 50);
     }
 
-function initQuiz(block) {
-  nextBtn.disabled = true; // Блокируем кнопку "Далее" при появлении теста
-  const quizContainer = block.querySelector('.quiz-container');
-  if (!quizContainer) return;
-  
-  const options = quizContainer.querySelectorAll('.quiz-option');
-  const submitBtn = quizContainer.querySelector('.quiz-submit-btn');
-  const feedback = quizContainer.querySelector('.quiz-feedback');
-  
-  let selectedOption = null;
-  activeQuizAnswered = false;
-  
-  options.forEach(option => {
-    option.addEventListener('click', () => {
-      if (activeQuizAnswered) return;
+    function initQuiz(block) {
+      nextBtn.disabled = true;
+      const quizContainer = block.querySelector('.quiz-container');
+      if (!quizContainer) return;
       
-      options.forEach(opt => opt.classList.remove('selected'));
-      option.classList.add('selected');
-      selectedOption = option;
+      const options = quizContainer.querySelectorAll('.quiz-option');
+      const submitBtn = quizContainer.querySelector('.quiz-submit-btn');
+      const feedback = quizContainer.querySelector('.quiz-feedback');
       
-      submitBtn.classList.add('active');
-    });
-  });
-  
-  submitBtn.addEventListener('click', () => {
-    if (!selectedOption || activeQuizAnswered) return;
-    
-    activeQuizAnswered = true;
-    const isCorrect = selectedOption.dataset.correct === 'true';
-    
-    if (isCorrect) {
-      selectedOption.classList.add('correct');
-    } else {
-      selectedOption.classList.add('incorrect');
-      // Найти и пометить правильный ответ
-      options.forEach(opt => {
-        if (opt.dataset.correct === 'true') {
-          opt.classList.add('correct');
+      let selectedOption = null;
+      activeQuizAnswered = false;
+      
+      options.forEach(option => {
+        option.addEventListener('click', () => {
+          if (activeQuizAnswered) return;
+          
+          options.forEach(opt => opt.classList.remove('selected'));
+          option.classList.add('selected');
+          selectedOption = option;
+          
+          submitBtn.classList.add('active');
+        });
+      });
+      
+      submitBtn.addEventListener('click', () => {
+        if (!selectedOption || activeQuizAnswered) return;
+        
+        activeQuizAnswered = true;
+        const isCorrect = selectedOption.dataset.correct === 'true';
+        
+        if (isCorrect) {
+          selectedOption.classList.add('correct');
+        } else {
+          selectedOption.classList.add('incorrect');
+          options.forEach(opt => {
+            if (opt.dataset.correct === 'true') {
+              opt.classList.add('correct');
+            }
+          });
         }
+        
+        feedback.classList.add('show');
+        submitBtn.style.display = 'none';
+        nextBtn.disabled = false;
       });
     }
-    
-    feedback.classList.add('show');
-    submitBtn.style.display = 'none';
-    nextBtn.disabled = false; // Разблокируем только после ответа
-  });
-}
-
-nextBtn.addEventListener('click', () => {
-  if (nextBtnCooldown || nextBtn.disabled) return;
-  
-  // Проверяем, есть ли активный тест, на который не ответили
-  const activeQuiz = document.querySelector('.quiz-container:not(.answered)');
-  if (activeQuiz && !activeQuizAnswered) {
-    return;
-  }
-  
-  nextBtnCooldown = true;
-  nextBtn.disabled = true;
-  
-  if (currentBlockIndex < totalBlocks - 1) {
-    currentBlockIndex++;
-    addContentBlock(currentBlockIndex);
-    updateProgressBar();
-    
-    if (currentBlockIndex === totalBlocks - 1) {
-      nextBtn.textContent = 'Завершить';
-      nextBtn.onclick = function() {
-        nextBtn.disabled = true;
-        nextBtn.style.background = 'var(--disabled)';
-        completeModule();
-      };
-    }
-  }
-  
-  setTimeout(() => {
-    nextBtnCooldown = false;
-    // Не разблокируем кнопку, если есть активный тест без ответа
-    const hasUnansweredQuiz = document.querySelector('.quiz-container:not(.answered)') && !activeQuizAnswered;
-    nextBtn.disabled = hasUnansweredQuiz;
-  }, 500);
-});
 
     function updateProgressBar() {
       progressBar.style.width = ((currentBlockIndex + 1) / totalBlocks) * 100 + '%';
-    }
-
-    // Функция для открытия чата ИИ
-    function openAIChat() {
-      // В функции openAIChat() добавляем:
-      function openAIChat() {
-        const chatWindow = aiChatIframe.contentWindow || aiChatIframe.contentDocument.defaultView;
-        aiChatIframe.src = 'agent.html';
-        aiChatModal.classList.add('active');
-        document.body.style.overflow = 'hidden';
-        
-        // После загрузки iframe передаем историю
-        aiChatIframe.onload = function() {
-          chatWindow.postMessage({
-            type: 'chatHistory',
-            history: chatHistory
-          }, '*');
-        };
-      }
-
-// Добавляем обработчик сообщений от iframe
-window.addEventListener('message', function(event) {
-  if (event.data.type === 'chatHistoryUpdate') {
-    chatHistory = event.data.history;
-  }
-});
-      aiChatIframe.src = 'agent.html';
-      aiChatModal.classList.add('active');
-      document.body.style.overflow = 'hidden';
-    }
-
-    // Функция для закрытия чата ИИ
-    function closeAIChat() {
-      aiChatModal.classList.remove('active');
-      aiChatIframe.src = 'about:blank';
-      document.body.style.overflow = '';
     }
 
     // Обработчики событий
@@ -1377,7 +1333,6 @@ window.addEventListener('message', function(event) {
     completionBtn.addEventListener('click', () => window.location.href = 'index.html');
     aiChatClose.addEventListener('click', closeAIChat);
 
-    // Обработчики для кнопок чата ИИ
     document.addEventListener('click', (e) => {
       if (e.target.classList.contains('ai-chat-btn')) {
         openAIChat();
@@ -1385,7 +1340,7 @@ window.addEventListener('message', function(event) {
     });
 
     nextBtn.addEventListener('click', () => {
-      if (nextBtnCooldown) return;
+      if (nextBtnCooldown || nextBtn.disabled) return;
       
       nextBtnCooldown = true;
       nextBtn.disabled = true;
@@ -1407,14 +1362,11 @@ window.addEventListener('message', function(event) {
       
       setTimeout(() => {
         nextBtnCooldown = false;
-        nextBtn.disabled = false;
-        if (!document.querySelector('.quiz-container:not(.answered)')) {
-          nextBtn.disabled = false;
-        }
+        const hasUnansweredQuiz = document.querySelector('.quiz-container:not(.answered)') && !activeQuizAnswered;
+        nextBtn.disabled = hasUnansweredQuiz;
       }, 500);
     });
 
-    // Обработчики для отзывов
     feedbackOptions.forEach(option => {
       option.addEventListener('click', () => {
         if (isFeedbackSubmitted) return;
@@ -1436,7 +1388,6 @@ window.addEventListener('message', function(event) {
       });
     });
 
-    // Инициализация модального окна отзыва
     feedbackText.style.display = 'none';
     feedbackSubmit.style.display = 'none';
     feedbackSkip.style.display = 'block';
@@ -1472,7 +1423,6 @@ window.addEventListener('message', function(event) {
 
     // Инициализация
     (async function init() {
-      // Получаем текущий прогресс пользователя
       userRecordId = await findUserRecord();
       if (userRecordId) {
         const response = await fetch(
@@ -1487,7 +1437,6 @@ window.addEventListener('message', function(event) {
         }
       }
       
-      // Показываем контент в любом случае
       if (!isFirstBlockAdded) {
         addContentBlock(0);
       }
