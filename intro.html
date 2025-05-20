@@ -641,30 +641,37 @@ const contentBlocks = [
       }, 500);
     });
 
-    // Инициализация
-    (async function init() {
-      // Получаем текущий прогресс пользователя
-      userRecordId = await findUserRecord();
-      if (userRecordId) {
-        const response = await fetch(
-          `https://app.nocodb.com/api/${config.apiVersion}/db/data/${config.orgs}/${config.projectName}/${config.tableName}/${userRecordId}`,
-          {
-            headers: { 'xc-token': config.apiToken }
-          }
-        );
-        if (response.ok) {
-          const data = await response.json();
-          userProgress = data.progress || 0;
-        }
+// Инициализация
+(async function init() {
+  // Получаем текущий прогресс пользователя
+  userRecordId = await findUserRecord();
+  if (userRecordId) {
+    const response = await fetch(
+      `https://app.nocodb.com/api/${config.apiVersion}/db/data/${config.orgs}/${config.projectName}/${config.tableName}/${userRecordId}`,
+      {
+        headers: { 'xc-token': config.apiToken }
       }
-      
-      // Показываем основной контент сразу
-      mainContent.classList.add('show');
-      if (!isFirstBlockAdded) {
-        addContentBlock(0);
-      }
-      updateProgressBar();
-    })();
+    );
+    if (response.ok) {
+      const data = await response.json();
+      userProgress = data.progress || 0;
+    }
+  }
+  
+  // Показываем контент сразу без задержки
+  if (!isFirstBlockAdded) {
+    addContentBlock(0);
+  }
+  updateProgressBar();
+  
+  // Плавное появление контента
+  setTimeout(() => {
+    const blocks = document.querySelectorAll('.content-block');
+    if (blocks.length > 0) {
+      blocks[0].classList.add('visible');
+    }
+  }, 50);
+})();
 </script>
 </body>
 </html>
