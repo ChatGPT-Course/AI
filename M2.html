@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <title>Модуль 2: Доступ к ChatGPT</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <style>
+<style>
     :root {
       --orange: #FF9800;
       --yellow: #FFF9C4;
@@ -459,7 +459,7 @@
       padding: 1.2rem;
       margin: 1.5rem 0;
       position: relative;
-      padding-bottom: 4rem; /* Добавлено - место для кнопки */
+      padding-bottom: 4rem;
     }
     .quiz-question {
       font-weight: 600;
@@ -536,8 +536,8 @@
       font-weight: 600;
       cursor: pointer;
       transition: all 0.3s;
-      margin-top: 1rem; /* Добавлено */
-      float: right;     /* Добавлено */
+      margin-top: 1rem;
+      float: right;
     }
     .quiz-submit-btn.active {
       background: var(--success);
@@ -586,12 +586,72 @@
       opacity: 1;
       pointer-events: auto;
     }
-    .ai-chat-iframe {
-      width: 95%;
-      height: 90%;
-      border: none;
-      border-radius: 12px;
+    .ai-chat-container {
+      width: 90%;
+      max-width: 500px;
+      height: 70%;
       background: white;
+      border-radius: 12px;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+    }
+    .ai-chat-messages {
+      flex: 1;
+      padding: 1rem;
+      overflow-y: auto;
+      display: flex;
+      flex-direction: column;
+      gap: 0.8rem;
+    }
+    .ai-chat-message {
+      max-width: 80%;
+      padding: 0.8rem 1rem;
+      border-radius: 12px;
+      line-height: 1.4;
+    }
+    .ai-chat-message.user {
+      align-self: flex-end;
+      background: var(--blue);
+      color: white;
+      border-bottom-right-radius: 4px;
+    }
+    .ai-chat-message.assistant {
+      align-self: flex-start;
+      background: #f1f1f1;
+      color: #333;
+      border-bottom-left-radius: 4px;
+    }
+    .ai-chat-input {
+      display: flex;
+      padding: 0.8rem;
+      border-top: 1px solid #eee;
+      background: #f9f9f9;
+    }
+    .ai-chat-input input {
+      flex: 1;
+      padding: 0.8rem;
+      border: 1px solid #ddd;
+      border-radius: 20px;
+      margin-right: 0.8rem;
+      font-size: 1rem;
+      outline: none;
+    }
+    .ai-chat-input input:focus {
+      border-color: var(--blue);
+    }
+    .ai-chat-input button {
+      padding: 0.8rem 1.2rem;
+      background: var(--blue);
+      color: white;
+      border: none;
+      border-radius: 20px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    .ai-chat-input button:hover {
+      background: #3367d6;
     }
     .ai-chat-close {
       position: absolute;
@@ -610,6 +670,11 @@
       align-items: center;
       justify-content: center;
       box-shadow: 0 2px 10px rgba(0,0,0,0.2);
+      transition: all 0.2s;
+    }
+    .ai-chat-close:hover {
+      background: #d32f2f;
+      transform: scale(1.1);
     }
 
     @media (max-width: 600px) {
@@ -664,8 +729,11 @@
         padding: 0.7rem 1.2rem;
         font-size: 0.9rem;
       }
+      .ai-chat-container {
+        height: 80%;
+      }
     }
-  </style>
+</style>
 </head>
 <body>
   <div class="splash" id="splash">
