@@ -439,17 +439,20 @@ const contentBlocks = [
       <li>👉 Не готовы тратить месяцы на изучение и хотите получить результат уже сегодня</li>
     </ul>`
   },
-  {
-    title: "",
-    image: "27.jpg",
-    content: `<b>📦 Структура курса</b> состоит из четырёх модулей, каждый из которых строится по принципу «объяснение + практика + закрепление»<br><br>
+{
+  title: "",
+  image: "27.jpg", // Картинка теперь будет между текстом и списком
+  content: `
+    <b>📦 Структура курса</b> состоит из четырёх модулей, каждый из которых строится по принципу:<br>
+    <b>ОБЪЯСНЕНИЕ + ПРАКТИКА + ЗАКРЕПЛЕНИЕ</b><br><br>
     <ol style="list-style-type: none; padding-left: 0;">
       <li>1️⃣ <b>Доступ к ChatGPT</b><br>- - - <i>как зарегистрироваться, обойти блокировки и начать пользоваться</i></li>
-      <li>2️⃣ <b>Основы ChatGPT</b>><br>- - - <i>как он устроен, как правильно формулировать запросы</i></li>
-      <li>3️⃣ <b>ChatGPT PRO</b>><br>- - - <i>продвинутые техники, шаблоны, методика CRAFT</i></li>
-      <li>4️⃣ <b>ChatGPT MASTER</b>><br>- - - <i>расширенные возможности, настройки, другие ИИ-инструменты</i></li>
-    </ol>`
-  },
+      <li>2️⃣ <b>Основы ChatGPT</b><br>- - - <i>как он устроен, как правильно формулировать запросы</i></li>
+      <li>3️⃣ <b>ChatGPT PRO</b><br>- - - <i>продвинутые техники, шаблоны, методика CRAFT</i></li>
+      <li>4️⃣ <b>ChatGPT MASTER</b><br>- - - <i>расширенные возможности, настройки, другие ИИ-инструменты</i></li>
+    </ol>
+  `
+}
   {
     title: "НАЧНИТЕ УЖЕ СЕГОДНЯ",
     image: "19.jpg",
@@ -555,55 +558,62 @@ const contentBlocks = [
       }
     }
 
-    function addContentBlock(index) {
-      if (index === 0 && isFirstBlockAdded) return;
-      
-      if (emptySpace) emptySpace.remove();
-      emptySpace = null;
+function addContentBlock(index) {
+  if (index === 0 && isFirstBlockAdded) return;
+  
+  if (emptySpace) emptySpace.remove();
+  emptySpace = null;
 
-      const block = document.createElement('div');
-      block.className = 'content-block';
-      
-      const title = document.createElement('h2');
-      title.className = 'content-title';
-      title.innerHTML = `${contentBlocks[index].title}`;
-      block.appendChild(title);
-      
-      if (contentBlocks[index].image) {
-        const img = document.createElement('img');
-        img.className = 'content-image';
-        img.src = `photo_course/${contentBlocks[index].image}`;
-        img.alt = contentBlocks[index].title;
-        block.appendChild(img);
-      }
-      
-      const content = document.createElement('div');
-      content.innerHTML = contentBlocks[index].content;
-      block.appendChild(content);
-      
-      if (contentBlocks[index].reimage) {
-        const img = document.createElement('img');
-        img.className = 'content-image-after';
-        img.src = `photo_course/${contentBlocks[index].reimage}`;
-        img.alt = contentBlocks[index].title;
-        block.appendChild(img);
-      }
-      
-      cardsContainer.appendChild(block);
-      emptySpace = document.createElement('div');
-      emptySpace.className = 'empty-space';
-      cardsContainer.appendChild(emptySpace);
-      
-      if (index === 0) isFirstBlockAdded = true;
-      
-      setTimeout(() => {
-        block.classList.add('visible');
-        window.scrollTo({
-          top: block.offsetTop - document.querySelector('.header-bar').offsetHeight,
-          behavior: 'smooth'
-        });
-      }, 50);
-    }
+  const block = document.createElement('div');
+  block.className = 'content-block';
+  
+  const title = document.createElement('h2');
+  title.className = 'content-title';
+  title.innerHTML = `${contentBlocks[index].title}`;
+  if (contentBlocks[index].title) block.appendChild(title);
+  
+  // Добавляем первую часть контента (до картинки)
+  const contentTop = document.createElement('div');
+  contentTop.innerHTML = contentBlocks[index].content.split('<ol')[0]; // Берем текст до списка
+  block.appendChild(contentTop);
+  
+  // Добавляем картинку
+  if (contentBlocks[index].image) {
+    const img = document.createElement('img');
+    img.className = 'content-image';
+    img.src = `photo_course/${contentBlocks[index].image}`;
+    img.alt = contentBlocks[index].title;
+    block.appendChild(img);
+  }
+  
+  // Добавляем остальной контент (список)
+  const contentBottom = document.createElement('div');
+  contentBottom.innerHTML = '<ol' + contentBlocks[index].content.split('<ol')[1]; // Берем список
+  block.appendChild(contentBottom);
+  
+  if (contentBlocks[index].reimage) {
+    const img = document.createElement('img');
+    img.className = 'content-image-after';
+    img.src = `photo_course/${contentBlocks[index].reimage}`;
+    img.alt = contentBlocks[index].title;
+    block.appendChild(img);
+  }
+  
+  cardsContainer.appendChild(block);
+  emptySpace = document.createElement('div');
+  emptySpace.className = 'empty-space';
+  cardsContainer.appendChild(emptySpace);
+  
+  if (index === 0) isFirstBlockAdded = true;
+  
+  setTimeout(() => {
+    block.classList.add('visible');
+    window.scrollTo({
+      top: block.offsetTop - document.querySelector('.header-bar').offsetHeight,
+      behavior: 'smooth'
+    });
+  }, 50);
+}
 
     function updateProgressBar() {
       progressBar.style.width = ((currentBlockIndex + 1) / totalBlocks) * 100 + '%';
