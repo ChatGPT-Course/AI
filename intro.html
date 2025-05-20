@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="ru">
 <head>
@@ -39,10 +38,11 @@
       display: flex;
       flex-direction: column;
       align-items: center;
-      justify-content: center;
+      justify-content: flex-start;
       z-index: 10;
       transition: opacity var(--transition), visibility var(--transition);
       padding: 2rem 1rem;
+      padding-top: 4rem;
     }
     .splash.hide {
       opacity: 0;
@@ -52,7 +52,7 @@
     .splash h1 {
       font-size: 2.1rem;
       color: var(--orange);
-      margin-bottom: 2rem;
+      margin-bottom: 1.5rem;
       letter-spacing: 1px;
       text-shadow: 0 2px 16px #ff980044;
       font-weight: 700;
@@ -71,9 +71,18 @@
       font-weight: 600;
       box-shadow: 0 4px 24px #ff980055;
       transition: transform 0.2s;
+      margin-top: 1.5rem;
     }
     .splash button:hover {
       transform: scale(1.05);
+    }
+    .splash-image {
+      width: 100%;
+      max-width: 400px;
+      border-radius: 8px;
+      margin: 0.5rem 0;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+      border: 1px solid #eee;
     }
     .main-content {
       opacity: 0;
@@ -199,6 +208,24 @@
       margin-bottom: 0.4rem;
       position: relative;
     }
+    .content-image {
+      width: 100%;
+      max-width: 500px;
+      border-radius: 8px;
+      margin: 0 0 1rem 0;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+      border: 1px solid #eee;
+      display: block;
+    }
+    .content-image-after {
+      width: 100%;
+      max-width: 500px;
+      border-radius: 8px;
+      margin: 1rem 0 0 0;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+      border: 1px solid #eee;
+      display: block;
+    }
     .tip-card {
       background: rgba(255, 248, 225, 0.8);
       border-left: 4px solid var(--orange);
@@ -243,15 +270,6 @@
       background: var(--disabled);
       cursor: not-allowed;
       transform: none !important;
-    }
-    .content-image {
-      width: 100%;
-      max-width: 500px;
-      border-radius: 8px;
-      margin: 0 0 1rem 0;
-      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-      border: 1px solid #eee;
-      display: block;
     }
     .divider {
       height: 1px;
@@ -340,6 +358,12 @@
       .splash h1 {
         font-size: 1.5rem;
       }
+      .splash {
+        padding-top: 3rem;
+      }
+      .splash-image {
+        max-width: 300px;
+      }
       .content-block {
         padding: 1.2rem 1rem;
         font-size: 1rem;
@@ -377,10 +401,9 @@
 </head>
 <body>
   <div class="splash" id="splash">
-    <div style="position: absolute; top: 0.5rem; left: 0.5rem; width: 100%; display: flex;">
-      <button class="exit-btn" id="splashExitBtn" title="Выйти"><span>←</span></button>
-    </div>
+    <button class="exit-btn" id="splashExitBtn" title="Выйти" style="position: absolute; top: 0.5rem; left: 0.5rem;"><span>←</span></button>
     <h1>Вступление</h1>
+    <img src="photo_course/25.jpg" class="splash-image" alt="Вступление">
     <button id="startBtn">Начать</button>
   </div>
 
@@ -449,13 +472,13 @@
 const contentBlocks = [
   {
     title: "О КУРСЕ",
-    image: "25.jpg",
     content: `<b>Добро пожаловать в мини-курс по основам работы с ChatGPT 🤗</b><br><br>
     Этот курс создан для тех, кто только начинает своё знакомство с современными технологиями и хочет быстро без сложностей понять, как использовать ChatGPT в повседневной жизни, работе, учебе и творчестве.<br><br>
     <b>Нажимайте кнопку ниже, если готовы приступить к обучению</b> 👇`
   },
   {
     title: "КУРС ПОМОЖЕТ ВАМ:",
+    reimage: "29.jpg",
     content: `
     <ul>
       <li>Разобраться, что такое ChatGPT и как он работает</li>
@@ -494,6 +517,7 @@ const contentBlocks = [
     Тогда скорее переходите в первый модуль и уже сегодня начните погружаться в мир Искусственного Интеллекта…`
   }
 ];
+
     let currentBlockIndex = 0;
     const totalBlocks = contentBlocks.length;
     let emptySpace = null;
@@ -615,6 +639,14 @@ const contentBlocks = [
       const content = document.createElement('div');
       content.innerHTML = contentBlocks[index].content;
       block.appendChild(content);
+      
+      if (contentBlocks[index].reimage) {
+        const img = document.createElement('img');
+        img.className = 'content-image-after';
+        img.src = `photo_course/${contentBlocks[index].reimage}`;
+        img.alt = contentBlocks[index].title;
+        block.appendChild(img);
+      }
       
       cardsContainer.appendChild(block);
       emptySpace = document.createElement('div');
