@@ -31,18 +31,80 @@
       -webkit-tap-highlight-color: transparent;
       line-height: 1.6;
     }
+
+    /* Новый стиль для загрузочного экрана */
+    .loader-container {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: var(--white);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      z-index: 1000;
+      transition: opacity 0.5s ease, visibility 0.5s ease;
+    }
+    .loader-container.hide {
+      opacity: 0;
+      visibility: hidden;
+    }
+    .loader {
+      position: relative;
+      width: 120px;
+      height: 120px;
+      margin-bottom: 20px;
+    }
+    .loader-circle {
+      width: 100%;
+      height: 100%;
+      border: 8px solid rgba(255, 152, 0, 0.1);
+      border-radius: 50%;
+      position: relative;
+    }
+    .loader-progress {
+      position: absolute;
+      top: -8px;
+      left: -8px;
+      width: 100%;
+      height: 100%;
+      border: 8px solid transparent;
+      border-top-color: var(--orange);
+      border-radius: 50%;
+      animation: rotate 1.5s linear infinite;
+      transform: rotate(0deg);
+    }
+    .loader-percent {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      font-size: 1.5rem;
+      font-weight: bold;
+      color: var(--orange);
+    }
+    .loader-text {
+      margin-top: 20px;
+      font-size: 1.1rem;
+      color: var(--text);
+      opacity: 0.8;
+    }
+    @keyframes rotate {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
   
     .main-content {
       opacity: 0;
-      pointer-events: none;
-      transition: opacity var(--transition);
+      transition: opacity 0.5s ease;
       min-height: 100vh;
       display: flex;
       flex-direction: column;
     }
     .main-content.show {
       opacity: 1;
-      pointer-events: auto;
     }
     .header-bar {
       display: flex;
@@ -303,14 +365,18 @@
     }
     
     @media (max-width: 600px) {
-      .splash h1 {
-        font-size: 1.5rem;
+      .loader {
+        width: 100px;
+        height: 100px;
       }
-      .splash {
-        padding-top: 3rem;
+      .loader-circle, .loader-progress {
+        border-width: 6px;
       }
-      .splash-image {
-        max-width: 300px;
+      .loader-percent {
+        font-size: 1.3rem;
+      }
+      .loader-text {
+        font-size: 1rem;
       }
       .content-block {
         padding: 1.2rem 1rem;
@@ -348,6 +414,15 @@
   </style>
 </head>
 <body>
+  <!-- Новый загрузочный экран -->
+  <div class="loader-container" id="loader">
+    <div class="loader">
+      <div class="loader-circle"></div>
+      <div class="loader-progress"></div>
+      <div class="loader-percent">0%</div>
+    </div>
+    <div class="loader-text">Загрузка курса...</div>
+  </div>
 
   <div class="main-content" id="mainContent">
     <div class="header-bar">
@@ -397,6 +472,8 @@
     };
 
     // Элементы
+    const loader = document.getElementById('loader');
+    const loaderPercent = document.querySelector('.loader-percent');
     const mainContent = document.getElementById('mainContent');
     const nextBtn = document.getElementById('nextBtn');
     const progressBar = document.getElementById('progressBar');
@@ -445,9 +522,9 @@ const contentBlocks = [
     content: `<b>📦 Структура курса</b> состоит из четырёх модулей, каждый из которых строится по принципу «объяснение + практика + закрепление»<br><br>
     <ol style="list-style-type: none; padding-left: 0;">
       <li>1️⃣ <b>Доступ к ChatGPT</b><br>- - - <i>как зарегистрироваться, обойти блокировки и начать пользоваться</i></li>
-      <li>2️⃣ <b>Основы ChatGPT</b>><br>- - - <i>как он устроен, как правильно формулировать запросы</i></li>
-      <li>3️⃣ <b>ChatGPT PRO</b>><br>- - - <i>продвинутые техники, шаблоны, методика CRAFT</i></li>
-      <li>4️⃣ <b>ChatGPT MASTER</b>><br>- - - <i>расширенные возможности, настройки, другие ИИ-инструменты</i></li>
+      <li>2️⃣ <b>Основы ChatGPT</b><br>- - - <i>как он устроен, как правильно формулировать запросы</i></li>
+      <li>3️⃣ <b>ChatGPT PRO</b><br>- - - <i>продвинутые техники, шаблоны, методика CRAFT</i></li>
+      <li>4️⃣ <b>ChatGPT MASTER</b><br>- - - <i>расширенные возможности, настройки, другие ИИ-инструменты</i></li>
     </ol>`
   },
   {
@@ -466,6 +543,23 @@ const contentBlocks = [
     let userRecordId = null;
     let userProgress = 0;
     let nextBtnCooldown = false;
+
+    // Анимация загрузки
+    function simulateLoading() {
+      let percent = 0;
+      const interval = setInterval(() => {
+        percent += Math.floor(Math.random() * 5) + 1;
+        if (percent >= 100) {
+          percent = 100;
+          clearInterval(interval);
+          setTimeout(() => {
+            loader.classList.add('hide');
+            mainContent.classList.add('show');
+          }, 500);
+        }
+        loaderPercent.textContent = percent + '%';
+      }, 50);
+    }
 
     // Декодирование URL-encoded строки
     function decodeURIComponentSafe(str) {
@@ -643,6 +737,9 @@ const contentBlocks = [
 
     // Инициализация
     (async function init() {
+      // Запускаем анимацию загрузки
+      simulateLoading();
+      
       // Получаем текущий прогресс пользователя
       userRecordId = await findUserRecord();
       if (userRecordId) {
@@ -658,8 +755,7 @@ const contentBlocks = [
         }
       }
       
-      // Показываем основной контент сразу
-      mainContent.classList.add('show');
+      // Показываем контент
       if (!isFirstBlockAdded) {
         addContentBlock(0);
       }
