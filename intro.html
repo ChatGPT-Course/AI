@@ -546,14 +546,55 @@ const contentBlocks = [
       }
     }
 
-    async function completeModule() {
-      const success = await updateProgress();
-      if (success) {
+async function completeModule() {
+  try {
+    // Если recordId еще не получен, получаем его
+    if (!userRecordId) {
+      userRecordId = await findUserRecord();
+      if (!userRecordId) {
+        console.error('Failed to get user record ID');
         completionModal.classList.add('active');
-      } else {
-        alert('Не удалось сохранить прогресс. Пожалуйста, попробуйте позже.');
+        return;
       }
     }
+
+    // Получаем текущий прогресс пользователя
+    const response = await fetch(
+      `https://app.nocodb.com/api/${config.apiVersion}/db/data/${config.orgs}/${config.projectName}/${config.tableName}/${userRecordId}`,
+      {
+        headers: { 'xc-token': config.apiToken }
+      }
+    );
+
+    if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+    
+    const data = await response.json();
+    const currentProgress = data.progress || 0;
+    
+    // Обновляем только если прогресс == 0
+    if (currentProgress === 0) {
+      const updateResponse = await fetch(
+        `https://app.nocodb.com/api/${config.apiVersion}/db/data/${config.orgs}/${config.projectName}/${config.tableName}/${userRecordId}`,
+        {
+          method: 'PATCH',
+          headers: {
+            'Content-Type': 'application/json',
+            'xc-token': config.apiToken
+          },
+          body: JSON.stringify({ progress: 1 })
+        }
+      );
+
+      if (!updateResponse.ok) throw new Error(`HTTP error! status: ${updateResponse.status}`);
+    }
+    
+    completionModal.classList.add('active');
+  } catch (error) {
+    console.error('Error:', error);
+    // В случае ошибки все равно показываем окно завершения
+    completionModal.classList.add('active');
+  }
+}
 
     function addContentBlock(index) {
       if (index === 0 && isFirstBlockAdded) return;
