@@ -21,7 +21,6 @@
       --info: #2196F3;
       --red: #F44336;
     }
-
     /* Новые стили загрузочного экрана */
     .loading-screen {
       position: fixed;
@@ -39,8 +38,8 @@
     }
     
     .egg-container {
-      width: 60px; /* Уменьшили в 6 раз (было 360px) */
-      height: 80px; /* Сохраняем пропорции */
+      width: 60px; /* Уменьшенный размер */
+      height: 80px;
       position: relative;
     }
     
@@ -53,17 +52,23 @@
       z-index: 2;
     }
     
+    .egg-fill-container {
+      width: 100%;
+      height: 100%;
+      position: absolute;
+      overflow: hidden;
+      z-index: 1;
+    }
+    
     .egg-fill {
       width: 100%;
-      height: 0%;
+      height: 100%;
       position: absolute;
       bottom: 0;
-      left: 0;
       background: var(--orange);
-      mask: url("data:image/svg+xml,%3Csvg viewBox='0 0 60 80' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M30 2c14 0 26 16 26 38S44 78 30 78 4 62 4 40 16 2 30 2z'/%3E%3C/svg%3E") no-repeat center;
-      mask-size: contain;
-      transition: height 2s ease-out;
-      z-index: 1;
+      clip-path: path("M30 2c14 0 26 16 26 38S44 78 30 78 4 62 4 40 16 2 30 2z");
+      transform: translateY(100%);
+      transition: transform 2s ease-out;
     }
     
     .loading-text {
@@ -427,7 +432,9 @@
   <!-- Загрузочный экран -->
   <div class="loading-screen" id="loadingScreen">
     <div class="egg-container">
-      <div class="egg-fill" id="eggFill"></div>
+      <div class="egg-fill-container">
+        <div class="egg-fill" id="eggFill"></div>
+      </div>
       <div class="egg-outline"></div>
     </div>
     <div class="loading-text">Загрузка курса...</div>
@@ -559,7 +566,7 @@ const contentBlocks = [
     
     // Запускаем анимацию заполнения
     setTimeout(() => {
-      eggFill.style.height = '100%';
+      eggFill.style.transform = 'translateY(0)';
     }, 50);
     
     // Через 2 секунды скрываем загрузочный экран
@@ -572,7 +579,7 @@ const contentBlocks = [
           addContentBlock(0);
         }
       }, 800);
-    }, 2050); // 2050мс = 50мс задержка + 2000мс анимация
+    }, 2050);
   }
 
     // Декодирование URL-encoded строки
