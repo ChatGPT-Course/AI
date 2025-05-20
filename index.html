@@ -15,8 +15,6 @@
       --graphite: #4A4A4A;
       --success: #4CAF50;
       --success-light: #81C784;
-      --module-current-rgb: #CD613C;   /* Розовый (F7A6B5) в RGB */
-      --module-completed-rgb: #2A8F5E; /* Зеленый (97E1A7) в RGB */
       --disabled: #9E9E9E;
       --disabled-light: #E0E0E0;
     }
@@ -217,15 +215,13 @@
 
     @keyframes pulse {
       0%, 100% { 
-        box-shadow: 0 4px 16px rgba(var(--module-current-rgb), 0.2);
+        transform: scale(1);
+        box-shadow: 0 4px 16px rgba(255, 122, 0, 0.2);
       }
       50% { 
-        box-shadow: 0 8px 24px rgba(var(--module-current-rgb), 0.3);
+        transform: scale(1.02);
+        box-shadow: 0 8px 24px rgba(255, 122, 0, 0.3);
       }
-    }
-    
-    .module.current::after {
-      border: 2px solid rgba(var(--module-current-rgb), 0.3);
     }
 
     .module.current::after {
@@ -257,7 +253,7 @@
       position: absolute;
       top: 0;
       right: 0;
-      background: var(--module-current-rgb);
+      background: var(--primary);
       color: white;
       padding: 8px 16px;
       border-radius: 0 0 0 16px;
@@ -267,7 +263,7 @@
     }
 
     .module-label.completed {
-      background: rgba(var(--module-completed-rgb), 1); /* Зеленый */
+      background: var(--success);
     }
 
     .module-label.locked {
@@ -308,7 +304,7 @@
     }
 
     .module-btn {
-      background: rgba(var(--module-current-rgb), 1); /* Оранжевый/розовый */
+      background: var(--primary);
       color: white;
       border: none;
       padding: 10px 16px;
@@ -332,15 +328,15 @@
     }
 
     .module-btn:hover:not(:disabled) {
-      background: rgba(var(--module-current-rgb), 0.9); /* Чуть прозрачный */
+      background: var(--primary-light);
     }
 
     .module-btn.completed {
-      background: rgba(var(--module-completed-rgb), 1); /* Зеленый */
+      background: var(--success);
     }
 
     .module-btn.completed:hover:not(:disabled) {
-      background: rgba(var(--module-completed-rgb), 0.9); /* Чуть прозрачный */
+      background: var(--success-light);
     }
 
     .module-btn.locked {
