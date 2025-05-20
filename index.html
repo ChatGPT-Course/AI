@@ -7,8 +7,12 @@
   <script src="https://telegram.org/js/telegram-web-app.js"></script>
   <style>
     :root {
-      --primary: #F7A6B5;
-      --primary-light: #FFC0CB;
+      --primary: #FF7A00;
+      --primary-light: #FF9E40
+      --button-primary: #F7A6B5; /* Розовый для кнопок */
+      --button-primary-light: #FFC0CB; /* Светлый розовый для hover */
+      --module-completed: #97E1A7; /* Зеленый для пройденных модулей */
+      --module-completed-light: #B7F0C2; /* Светлый зеленый для hover */
       --white: #FFFFFF;
       --dark: #333333;
       --gray: #F5F5F5;
@@ -185,7 +189,7 @@
       background: var(--white);
       border-radius: 16px;
       padding: 24px;
-      box-shadow: 0 4px 16px rgba(255, 122, 0, 0.1);
+      box-shadow: 0 4px 16px rgba(247, 166, 181, 0.1); /* Розовая тень */
       transition: transform 0.2s ease, box-shadow 0.2s ease;
       position: relative;
       cursor: default;
@@ -204,7 +208,7 @@
     }
 
     .module.completed {
-      background: #E8F5E9;
+      background: #E8F5E9; /* Светло-зеленый фон */
     }
 
     .module.current {
@@ -232,7 +236,7 @@
       right: -10px;
       bottom: -10px;
       border-radius: 26px;
-     border: 2px solid rgba(247, 166, 181, 0.3);
+      border: 2px solid rgba(247, 166, 181, 0.3);
       animation: ripple 3s infinite ease-out;
       pointer-events: none;
       z-index: -1;
@@ -253,7 +257,7 @@
       position: absolute;
       top: 0;
       right: 0;
-      background: var(--primary);
+      background: var(--button-primary); /* Розовый (#F7A6B5) */
       color: white;
       padding: 8px 16px;
       border-radius: 0 0 0 16px;
@@ -263,7 +267,7 @@
     }
 
     .module-label.completed {
-      background: var(--success);
+      background: var(--module-completed); /* Зеленый (#97E1A7) */
     }
 
     .module-label.locked {
@@ -304,7 +308,7 @@
     }
 
     .module-btn {
-      background: var(--primary);
+      background: var(--button-primary);
       color: white;
       border: none;
       padding: 10px 16px;
@@ -328,15 +332,15 @@
     }
 
     .module-btn:hover:not(:disabled) {
-      background: var(--primary-light);
+      background: var(--button-primary-light);
     }
 
     .module-btn.completed {
-      background: var(--success);
+      background: var(--module-completed); /* Зеленый (#97E1A7) */
     }
 
     .module-btn.completed:hover:not(:disabled) {
-      background: var(--success-light);
+      background: var(--module-completed-light); /* Светлый зеленый (#B7F0C2) */
     }
 
     .module-btn.locked {
