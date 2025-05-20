@@ -8,17 +8,13 @@
   <style>
     :root {
       --primary: #FF7A00;
-      --primary-light: #FF9E40
-      --button-primary: #F7A6B5; /* Розовый для кнопок */
-      --button-primary-light: #FFC0CB; /* Светлый розовый для hover */
-      --module-completed: #97E1A7; /* Зеленый для пройденных модулей */
-      --module-completed-light: #B7F0C2; /* Светлый зеленый для hover */
+      --primary-light: #FF9E40;
       --white: #FFFFFF;
       --dark: #333333;
       --gray: #F5F5F5;
       --graphite: #4A4A4A;
-      --success: #97E1A7;
-      --success-light: #B7F0C2;
+      --success: #4CAF50;
+      --success-light: #81C784;
       --disabled: #9E9E9E;
       --disabled-light: #E0E0E0;
     }
@@ -118,7 +114,7 @@
       align-items: center;
       background: var(--graphite);
       padding: 20px;
-      box-shadow: 0 4px 16px rgba(247, 166, 181, 0.1);
+      box-shadow: 0 4px 16px rgba(0, 0, 0, 0.2);
       width: 100%;
       margin-bottom: 20px;
       position: relative;
@@ -189,7 +185,7 @@
       background: var(--white);
       border-radius: 16px;
       padding: 24px;
-      box-shadow: 0 4px 16px rgba(247, 166, 181, 0.1); /* Розовая тень */
+      box-shadow: 0 4px 16px rgba(255, 122, 0, 0.1);
       transition: transform 0.2s ease, box-shadow 0.2s ease;
       position: relative;
       cursor: default;
@@ -208,7 +204,7 @@
     }
 
     .module.completed {
-      background: #E8F5E9; /* Светло-зеленый фон */
+      background: #E8F5E9;
     }
 
     .module.current {
@@ -220,11 +216,11 @@
     @keyframes pulse {
       0%, 100% { 
         transform: scale(1);
-        box-shadow: 0 4px 16px rgba(247, 166, 181, 0.2);
+        box-shadow: 0 4px 16px rgba(255, 122, 0, 0.2);
       }
       50% { 
         transform: scale(1.02);
-        box-shadow: 0 8px 24px rgba(247, 166, 181, 0.3);
+        box-shadow: 0 8px 24px rgba(255, 122, 0, 0.3);
       }
     }
 
@@ -236,7 +232,7 @@
       right: -10px;
       bottom: -10px;
       border-radius: 26px;
-      border: 2px solid rgba(247, 166, 181, 0.3);
+      border: 2px solid rgba(255, 122, 0, 0.3);
       animation: ripple 3s infinite ease-out;
       pointer-events: none;
       z-index: -1;
@@ -257,7 +253,7 @@
       position: absolute;
       top: 0;
       right: 0;
-      background: var(--button-primary); /* Розовый (#F7A6B5) */
+      background: var(--primary);
       color: white;
       padding: 8px 16px;
       border-radius: 0 0 0 16px;
@@ -267,7 +263,7 @@
     }
 
     .module-label.completed {
-      background: var(--module-completed); /* Зеленый (#97E1A7) */
+      background: var(--success);
     }
 
     .module-label.locked {
@@ -308,7 +304,7 @@
     }
 
     .module-btn {
-      background: var(--button-primary);
+      background: var(--primary);
       color: white;
       border: none;
       padding: 10px 16px;
@@ -332,15 +328,15 @@
     }
 
     .module-btn:hover:not(:disabled) {
-      background: var(--button-primary-light);
+      background: var(--primary-light);
     }
 
     .module-btn.completed {
-      background: var(--module-completed); /* Зеленый (#97E1A7) */
+      background: var(--success);
     }
 
     .module-btn.completed:hover:not(:disabled) {
-      background: var(--module-completed-light); /* Светлый зеленый (#B7F0C2) */
+      background: var(--success-light);
     }
 
     .module-btn.locked {
