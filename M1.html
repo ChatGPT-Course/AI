@@ -31,22 +31,21 @@
       -webkit-tap-highlight-color: transparent;
       line-height: 1.6;
     }
-        /* Добавьте эти стили в секцию <style> */
     .content-block ul {
       list-style-type: none; /* Убираем маркеры */
-      padding-left: 0; /* Убираем стандартный отступ */
+      padding-left: 1em; /* Уменьшаем отступ слева (было 1.8em) */
       margin: 0.8rem 0;
     }
     
     .content-block li {
-      margin-bottom: 0.8rem; /* Увеличиваем отступ между пунктами */
+      margin-bottom: 0.8rem;
       position: relative;
-      padding-left: 1.8em; /* Отступ для эмодзи */
-      text-indent: -1.8em; /* Компенсируем отступ */
+      padding-left: 1.5em; /* Уменьшаем отступ для эмодзи (было 1.8em) */
+      text-indent: -1.5em; /* Компенсируем новый отступ (было -1.8em) */
     }
-        
+    
     .content-block li .emoji {
-      margin-right: 0.5em; /* Отступ после эмодзи */
+      margin-right: 0.5em;
       vertical-align: middle;
     }
     .content-image-after {
@@ -198,7 +197,7 @@
     }
     .buttons-container {
       position: fixed;
-      bottom: 1.5rem;
+      bottom: 3rem; /* Было 1.5rem */
       left: 0;
       width: 100%;
       display: flex;
