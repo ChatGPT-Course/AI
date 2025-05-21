@@ -41,8 +41,8 @@
     .content-block li {
       margin-bottom: 0.8rem; /* Увеличиваем отступ между пунктами */
       position: relative;
-      padding-left: 1.8em; /* Отступ для эмодзи */
-      text-indent: -1.8em; /* Компенсируем отступ */
+      padding-left: 1.5em; /* Отступ для эмодзи (можно регулировать) */
+      text-indent: -1.5em; /* Компенсируем отступ (должен быть равен padding-left с минусом) */
     }
         
     .content-block li .emoji {
@@ -178,10 +178,6 @@
     .content-block ul {
       padding-left: 1rem;
       margin: 0.8rem 0;
-    }
-    .content-block li {
-      margin-bottom: 0.4rem;
-      position: relative;
     }
     .tip-card {
       background: rgba(255, 248, 225, 0.8);
