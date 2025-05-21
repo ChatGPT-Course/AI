@@ -31,49 +31,6 @@
       -webkit-tap-highlight-color: transparent;
       line-height: 1.6;
     }
-    .splash {
-      position: fixed;
-      inset: 0;
-      background: var(--white);
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      z-index: 10;
-      transition: opacity var(--transition), visibility var(--transition);
-      padding: 2rem 1rem;
-    }
-    .splash.hide {
-      opacity: 0;
-      visibility: hidden;
-      pointer-events: none;
-    }
-    .splash h1 {
-      font-size: 2.1rem;
-      color: var(--orange);
-      margin-bottom: 2rem;
-      letter-spacing: 1px;
-      text-shadow: 0 2px 16px #ff980044;
-      font-weight: 700;
-      text-align: center;
-      word-break: break-word;
-      line-height: 1.2;
-    }
-    .splash button {
-      padding: 1rem 2.5rem;
-      font-size: 1.2rem;
-      background: linear-gradient(90deg, var(--yellow), var(--orange));
-      color: var(--text);
-      border: none;
-      border-radius: 2rem;
-      cursor: pointer;
-      font-weight: 600;
-      box-shadow: 0 4px 24px #ff980055;
-      transition: transform 0.2s;
-    }
-    .splash button:hover {
-      transform: scale(1.05);
-    }
     .main-content {
       opacity: 0;
       pointer-events: none;
@@ -515,13 +472,6 @@
   </style>
 </head>
 <body>
-  <div class="splash" id="splash">
-    <div style="position: absolute; top: 0.5rem; left: 0.5rem; width: 100%; display: flex;">
-      <button class="exit-btn" id="splashExitBtn" title="Выйти"><span>←</span></button>
-    </div>
-    <h1>Модуль 1:<br>Доступ к ChatGPT</h1>
-    <button id="startBtn">Начать</button>
-  </div>
 
   <div class="main-content" id="mainContent">
     <div class="header-bar">
@@ -591,7 +541,6 @@
     };
 
     // Элементы
-    const splash = document.getElementById('splash');
     const startBtn = document.getElementById('startBtn');
     const mainContent = document.getElementById('mainContent');
     const nextBtn = document.getElementById('nextBtn');
@@ -1012,17 +961,6 @@ async function completeModule() {
       progressBar.style.width = ((currentBlockIndex + 1) / totalBlocks) * 100 + '%';
     }
 
-    // Обработчики событий
-    startBtn.addEventListener('click', () => {
-      splash.classList.add('hide');
-      setTimeout(() => {
-        mainContent.classList.add('show');
-        addContentBlock(0);
-        updateProgressBar();
-      }, 300);
-    });
-
-    splashExitBtn.addEventListener('click', () => window.location.href = 'index.html');
     exitBtn.addEventListener('click', () => exitModal.style.display = 'flex');
     modalExitBtn.addEventListener('click', () => window.location.href = 'index.html');
     modalStayBtn.addEventListener('click', () => exitModal.style.display = 'none');
@@ -1129,10 +1067,10 @@ async function completeModule() {
     }
   }
   
-  // Показываем контент в любом случае
-  if (!isFirstBlockAdded) {
-    addContentBlock(0);
-  }
+  // Сразу показываем основной контент
+  mainContent.classList.add('show');
+  addContentBlock(0);
+  updateProgressBar();
 })();
 </script>
 </body>
