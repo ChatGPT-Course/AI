@@ -57,6 +57,15 @@
       box-shadow: 0 2px 12px #ff980022;
       padding: 0 0.5rem;
     }
+    .content-image-after {
+      width: 100%;
+      max-width: 500px;
+      border-radius: 8px;
+      margin: 1rem 0 0 0;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+      border: 1px solid #eee;
+      display: block;
+    }
     .exit-btn {
       background: var(--red);
       border: none;
@@ -929,7 +938,7 @@ async function completeModule() {
       
       if (emptySpace) emptySpace.remove();
       emptySpace = null;
-
+    
       const block = document.createElement('div');
       block.className = 'content-block';
       
@@ -950,6 +959,15 @@ async function completeModule() {
       content.innerHTML = contentBlocks[index].content;
       block.appendChild(content);
       
+      // Добавьте этот блок для reimage
+      if (contentBlocks[index].reimage) {
+        const img = document.createElement('img');
+        img.className = 'content-image-after';
+        img.src = `photo_course/${contentBlocks[index].reimage}`;
+        img.alt = contentBlocks[index].title;
+        block.appendChild(img);
+      }
+      
       cardsContainer.appendChild(block);
       emptySpace = document.createElement('div');
       emptySpace.className = 'empty-space';
@@ -965,7 +983,6 @@ async function completeModule() {
         });
       }, 50);
     }
-
     function updateProgressBar() {
       progressBar.style.width = ((currentBlockIndex + 1) / totalBlocks) * 100 + '%';
     }
