@@ -32,7 +32,6 @@
       line-height: 1.6;
     }
     .main-content {
-      opacity: 0;
       pointer-events: none;
       transition: opacity var(--transition);
       min-height: 100vh;
@@ -694,15 +693,12 @@
     };
 
     // Элементы
-    const splash = document.getElementById('splash');
-    const startBtn = document.getElementById('startBtn');
+    let isFeedbackSubmitted = false;
     const mainContent = document.getElementById('mainContent');
     const nextBtn = document.getElementById('nextBtn');
-    const guideBtn = document.getElementById('guideBtn');
     const progressBar = document.getElementById('progressBar');
     const cardsContainer = document.getElementById('cardsContainer');
     const exitBtn = document.getElementById('exitBtn');
-    const splashExitBtn = document.getElementById('splashExitBtn');
     const exitModal = document.getElementById('exitModal');
     const modalExitBtn = document.getElementById('modalExitBtn');
     const modalStayBtn = document.getElementById('modalStayBtn');
@@ -714,9 +710,6 @@
     const feedbackSubmit = document.getElementById('feedbackSubmit');
     const feedbackSkip = document.getElementById('feedbackSkip');
     const feedbackSuccess = document.getElementById('feedbackSuccess');
-    const aiChatModal = document.getElementById('aiChatModal');
-    const aiChatIframe = document.getElementById('aiChatIframe');
-    const aiChatClose = document.getElementById('aiChatClose');
 
     // Все контентные блоки
     const contentBlocks = [
@@ -1331,8 +1324,11 @@
       completionModal.classList.add('active');
     });
 
-    // Инициализация
+   // Инициализация
     (async function init() {
+      // Показываем контент сразу
+      mainContent.classList.add('show');
+      
       userRecordId = await findUserRecord();
       if (userRecordId) {
         const response = await fetch(
@@ -1350,6 +1346,7 @@
       if (!isFirstBlockAdded) {
         addContentBlock(0);
       }
+      updateProgressBar();
     })();
 </script>
 </body>
