@@ -32,8 +32,6 @@
       line-height: 1.6;
     }
     .main-content {
-      pointer-events: none;
-      transition: opacity var(--transition);
       min-height: 100vh;
       display: flex;
       flex-direction: column;
@@ -54,6 +52,9 @@
       z-index: 5;
       box-shadow: 0 2px 12px #ff980022;
       padding: 0 0.5rem;
+      opacity: 0;
+      transform: translateY(-20px);
+      transition: opacity var(--transition), transform var(--transition);
     }
     .exit-btn {
       background: var(--red);
@@ -177,6 +178,9 @@
       z-index: 2;
       padding: 0 1rem;
       box-sizing: border-box;
+      opacity: 0;
+      transform: translateY(20px);
+      transition: opacity var(--transition), transform var(--transition);
     }
     .next-btn {
       padding: 0.8rem 1.8rem;
@@ -1209,9 +1213,11 @@
       
       if (emptySpace) emptySpace.remove();
       emptySpace = null;
-
+    
       const block = document.createElement('div');
       block.className = 'content-block';
+      block.style.opacity = '0';
+      block.style.transform = 'translateY(20px)';
       
       const title = document.createElement('h2');
       title.className = 'content-title';
@@ -1237,8 +1243,12 @@
       
       if (index === 0) isFirstBlockAdded = true;
       
+      // Анимация появления блока контента
       setTimeout(() => {
-        block.classList.add('visible');
+        block.style.opacity = '1';
+        block.style.transform = 'translateY(0)';
+        block.style.transition = 'opacity 0.5s ease-out, transform 0.5s ease-out';
+        
         window.scrollTo({
           top: block.offsetTop - document.querySelector('.header-bar').offsetHeight,
           behavior: 'smooth'
@@ -1247,7 +1257,7 @@
         if (contentBlocks[index].hasQuiz) {
           initQuiz(block);
         }
-      }, 50);
+      }, 150); // Небольшая задержка для плавного появления
     }
 
     function initQuiz(block) {
@@ -1489,9 +1499,13 @@
       }
     });
 
-    // Инициализация
+        // Инициализация
     (async function init() {
-      mainContent.classList.add('show');
+      // Изначально скрываем элементы интерфейса
+      document.querySelector('.header-bar').style.opacity = '0';
+      document.querySelector('.header-bar').style.transform = 'translateY(-20px)';
+      document.querySelector('.buttons-container').style.opacity = '0';
+      document.querySelector('.buttons-container').style.transform = 'translateY(20px)';
       
       userRecordId = await findUserRecord();
       if (userRecordId) {
@@ -1507,10 +1521,27 @@
         }
       }
       
-      if (!isFirstBlockAdded) {
-        addContentBlock(0);
-      }
-      updateProgressBar();
+      // Показываем все элементы с анимацией после небольшой задержки
+      setTimeout(() => {
+        // Показываем основной контент
+        mainContent.style.opacity = '1';
+        
+        // Показываем шапку
+        document.querySelector('.header-bar').style.opacity = '1';
+        document.querySelector('.header-bar').style.transform = 'translateY(0)';
+        document.querySelector('.header-bar').style.transition = 'opacity 0.5s ease-out, transform 0.5s ease-out';
+        
+        // Показываем кнопки
+        document.querySelector('.buttons-container').style.opacity = '1';
+        document.querySelector('.buttons-container').style.transform = 'translateY(0)';
+        document.querySelector('.buttons-container').style.transition = 'opacity 0.5s ease-out, transform 0.5s ease-out';
+        
+        // Добавляем первый блок контента
+        if (!isFirstBlockAdded) {
+          addContentBlock(0);
+        }
+        updateProgressBar();
+      }, 100);
     })();
   </script>
 </body>
