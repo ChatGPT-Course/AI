@@ -540,8 +540,9 @@
     }
     
     .ai-chat-header {
-      padding: 0.6rem 1rem;
-      font-size: 0.9rem;
+      padding: 0.3rem 1rem;
+      font-size: 0.8rem;
+      height: 30px;
       background: var(--blue);
       color: white;
       display: flex;
@@ -595,7 +596,7 @@
     
     .ai-chat-input textarea {
       flex: 1;
-      width: 100%;
+      width: calc(100% - 1.6rem);
       padding: 0.8rem;
       border: 1px solid #ddd;
       border-radius: 8px;
@@ -624,6 +625,7 @@
       .ai-chat-container {
         height: 85vh;
         width: 95%;
+        margin: 2vh auto;
       }
       
       .ai-chat-header {
@@ -1375,18 +1377,25 @@
     aiChatClose.addEventListener('click', closeAIChat);
     
     function closeAIChat() {
+      // Не закрываем сразу, а только скрываем модальное окно
       aiChatModal.classList.remove('active');
-    }
-    
-    function renderChatHistory() {
-      aiChatMessages.innerHTML = '';
-      chatHistory.forEach(msg => {
-        const messageDiv = document.createElement('div');
-        messageDiv.className = `ai-chat-message ${msg.role}`;
-        messageDiv.textContent = msg.content;
-        aiChatMessages.appendChild(messageDiv);
-      });
-      aiChatMessages.scrollTop = aiChatMessages.scrollHeight;
+      
+      // Проверяем, есть ли неотвеченные сообщения
+      const lastMessage = chatHistory[chatHistory.length - 1];
+      if (lastMessage?.role === 'user') {
+        // Продолжаем ждать ответа в фоне
+        setTimeout(() => {
+          if (lastMessage.role === 'user') {
+            // Если ответ так и не пришел, добавляем сообщение об ошибке
+            chatHistory.push({
+              role: 'assistant',
+              content: 'Ответ не был получен из-за закрытия чата'
+            });
+            // Обновляем историю при следующем открытии
+            renderChatHistory();
+          }
+        }, 10000); // Даем 10 секунд на получение ответа
+      }
     }
     
     async function sendMessageToAI(message) {
