@@ -188,6 +188,130 @@
   </div>
 
   <script>
+    // Конфигурация NocoDB
+    const config = {
+      orgs: 'weamcfo6',
+      projectName: 'p27jdsmk69wuimh',
+      tableName: 'mc6qh91f060pv4y',
+      apiToken: 'bocQfycJpJsTG_tbwEf8ma8E5rhoig0njMDXFWtJ',
+      baseUrl: 'https://app.nocodb.com/api/v1/db/data'
+    };
+
+    // Установить cookie
+    function setCookie(name, value, days = 365) {
+      const expires = new Date();
+      expires.setTime(expires.getTime() + (days * 24 * 60 * 60 * 1000));
+      document.cookie = `${name}=${value};expires=${expires.toUTCString()};path=/`;
+    }
+
+    // Получить cookie
+    function getCookie(name) {
+      const value = `; ${document.cookie}`;
+      const parts = value.split(`; ${name}=`);
+      if (parts.length === 2) return parts.pop().split(';').shift();
+      return null;
+    }
+
+    // Получить данные Telegram пользователя
+    function getTelegramUserData() {
+      // Проверяем, доступен ли Telegram WebApp API
+      if (window.Telegram && window.Telegram.WebApp && window.Telegram.WebApp.initDataUnsafe.user) {
+        const user = window.Telegram.WebApp.initDataUnsafe.user;
+        return {
+          id: user.id,
+          username: user.username || '',
+          first_name: user.first_name || '',
+          last_name: user.last_name || ''
+        };
+      }
+      
+      // Если Telegram API недоступен, пытаемся получить из URL параметров
+      const urlParams = new URLSearchParams(window.location.search);
+      const userId = urlParams.get('user_id');
+      const username = urlParams.get('username');
+      const firstName = urlParams.get('first_name');
+      
+      if (userId) {
+        return {
+          id: userId,
+          username: username || '',
+          first_name: firstName || '',
+          last_name: ''
+        };
+      }
+      
+      // Если данных нет, используем тестовые
+      return {
+        id: '123456789',
+        username: 'testuser',
+        first_name: 'Test',
+        last_name: 'User'
+      };
+    }
+
+    // Сохранить данные пользователя в cookies
+    function saveUserData(userData) {
+      setCookie('tg_user_id', userData.id);
+      setCookie('tg_username', userData.username);
+      setCookie('tg_name', `${userData.first_name} ${userData.last_name}`.trim());
+    }
+
+    // Проверить пользователя в NocoDB
+    async function checkUserInDatabase(userData) {
+      try {
+        // Получаем все записи
+        const response = await fetch(`${config.baseUrl}/${config.orgs}/${config.projectName}/${config.tableName}`, {
+          headers: {
+            'xc-token': config.apiToken
+          }
+        });
+
+        if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+        
+        const data = await response.json();
+        const existingUser = data.list.find(u => u.tg_user_id == userData.id);
+        
+        if (!existingUser) {
+          // Создаем нового пользователя
+          const createResponse = await fetch(`${config.baseUrl}/${config.orgs}/${config.projectName}/${config.tableName}`, {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              'xc-token': config.apiToken
+            },
+            body: JSON.stringify({
+              tg_user_id: userData.id,
+              name: `${userData.first_name} ${userData.last_name}`.trim(),
+              username: userData.username,
+              progress: 0,
+              oplata: 0
+            })
+          });
+
+          if (!createResponse.ok) throw new Error(`Failed to create user: ${createResponse.status}`);
+          console.log('New user created successfully');
+        } else {
+          console.log('User already exists in database');
+        }
+      } catch (error) {
+        console.error('Error checking/creating user:', error);
+      }
+    }
+
+    // Инициализация при загрузке страницы
+    document.addEventListener('DOMContentLoaded', async () => {
+      // Получаем данные пользователя Telegram
+      const userData = getTelegramUserData();
+      
+      // Сохраняем в cookies
+      saveUserData(userData);
+      
+      // Проверяем в базе данных
+      await checkUserInDatabase(userData);
+      
+      console.log('User data initialized:', userData);
+    });
+
     // Обработчики навигации
     document.getElementById('guidesBtn').addEventListener('click', () => {
       window.location.href = 'gaid.html';
