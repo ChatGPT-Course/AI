@@ -33,37 +33,58 @@
       padding-bottom: 120px;
     }
 
-    .welcome-section {
+    .progress-section {
       margin-bottom: 3rem;
       width: 100%;
       max-width: 600px;
       background: #ffffff;
-      border-radius: 20px;
-      padding: 2rem;
+      border-radius: 12px;
+      padding: 1.5rem;
       border: 1px solid #e0e0e0;
-      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
     }
 
-    .welcome-title {
-      font-size: 2.2rem;
-      font-weight: 700;
+    .progress-title {
+      font-size: 1.4rem;
+      font-weight: 600;
       color: #2c3e50;
       margin-bottom: 0.5rem;
-      line-height: 1.2;
     }
 
-    .welcome-subtitle {
-      font-size: 1.1rem;
-      color: #7f8c8d;
+    .progress-subtitle {
+      font-size: 0.9rem;
+      color: #6c757d;
       margin-bottom: 1rem;
-      line-height: 1.5;
     }
 
-    .welcome-description {
-      font-size: 0.95rem;
-      color: #5a6c7d;
-      line-height: 1.6;
-      max-width: 100%;
+    .overall-progress {
+      margin-bottom: 0.5rem;
+    }
+
+    .overall-progress-label {
+      font-size: 0.85rem;
+      color: #6c757d;
+      margin-bottom: 0.5rem;
+      font-weight: 500;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .overall-progress-bar-container {
+      background: #f1f3f4;
+      border-radius: 8px;
+      height: 10px;
+      overflow: hidden;
+      position: relative;
+    }
+
+    .overall-progress-bar {
+      height: 100%;
+      background: linear-gradient(90deg, #8b5cf6, #a855f7);
+      border-radius: 8px;
+      transition: width 0.5s ease;
+      position: relative;
     }
 
     .modules-container {
@@ -159,9 +180,14 @@
       background: #f3f4f6;
     }
 
+    .favorite-btn:focus {
+      outline: none;
+      border: none;
+    }
+
     .favorite-icon {
-      width: 20px;
-      height: 20px;
+      width: 24px;
+      height: 24px;
       fill: #d1d5db;
       transition: fill 0.2s ease;
     }
@@ -369,10 +395,18 @@
 </head>
 <body>
   <div class="main-content">
-    <div class="welcome-section" id="welcomeSection">
-      <h1 class="welcome-title">Обучающие модули</h1>
-      <p class="welcome-subtitle">Выберите модуль для изучения</p>
-      <p class="welcome-description">Пройдите все модули по порядку для получения сертификата</p>
+    <div class="progress-section" id="progressSection">
+      <h1 class="progress-title">Общий прогресс</h1>
+      <p class="progress-subtitle">Ваше продвижение по курсу</p>
+      <div class="overall-progress">
+        <div class="overall-progress-label">
+          <span>Пройдено блоков</span>
+          <span id="overallProgressText">0/50</span>
+        </div>
+        <div class="overall-progress-bar-container">
+          <div class="overall-progress-bar" id="overallProgressBar" style="width: 0%"></div>
+        </div>
+      </div>
     </div>
 
     <div class="modules-container" id="modulesContainer">
@@ -385,12 +419,12 @@
       <svg class="nav-icon" viewBox="0 0 24 24">
         <path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-5 14H7v-2h7v2zm3-4H7v-2h10v2zm0-4H7V7h10v2z"/>
       </svg>
-      <span class="nav-label">Guides</span>
+      <span class="nav-label">Курс</span>
     </button>
 
     <button class="nav-button" id="favoriteBtn">
       <svg class="nav-icon" viewBox="0 0 24 24">
-        <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/>
+        <path d="M4 2v20l8-4 8 4V2H4z"/>
       </svg>
       <span class="nav-label">Избранное</span>
     </button>
@@ -399,14 +433,14 @@
       <svg class="nav-icon" viewBox="0 0 24 24">
         <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/>
       </svg>
-      <span class="nav-label">AI Tools</span>
+      <span class="nav-label">Инструменты</span>
     </button>
 
     <button class="nav-button" id="profileBtn">
       <svg class="nav-icon" viewBox="0 0 24 24">
         <path d="M12 2C13.1 2 14 2.9 14 4C14 5.1 13.1 6 12 6C10.9 6 10 5.1 10 4C10 2.9 10.9 2 12 2ZM21 9V7L15 7V9C15 11.7 12.7 14 10 14S5 11.7 5 9V7H3V9C3 12.4 5.4 15.1 8.5 15.8V18H7V20H17V18H15.5V15.8C18.6 15.1 21 12.4 21 9Z"/>
       </svg>
-      <span class="nav-label">Profile</span>
+      <span class="nav-label">Профиль</span>
     </button>
   </div>
 
@@ -690,7 +724,7 @@
             <div class="module-label">${module.label}</div>
             <button class="favorite-btn ${isFavorite(module.id) ? 'active' : ''}" onclick="toggleFavorite('${module.id}')">
               <svg class="favorite-icon" viewBox="0 0 24 24">
-                <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/>
+                <path d="M4 2v20l8-4 8 4V2H4z"/>
               </svg>
             </button>
           </div>
@@ -719,20 +753,47 @@
       updateUserInfo();
     }
 
-    // Обновить информацию о пользователе
+    // Обновить информацию о пользователе и общий прогресс
     function updateUserInfo() {
       const userName = getCookie('tg_name') || 'Пользователь';
-      const welcomeTitle = document.querySelector('.welcome-title');
-      const welcomeSubtitle = document.querySelector('.welcome-subtitle');
+      const progressTitle = document.querySelector('.progress-title');
+      const progressSubtitle = document.querySelector('.progress-subtitle');
       
-      if (welcomeTitle) {
-        welcomeTitle.textContent = `Привет, ${userName}!`;
+      if (progressTitle) {
+        progressTitle.textContent = `Привет, ${userName}!`;
       }
       
-      if (welcomeSubtitle) {
-        const progressText = userProgress > 0 ? `Прогресс: ${userProgress}/5` : 'Начните обучение';
-        const paymentText = userPayment > 0 ? ' | Полная версия ✅' : ' | Демо-режим';
-        welcomeSubtitle.textContent = `${progressText}${paymentText}`;
+      // Обновляем общий прогресс
+      updateOverallProgress();
+      
+      if (progressSubtitle) {
+        const paymentText = userPayment > 0 ? 'Полная версия ✅' : 'Демо-режим';
+        progressSubtitle.textContent = paymentText;
+      }
+    }
+
+    // Обновить общий прогресс
+    function updateOverallProgress() {
+      const totalBlocks = 50; // Общее количество блоков во всех модулях
+      let completedBlocks = 0;
+
+      // Считаем завершенные блоки из всех модулей
+      modules.forEach(module => {
+        const moduleProgressValue = moduleProgress[module.id] || 0;
+        completedBlocks += moduleProgressValue;
+      });
+
+      const progressPercentage = (completedBlocks / totalBlocks) * 100;
+      
+      const progressBar = document.getElementById('overallProgressBar');
+      const progressText = document.getElementById('overallProgressText');
+      
+      if (progressBar) {
+        progressBar.style.width = `${progressPercentage}%`;
+      }
+      
+      if (progressText) {
+        progressText.textContent = `${completedBlocks}/${totalBlocks}`;
       }
     }
 
