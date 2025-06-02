@@ -185,6 +185,35 @@
       border: none;
     }
 
+    .favorite-btn:active {
+      outline: none;
+      border: none;
+    }
+
+    .nav-button:focus {
+      outline: none;
+    }
+
+    .nav-button:active {
+      outline: none;
+    }
+
+    .module-start-btn:focus {
+      outline: none;
+    }
+
+    .module-start-btn:active {
+      outline: none;
+    }
+
+    button:focus {
+      outline: none;
+    }
+
+    button:active {
+      outline: none;
+    }
+
     .favorite-icon {
       width: 24px;
       height: 24px;
@@ -540,7 +569,20 @@
       }
       
       localStorage.setItem('favoriteModules', JSON.stringify(favorites));
-      renderModules(); // Перерендер для обновления кнопок
+      
+      // Обновляем только кнопку избранного без перерендера
+      const moduleCards = document.querySelectorAll('.module-card');
+      moduleCards.forEach(card => {
+        const cardModuleId = modules.find(m => card.innerHTML.includes(m.title))?.id;
+        if (cardModuleId === moduleId) {
+          const favoriteBtn = card.querySelector('.favorite-btn');
+          if (isFavorite(moduleId)) {
+            favoriteBtn.classList.add('active');
+          } else {
+            favoriteBtn.classList.remove('active');
+          }
+        }
+      });
     }
 
     function isFavorite(moduleId) {
@@ -749,8 +791,10 @@
         // Добавляем обработчик события после создания элемента
         const favoriteBtn = moduleCard.querySelector('.favorite-btn');
         favoriteBtn.addEventListener('click', (e) => {
+          e.preventDefault();
           e.stopPropagation();
           toggleFavorite(module.id);
+          return false;
         });
         
         modulesContainer.appendChild(moduleCard);
