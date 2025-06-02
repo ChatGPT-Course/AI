@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="ru">
 <head>
@@ -13,7 +14,7 @@
 
     body {
       font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Arial, sans-serif;
-      background: #ffffff;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
       min-height: 100vh;
       display: flex;
       flex-direction: column;
@@ -25,52 +26,225 @@
       flex-direction: column;
       justify-content: flex-start;
       align-items: center;
-      padding: 1rem;
+      padding: 2rem 1rem;
       text-align: center;
       max-width: 100%;
       margin: 0 auto;
-      padding-bottom: 100px;
+      padding-bottom: 120px;
     }
 
     .welcome-section {
-      margin-bottom: 2rem;
+      margin-bottom: 3rem;
       width: 100%;
+      background: rgba(255, 255, 255, 0.1);
+      backdrop-filter: blur(10px);
+      border-radius: 20px;
+      padding: 2rem;
+      border: 1px solid rgba(255, 255, 255, 0.2);
     }
 
     .welcome-title {
-      font-size: 1.8rem;
+      font-size: 2.2rem;
       font-weight: 700;
-      color: #2c3e50;
+      color: #ffffff;
       margin-bottom: 0.5rem;
       line-height: 1.2;
+      text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
     }
 
     .welcome-subtitle {
-      font-size: 1rem;
-      color: #7f8c8d;
-      margin-bottom: 1.5rem;
+      font-size: 1.1rem;
+      color: rgba(255, 255, 255, 0.9);
+      margin-bottom: 1rem;
       line-height: 1.5;
     }
 
     .welcome-description {
-      font-size: 0.9rem;
-      color: #5a6c7d;
+      font-size: 0.95rem;
+      color: rgba(255, 255, 255, 0.8);
       line-height: 1.6;
       max-width: 100%;
     }
 
+    .modules-path {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 2rem;
+      width: 100%;
+      max-width: 400px;
+      position: relative;
+    }
+
+    .module-item {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      position: relative;
+      width: 100%;
+    }
+
+    .module-card {
+      background: #ffffff;
+      border-radius: 20px;
+      padding: 2rem;
+      text-align: center;
+      transition: all 0.4s ease;
+      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+      width: 280px;
+      position: relative;
+      cursor: pointer;
+      border: 3px solid transparent;
+    }
+
+    /* Состояния карточек */
+    .module-card.completed {
+      background: linear-gradient(135deg, #4CAF50, #45a049);
+      color: white;
+      transform: scale(1.02);
+    }
+
+    .module-card.current {
+      background: linear-gradient(135deg, #FF9800, #F57C00);
+      color: white;
+      animation: currentPulse 2s ease-in-out infinite;
+      border: 3px solid #FFB74D;
+      box-shadow: 0 0 20px rgba(255, 152, 0, 0.4);
+    }
+
+    .module-card.locked {
+      background: #f5f5f5;
+      color: #999;
+      cursor: not-allowed;
+      opacity: 0.7;
+    }
+
+    .module-card.intro-pulse {
+      animation: introPulse 2s ease-in-out infinite;
+      border: 3px solid #2196F3;
+      box-shadow: 0 0 20px rgba(33, 150, 243, 0.4);
+    }
+
+    /* Анимации */
+    @keyframes currentPulse {
+      0%, 100% {
+        transform: scale(1.02);
+        box-shadow: 0 0 20px rgba(255, 152, 0, 0.4);
+      }
+      50% {
+        transform: scale(1.05);
+        box-shadow: 0 0 30px rgba(255, 152, 0, 0.6);
+      }
+    }
+
+    @keyframes introPulse {
+      0%, 100% {
+        transform: scale(1);
+        box-shadow: 0 0 20px rgba(33, 150, 243, 0.4);
+      }
+      50% {
+        transform: scale(1.03);
+        box-shadow: 0 0 30px rgba(33, 150, 243, 0.6);
+      }
+    }
+
+    @keyframes progressWave {
+      0% {
+        background-position: 0% 50%;
+      }
+      100% {
+        background-position: 100% 50%;
+      }
+    }
+
+    .module-icon {
+      font-size: 3rem;
+      margin-bottom: 1rem;
+      display: block;
+    }
+
+    .module-title {
+      font-size: 1.3rem;
+      font-weight: 700;
+      margin-bottom: 0.8rem;
+    }
+
+    .module-description {
+      line-height: 1.5;
+      font-size: 0.9rem;
+      margin: 0 0 1.5rem 0;
+      opacity: 0.9;
+    }
+
+    .module-start-btn {
+      border: none;
+      border-radius: 12px;
+      padding: 0.8rem 1.5rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      width: 100%;
+      font-size: 0.95rem;
+    }
+
+    .module-card.completed .module-start-btn {
+      background: rgba(255, 255, 255, 0.2);
+      color: white;
+      border: 2px solid rgba(255, 255, 255, 0.3);
+    }
+
+    .module-card.current .module-start-btn {
+      background: rgba(255, 255, 255, 0.9);
+      color: #FF9800;
+      font-weight: 700;
+    }
+
+    .module-card.locked .module-start-btn {
+      background: #e0e0e0;
+      color: #999;
+      cursor: not-allowed;
+    }
+
+    .module-card:not(.locked) .module-start-btn:hover {
+      transform: translateY(-2px);
+    }
+
+    /* Связующие линии */
+    .connection-line {
+      width: 4px;
+      height: 40px;
+      background: #ddd;
+      margin: 0;
+      position: relative;
+      border-radius: 2px;
+    }
+
+    .connection-line.completed {
+      background: linear-gradient(180deg, #4CAF50, #4CAF50);
+      animation: progressWave 2s linear infinite;
+      background-size: 100% 200%;
+    }
+
+    .connection-line.active {
+      background: linear-gradient(180deg, #4CAF50 0%, #4CAF50 50%, #FF9800 50%, #FF9800 100%);
+      animation: progressWave 2s linear infinite;
+      background-size: 100% 200%;
+    }
+
+    /* Навигационная панель */
     .navigation-panel {
       position: fixed;
       bottom: 0;
       left: 0;
       right: 0;
-      background: #ffffff;
-      border-top: 1px solid #e0e0e0;
+      background: rgba(255, 255, 255, 0.95);
+      backdrop-filter: blur(10px);
+      border-top: 1px solid rgba(0, 0, 0, 0.1);
       padding: 1rem 0;
       display: flex;
       justify-content: space-around;
       align-items: center;
-      box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.1);
+      box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.1);
     }
 
     .nav-button {
@@ -83,170 +257,89 @@
       cursor: pointer;
       transition: all 0.2s ease;
       min-width: 70px;
+      border-radius: 12px;
     }
 
     .nav-button:hover {
-      background: #f8f9fa;
-      border-radius: 8px;
+      background: rgba(102, 126, 234, 0.1);
     }
 
     .nav-icon {
       width: 24px;
       height: 24px;
       margin-bottom: 0.3rem;
-      fill: #6c757d;
+      fill: #667eea;
       transition: fill 0.2s ease;
     }
 
     .nav-button:hover .nav-icon {
-      fill: #495057;
+      fill: #5a67d8;
     }
 
     .nav-label {
       font-size: 0.8rem;
-      color: #6c757d;
+      color: #667eea;
       font-weight: 500;
       transition: color 0.2s ease;
     }
 
     .nav-button:hover .nav-label {
-      color: #495057;
+      color: #5a67d8;
     }
 
-    .modules-grid {
-      display: grid;
-      grid-template-columns: 1fr;
-      gap: 1rem;
-      margin-top: 1rem;
-      width: 100%;
-      max-width: 400px;
-    }
-
-    .module-card {
-      background: #ffffff;
-      border: 1px solid #e9ecef;
-      border-radius: 12px;
-      padding: 1.5rem;
-      text-align: center;
-      transition: all 0.3s ease;
-      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
-      position: relative;
-    }
-
-    .module-card.locked {
-      background: #f8f9fa;
-      opacity: 0.6;
-    }
-
-    .locked-overlay {
-      position: absolute;
-      top: 0;
-      left: 0;
-      right: 0;
-      bottom: 0;
-      background: rgba(255, 255, 255, 0.8);
-      border-radius: 12px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 2rem;
-    }
-
-    .module-card:hover {
-      transform: translateY(-4px);
-      box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
-    }
-
-    .module-icon {
-      font-size: 2.5rem;
-      margin-bottom: 0.8rem;
-      display: block;
-    }
-
-    .module-title {
-      font-size: 1.2rem;
-      font-weight: 700;
-      color: #2c3e50;
-      margin-bottom: 0.8rem;
-    }
-
-    .module-description {
-      color: #6c757d;
-      line-height: 1.5;
-      font-size: 0.85rem;
-      margin: 0 0 1rem 0;
-    }
-
-    .module-start-btn {
-      background: linear-gradient(90deg, #4285F4, #3367D6);
-      color: white;
-      border: none;
-      border-radius: 8px;
-      padding: 0.7rem 1.2rem;
-      font-weight: 600;
-      cursor: pointer;
-      transition: all 0.3s ease;
-      width: 100%;
-      font-size: 0.9rem;
-    }
-
-    .module-start-btn:hover:not(.disabled) {
-      background: linear-gradient(90deg, #3367D6, #2A56C6);
-      transform: translateY(-2px);
-    }
-
-    .module-start-btn.disabled {
-      background: #cccccc;
-      cursor: not-allowed;
-      transform: none;
-    }
-
+    /* Адаптивность */
     @media (max-width: 768px) {
       .main-content {
-        padding: 0.5rem;
-        padding-bottom: 80px;
+        padding: 1rem 0.5rem;
+        padding-bottom: 100px;
+      }
+
+      .welcome-section {
+        padding: 1.5rem;
+        margin-bottom: 2rem;
       }
 
       .welcome-title {
-        font-size: 1.5rem;
+        font-size: 1.8rem;
       }
 
       .welcome-subtitle {
-        font-size: 0.9rem;
+        font-size: 1rem;
       }
 
-      .modules-grid {
-        gap: 0.8rem;
-        max-width: 100%;
+      .modules-path {
+        gap: 1.5rem;
+        max-width: 320px;
       }
 
       .module-card {
-        padding: 1rem;
+        width: 100%;
+        padding: 1.5rem;
+        max-width: 300px;
       }
 
       .module-icon {
-        font-size: 2rem;
+        font-size: 2.5rem;
       }
 
       .module-title {
-        font-size: 1.1rem;
+        font-size: 1.2rem;
       }
 
       .module-description {
-        font-size: 0.8rem;
-      }
-
-      .module-start-btn {
-        padding: 0.6rem 1rem;
         font-size: 0.85rem;
       }
 
+      .connection-line {
+        height: 30px;
+      }
+
       .navigation-panel {
-        padding: 0.5rem 0;
+        padding: 0.8rem 0;
       }
 
       .nav-button {
-        padding: 0.3rem 0.5rem;
+        padding: 0.4rem 0.8rem;
         min-width: 60px;
       }
 
@@ -266,10 +359,11 @@
     <div class="welcome-section" id="welcomeSection">
       <h1 class="welcome-title">Обучающие модули</h1>
       <p class="welcome-subtitle">Выберите модуль для изучения</p>
-      
-      <div class="modules-grid" id="modulesGrid">
-        <!-- Модули будут загружены динамически через JavaScript -->
-      </div>
+      <p class="welcome-description">Пройдите все модули по порядку для получения сертификата</p>
+    </div>
+
+    <div class="modules-path" id="modulesPath">
+      <!-- Модули будут загружены динамически через JavaScript -->
     </div>
   </div>
 
@@ -434,15 +528,15 @@
 
     // Плавное обновление интерфейса
     function updateInterface() {
-      const modulesGrid = document.getElementById('modulesGrid');
+      const modulesPath = document.getElementById('modulesPath');
       
       // Добавляем плавный переход
-      modulesGrid.style.transition = 'opacity 0.3s ease';
-      modulesGrid.style.opacity = '0.7';
+      modulesPath.style.transition = 'opacity 0.3s ease';
+      modulesPath.style.opacity = '0.7';
       
       setTimeout(() => {
         renderModules();
-        modulesGrid.style.opacity = '1';
+        modulesPath.style.opacity = '1';
       }, 150);
     }
 
@@ -470,57 +564,92 @@
       }
     }
 
-    // Отобразить модули на основе прогресса и оплаты
-    function renderModules() {
-      const modulesGrid = document.getElementById('modulesGrid');
-      modulesGrid.innerHTML = '';
+    // Определить состояние модуля
+    function getModuleState(module, index) {
+      if (userProgress === 5) {
+        return 'completed'; // Все модули завершены
+      }
+      
+      if (module.id === 'intro' && userProgress === 0) {
+        return 'intro-pulse'; // Пульсация вступления при прогрессе 0
+      }
+      
+      if (userProgress > module.requiredProgress) {
+        return 'completed'; // Модуль пройден
+      }
+      
+      // Логика текущего модуля
+      if (module.id === 'intro' && userProgress === 0) {
+        return 'current';
+      } else if (module.id === 'm1' && (userProgress >= 1 || userPayment > 0)) {
+        return userProgress === 1 ? 'current' : 'completed';
+      } else if (userProgress >= module.requiredProgress) {
+        return userProgress === module.requiredProgress ? 'current' : 'completed';
+      }
+      
+      return 'locked'; // Модуль заблокирован
+    }
 
-      modules.forEach(module => {
-        // Логика доступности модулей:
-        // - Вступление доступно всегда
-        // - Модуль 1 доступен при прогрессе >= 1 или оплате > 0
-        // - Остальные модули доступны только при соответствующем прогрессе
+    // Определить состояние связи
+    function getConnectionState(moduleIndex) {
+      if (userProgress === 5) {
+        return 'completed';
+      }
+      
+      if (userProgress > moduleIndex) {
+        return 'completed';
+      } else if (userProgress === moduleIndex + 1) {
+        return 'active';
+      }
+      
+      return '';
+    }
+
+    // Отобразить модули
+    function renderModules() {
+      const modulesPath = document.getElementById('modulesPath');
+      modulesPath.innerHTML = '';
+
+      modules.forEach((module, index) => {
+        const moduleState = getModuleState(module, index);
+        
+        // Логика доступности
         let isAvailable = false;
         let buttonText = 'Начать';
-        let lockReason = '';
 
         if (module.id === 'intro') {
           isAvailable = true;
         } else if (module.id === 'm1') {
           isAvailable = userProgress >= module.requiredProgress || userPayment > 0;
-          if (!isAvailable && userPayment === 0) {
-            lockReason = 'Требуется оплата';
-          }
         } else {
           isAvailable = userProgress >= module.requiredProgress;
-          if (!isAvailable) {
-            lockReason = 'Завершите предыдущие модули';
-          }
         }
 
-        const isCompleted = userProgress > module.requiredProgress;
-        if (isCompleted) {
+        if (moduleState === 'completed') {
           buttonText = 'Повторить';
+        } else if (moduleState === 'current') {
+          buttonText = 'Продолжить';
+        } else if (!isAvailable) {
+          buttonText = userPayment === 0 && module.id === 'm1' ? 'Требуется оплата' : 'Заблокировано';
         }
         
-        const moduleCard = document.createElement('div');
-        moduleCard.className = `module-card ${!isAvailable ? 'locked' : ''}`;
+        const moduleItem = document.createElement('div');
+        moduleItem.className = 'module-item';
         
-        moduleCard.innerHTML = `
-          <div class="module-icon">${module.icon}</div>
-          <h3 class="module-title">${module.title}</h3>
-          <p class="module-description">${module.description}</p>
-          ${isAvailable ? 
-            `<button class="module-start-btn" onclick="startModule('${module.file}')">${buttonText}</button>` :
-            `<button class="module-start-btn disabled">${lockReason || 'Заблокировано'}</button>`
-          }
-          ${!isAvailable ? '<div class="locked-overlay">🔒</div>' : ''}
+        moduleItem.innerHTML = `
+          <div class="module-card ${moduleState}" ${isAvailable ? `onclick="startModule('${module.file}')"` : ''}>
+            <div class="module-icon">${module.icon}</div>
+            <h3 class="module-title">${module.title}</h3>
+            <p class="module-description">${module.description}</p>
+            <button class="module-start-btn">${buttonText}</button>
+          </div>
+          ${index < modules.length - 1 ? `<div class="connection-line ${getConnectionState(index)}"></div>` : ''}
         `;
         
-        modulesGrid.appendChild(moduleCard);
+        modulesPath.appendChild(moduleItem);
       });
       
-      // Обновляем информацию о пользователе в заголовке
+      // Обновляем информацию о пользователе
       updateUserInfo();
     }
 
@@ -536,7 +665,7 @@
       
       if (welcomeSubtitle) {
         const progressText = userProgress > 0 ? `Прогресс: ${userProgress}/5` : 'Начните обучение';
-        const paymentText = userPayment > 0 ? ' | Оплачено ✅' : ' | Демо-режим';
+        const paymentText = userPayment > 0 ? ' | Полная версия ✅' : ' | Демо-режим';
         welcomeSubtitle.textContent = `${progressText}${paymentText}`;
       }
     }
