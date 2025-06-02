@@ -1,0 +1,209 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Главное меню курса</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Arial, sans-serif;
+      background: #ffffff;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .main-content {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      padding: 2rem;
+      text-align: center;
+      max-width: 600px;
+      margin: 0 auto;
+    }
+
+    .welcome-section {
+      margin-bottom: 3rem;
+    }
+
+    .welcome-title {
+      font-size: 2.5rem;
+      font-weight: 700;
+      color: #2c3e50;
+      margin-bottom: 1rem;
+      line-height: 1.2;
+    }
+
+    .welcome-subtitle {
+      font-size: 1.2rem;
+      color: #7f8c8d;
+      margin-bottom: 2rem;
+      line-height: 1.5;
+    }
+
+    .welcome-description {
+      font-size: 1rem;
+      color: #5a6c7d;
+      line-height: 1.6;
+      max-width: 500px;
+    }
+
+    .navigation-panel {
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      background: #ffffff;
+      border-top: 1px solid #e0e0e0;
+      padding: 1rem 0;
+      display: flex;
+      justify-content: space-around;
+      align-items: center;
+      box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.1);
+    }
+
+    .nav-button {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 0.5rem 1rem;
+      background: none;
+      border: none;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      min-width: 70px;
+    }
+
+    .nav-button:hover {
+      background: #f8f9fa;
+      border-radius: 8px;
+    }
+
+    .nav-icon {
+      width: 24px;
+      height: 24px;
+      margin-bottom: 0.3rem;
+      fill: #6c757d;
+      transition: fill 0.2s ease;
+    }
+
+    .nav-button:hover .nav-icon {
+      fill: #495057;
+    }
+
+    .nav-label {
+      font-size: 0.8rem;
+      color: #6c757d;
+      font-weight: 500;
+      transition: color 0.2s ease;
+    }
+
+    .nav-button:hover .nav-label {
+      color: #495057;
+    }
+
+    
+
+    @media (max-width: 768px) {
+      .module1-header {
+        padding: 1.5rem 1rem;
+      }
+      
+      .module1-title {
+        font-size: 1.5rem;
+      }
+      
+      .slides-container {
+        margin-top: 120px;
+        padding: 1rem;
+      }
+      
+      .slide-content {
+        padding: 1.5rem;
+        min-height: 250px;
+      }
+      
+      .navigation-buttons {
+        bottom: 1rem;
+      }
+      
+      .nav-btn {
+        padding: 0.8rem 1.5rem;
+        font-size: 0.9rem;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="main-content">
+    <div class="welcome-section" id="welcomeSection">
+      <h1 class="welcome-title">Добро пожаловать в курс!</h1>
+      <p class="welcome-subtitle">Изучайте новые навыки с удовольствием</p>
+      <p class="welcome-description">
+        Здесь вы найдете все необходимые материалы для успешного обучения. 
+        Выберите нужный раздел в навигации внизу экрана и начните свой путь к новым знаниям.
+      </p>
+    </div>
+
+    
+  </div>
+
+  <div class="navigation-panel">
+    <button class="nav-button" id="guidesBtn">
+      <svg class="nav-icon" viewBox="0 0 24 24">
+        <path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-5 14H7v-2h7v2zm3-4H7v-2h10v2zm0-4H7V7h10v2z"/>
+      </svg>
+      <span class="nav-label">Guides</span>
+    </button>
+
+    <button class="nav-button" id="challengesBtn">
+      <svg class="nav-icon" viewBox="0 0 24 24">
+        <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/>
+      </svg>
+      <span class="nav-label">Challenges</span>
+    </button>
+
+    <button class="nav-button" id="aiToolsBtn">
+      <svg class="nav-icon" viewBox="0 0 24 24">
+        <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/>
+      </svg>
+      <span class="nav-label">AI Tools</span>
+    </button>
+
+    <button class="nav-button" id="profileBtn">
+      <svg class="nav-icon" viewBox="0 0 24 24">
+        <path d="M12 2C13.1 2 14 2.9 14 4C14 5.1 13.1 6 12 6C10.9 6 10 5.1 10 4C10 2.9 10.9 2 12 2ZM21 9V7L15 7V9C15 11.7 12.7 14 10 14S5 11.7 5 9V7H3V9C3 12.4 5.4 15.1 8.5 15.8V18H7V20H17V18H15.5V15.8C18.6 15.1 21 12.4 21 9Z"/>
+      </svg>
+      <span class="nav-label">Profile</span>
+    </button>
+  </div>
+
+  <script>
+    // Обработчики навигации
+    document.getElementById('guidesBtn').addEventListener('click', () => {
+      window.location.href = 'gaid.html';
+    });
+
+    document.getElementById('challengesBtn').addEventListener('click', () => {
+      console.log('Challenges clicked');
+    });
+
+    document.getElementById('aiToolsBtn').addEventListener('click', () => {
+      console.log('AI Tools clicked');
+    });
+
+    document.getElementById('profileBtn').addEventListener('click', () => {
+      console.log('Profile clicked');
+    });
+  </script>
+</body>
+</html>
