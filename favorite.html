@@ -1,0 +1,408 @@
+
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Избранные модули</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Arial, sans-serif;
+      background: #ffffff;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .main-content {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      justify-content: flex-start;
+      align-items: center;
+      padding: 2rem 1rem;
+      text-align: center;
+      max-width: 100%;
+      margin: 0 auto;
+      padding-bottom: 120px;
+    }
+
+    .header-section {
+      margin-bottom: 3rem;
+      width: 100%;
+      max-width: 600px;
+    }
+
+    .header-title {
+      font-size: 2.2rem;
+      font-weight: 700;
+      color: #2c3e50;
+      margin-bottom: 0.5rem;
+      line-height: 1.2;
+    }
+
+    .header-subtitle {
+      font-size: 1.1rem;
+      color: #7f8c8d;
+      margin-bottom: 1rem;
+      line-height: 1.5;
+    }
+
+    .favorites-container {
+      display: flex;
+      flex-direction: column;
+      gap: 1rem;
+      width: 100%;
+      max-width: 600px;
+    }
+
+    .favorite-item {
+      background: #ffffff;
+      border-radius: 12px;
+      padding: 1.5rem;
+      text-align: left;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+      border: 1px solid #f0f0f0;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      transition: all 0.2s ease;
+    }
+
+    .favorite-item:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.12);
+    }
+
+    .favorite-info {
+      flex: 1;
+    }
+
+    .favorite-title {
+      font-size: 1.2rem;
+      font-weight: 600;
+      color: #2c3e50;
+      margin-bottom: 0.3rem;
+    }
+
+    .favorite-label {
+      font-size: 0.9rem;
+      color: #6c757d;
+    }
+
+    .favorite-actions {
+      display: flex;
+      gap: 0.5rem;
+    }
+
+    .action-btn {
+      border: none;
+      border-radius: 8px;
+      padding: 0.5rem 1rem;
+      cursor: pointer;
+      font-size: 0.9rem;
+      font-weight: 500;
+      transition: all 0.2s ease;
+    }
+
+    .open-btn {
+      background: #4285F4;
+      color: white;
+    }
+
+    .open-btn:hover {
+      background: #3367D6;
+    }
+
+    .remove-btn {
+      background: #f8f9fa;
+      color: #dc3545;
+      border: 1px solid #e9ecef;
+    }
+
+    .remove-btn:hover {
+      background: #dc3545;
+      color: white;
+    }
+
+    .empty-state {
+      text-align: center;
+      padding: 3rem 1rem;
+      color: #6c757d;
+    }
+
+    .empty-icon {
+      font-size: 3rem;
+      margin-bottom: 1rem;
+      opacity: 0.5;
+    }
+
+    .empty-title {
+      font-size: 1.2rem;
+      font-weight: 600;
+      margin-bottom: 0.5rem;
+    }
+
+    .empty-text {
+      font-size: 1rem;
+      line-height: 1.5;
+    }
+
+    /* Навигационная панель */
+    .navigation-panel {
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      background: #ffffff;
+      border-top: 1px solid #e0e0e0;
+      padding: 1rem 0;
+      display: flex;
+      justify-content: space-around;
+      align-items: center;
+      box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.1);
+    }
+
+    .nav-button {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 0.5rem 1rem;
+      background: none;
+      border: none;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      min-width: 70px;
+      border-radius: 8px;
+    }
+
+    .nav-button:hover {
+      background: #f8f9fa;
+    }
+
+    .nav-button.active {
+      background: #e3f2fd;
+    }
+
+    .nav-icon {
+      width: 24px;
+      height: 24px;
+      margin-bottom: 0.3rem;
+      fill: #6c757d;
+      transition: fill 0.2s ease;
+    }
+
+    .nav-button:hover .nav-icon,
+    .nav-button.active .nav-icon {
+      fill: #2196F3;
+    }
+
+    .nav-label {
+      font-size: 0.8rem;
+      color: #6c757d;
+      font-weight: 500;
+      transition: color 0.2s ease;
+    }
+
+    .nav-button:hover .nav-label,
+    .nav-button.active .nav-label {
+      color: #2196F3;
+    }
+
+    @media (max-width: 768px) {
+      .main-content {
+        padding: 1rem 0.5rem;
+        padding-bottom: 100px;
+      }
+
+      .header-title {
+        font-size: 1.8rem;
+      }
+
+      .header-subtitle {
+        font-size: 1rem;
+      }
+
+      .favorite-item {
+        padding: 1rem;
+        flex-direction: column;
+        gap: 1rem;
+        align-items: flex-start;
+      }
+
+      .favorite-actions {
+        width: 100%;
+        justify-content: flex-end;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="main-content">
+    <div class="header-section">
+      <h1 class="header-title">Избранные модули</h1>
+      <p class="header-subtitle">Ваши сохраненные модули для быстрого доступа</p>
+    </div>
+
+    <div class="favorites-container" id="favoritesContainer">
+      <!-- Избранные модули будут загружены динамически -->
+    </div>
+  </div>
+
+  <div class="navigation-panel">
+    <button class="nav-button" id="guidesBtn">
+      <svg class="nav-icon" viewBox="0 0 24 24">
+        <path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-5 14H7v-2h7v2zm3-4H7v-2h10v2zm0-4H7V7h10v2z"/>
+      </svg>
+      <span class="nav-label">Guides</span>
+    </button>
+
+    <button class="nav-button active" id="favoriteBtn">
+      <svg class="nav-icon" viewBox="0 0 24 24">
+        <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/>
+      </svg>
+      <span class="nav-label">Избранное</span>
+    </button>
+
+    <button class="nav-button" id="aiToolsBtn">
+      <svg class="nav-icon" viewBox="0 0 24 24">
+        <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/>
+      </svg>
+      <span class="nav-label">AI Tools</span>
+    </button>
+
+    <button class="nav-button" id="profileBtn">
+      <svg class="nav-icon" viewBox="0 0 24 24">
+        <path d="M12 2C13.1 2 14 2.9 14 4C14 5.1 13.1 6 12 6C10.9 6 10 5.1 10 4C10 2.9 10.9 2 12 2ZM21 9V7L15 7V9C15 11.7 12.7 14 10 14S5 11.7 5 9V7H3V9C3 12.4 5.4 15.1 8.5 15.8V18H7V20H17V18H15.5V15.8C18.6 15.1 21 12.4 21 9Z"/>
+      </svg>
+      <span class="nav-label">Profile</span>
+    </button>
+  </div>
+
+  <script>
+    // Структура модулей (копия из gaid.html)
+    const modules = [
+      {
+        id: 'intro',
+        title: 'Знакомство с курсом',
+        label: 'Вступление',
+        file: 'intro.html'
+      },
+      {
+        id: 'm1',
+        title: 'Основы искусственного интеллекта',
+        label: 'Модуль 1',
+        file: 'M1.html'
+      },
+      {
+        id: 'm2',
+        title: 'Продвинутые техники ИИ',
+        label: 'Модуль 2',
+        file: 'M2.html'
+      },
+      {
+        id: 'm3',
+        title: 'Практическое применение',
+        label: 'Модуль 3',
+        file: 'M3.html'
+      },
+      {
+        id: 'm4',
+        title: 'Мастерство работы с ИИ',
+        label: 'Модуль 4',
+        file: 'M4.html'
+      }
+    ];
+
+    // Получить избранные модули из localStorage
+    function getFavorites() {
+      const favorites = localStorage.getItem('favoriteModules');
+      return favorites ? JSON.parse(favorites) : [];
+    }
+
+    // Удалить из избранного
+    function removeFromFavorites(moduleId) {
+      let favorites = getFavorites();
+      favorites = favorites.filter(id => id !== moduleId);
+      localStorage.setItem('favoriteModules', JSON.stringify(favorites));
+      renderFavorites();
+    }
+
+    // Открыть модуль
+    function openModule(file) {
+      window.location.href = file;
+    }
+
+    // Отобразить избранные модули
+    function renderFavorites() {
+      const favoritesContainer = document.getElementById('favoritesContainer');
+      const favorites = getFavorites();
+
+      if (favorites.length === 0) {
+        favoritesContainer.innerHTML = `
+          <div class="empty-state">
+            <div class="empty-icon">💙</div>
+            <div class="empty-title">Нет избранных модулей</div>
+            <div class="empty-text">Добавьте модули в избранное на странице курса для быстрого доступа</div>
+          </div>
+        `;
+        return;
+      }
+
+      favoritesContainer.innerHTML = '';
+
+      favorites.forEach(moduleId => {
+        const module = modules.find(m => m.id === moduleId);
+        if (!module) return;
+
+        const favoriteItem = document.createElement('div');
+        favoriteItem.className = 'favorite-item';
+        favoriteItem.innerHTML = `
+          <div class="favorite-info">
+            <div class="favorite-title">${module.title}</div>
+            <div class="favorite-label">${module.label}</div>
+          </div>
+          <div class="favorite-actions">
+            <button class="action-btn open-btn" onclick="openModule('${module.file}')">Открыть</button>
+            <button class="action-btn remove-btn" onclick="removeFromFavorites('${module.id}')">Удалить</button>
+          </div>
+        `;
+
+        favoritesContainer.appendChild(favoriteItem);
+      });
+    }
+
+    // Обработчики навигации
+    document.getElementById('guidesBtn').addEventListener('click', () => {
+      window.location.href = 'gaid.html';
+    });
+
+    document.getElementById('favoriteBtn').addEventListener('click', () => {
+      // Уже на странице избранного
+    });
+
+    document.getElementById('aiToolsBtn').addEventListener('click', () => {
+      console.log('AI Tools clicked');
+    });
+
+    document.getElementById('profileBtn').addEventListener('click', () => {
+      console.log('Profile clicked');
+    });
+
+    // Инициализация при загрузке страницы
+    document.addEventListener('DOMContentLoaded', () => {
+      renderFavorites();
+    });
+
+    // Глобальные функции для использования в onclick
+    window.removeFromFavorites = removeFromFavorites;
+    window.openModule = openModule;
+  </script>
+</body>
+</html>
