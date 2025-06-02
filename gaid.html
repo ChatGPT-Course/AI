@@ -358,7 +358,10 @@
     ];
 
     let userProgress = 0;
+    let userPayment = 0;
     let userId = null;
+    let lastUpdateTime = 0;
+    let checkInterval = null;
 
     // Получить данные пользователя из cookies
     function getCookie(name) {
@@ -369,7 +372,7 @@
     }
 
     // Получить данные пользователя из NocoDB
-    async function getUserData() {
+    async function getUserData(isUpdate = false) {
       userId = getCookie('tg_user_id');
       
       if (!userId) {
@@ -390,27 +393,115 @@
         const user = data.list.find(u => u.tg_user_id == userId);
         
         if (user) {
-          userProgress = user.progress || 0;
+          const newProgress = user.progress || 0;
+          const newPayment = user.oplata || 0;
+          
+          // Проверяем, изменились ли данные
+          if (isUpdate && (newProgress !== userProgress || newPayment !== userPayment)) {
+            console.log('Данные пользователя обновлены:', { 
+              progress: newProgress, 
+              payment: newPayment 
+            });
+            
+            userProgress = newProgress;
+            userPayment = newPayment;
+            lastUpdateTime = Date.now();
+            
+            // Плавное обновление интерфейса
+            updateInterface();
+          } else if (!isUpdate) {
+            userProgress = newProgress;
+            userPayment = newPayment;
+            lastUpdateTime = Date.now();
+            renderModules();
+          }
         } else {
-          userProgress = 0;
+          if (!isUpdate) {
+            userProgress = 0;
+            userPayment = 0;
+            renderModules();
+          }
         }
-
-        renderModules();
       } catch (error) {
         console.error('Error fetching user data:', error);
-        userProgress = 0;
-        renderModules();
+        if (!isUpdate) {
+          userProgress = 0;
+          userPayment = 0;
+          renderModules();
+        }
       }
     }
 
-    // Отобразить модули на основе прогресса
+    // Плавное обновление интерфейса
+    function updateInterface() {
+      const modulesGrid = document.getElementById('modulesGrid');
+      
+      // Добавляем плавный переход
+      modulesGrid.style.transition = 'opacity 0.3s ease';
+      modulesGrid.style.opacity = '0.7';
+      
+      setTimeout(() => {
+        renderModules();
+        modulesGrid.style.opacity = '1';
+      }, 150);
+    }
+
+    // Запуск автоматической проверки обновлений
+    function startAutoUpdate() {
+      // Очищаем предыдущий интервал если есть
+      if (checkInterval) {
+        clearInterval(checkInterval);
+      }
+      
+      // Устанавливаем проверку каждые 3 секунды
+      checkInterval = setInterval(() => {
+        getUserData(true);
+      }, 3000);
+      
+      console.log('Автоматическая проверка обновлений запущена (каждые 3 сек)');
+    }
+
+    // Остановка автоматической проверки
+    function stopAutoUpdate() {
+      if (checkInterval) {
+        clearInterval(checkInterval);
+        checkInterval = null;
+        console.log('Автоматическая проверка обновлений остановлена');
+      }
+    }
+
+    // Отобразить модули на основе прогресса и оплаты
     function renderModules() {
       const modulesGrid = document.getElementById('modulesGrid');
       modulesGrid.innerHTML = '';
 
       modules.forEach(module => {
-        const isAvailable = userProgress >= module.requiredProgress;
+        // Логика доступности модулей:
+        // - Вступление доступно всегда
+        // - Модуль 1 доступен при прогрессе >= 1 или оплате > 0
+        // - Остальные модули доступны только при соответствующем прогрессе
+        let isAvailable = false;
+        let buttonText = 'Начать';
+        let lockReason = '';
+
+        if (module.id === 'intro') {
+          isAvailable = true;
+        } else if (module.id === 'm1') {
+          isAvailable = userProgress >= module.requiredProgress || userPayment > 0;
+          if (!isAvailable && userPayment === 0) {
+            lockReason = 'Требуется оплата';
+          }
+        } else {
+          isAvailable = userProgress >= module.requiredProgress;
+          if (!isAvailable) {
+            lockReason = 'Завершите предыдущие модули';
+          }
+        }
+
         const isCompleted = userProgress > module.requiredProgress;
+        if (isCompleted) {
+          buttonText = 'Повторить';
+        }
         
         const moduleCard = document.createElement('div');
         moduleCard.className = `module-card ${!isAvailable ? 'locked' : ''}`;
@@ -420,14 +511,34 @@
           <h3 class="module-title">${module.title}</h3>
           <p class="module-description">${module.description}</p>
           ${isAvailable ? 
-            `<button class="module-start-btn" onclick="startModule('${module.file}')">${isCompleted ? 'Повторить' : 'Начать'}</button>` :
-            `<button class="module-start-btn disabled">Заблокировано</button>`
+            `<button class="module-start-btn" onclick="startModule('${module.file}')">${buttonText}</button>` :
+            `<button class="module-start-btn disabled">${lockReason || 'Заблокировано'}</button>`
           }
           ${!isAvailable ? '<div class="locked-overlay">🔒</div>' : ''}
         `;
         
         modulesGrid.appendChild(moduleCard);
       });
+      
+      // Обновляем информацию о пользователе в заголовке
+      updateUserInfo();
+    }
+
+    // Обновить информацию о пользователе
+    function updateUserInfo() {
+      const userName = getCookie('tg_name') || 'Пользователь';
+      const welcomeTitle = document.querySelector('.welcome-title');
+      const welcomeSubtitle = document.querySelector('.welcome-subtitle');
+      
+      if (welcomeTitle) {
+        welcomeTitle.textContent = `Привет, ${userName}!`;
+      }
+      
+      if (welcomeSubtitle) {
+        const progressText = userProgress > 0 ? `Прогресс: ${userProgress}/5` : 'Начните обучение';
+        const paymentText = userPayment > 0 ? ' | Оплачено ✅' : ' | Демо-режим';
+        welcomeSubtitle.textContent = `${progressText}${paymentText}`;
+      }
     }
 
     // Начать модуль
@@ -455,6 +566,23 @@
     // Инициализация при загрузке страницы
     document.addEventListener('DOMContentLoaded', () => {
       getUserData();
+      startAutoUpdate();
+    });
+
+    // Остановка проверки при уходе со страницы
+    window.addEventListener('beforeunload', () => {
+      stopAutoUpdate();
+    });
+
+    // Возобновление проверки при возвращении на страницу
+    document.addEventListener('visibilitychange', () => {
+      if (document.visibilityState === 'visible') {
+        if (!checkInterval) {
+          startAutoUpdate();
+        }
+      } else {
+        stopAutoUpdate();
+      }
     });
   </script>
 </body>
