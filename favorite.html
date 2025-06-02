@@ -415,14 +415,14 @@
   </div>
 
   <div class="navigation-panel">
-    <button class="nav-button active" id="guidesBtn">
+    <button class="nav-button" id="guidesBtn">
       <svg class="nav-icon" viewBox="0 0 24 24">
         <path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-5 14H7v-2h7v2zm3-4H7v-2h10v2zm0-4H7V7h10v2z"/>
       </svg>
       <span class="nav-label">Курс</span>
     </button>
 
-    <button class="nav-button" id="favoriteBtn">
+    <button class="nav-button active" id="favoriteBtn">
       <svg class="nav-icon" viewBox="0 0 24 24">
         <path d="M4 2v20l8-4 8 4V2H4z"/>
       </svg>
@@ -685,7 +685,22 @@
       const modulesContainer = document.getElementById('modulesContainer');
       modulesContainer.innerHTML = '';
 
-      modules.forEach((module, index) => {
+      // Показываем только избранные модули
+      const favoriteModules = getFavorites();
+      const filteredModules = modules.filter(module => favoriteModules.includes(module.id));
+
+      if (filteredModules.length === 0) {
+        modulesContainer.innerHTML = `
+          <div style="text-align: center; padding: 2rem; color: #6c757d;">
+            <h3>Нет избранных модулей</h3>
+            <p>Добавьте модули в избранное в разделе "Курс"</p>
+          </div>
+        `;
+        updateUserInfo();
+        return;
+      }
+
+      filteredModules.forEach((module, index) => {
         const moduleState = getModuleState(module, index);
 
         // Логика доступности
@@ -715,14 +730,10 @@
         const moduleCard = document.createElement('div');
         moduleCard.className = `module-card ${moduleState}`;
 
-        if (isAvailable) {
-          moduleCard.addEventListener('click', () => startModule(module.file));
-        }
-
         moduleCard.innerHTML = `
           <div class="module-header">
             <div class="module-label">${module.label}</div>
-            <button class="favorite-btn ${isFavorite(module.id) ? 'active' : ''}" onclick="toggleFavorite('${module.id}')">
+            <button class="favorite-btn active">
               <svg class="favorite-icon" viewBox="0 0 24 24">
                 <path d="M4 2v20l8-4 8 4V2H4z"/>
               </svg>
@@ -746,6 +757,22 @@
           </div>
         `;
 
+        // Добавляем обработчики событий после создания элемента
+        const favoriteBtn = moduleCard.querySelector('.favorite-btn');
+        const startBtn = moduleCard.querySelector('.module-start-btn');
+
+        favoriteBtn.addEventListener('click', (e) => {
+          e.stopPropagation();
+          toggleFavorite(module.id);
+        });
+
+        if (isAvailable) {
+          startBtn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            startModule(module.file);
+          });
+        }
+
         modulesContainer.appendChild(moduleCard);
       });
 
@@ -760,15 +787,14 @@
       const progressSubtitle = document.querySelector('.progress-subtitle');
 
       if (progressTitle) {
-        progressTitle.textContent = `Привет, ${userName}!`;
+        progressTitle.textContent = `Избранные модули`;
       }
 
       // Обновляем общий прогресс
       updateOverallProgress();
 
       if (progressSubtitle) {
-        const paymentText = userPayment > 0 ? 'Полная версия ✅' : 'Демо-режим';
-        progressSubtitle.textContent = paymentText;
+        progressSubtitle.textContent = 'Ваши сохраненные модули';
       }
     }
 
@@ -804,7 +830,7 @@
 
     // Обработчики навигации
     document.getElementById('guidesBtn').addEventListener('click', () => {
-      window.location.href = 'index.html';
+      window.location.href = 'gaid.html';
     });
 
     document.getElementById('favoriteBtn').addEventListener('click', () => {
