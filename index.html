@@ -4,6 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Главное меню курса</title>
+  <script src="https://telegram.org/js/telegram-web-app.js"></script>
   <style>
     * {
       margin: 0;
@@ -55,6 +56,12 @@
       color: #5a6c7d;
       line-height: 1.6;
       max-width: 500px;
+    }
+
+    .loading-message {
+      font-size: 1.1rem;
+      color: #6c757d;
+      margin: 2rem 0;
     }
 
     .navigation-panel {
@@ -111,34 +118,17 @@
       color: #495057;
     }
 
-    
-
     @media (max-width: 768px) {
-      .module1-header {
-        padding: 1.5rem 1rem;
+      .welcome-title {
+        font-size: 1.8rem;
       }
-      
-      .module1-title {
-        font-size: 1.5rem;
+
+      .welcome-subtitle {
+        font-size: 1rem;
       }
-      
-      .slides-container {
-        margin-top: 120px;
+
+      .main-content {
         padding: 1rem;
-      }
-      
-      .slide-content {
-        padding: 1.5rem;
-        min-height: 250px;
-      }
-      
-      .navigation-buttons {
-        bottom: 1rem;
-      }
-      
-      .nav-btn {
-        padding: 0.8rem 1.5rem;
-        font-size: 0.9rem;
       }
     }
   </style>
@@ -152,9 +142,8 @@
         Здесь вы найдете все необходимые материалы для успешного обучения. 
         Выберите нужный раздел в навигации внизу экрана и начните свой путь к новым знаниям.
       </p>
+      <div class="loading-message" id="loadingMessage">Загружаем ваши данные...</div>
     </div>
-
-    
   </div>
 
   <div class="navigation-panel">
@@ -197,6 +186,11 @@
       baseUrl: 'https://app.nocodb.com/api/v1/db/data'
     };
 
+    // Переменные для работы с Telegram WebApp
+    let tg = window.Telegram.WebApp;
+    let userData = null;
+    let isInitialized = false;
+
     // Установить cookie
     function setCookie(name, value, days = 365) {
       const expires = new Date();
@@ -204,53 +198,31 @@
       document.cookie = `${name}=${value};expires=${expires.toUTCString()};path=/`;
     }
 
-    // Получить cookie
-    function getCookie(name) {
-      const value = `; ${document.cookie}`;
-      const parts = value.split(`; ${name}=`);
-      if (parts.length === 2) return parts.pop().split(';').shift();
-      return null;
-    }
-
-    // Получить данные Telegram пользователя
+    // Получить данные пользователя из Telegram WebApp
     function getTelegramUserData() {
-      // Проверяем, доступен ли Telegram WebApp API
-      if (window.Telegram && window.Telegram.WebApp && window.Telegram.WebApp.initDataUnsafe && window.Telegram.WebApp.initDataUnsafe.user) {
-        const user = window.Telegram.WebApp.initDataUnsafe.user;
-        console.log('Получены данные пользователя из Telegram WebApp:', user);
-        return {
-          id: user.id.toString(),
-          username: user.username || '',
-          first_name: user.first_name || '',
-          last_name: user.last_name || ''
-        };
+      try {
+        // Расширяем приложение на весь экран
+        tg.expand();
+
+        // Получаем данные пользователя
+        if (tg.initDataUnsafe && tg.initDataUnsafe.user) {
+          const user = tg.initDataUnsafe.user;
+          console.log('Получены данные пользователя Telegram:', user);
+
+          return {
+            id: user.id.toString(),
+            username: user.username || '',
+            first_name: user.first_name || '',
+            last_name: user.last_name || '',
+            language_code: user.language_code || 'ru'
+          };
+        }
+
+        throw new Error('Данные пользователя недоступны');
+      } catch (error) {
+        console.error('Ошибка получения данных пользователя:', error);
+        throw error;
       }
-      
-      // Если Telegram API недоступен, пытаемся получить из URL параметров
-      const urlParams = new URLSearchParams(window.location.search);
-      const userId = urlParams.get('user_id');
-      const username = urlParams.get('username');
-      const firstName = urlParams.get('first_name');
-      
-      if (userId) {
-        console.log('Получены данные пользователя из URL параметров');
-        return {
-          id: userId,
-          username: username || '',
-          first_name: firstName || '',
-          last_name: ''
-        };
-      }
-      
-      // Для тестирования - генерируем случайный ID
-      console.log('Telegram WebApp API не доступен, используются тестовые данные');
-      const testId = 'test_' + Math.random().toString().substr(2, 9);
-      return {
-        id: testId,
-        username: 'testuser',
-        first_name: 'Test',
-        last_name: 'User'
-      };
     }
 
     // Сохранить данные пользователя в cookies
@@ -258,12 +230,13 @@
       setCookie('tg_user_id', userData.id);
       setCookie('tg_username', userData.username);
       setCookie('tg_name', `${userData.first_name} ${userData.last_name}`.trim());
+      setCookie('tg_language', userData.language_code);
     }
 
     // Проверить пользователя в NocoDB
     async function checkUserInDatabase(userData) {
       console.log('Проверяем пользователя в базе данных:', userData);
-      
+
       try {
         // Получаем все записи из таблицы
         const listResponse = await fetch(`${config.baseUrl}/${config.orgs}/${config.projectName}/${config.tableName}`, {
@@ -277,31 +250,32 @@
         if (!listResponse.ok) {
           throw new Error(`Ошибка получения данных: ${listResponse.status} ${listResponse.statusText}`);
         }
-        
+
         const data = await listResponse.json();
         console.log('Получены данные из базы:', data);
-        
+
         // Ищем пользователя по tg_user_id
         const existingUser = data.list ? data.list.find(user => user.tg_user_id && user.tg_user_id.toString() === userData.id.toString()) : null;
-        
+
         if (existingUser) {
           console.log('Пользователь найден в базе данных:', existingUser);
-          return;
+          return true;
         }
-        
+
         console.log('Пользователь не найден, создаем новую запись...');
-        
+
         // Создаем нового пользователя
         const newUserData = {
           tg_user_id: userData.id,
           name: `${userData.first_name} ${userData.last_name}`.trim() || 'Не указано',
           username: userData.username || 'Не указан',
           progress: 0,
-          oplata: 0
+          oplata: 0,
+          data: ''
         };
-        
+
         console.log('Данные для создания пользователя:', newUserData);
-        
+
         const createResponse = await fetch(`${config.baseUrl}/${config.orgs}/${config.projectName}/${config.tableName}`, {
           method: 'POST',
           headers: {
@@ -315,64 +289,115 @@
           const errorText = await createResponse.text();
           throw new Error(`Ошибка создания пользователя: ${createResponse.status} ${createResponse.statusText} - ${errorText}`);
         }
-        
+
         const createdUser = await createResponse.json();
         console.log('Пользователь успешно создан:', createdUser);
-        
+        return true;
+
       } catch (error) {
         console.error('Ошибка при работе с базой данных:', error);
-        // Показываем пользователю информацию об ошибке
-        alert('Произошла ошибка при проверке данных пользователя. Проверьте консоль для деталей.');
+
+        // Уведомляем пользователя об ошибке через Telegram WebApp
+        if (tg.showAlert) {
+          tg.showAlert('Произошла ошибка при проверке данных пользователя. Попробуйте позже.');
+        }
+
+        throw error;
       }
     }
 
-    // Инициализация при загрузке страницы
-    document.addEventListener('DOMContentLoaded', async () => {
-      console.log('Начинаем инициализацию...');
-      
-      // Добавляем задержку для полной загрузки Telegram WebApp
-      await new Promise(resolve => setTimeout(resolve, 1000));
-      
-      // Инициализируем Telegram WebApp если доступен
-      if (window.Telegram && window.Telegram.WebApp) {
-        console.log('Telegram WebApp найден, инициализируем...');
-        window.Telegram.WebApp.ready();
-        window.Telegram.WebApp.expand();
+    // Инициализация приложения
+    async function initApp() {
+      try {
+        console.log('Начинаем инициализацию приложения...');
+
+        // Проверяем доступность Telegram WebApp
+        if (!window.Telegram || !window.Telegram.WebApp) {
+          throw new Error('Приложение должно быть запущено в Telegram');
+        }
+
+        // Инициализируем Telegram WebApp
+        tg.ready();
         console.log('Telegram WebApp инициализирован');
-        console.log('initDataUnsafe:', window.Telegram.WebApp.initDataUnsafe);
-      } else {
-        console.log('Telegram WebApp не найден');
+
+        // Получаем данные пользователя
+        userData = getTelegramUserData();
+        console.log('Полученные данные пользователя:', userData);
+
+        // Сохраняем в cookies
+        saveUserData(userData);
+        console.log('Данные сохранены в cookies');
+
+        // Проверяем в базе данных
+        await checkUserInDatabase(userData);
+
+        // Скрываем сообщение о загрузке
+        document.getElementById('loadingMessage').style.display = 'none';
+
+        console.log('Инициализация завершена успешно');
+        isInitialized = true;
+
+      } catch (error) {
+        console.error('Ошибка инициализации:', error);
+
+        // Показываем ошибку пользователю
+        const loadingMessage = document.getElementById('loadingMessage');
+        loadingMessage.textContent = `Ошибка: ${error.message}`;
+        loadingMessage.style.color = '#dc3545';
+
+        // Если есть возможность, показываем alert через Telegram
+        if (tg.showAlert) {
+          tg.showAlert(`Ошибка инициализации: ${error.message}`);
+        }
       }
-      
-      // Получаем данные пользователя Telegram
-      const userData = getTelegramUserData();
-      console.log('Полученные данные пользователя:', userData);
-      
-      // Сохраняем в cookies
-      saveUserData(userData);
-      console.log('Данные сохранены в cookies');
-      
-      // Проверяем в базе данных
-      await checkUserInDatabase(userData);
-      
-      console.log('Инициализация завершена');
-    });
+    }
 
     // Обработчики навигации
     document.getElementById('guidesBtn').addEventListener('click', () => {
+      if (!isInitialized) {
+        console.warn('Приложение еще не инициализировано');
+        return;
+      }
       window.location.href = 'gaid.html';
     });
 
     document.getElementById('challengesBtn').addEventListener('click', () => {
       console.log('Challenges clicked');
+      if (tg.showAlert) {
+        tg.showAlert('Раздел находится в разработке');
+      }
     });
 
     document.getElementById('aiToolsBtn').addEventListener('click', () => {
       console.log('AI Tools clicked');
+      if (tg.showAlert) {
+        tg.showAlert('Раздел находится в разработке');
+      }
     });
 
     document.getElementById('profileBtn').addEventListener('click', () => {
       console.log('Profile clicked');
+      if (tg.showAlert) {
+        tg.showAlert('Раздел находится в разработке');
+      }
+    });
+
+    // Запускаем инициализацию после загрузки DOM
+    document.addEventListener('DOMContentLoaded', initApp);
+
+    // Обработка события закрытия приложения
+    tg.onEvent('mainButtonClicked', function() {
+      tg.close();
+    });
+
+    // Дополнительная проверка на случай, если скрипт Telegram не загрузился
+    window.addEventListener('load', function() {
+      setTimeout(() => {
+        if (!isInitialized && window.Telegram && window.Telegram.WebApp) {
+          console.log('Повторная попытка инициализации...');
+          initApp();
+        }
+      }, 1000);
     });
   </script>
 </body>
