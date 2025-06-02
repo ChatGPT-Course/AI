@@ -2,1110 +2,208 @@
 <html lang="ru">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title>Основы ИИ — Онлайн курс</title>
-  <script src="https://telegram.org/js/telegram-web-app.js"></script>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Главное меню курса</title>
   <style>
-    :root {
-      --primary: #FF7A00;
-      --primary-light: #FF9E40;
-      --white: #FFFFFF;
-      --dark: #333333;
-      --gray: #F5F5F5;
-      --graphite: #4A4A4A;
-      --success: #4CAF50;
-      --success-light: #81C784;
-      --disabled: #9E9E9E;
-      --disabled-light: #E0E0E0;
-    }
-
     * {
       margin: 0;
       padding: 0;
       box-sizing: border-box;
-      -webkit-tap-highlight-color: transparent;
-      outline: none;
-      -webkit-overflow-scrolling: touch;
-    }
-
-    html, body {
-      width: 100%;
-      height: 100%;
-      overflow-x: hidden;
-      position: fixed;
     }
 
     body {
-      margin: 0;
-      font-family: 'Segoe UI', Arial, sans-serif;
-      background: linear-gradient(135deg, #FFF3E0 0%, #FFFFFF 100%);
-      color: var(--dark);
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Arial, sans-serif;
+      background: #ffffff;
       min-height: 100vh;
-      overflow-y: auto;
-      -webkit-font-smoothing: antialiased;
-      touch-action: pan-y;
-    }
-
-    /* Экран загрузки */
-    .loading-screen {
-      position: fixed;
-      top: 0;
-      left: 0;
-      right: 0;
-      bottom: 0;
-      background: linear-gradient(135deg, var(--white) 0%, #FFF3E0 100%);
       display: flex;
       flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      z-index: 1000;
-      transition: opacity 0.5s ease;
-      will-change: opacity;
     }
 
-    .loading-text {
-      font-size: 20px;
-      font-weight: 500;
-      margin-bottom: 20px;
-      color: var(--primary);
-    }
-
-    .loading-balls {
-      display: flex;
-      gap: 12px;
-    }
-
-    .loading-ball {
-      width: 16px;
-      height: 16px;
-      border-radius: 50%;
-      animation: bounce 1s infinite ease-in-out;
-      will-change: transform;
-    }
-
-    .loading-ball:nth-child(1) {
-      background: var(--primary);
-      animation-delay: 0s;
-    }
-
-    .loading-ball:nth-child(2) {
-      background: var(--primary-light);
-      animation-delay: 0.2s;
-    }
-
-    .loading-ball:nth-child(3) {
-      background: #AAAAAA;
-      animation-delay: 0.4s;
-    }
-
-    @keyframes bounce {
-      0%, 100% { transform: translateY(0); }
-      50% { transform: translateY(-10px); }
-    }
-
-    #app-content {
-      opacity: 0;
-      transition: opacity 0.5s ease;
-      will-change: opacity;
-    }
-
-    .header {
-      display: flex;
-      align-items: center;
-      background: var(--graphite);
-      padding: 20px;
-      box-shadow: 0 4px 16px rgba(0, 0, 0, 0.2);
-      width: 100%;
-      margin-bottom: 20px;
-      position: relative;
-      color: var(--white);
-    }
-
-    .avatar {
-      width: 64px;
-      height: 64px;
-      border-radius: 50%;
-      background: linear-gradient(135deg, var(--primary) 0%, var(--primary-light) 100%);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      color: white;
-      font-weight: bold;
-      margin-right: 20px;
-      overflow: hidden;
-      flex-shrink: 0;
-    }
-
-    .avatar img {
-      width: 100%;
-      height: 100%;
-      object-fit: cover;
-    }
-
-    .user-info {
+    .main-content {
       flex: 1;
-      min-width: 0;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      padding: 2rem;
+      text-align: center;
+      max-width: 600px;
+      margin: 0 auto;
     }
 
-    .user-name {
-      font-size: 20px;
-      font-weight: 600;
-      color: var(--white);
-      margin-bottom: 4px;
+    .welcome-section {
+      margin-bottom: 3rem;
+    }
+
+    .welcome-title {
+      font-size: 2.5rem;
+      font-weight: 700;
+      color: #2c3e50;
+      margin-bottom: 1rem;
       line-height: 1.2;
-      white-space: nowrap;
-      overflow: hidden;
-      text-overflow: ellipsis;
     }
 
-    .user-id {
-      font-size: 14px;
-      color: #DDD;
-      white-space: nowrap;
-      overflow: hidden;
-      text-overflow: ellipsis;
+    .welcome-subtitle {
+      font-size: 1.2rem;
+      color: #7f8c8d;
+      margin-bottom: 2rem;
+      line-height: 1.5;
     }
 
-    .content {
-      padding: 0 20px 20px;
-      max-width: 1200px;
-      margin: 0 auto;
-      position: relative;
-      width: 100%;
+    .welcome-description {
+      font-size: 1rem;
+      color: #5a6c7d;
+      line-height: 1.6;
+      max-width: 500px;
     }
 
-    .modules-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-      gap: 40px;
-      position: relative;
-    }
-
-    .module {
-      background: var(--white);
-      border-radius: 16px;
-      padding: 24px;
-      box-shadow: 0 4px 16px rgba(255, 122, 0, 0.1);
-      transition: transform 0.2s ease, box-shadow 0.2s ease;
-      position: relative;
-      cursor: default;
-      z-index: 2;
-      overflow: hidden;
-      will-change: transform;
-    }
-
-    .module:active:not(.locked) {
-      transform: scale(0.98) translateY(2px);
-    }
-
-    .module.locked {
-      background: var(--disabled-light);
-      cursor: not-allowed;
-    }
-
-    .module.completed {
-      background: #E8F5E9;
-    }
-
-    .module.current {
-      animation: pulse 2s infinite ease-in-out;
-      position: relative;
-      overflow: visible;
-    }
-
-    @keyframes pulse {
-      0%, 100% { 
-        transform: scale(1);
-        box-shadow: 0 4px 16px rgba(255, 122, 0, 0.2);
-      }
-      50% { 
-        transform: scale(1.02);
-        box-shadow: 0 8px 24px rgba(255, 122, 0, 0.3);
-      }
-    }
-
-    .module.current::after {
-      content: '';
-      position: absolute;
-      top: -10px;
-      left: -10px;
-      right: -10px;
-      bottom: -10px;
-      border-radius: 26px;
-      border: 2px solid rgba(255, 122, 0, 0.3);
-      animation: ripple 3s infinite ease-out;
-      pointer-events: none;
-      z-index: -1;
-    }
-
-    @keyframes ripple {
-      0% {
-        opacity: 1;
-        transform: scale(1);
-      }
-      100% {
-        opacity: 0;
-        transform: scale(1.1);
-      }
-    }
-
-    .module-label {
-      position: absolute;
-      top: 0;
-      right: 0;
-      background: var(--primary);
-      color: white;
-      padding: 8px 16px;
-      border-radius: 0 0 0 16px;
-      font-size: 16px;
-      font-weight: 500;
-      z-index: 2;
-    }
-
-    .module-label.completed {
-      background: var(--success);
-    }
-
-    .module-label.locked {
-      background: var(--disabled);
-    }
-
-    .module-content {
-      position: relative;
-      height: 100%;
-      display: flex;
-      flex-direction: column;
-    }
-
-    .module-title {
-      font-size: 20px;
-      font-weight: 600;
-      margin-bottom: 8px;
-      color: var(--dark);
-      text-align: left;
-      padding-right: 80px;
-    }
-
-    .module-desc {
-      font-size: 14px;
-      color: #666;
-      margin-bottom: 12px;
-      line-height: 1.4;
-      flex-grow: 1;
-    }
-
-    .module-blocks {
-      font-size: 14px;
-      color: #666;
-      font-weight: bold;
-      font-style: italic;
-      margin-bottom: 16px;
-      align-self: flex-start;
-    }
-
-    .module-btn {
-      background: var(--primary);
-      color: white;
-      border: none;
-      padding: 10px 16px;
-      border-radius: 8px;
-      font-weight: 600;
-      cursor: pointer;
-      transition: background 0.2s, transform 0.1s;
-      align-self: flex-end;
-      width: auto;
-      min-width: 120px;
-      text-align: center;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      gap: 8px;
-      will-change: transform;
-    }
-
-    .module-btn:active:not(:disabled) {
-      transform: scale(0.98);
-    }
-
-    .module-btn:hover:not(:disabled) {
-      background: var(--primary-light);
-    }
-
-    .module-btn.completed {
-      background: var(--success);
-    }
-
-    .module-btn.completed:hover:not(:disabled) {
-      background: var(--success-light);
-    }
-
-    .module-btn.locked {
-      background: var(--disabled);
-      cursor: not-allowed;
-    }
-
-    /* Progress line */
-    .progress-line {
-      position: absolute;
-      height: 4px;
-      background: var(--disabled-light);
-      top: 50%;
-      left: 20px;
-      right: 20px;
-      z-index: 1;
-      margin-top: -2px;
-    }
-
-    .progress-line-fill {
-      position: absolute;
-      height: 100%;
-      background: var(--success);
-      width: 0;
-      transition: width 1s ease;
-    }
-
-    /* Menu Button Styles */
-    .menu-button {
-      position: absolute;
-      right: 20px;
-      top: 50%;
-      transform: translateY(-50%);
-      width: 40px;
-      height: 40px;
-      background: transparent;
-      border: 2px solid var(--white);
-      border-radius: 8px;
-      cursor: pointer;
-      display: flex;
-      flex-direction: column;
-      justify-content: center;
-      gap: 5px;
-      z-index: 100;
-      padding: 0;
-    }
-
-    .menu-button span {
-      display: block;
-      width: 24px;
-      height: 3px;
-      background: var(--white);
-      margin: 0 auto;
-      border-radius: 2px;
-      transition: all 0.3s ease;
-    }
-
-    .menu-button.active span:nth-child(1) {
-      transform: rotate(45deg) translate(6px, 6px);
-    }
-
-    .menu-button.active span:nth-child(2) {
-      opacity: 0;
-    }
-
-    .menu-button.active span:nth-child(3) {
-      transform: rotate(-45deg) translate(6px, -6px);
-    }
-
-    /* Menu Content */
-    .menu-content {
-      position: absolute;
-      top: 80px;
-      right: 20px;
-      background: transparent;
-      padding: 0;
-      border-radius: 8px;
-      box-shadow: none;
-      display: flex;
-      flex-direction: column;
-      align-items: flex-end;
-      z-index: 99;
-      opacity: 0;
-      pointer-events: none;
-      transform: translateY(-10px);
-      transition: opacity 0.3s cubic-bezier(.77,0,.18,1), transform 0.3s cubic-bezier(.77,0,.18,1);
-    }
-
-    .menu-content.active {
-      opacity: 1;
-      pointer-events: auto;
-      transform: translateY(0);
-    }
-
-    .menu-content button {
-      background: var(--graphite);
-      color: #fff;
-      border: none;
-      padding: 14px 32px;
-      min-width: 160px;
-      border-radius: 32px;
-      font-size: 16px;
-      font-weight: 600;
-      cursor: pointer;
-      box-shadow: 0 4px 16px rgba(0,0,0,0.12);
-      margin: 0 0 0.5rem 0;
-      opacity: 0;
-      transform: translateY(-10px) scale(0.95);
-      transition: opacity 0.35s cubic-bezier(.77,0,.18,1), transform 0.35s cubic-bezier(.77,0,.18,1);
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      box-sizing: border-box;
-      outline: none !important;
-    }
-
-    .menu-content.active button {
-      opacity: 1;
-      transform: translateY(0) scale(1);
-      transition-delay: 0.1s;
-    }
-
-    .menu-content button:active {
-      background: #222;
-    }
-
-    /* Popup Styles */
-    .popup-overlay {
+    .navigation-panel {
       position: fixed;
-      top: 0;
+      bottom: 0;
       left: 0;
       right: 0;
-      bottom: 0;
-      background: rgba(0,0,0,0.7);
+      background: #ffffff;
+      border-top: 1px solid #e0e0e0;
+      padding: 1rem 0;
       display: flex;
-      justify-content: center;
+      justify-content: space-around;
       align-items: center;
-      z-index: 2000;
+      box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.1);
     }
 
-    .popup-content {
-      background: white;
-      padding: 24px;
-      border-radius: 16px;
-      max-width: 320px;
-      width: 100%;
-      text-align: center;
-      box-shadow: 0 8px 32px rgba(0,0,0,0.2);
-    }
-
-    .popup-title {
-      font-size: 20px;
-      font-weight: 600;
-      color: var(--primary);
-      margin-bottom: 16px;
-    }
-
-    .popup-message {
-      margin-bottom: 24px;
-      color: var(--dark);
-      line-height: 1.4;
-    }
-
-    .popup-buttons {
+    .nav-button {
       display: flex;
-      gap: 12px;
-      justify-content: space-between;
-    }
-
-    .popup-button {
-      background: var(--primary);
-      color: white;
+      flex-direction: column;
+      align-items: center;
+      padding: 0.5rem 1rem;
+      background: none;
       border: none;
-      padding: 12px 24px;
-      border-radius: 8px;
-      font-weight: 600;
       cursor: pointer;
-      transition: background 0.2s;
-      flex: 1;
+      transition: all 0.2s ease;
+      min-width: 70px;
     }
 
-    .popup-button.secondary {
-      background: #EEE;
-      color: var(--dark);
-      flex: 0.5;
+    .nav-button:hover {
+      background: #f8f9fa;
+      border-radius: 8px;
     }
 
-    .popup-button:hover {
-      background: var(--primary-light);
+    .nav-icon {
+      width: 24px;
+      height: 24px;
+      margin-bottom: 0.3rem;
+      fill: #6c757d;
+      transition: fill 0.2s ease;
     }
 
-    .popup-button.secondary:hover {
-      background: #DDD;
+    .nav-button:hover .nav-icon {
+      fill: #495057;
     }
 
-    @media (max-width: 600px) {
-      .header {
-        padding: 15px;
+    .nav-label {
+      font-size: 0.8rem;
+      color: #6c757d;
+      font-weight: 500;
+      transition: color 0.2s ease;
+    }
+
+    .nav-button:hover .nav-label {
+      color: #495057;
+    }
+
+    
+
+    @media (max-width: 768px) {
+      .module1-header {
+        padding: 1.5rem 1rem;
       }
       
-      .avatar {
-        width: 48px;
-        height: 48px;
-        margin-right: 15px;
+      .module1-title {
+        font-size: 1.5rem;
       }
-
-      .user-name {
-        font-size: 18px;
+      
+      .slides-container {
+        margin-top: 120px;
+        padding: 1rem;
       }
-
-      .content {
-        padding: 0 15px 15px;
+      
+      .slide-content {
+        padding: 1.5rem;
+        min-height: 250px;
       }
-
-      .modules-grid {
-        grid-template-columns: 1fr;
-        gap: 30px;
+      
+      .navigation-buttons {
+        bottom: 1rem;
       }
-
-      .progress-line {
-        display: none;
-      }
-
-      .popup-buttons {
-        flex-direction: column;
-        gap: 8px;
-      }
-
-      .popup-button,
-      .popup-button.secondary {
-        width: 100%;
-        flex: none;
+      
+      .nav-btn {
+        padding: 0.8rem 1.5rem;
+        font-size: 0.9rem;
       }
     }
   </style>
 </head>
 <body>
-  <div class="loading-screen" id="loading-screen">
-    <div class="loading-text">Загрузка</div>
-    <div class="loading-balls">
-      <div class="loading-ball"></div>
-      <div class="loading-ball"></div>
-      <div class="loading-ball"></div>
+  <div class="main-content">
+    <div class="welcome-section" id="welcomeSection">
+      <h1 class="welcome-title">Добро пожаловать в курс!</h1>
+      <p class="welcome-subtitle">Изучайте новые навыки с удовольствием</p>
+      <p class="welcome-description">
+        Здесь вы найдете все необходимые материалы для успешного обучения. 
+        Выберите нужный раздел в навигации внизу экрана и начните свой путь к новым знаниям.
+      </p>
     </div>
+
+    
   </div>
 
-  <div id="app-content">
-    <div class="header">
-      <div class="avatar" id="userAvatar">
-        <span id="avatar-fallback">U</span>
-      </div>
-      <div class="user-info">
-        <div class="user-name" id="userName">Загрузка...</div>
-        <div class="user-id" id="userId">ID: загрузка...</div>
-      </div>
-      <button class="menu-button" id="menuButton">
-        <span></span>
-        <span></span>
-        <span></span>
-      </button>
-      <div class="menu-content" id="menuContent">
-        <button id="supportButton">Тех. поддержка 🛠️</button>
-      </div>
-    </div>
+  <div class="navigation-panel">
+    <button class="nav-button" id="guidesBtn">
+      <svg class="nav-icon" viewBox="0 0 24 24">
+        <path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-5 14H7v-2h7v2zm3-4H7v-2h10v2zm0-4H7V7h10v2z"/>
+      </svg>
+      <span class="nav-label">Guides</span>
+    </button>
 
-    <div class="content">
-      <div class="progress-line">
-        <div class="progress-line-fill" id="progressFill"></div>
-      </div>
-      <div class="modules-grid" id="modules-container">
-        <!-- Модули будут добавлены динамически -->
-      </div>
-    </div>
+    <button class="nav-button" id="challengesBtn">
+      <svg class="nav-icon" viewBox="0 0 24 24">
+        <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/>
+      </svg>
+      <span class="nav-label">Challenges</span>
+    </button>
+
+    <button class="nav-button" id="aiToolsBtn">
+      <svg class="nav-icon" viewBox="0 0 24 24">
+        <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/>
+      </svg>
+      <span class="nav-label">AI Tools</span>
+    </button>
+
+    <button class="nav-button" id="profileBtn">
+      <svg class="nav-icon" viewBox="0 0 24 24">
+        <path d="M12 2C13.1 2 14 2.9 14 4C14 5.1 13.1 6 12 6C10.9 6 10 5.1 10 4C10 2.9 10.9 2 12 2ZM21 9V7L15 7V9C15 11.7 12.7 14 10 14S5 11.7 5 9V7H3V9C3 12.4 5.4 15.1 8.5 15.8V18H7V20H17V18H15.5V15.8C18.6 15.1 21 12.4 21 9Z"/>
+      </svg>
+      <span class="nav-label">Profile</span>
+    </button>
   </div>
 
-<script>
-    // Конфигурация NocoDB
-    const nocodbConfig = {
-      apiUrl: 'https://app.nocodb.com/api/v2/tables/mc6qh91f060pv4y/records',
-      apiToken: 'bocQfycJpJsTG_tbwEf8ma8E5rhoig0njMDXFWtJ',
-      defaultLimit: 25,
-      defaultViewId: 'vwz8x1qjxgvl15di'
-    };
-
-    // Состояние приложения
-    const state = {
-      userId: null,
-      username: null,
-      isPaid: false,
-      isLoaded: false,
-      progress: 0,
-      checkInterval: null,
-      lastCheckTime: 0,
-      menuOpen: false
-    };
-
-    // Функция для установки cookie
-    function setCookie(name, value, days) {
-      const date = new Date();
-      date.setTime(date.getTime() + (days * 24 * 60 * 60 * 1000));
-      const expires = "expires=" + date.toUTCString();
-      document.cookie = name + "=" + encodeURIComponent(value) + ";" + expires + ";path=/";
-    }
-
-    // Функция для получения cookie
-    function getCookie(name) {
-      const cookies = document.cookie.split('; ');
-      for (const cookie of cookies) {
-        const [cookieName, cookieValue] = cookie.split('=');
-        if (cookieName === name) {
-          return decodeURIComponent(cookieValue);
-        }
-      }
-      return null;
-    }
-
-    // Функция для скрытия экрана загрузки
-    function hideLoadingScreen() {
-      const loadingScreen = document.getElementById('loading-screen');
-      loadingScreen.style.opacity = '0';
-      setTimeout(() => {
-        loadingScreen.style.display = 'none';
-        document.getElementById('app-content').style.opacity = '1';
-      }, 500);
-    }
-
-    // Кэш для запросов
-    const requestCache = new Map();
-    const CACHE_TTL = 2000; // 2 секунды
-
-    // Функция для выполнения запросов к NocoDB с кэшированием
-    async function nocodbRequest(endpoint, method = 'GET', body = null) {
-      const cacheKey = `${method}:${endpoint}`;
-      const cached = requestCache.get(cacheKey);
-      
-      if (cached && Date.now() - cached.timestamp < CACHE_TTL) {
-        return cached.data;
-      }
-
-      const headers = {
-        'Content-Type': 'application/json',
-        'xc-token': nocodbConfig.apiToken
-      };
-
-      const options = {
-        method,
-        headers
-      };
-
-      if (body) {
-        options.body = JSON.stringify(body);
-      }
-
-      try {
-        const response = await fetch(`${nocodbConfig.apiUrl}${endpoint}`, options);
-        if (!response.ok) {
-          throw new Error(`HTTP error! status: ${response.status}`);
-        }
-        const data = await response.json();
-        requestCache.set(cacheKey, { data, timestamp: Date.now() });
-        return data;
-      } catch (error) {
-        console.error('Ошибка при запросе к NocoDB:', error);
-        throw error;
-      }
-    }
-
-    // Функция для поиска пользователя в NocoDB
-    async function findUserInNocodb(userId) {
-      try {
-        const response = await nocodbRequest(
-          `?where=(tg_user_id,eq,${userId})&viewId=${nocodbConfig.defaultViewId}`
-        );
-        
-        if (response.list && response.list.length > 0) {
-          return response.list[0];
-        }
-        return null;
-      } catch (error) {
-        console.error('Ошибка при поиске пользователя:', error);
-        return null;
-      }
-    }
-
-    // Функция для создания нового пользователя в NocoDB
-    async function createUserInNocodb(user) {
-      try {
-        const newUser = {
-          tg_user_id: user.id.toString(),
-          name: [user.first_name, user.last_name].filter(Boolean).join(' '),
-          username: user.username || '',
-          oplata: 0,
-          date_oplata: '-',
-          progress: 0
-        };
-
-        const response = await nocodbRequest('', 'POST', newUser);
-        return response;
-      } catch (error) {
-        console.error('Ошибка при создании пользователя:', error);
-        throw error;
-      }
-    }
-
-    // Функция для проверки данных пользователя
-    async function checkUserData() {
-      if (!state.userId) return;
-      
-      try {
-        const currentTime = Date.now();
-        // Проверяем не чаще чем раз в 2 секунды
-        if (currentTime - state.lastCheckTime < 2000) return;
-        
-        state.lastCheckTime = currentTime;
-        
-        const userData = await findUserInNocodb(state.userId);
-        if (!userData) return;
-        
-        // Проверяем изменения в данных
-        const isPaidChanged = (userData.oplata === 1) !== state.isPaid;
-        const progressChanged = userData.progress !== state.progress;
-        
-        if (isPaidChanged || progressChanged) {
-          state.isPaid = userData.oplata === 1;
-          state.progress = typeof userData.progress === 'number' ? userData.progress : 0;
-          
-          console.log('Обновлены данные пользователя:', {
-            isPaid: state.isPaid,
-            progress: state.progress
-          });
-          
-          // Обновляем интерфейс
-          updateUI();
-        }
-      } catch (error) {
-        console.error('Ошибка при проверке данных пользователя:', error);
-      }
-    }
-
-    // Функция для запуска периодической проверки
-    function startDataChecking() {
-      // Останавливаем предыдущий интервал, если он был
-      if (state.checkInterval) {
-        clearInterval(state.checkInterval);
-      }
-      
-      // Запускаем новую проверку сразу
-      checkUserData();
-      
-      // Устанавливаем интервал проверки каждые 2 секунды
-      state.checkInterval = setInterval(checkUserData, 2000);
-    }
-
-    // Функция для проверки и создания пользователя в NocoDB
-    async function checkAndCreateUser(user) {
-      try {
-        const existingUser = await findUserInNocodb(user.id);
-        
-        if (!existingUser) {
-          // Создаем нового пользователя
-          await createUserInNocodb(user);
-          console.log('Создан новый пользователь:', user.id);
-          state.isPaid = false;
-          state.progress = 0;
-        } else {
-          // Получаем данные существующего пользователя
-          state.isPaid = existingUser.oplata === 1;
-          state.progress = typeof existingUser.progress === 'number' ? existingUser.progress : 0;
-          console.log('Статус оплаты пользователя:', state.isPaid);
-          console.log('Прогресс пользователя:', state.progress);
-        }
-        
-        // Обновляем UI
-        updateUI();
-        state.isLoaded = true;
-        hideLoadingScreen();
-        
-        // Запускаем периодическую проверку данных
-        startDataChecking();
-      } catch (error) {
-        console.error('Ошибка при работе с базой данных:', error);
-        // В случае ошибки все равно показываем интерфейс
-        state.isLoaded = true;
-        hideLoadingScreen();
-      }
-    }
-
-    // Функция обновления интерфейса модулей
-    function updateUI() {
-      const modules = [
-        { id: -1, title: "Введение", desc: "Кратко расскажем о том, что вас ждем на этом мини-курсе и чему вы сможете научиться", link: "intro.html", label: "Вступление", blocks: 4 },
-        { id: 1, title: "Доступ к ChatGPT", desc: "Способы доступа, тарифы, ограничения бесплатной версии. Инструкция по обходу блокировок", link: "M1.html", label: "Модуль 1", blocks:18 },
-        { id: 2, title: "Основы ChatGPT", desc: "Язык общения с ИИ. синтаксис промптов, примеры запросов, практические упражнения", link: "M2.html", label: "Модуль 2", blocks: 19 },
-        { id: 3, title: "ChatGPT PRO", desc: "Превращение ChatGPT в эксперта по вашей теме. Метод CRAFT. Формат и стилем ответов", link: "M3.html", label: "Модуль 3", blocks: 6 },
-        { id: 4, title: "ChatGPT MASTER", desc: "Персонализация ChatGPT, специализированные GPTs-боты, нейросети для генерации контента", link: "M4.html", label: "Модуль 4", blocks: 8 }
-      ];
-
-      let html = '';
-      modules.forEach((module, index) => {
-        let isLocked = false;
-        let lockReason = '';
-        let isCompleted = false;
-        let isCurrent = false;
-        let buttonText = 'Изучить модуль';
-        let buttonIcon = '';
-        let cardClass = 'module';
-        let btnClass = 'module-btn';
-        let labelClass = 'module-label';
-        let lockIcon = '';
-
-        // Определяем статус модуля
-        if (module.id === -1) {
-          // Введение
-          isCompleted = state.progress >= 1;
-          isCurrent = state.progress === 0;
-          buttonText = isCompleted ? 'Модуль пройден' : 'Изучить модуль';
-          buttonIcon = isCompleted ? '✔️' : '';
-        } else {
-          // Все остальные модули
-          const moduleAvailable = state.progress >= module.id;
-          const nextModuleAvailable = state.progress >= module.id + 1;
-          
-          isCompleted = nextModuleAvailable;
-          isCurrent = state.progress === module.id;
-          
-          if (moduleAvailable) {
-            buttonText = isCompleted ? 'Модуль пройден' : 'Изучить модуль';
-            buttonIcon = isCompleted ? '✔️' : '';
-          } else {
-            isLocked = true;
-            lockReason = 'progress';
-            buttonText = 'Недоступен 🔒';
-          }
-        }
-
-        // Проверка оплаты для модулей 2, 3, 4
-        if (module.id >= 2 && !state.isPaid) {
-          isLocked = true;
-          lockReason = 'oplata';
-          buttonText = 'Недоступен 🔒';
-        }
-
-        // Устанавливаем классы в зависимости от статуса
-        if (isCompleted) {
-          cardClass += ' completed';
-          btnClass += ' completed';
-          labelClass += ' completed';
-        } else if (isLocked) {
-          cardClass += ' locked';
-          btnClass += ' locked';
-          labelClass += ' locked';
-        } else if (isCurrent) {
-          cardClass += ' current';
-        }
-
-        html += `
-          <div class="${cardClass}">
-            <div class="${labelClass}">${module.label}</div>
-            <div class="module-content">
-              <h3 class="module-title">${module.title}</h3>
-              <div class="module-desc">${module.desc}</div>
-              <div class="module-blocks">Блоков: ${module.blocks}</div>
-              <button class="${btnClass}" onclick="handleModuleClick('${module.link}', ${isLocked}, '${lockReason}', ${module.id}, ${isCompleted})">
-                ${buttonIcon ? buttonIcon + ' ' : ''}${buttonText}
-              </button>
-            </div>
-          </div>
-        `;
-      });
-      
-      const container = document.getElementById('modules-container');
-      // Используем requestAnimationFrame для плавного обновления
-      requestAnimationFrame(() => {
-        container.innerHTML = html;
-        updateProgressBar();
-      });
-    }
-
-    // Обновление прогресс-бара
-    function updateProgressBar() {
-      const progressFill = document.getElementById('progressFill');
-      const totalModules = 5; // Введение + 4 модуля
-      const progressPercent = (state.progress / totalModules) * 100;
-      
-      progressFill.style.width = `${progressPercent}%`;
-    }
-
-    // Обработчик клика по модулю (теперь только по кнопке)
-    function handleModuleClick(link, isLocked, lockReason, moduleId, isCompleted) {
-      if (isLocked) {
-        if (lockReason === 'oplata') {
-          showPaymentPopup();
-        } else {
-          showProgressPopup(moduleId);
-        }
-        return;
-      }
-      
-      if (isCompleted) {
-        if (confirm('Этот модуль уже изучен. Хотите повторить?')) {
-          window.location.href = link;
-        }
-        return;
-      }
-      
-      window.location.href = link;
-    }
-
-    // Показать попап оплаты
-    function showPaymentPopup() {
-      const popup = document.createElement('div');
-      popup.className = 'popup-overlay';
-      popup.innerHTML = `
-        <div class="popup-content">
-          <h3 class="popup-title">Ой-ой! Нет доступа</h3>
-          <p class="popup-message">Доступ для этого модуля открыт в полной версии курса</p>
-          <div class="popup-buttons">
-            <button id="buyButton" class="popup-button">Купить полный курс</button>
-            <button id="closePopup" class="popup-button secondary">Ок</button>
-          </div>
-        </div>
-      `;
-      
-      document.body.appendChild(popup);
-      
-      document.getElementById('buyButton').addEventListener('click', () => {
-        window.location.href = 'oplata.html';
-        document.body.removeChild(popup);
-      });
-      
-      document.getElementById('closePopup').addEventListener('click', () => {
-        document.body.removeChild(popup);
-      });
-    }
-
-    // Показать попап прогресса
-    function showProgressPopup(moduleId) {
-      const popup = document.createElement('div');
-      popup.className = 'popup-overlay';
-      popup.innerHTML = `
-        <div class="popup-content">
-          <h3 class="popup-title">Не так быстро!</h3>
-          <p class="popup-message">Для доступа к модулю ${moduleId} нужно пройти предыдущий модуль ${moduleId - 1}.</p>
-          <button id="closePopup" class="popup-button">Понятно</button>
-        </div>
-      `;
-      
-      document.body.appendChild(popup);
-      
-      document.getElementById('closePopup').addEventListener('click', () => {
-        document.body.removeChild(popup);
-      });
-    }
-
-    // Обработчик меню
-    function toggleMenu() {
-      state.menuOpen = !state.menuOpen;
-      const menuButton = document.getElementById('menuButton');
-      const menuContent = document.getElementById('menuContent');
-      
-      menuButton.classList.toggle('active', state.menuOpen);
-      menuContent.classList.toggle('active', state.menuOpen);
-    }
-
-    // Инициализация Telegram Web App
-    async function initTelegramApp() {
-      try {
-        if (window.Telegram?.WebApp) {
-          Telegram.WebApp.ready();
-          Telegram.WebApp.expand();
-        }
-
-        const tg = window.Telegram.WebApp;
-        const user = tg.initDataUnsafe?.user;
-        
-        if (!user) {
-          throw new Error('Пользователь Telegram не определен');
-        }
-
-        state.userId = user.id.toString();
-        state.username = user.username || null;
-
-        // Сохраняем данные пользователя в cookie
-        setCookie('tg_user_id', state.userId, 30);
-        setCookie('tg_username', user.username || '', 30);
-        setCookie('tg_name', [user.first_name, user.last_name].filter(Boolean).join(' ') || 'Пользователь', 30);
-
-        // Устанавливаем данные пользователя из Telegram
-        document.getElementById('userName').textContent = getCookie('tg_name') || 'Пользователь';
-        document.getElementById('userId').textContent = `ID: ${state.userId}`;
-
-        // Устанавливаем аватар
-        const avatarElement = document.getElementById('userAvatar');
-        if (user.photo_url) {
-          const img = new Image();
-          img.src = user.photo_url;
-          img.onload = () => {
-            avatarElement.innerHTML = '';
-            avatarElement.appendChild(img);
-          };
-          img.onerror = () => {
-            const fallback = user.first_name?.charAt(0).toUpperCase() || 'U';
-            document.getElementById('avatar-fallback').textContent = fallback;
-          };
-        } else {
-          const fallback = user.first_name?.charAt(0).toUpperCase() || 'U';
-          document.getElementById('avatar-fallback').textContent = fallback;
-        }
-
-        // Проверяем и создаем пользователя в NocoDB
-        await checkAndCreateUser(user);
-      } catch (error) {
-        console.error('Ошибка инициализации Telegram:', error);
-        // В случае ошибки переходим в тестовый режим
-        await initTestMode();
-      }
-    }
-
-    // Инициализация тестового режима
-    async function initTestMode() {
-      const testUser = {
-        id: "test-user",
-        first_name: "Тестовый",
-        last_name: "Пользователь",
-        username: "test"
-      };
-      
-      state.userId = testUser.id;
-      // Сохраняем тестовые данные в cookie
-      setCookie('tg_user_id', testUser.id, 30);
-      setCookie('tg_username', testUser.username, 30);
-      setCookie('tg_name', [testUser.first_name, testUser.last_name].join(' '), 30);
-      
-      document.getElementById('userName').textContent = 'Тестовый пользователь';
-      document.getElementById('userId').textContent = 'ID: test-user';
-      document.getElementById('avatar-fallback').textContent = 'T';
-      
-      // Проверяем и создаем тестового пользователя в NocoDB
-      await checkAndCreateUser(testUser);
-    }
-
-    // Основная функция инициализации
-    document.addEventListener('DOMContentLoaded', async () => {
-      try {
-        // Показываем экран загрузки
-        document.getElementById('loading-screen').style.display = 'flex';
-        document.getElementById('app-content').style.opacity = '0';
-
-        // Инициализация меню
-        document.getElementById('menuButton').addEventListener('click', toggleMenu);
-        document.getElementById('supportButton').addEventListener('click', () => {
-          window.location.href = 'help.html';
-        });
-
-        if (window.Telegram?.WebApp) {
-          await initTelegramApp();
-        } else {
-          await initTestMode();
-        }
-      } catch (error) {
-        console.error('Ошибка инициализации:', error);
-        // В случае любой ошибки все равно скрываем экран загрузки
-        state.isLoaded = true;
-        hideLoadingScreen();
-      }
+  <script>
+    // Обработчики навигации
+    document.getElementById('guidesBtn').addEventListener('click', () => {
+      window.location.href = 'gaid.html';
     });
 
-    // Глобальные функции
-    window.handleModuleClick = handleModuleClick;
+    document.getElementById('challengesBtn').addEventListener('click', () => {
+      console.log('Challenges clicked');
+    });
+
+    document.getElementById('aiToolsBtn').addEventListener('click', () => {
+      console.log('AI Tools clicked');
+    });
+
+    document.getElementById('profileBtn').addEventListener('click', () => {
+      console.log('Profile clicked');
+    });
   </script>
 </body>
 </html>
