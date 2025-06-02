@@ -15,6 +15,8 @@
       --graphite: #4A4A4A;
       --success: #4CAF50;
       --success-light: #81C784;
+      --module-current-rgb: 247, 166, 181;   /* Розовый (F7A6B5) в RGB */
+      --module-completed-rgb: 151, 225, 167; /* Зеленый (97E1A7) в RGB */
       --disabled: #9E9E9E;
       --disabled-light: #E0E0E0;
     }
@@ -215,13 +217,15 @@
 
     @keyframes pulse {
       0%, 100% { 
-        transform: scale(1);
-        box-shadow: 0 4px 16px rgba(255, 122, 0, 0.2);
+        box-shadow: 0 4px 16px rgba(var(--module-current-rgb), 0.2);
       }
       50% { 
-        transform: scale(1.02);
-        box-shadow: 0 8px 24px rgba(255, 122, 0, 0.3);
+        box-shadow: 0 8px 24px rgba(var(--module-current-rgb), 0.3);
       }
+    }
+    
+    .module.current::after {
+      border: 2px solid rgba(var(--module-current-rgb), 0.3);
     }
 
     .module.current::after {
@@ -253,7 +257,7 @@
       position: absolute;
       top: 0;
       right: 0;
-      background: var(--primary);
+      background: var(--module-current-rgb);
       color: white;
       padding: 8px 16px;
       border-radius: 0 0 0 16px;
@@ -263,7 +267,7 @@
     }
 
     .module-label.completed {
-      background: var(--success);
+      background: rgba(var(--module-completed-rgb), 1); /* Зеленый */
     }
 
     .module-label.locked {
@@ -304,7 +308,7 @@
     }
 
     .module-btn {
-      background: var(--primary);
+      background: rgba(var(--module-current-rgb), 1); /* Оранжевый/розовый */
       color: white;
       border: none;
       padding: 10px 16px;
@@ -328,15 +332,15 @@
     }
 
     .module-btn:hover:not(:disabled) {
-      background: var(--primary-light);
+      background: rgba(var(--module-current-rgb), 0.9); /* Чуть прозрачный */
     }
 
     .module-btn.completed {
-      background: var(--success);
+      background: rgba(var(--module-completed-rgb), 1); /* Зеленый */
     }
 
     .module-btn.completed:hover:not(:disabled) {
-      background: var(--success-light);
+      background: rgba(var(--module-completed-rgb), 0.9); /* Чуть прозрачный */
     }
 
     .module-btn.locked {
