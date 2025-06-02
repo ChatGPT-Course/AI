@@ -111,31 +111,96 @@
       color: #495057;
     }
 
-    
+    .modules-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 2rem;
+      margin-top: 2rem;
+      max-width: 900px;
+    }
+
+    .module-card {
+      background: #ffffff;
+      border: 1px solid #e9ecef;
+      border-radius: 16px;
+      padding: 2rem;
+      text-align: center;
+      transition: all 0.3s ease;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+    }
+
+    .module-card:hover {
+      transform: translateY(-4px);
+      box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
+    }
+
+    .module-icon {
+      font-size: 3rem;
+      margin-bottom: 1rem;
+      display: block;
+    }
+
+    .module-title {
+      font-size: 1.4rem;
+      font-weight: 700;
+      color: #2c3e50;
+      margin-bottom: 1rem;
+    }
+
+    .module-description {
+      color: #6c757d;
+      line-height: 1.6;
+      font-size: 0.95rem;
+      margin: 0 0 1.5rem 0;
+    }
+
+    .module-start-btn {
+      background: linear-gradient(90deg, #4285F4, #3367D6);
+      color: white;
+      border: none;
+      border-radius: 8px;
+      padding: 0.8rem 1.5rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      width: 100%;
+      font-size: 0.95rem;
+    }
+
+    .module-start-btn:hover:not(.disabled) {
+      background: linear-gradient(90deg, #3367D6, #2A56C6);
+      transform: translateY(-2px);
+    }
+
+    .module-start-btn.disabled {
+      background: #cccccc;
+      cursor: not-allowed;
+      transform: none;
+    }
 
     @media (max-width: 768px) {
       .module1-header {
         padding: 1.5rem 1rem;
       }
-      
+
       .module1-title {
         font-size: 1.5rem;
       }
-      
+
       .slides-container {
         margin-top: 120px;
         padding: 1rem;
       }
-      
+
       .slide-content {
         padding: 1.5rem;
         min-height: 250px;
       }
-      
+
       .navigation-buttons {
         bottom: 1rem;
       }
-      
+
       .nav-btn {
         padding: 0.8rem 1.5rem;
         font-size: 0.9rem;
@@ -146,15 +211,44 @@
 <body>
   <div class="main-content">
     <div class="welcome-section" id="welcomeSection">
-      <h1 class="welcome-title">Добро пожаловать в курс!</h1>
-      <p class="welcome-subtitle">Изучайте новые навыки с удовольствием</p>
-      <p class="welcome-description">
-        Здесь вы найдете все необходимые материалы для успешного обучения. 
-        Выберите нужный раздел в навигации внизу экрана и начните свой путь к новым знаниям.
-      </p>
-    </div>
+      <h1 class="welcome-title">Обучающие модули</h1>
+      <p class="welcome-subtitle">Выберите модуль для изучения</p>
+      
+      <div class="modules-grid">
+        <div class="module-card">
+          <div class="module-icon">🧠</div>
+          <h3 class="module-title">Модуль 1</h3>
+          <p class="module-description">
+            Основы искусственного интеллекта.
+            Изучите базовые концепции и принципы.
+            Получите первые практические навыки.
+          </p>
+          <button class="module-start-btn" onclick="window.location.href='M1.html'">Начать</button>
+        </div>
 
-    
+        <div class="module-card">
+          <div class="module-icon">🚀</div>
+          <h3 class="module-title">Модуль 2</h3>
+          <p class="module-description">
+            Продвинутые техники работы с ИИ.
+            Углубите свои знания.
+            Освойте сложные инструменты.
+          </p>
+          <button class="module-start-btn disabled">Скоро</button>
+        </div>
+
+        <div class="module-card">
+          <div class="module-icon">⚡</div>
+          <h3 class="module-title">Модуль 3</h3>
+          <p class="module-description">
+            Практическое применение ИИ.
+            Работа с реальными проектами.
+            Создание собственных решений.
+          </p>
+          <button class="module-start-btn disabled">Скоро</button>
+        </div>
+      </div>
+    </div>
   </div>
 
   <div class="navigation-panel">
@@ -192,6 +286,11 @@
     document.getElementById('guidesBtn').addEventListener('click', () => {
       window.location.href = 'gaid.html';
     });
+    
+    // Кнопка "Назад" для возврата в главное меню
+    function goBack() {
+      window.location.href = 'main.html';
+    }
 
     document.getElementById('challengesBtn').addEventListener('click', () => {
       console.log('Challenges clicked');
