@@ -722,7 +722,7 @@
         moduleCard.innerHTML = `
           <div class="module-header">
             <div class="module-label">${module.label}</div>
-            <button class="favorite-btn ${isFavorite(module.id) ? 'active' : ''}" onclick="toggleFavorite('${module.id}')">
+            <button class="favorite-btn ${isFavorite(module.id) ? 'active' : ''}">
               <svg class="favorite-icon" viewBox="0 0 24 24">
                 <path d="M4 2v20l8-4 8 4V2H4z"/>
               </svg>
@@ -745,6 +745,13 @@
             </div>
           </div>
         `;
+        
+        // Добавляем обработчик события после создания элемента
+        const favoriteBtn = moduleCard.querySelector('.favorite-btn');
+        favoriteBtn.addEventListener('click', (e) => {
+          e.stopPropagation();
+          toggleFavorite(module.id);
+        });
         
         modulesContainer.appendChild(moduleCard);
       });
