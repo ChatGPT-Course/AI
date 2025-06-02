@@ -215,10 +215,10 @@
     // Получить данные Telegram пользователя
     function getTelegramUserData() {
       // Проверяем, доступен ли Telegram WebApp API
-      if (window.Telegram && window.Telegram.WebApp && window.Telegram.WebApp.initDataUnsafe.user) {
+      if (window.Telegram && window.Telegram.WebApp && window.Telegram.WebApp.initDataUnsafe && window.Telegram.WebApp.initDataUnsafe.user) {
         const user = window.Telegram.WebApp.initDataUnsafe.user;
         return {
-          id: user.id,
+          id: user.id.toString(),
           username: user.username || '',
           first_name: user.first_name || '',
           last_name: user.last_name || ''
@@ -240,9 +240,10 @@
         };
       }
       
-      // Если данных нет, используем тестовые
+      // Для тестирования - генерируем случайный ID
+      console.log('Telegram WebApp API не доступен, используются тестовые данные');
       return {
-        id: '123456789',
+        id: Math.random().toString().substr(2, 9),
         username: 'testuser',
         first_name: 'Test',
         last_name: 'User'
@@ -300,6 +301,12 @@
 
     // Инициализация при загрузке страницы
     document.addEventListener('DOMContentLoaded', async () => {
+      // Инициализируем Telegram WebApp если доступен
+      if (window.Telegram && window.Telegram.WebApp) {
+        window.Telegram.WebApp.ready();
+        window.Telegram.WebApp.expand();
+      }
+      
       // Получаем данные пользователя Telegram
       const userData = getTelegramUserData();
       
