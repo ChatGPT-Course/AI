@@ -1,1 +1,1711 @@
 
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <title>Модуль PRO: Продвинутые техники работы с ChatGPT</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    :root {
+      --orange: #FF9800;
+      --yellow: #FFF9C4;
+      --white: #FFF;
+      --text: #222;
+      --gray: #F2F2F2;
+      --header-gray: #E0E0E0;
+      --transition: 0.6s cubic-bezier(.77,0,.18,1);
+      --disabled: #CCCCCC;
+      --blue: #4285F4;
+      --success: #4CAF50;
+      --error: #F44336;
+      --warning: #FF9800;
+      --info: #2196F3;
+      --red: #F44336;
+    }
+    body {
+      margin: 0;
+      min-height: 100vh;
+      font-family: 'Segoe UI', 'Roboto', Arial, sans-serif;
+      background: var(--white);
+      color: var(--text);
+      overflow-x: hidden;
+      -webkit-tap-highlight-color: transparent;
+      line-height: 1.6;
+    }
+    .main-content {
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+    .main-content.show {
+      opacity: 1;
+      pointer-events: auto;
+    }
+    .header-bar {
+      display: flex;
+      align-items: center;
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100vw;
+      height: 56px;
+      background: var(--header-gray);
+      z-index: 5;
+      box-shadow: 0 2px 12px #ff980022;
+      padding: 0 0.5rem;
+      opacity: 0;
+      transform: translateY(-20px);
+      transition: opacity var(--transition), transform var(--transition);
+    }
+    .exit-btn {
+      background: var(--red);
+      border: none;
+      color: var(--white);
+      font-size: 1.2rem;
+      border-radius: 8px;
+      width: 40px;
+      height: 40px;
+      margin-right: 1rem;
+      cursor: pointer;
+      font-weight: 700;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: all 0.2s;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    }
+    .exit-btn:hover {
+      background: #d32f2f;
+      transform: scale(1.07);
+    }
+    .exit-btn span {
+      display: block;
+      line-height: 1;
+      transform: translateX(-1px);
+      color: white;
+      font-weight: bold;
+    }
+    .progress-bar {
+      flex: 1;
+      height: 12px;
+      background: #fff3;
+      border-radius: 6px;
+      position: relative;
+      margin-left: 0.5rem;
+      margin-right: 0.5rem;
+      overflow: hidden;
+      border: 1px solid #ddd;
+      max-width: calc(100% - 100px);
+    }
+    .progress-bar-inner {
+      height: 100%;
+      width: 0;
+      background: linear-gradient(90deg, var(--yellow), var(--orange));
+      border-radius: 6px;
+      transition: width 0.5s cubic-bezier(.77,0,.18,1);
+      z-index: 2;
+    }
+    .cards-container {
+      margin-top: 72px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      width: 100%;
+      min-height: calc(100vh - 128px);
+      padding-bottom: 6rem;
+    }
+    .content-block {
+      max-width: 600px;
+      width: 95%;
+      padding: 1.5rem 1.2rem;
+      font-size: 1.1rem;
+      color: #333;
+      margin-bottom: 1rem;
+      opacity: 0;
+      transform: translateY(20px);
+      transition: opacity 0.5s ease-out, transform 0.5s ease-out;
+      position: relative;
+      box-sizing: border-box;
+      transition-delay: 0.1s;
+    }
+    .content-block.visible {
+      opacity: 1;
+      transform: translateY(0);
+    }
+    .content-title {
+      color: var(--orange);
+      font-weight: 700;
+      font-size: 1.3rem;
+      margin: 0 0 0.8rem 0;
+      display: flex;
+      align-items: center;
+    }
+    .content-counter {
+      font-size: 0.9rem;
+      color: #666;
+      background: rgba(255, 255, 255, 0.7);
+      padding: 0.2rem 0.6rem;
+      border-radius: 1rem;
+      margin-left: 0.8rem;
+    }
+    .content-block ul {
+      padding-left: 1rem;
+      margin: 0.8rem 0;
+    }
+    .content-block li {
+      margin-bottom: 0.4rem;
+      position: relative;
+    }
+    .tip-card {
+      background: rgba(255, 248, 225, 0.8);
+      border-left: 4px solid var(--orange);
+      padding: 0.8rem 1rem;
+      margin: 1rem 0;
+      border-radius: 0 8px 8px 0;
+    }
+    .tip-card-title {
+      font-weight: 700;
+      color: var(--orange);
+      margin: 0 0 0.3rem 0;
+      font-size: 1rem;
+    }
+    .buttons-container {
+      position: fixed;
+      bottom: 3rem;
+      left: 0;
+      width: 100%;
+      display: flex;
+      justify-content: center;
+      z-index: 2;
+      padding: 0 1rem;
+      box-sizing: border-box;
+      opacity: 0;
+      transform: translateY(20px);
+      transition: opacity var(--transition), transform var(--transition);
+    }
+    .next-btn {
+      padding: 0.8rem 1.8rem;
+      font-size: 1rem;
+      background: linear-gradient(90deg, var(--yellow), var(--orange));
+      color: var(--text);
+      border: none;
+      border-radius: 2rem;
+      cursor: pointer;
+      font-weight: 600;
+      box-shadow: 0 4px 12px rgba(255, 152, 0, 0.3);
+      transition: all 0.3s;
+      min-width: 120px;
+    }
+    .next-btn:hover:not(:disabled) {
+      transform: scale(1.05);
+    }
+    .next-btn:disabled {
+      background: var(--disabled);
+      cursor: not-allowed;
+      transform: none !important;
+    }
+    .content-image {
+      width: 100%;
+      max-width: 500px;
+      border-radius: 8px;
+      margin: 0 0 1rem 0;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+      border: 1px solid #eee;
+      display: block;
+    }
+    .divider {
+      height: 1px;
+      background-color: #ddd;
+      margin: 1.5rem 0;
+      width: 100%;
+    }
+    .empty-space {
+      height: 50vh;
+      width: 100%;
+    }
+    .completion-modal {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0,0,0,0.7);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      z-index: 1000;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.3s ease;
+    }
+    .completion-modal.active {
+      opacity: 1;
+      pointer-events: auto;
+    }
+    .completion-content {
+      background: white;
+      padding: 2rem;
+      border-radius: 16px;
+      text-align: center;
+      max-width: 90%;
+      width: 350px;
+      box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+      transform: scale(0.9);
+      transition: transform 0.3s ease;
+    }
+    .completion-modal.active .completion-content {
+      transform: scale(1);
+    }
+    .checkmark {
+      width: 80px;
+      height: 80px;
+      margin: 0 auto 1.5rem;
+      position: relative;
+    }
+    .checkmark-circle {
+      width: 100%;
+      height: 100%;
+      border-radius: 50%;
+      background: rgba(76, 175, 80, 0.1);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
+    .checkmark-icon {
+      color: #4CAF50;
+      font-size: 50px;
+    }
+    .completion-title {
+      font-size: 1.5rem;
+      font-weight: 700;
+      margin-bottom: 1rem;
+      color: #333;
+    }
+    .completion-btn {
+      padding: 0.8rem 2rem;
+      background: linear-gradient(90deg, var(--yellow), var(--orange));
+      color: var(--text);
+      border: none;
+      border-radius: 2rem;
+      font-weight: 600;
+      cursor: pointer;
+      margin-top: 1.5rem;
+      transition: all 0.3s;
+    }
+    .completion-btn:hover {
+      transform: scale(1.05);
+    }
+    
+    /* Feedback modal styles */
+    .feedback-modal {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0,0,0,0.7);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      z-index: 1001;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.3s ease;
+    }
+    .feedback-modal.active {
+      opacity: 1;
+      pointer-events: auto;
+    }
+    .feedback-content {
+      background: white;
+      padding: 1.5rem;
+      border-radius: 16px;
+      text-align: center;
+      max-width: 90%;
+      width: 300px;
+      box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+      transform: scale(0.9);
+      transition: transform 0.3s ease;
+      box-sizing: border-box;
+    }
+    .feedback-modal.active .feedback-content {
+      transform: scale(1);
+    }
+    .feedback-title {
+      font-size: 1.3rem;
+      font-weight: 700;
+      margin-bottom: 1.5rem;
+      color: #333;
+    }
+    .feedback-options {
+      display: flex;
+      justify-content: space-around;
+      margin-bottom: 1.5rem;
+    }
+    .feedback-option {
+      font-size: 2rem;
+      cursor: pointer;
+      transition: all 0.2s;
+      padding: 0.5rem;
+      border-radius: 50%;
+      width: 50px;
+      height: 50px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background-color: #f5f5f5;
+      border: 2px solid #e0e0e0;
+    }
+    .feedback-option:hover {
+      transform: scale(1.1);
+    }
+    .feedback-option.selected {
+      background-color: #e8f5e9;
+      border-color: #4CAF50;
+      transform: scale(1.2);
+    }
+    .feedback-text {
+      width: 100%;
+      height: 100px;
+      padding: 0.8rem;
+      border: 1px solid #ddd;
+      border-radius: 8px;
+      margin-bottom: 1.5rem;
+      resize: none;
+      font-family: inherit;
+      box-sizing: border-box;
+    }
+    .feedback-buttons {
+      display: flex;
+      justify-content: center;
+      width: 100%;
+    }
+    .feedback-submit {
+      padding: 0.8rem 1.5rem;
+      background: linear-gradient(90deg, var(--blue), #3367D6);
+      color: white;
+      border: none;
+      border-radius: 2rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.3s;
+      display: none;
+    }
+    .feedback-submit.active {
+      display: block;
+    }
+    .feedback-skip {
+      padding: 0.8rem 1.5rem;
+      background: #f5f5f5;
+      color: var(--text);
+      border: none;
+      border-radius: 2rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.3s;
+    }
+    .feedback-skip:hover {
+      background: #e0e0e0;
+    }
+    .feedback-success {
+      font-size: 1.2rem;
+      color: var(--success);
+      margin-top: 1rem;
+      display: none;
+    }
+
+    .quiz-container {
+      background: #f5f5f5;
+      border-radius: 12px;
+      padding: 1.2rem;
+      margin: 1.5rem 0;
+      position: relative;
+      padding-bottom: 4rem; /* Добавлено - место для кнопки */
+    }
+    .quiz-question {
+      font-weight: 600;
+      margin-bottom: 1rem;
+      color: #333;
+    }
+    .quiz-options {
+      display: flex;
+      flex-direction: column;
+      gap: 0.8rem;
+    }
+    .quiz-option {
+      padding: 0.8rem 1rem;
+      background: white;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: all 0.2s;
+      border: 1px solid #ddd;
+      position: relative;
+      padding-left: 2.5rem;
+    }
+    .quiz-option:hover {
+      background: #fff9e6;
+    }
+    .quiz-option.selected {
+      background: #fff3e0;
+      border-color: var(--orange);
+    }
+    .quiz-option.correct {
+      background: #e8f5e9;
+      border-color: var(--success);
+    }
+    .quiz-option.incorrect {
+      background: #ffebee;
+      border-color: var(--error);
+    }
+    .quiz-option::before {
+      content: '○';
+      position: absolute;
+      left: 1rem;
+      top: 50%;
+      transform: translateY(-50%);
+      font-size: 1.2rem;
+    }
+    .quiz-option.selected::before {
+      content: '◉';
+      color: var(--orange);
+    }
+    .quiz-option.correct::before {
+      content: '✓';
+      color: var(--success);
+    }
+    .quiz-option.incorrect::before {
+      content: '✕';
+      color: var(--error);
+    }
+    .quiz-feedback {
+      margin-top: 1rem;
+      padding: 0.8rem;
+      background: rgba(255, 255, 255, 0.8);
+      border-radius: 8px;
+      border-left: 4px solid var(--orange);
+      display: none;
+    }
+    .quiz-feedback.show {
+      display: block;
+    }
+    .quiz-submit-btn {
+      padding: 0.5rem 1rem;
+      background: var(--disabled);
+      color: white;
+      border: none;
+      border-radius: 20px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.3s;
+      margin-top: 1rem; /* Добавлено */
+      float: right;     /* Добавлено */
+    }
+    .quiz-submit-btn.active {
+      background: var(--success);
+    }
+    .quiz-submit-btn:hover:not(:disabled) {
+      transform: scale(1.05);
+    }
+
+    /* AI Chat Modal Styles */
+    .loading-dots {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 4px;
+      height: 20px;
+    }
+    
+    .loading-dots span {
+      display: inline-block;
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background-color: #666;
+      animation: loading-dots 1.4s infinite ease-in-out both;
+    }
+    
+    .loading-dots span:nth-child(1) {
+      animation-delay: -0.32s;
+    }
+    
+    .loading-dots span:nth-child(2) {
+      animation-delay: -0.16s;
+    @keyframes loading-dots {
+      0%, 80%, 100% { 
+        transform: scale(0);
+        opacity: 0.5;
+      }
+      40% { 
+        transform: scale(1);
+        opacity: 1;
+      }
+    }
+    }
+    .ai-chat-modal {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0,0,0,0.7);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      z-index: 9999;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.3s ease;
+    }
+    
+    .ai-chat-modal.active {
+      opacity: 1;
+      pointer-events: auto;
+    }
+    
+    .ai-chat-container {
+      width: 90%;
+      max-width: 500px;
+      height: 90vh; /* Увеличили высоту до 90% экрана */
+      max-height: 800px; /* Увеличили максимальную высоту */
+      background: white;
+      border-radius: 12px;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+    }
+    
+    .ai-chat-header {
+      padding: 0.4rem 1rem; /* Еще уменьшили вертикальный padding */
+      font-size: 0.85rem; /* Уменьшили шрифт шапки */
+      background: var(--blue);
+      color: white;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      min-height: 36px; /* Еще уменьшили высоту шапки */
+    }
+    
+    .ai-chat-close {
+      background: none;
+      border: none;
+      color: white;
+      font-size: 1.4rem; /* Еще уменьшили размер крестика */
+      padding: 0.2rem; /* Еще уменьшили padding */
+      cursor: pointer;
+      line-height: 1;
+    }
+    
+    .ai-chat-messages {
+      flex: 1;
+      padding: 0.8rem; /* Уменьшили padding */
+      overflow-y: auto;
+      display: flex;
+      flex-direction: column;
+      gap: 0.7rem; /* Уменьшили промежуток между сообщениями */
+    }
+    
+    .ai-chat-message {
+      max-width: 85%;
+      padding: 0.7rem 1rem; /* Уменьшили padding */
+      border-radius: 10px; /* Слегка уменьшили скругление */
+      line-height: 1.35; /* Уменьшили межстрочный интервал */
+      word-wrap: break-word;
+      font-size: 0.85rem; /* Уменьшили размер шрифта сообщений */
+    }
+    
+    .ai-chat-message.user {
+      align-self: flex-end;
+      background: var(--blue);
+      color: white;
+    }
+    
+    .ai-chat-message.assistant {
+      align-self: flex-start;
+      background: var(--gray);
+    }
+    
+    .ai-chat-input {
+      padding: 0.7rem; /* Уменьшили padding */
+      flex-direction: column;
+      border-top: 1px solid #ddd;
+      display: flex;
+      gap: 0.7rem; /* Уменьшили промежуток */
+      box-sizing: border-box;
+    }
+    
+    .ai-chat-input textarea {
+      flex: 1;
+      width: calc(100% - 1.4rem);
+      padding: 0.7rem;
+      border: 1px solid #ddd;
+      border-radius: 8px;
+      resize: none;
+      min-height: 75px;
+      font-family: inherit;
+      box-sizing: border-box;
+      margin: 0 auto;
+      font-size: 0.9rem; /* Уменьшили шрифт текстового поля */
+    }
+    
+    .ai-chat-input button {
+      padding: 0.7rem;
+      width: calc(100% - 1.4rem);
+      background: var(--blue);
+      color: white;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: background 0.2s;
+      margin: 0 auto;
+      font-size: 0.9rem; /* Уменьшили шрифт кнопки */
+    }
+    
+    .ai-chat-input button:hover {
+      background: #3367d6;
+    }
+    @media (max-width: 600px) {
+      .splash h1 {
+        font-size: 1.5rem;
+      .ai-chat-container {
+        height: 92vh;
+        width: 95%;
+      }
+      
+      .ai-chat-header {
+        padding: 0.4rem;
+      }
+      
+      .ai-chat-btn {
+        padding: 0.7rem 1.2rem;
+        font-size: 0.9rem;
+      }
+      }
+      .content-block {
+        padding: 1.2rem 1rem;
+        font-size: 1rem;
+      }
+      .header-bar {
+        height: 48px;
+      }
+      .exit-btn {
+        width: 36px;
+        height: 36px;
+      }
+      .buttons-container {
+        bottom: 2rem;
+      }
+      .next-btn, .guide-btn {
+        padding: 0.7rem 1rem;
+        min-width: 110px;
+      }
+      .empty-space {
+        height: 40vh;
+      }
+      .completion-content, .feedback-content {
+        padding: 1.2rem;
+        width: 280px;
+      }
+      .checkmark {
+        width: 60px;
+        height: 60px;
+      }
+      .checkmark-icon {
+        font-size: 40px;
+      }
+      .feedback-option {
+        width: 40px;
+        height: 40px;
+        font-size: 1.5rem;
+      }
+      .quiz-option {
+        padding: 0.6rem 0.8rem;
+        padding-left: 2rem;
+      }
+      .quiz-option::before {
+        left: 0.8rem;
+      }
+      .ai-chat-btn:hover {
+      background: #3367d6;
+      transform: scale(1.05);
+    }
+      .ai-chat-btn {
+      background: var(--blue);
+      color: white;
+      border: none;
+      border-radius: 2rem;
+      padding: 0.8rem 1.5rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.3s;
+      margin: 1rem 0;
+      display: inline-block;
+      box-shadow: 0 2px 8px rgba(66, 133, 244, 0.3);
+    }
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="main-content" id="mainContent">
+    <div class="header-bar">
+      <button class="exit-btn" id="exitBtn" title="Выйти"><span>←</span></button>
+      <div class="progress-bar">
+        <div class="progress-bar-inner" id="progressBar"></div>
+      </div>
+    </div>
+    
+    <div class="cards-container" id="cardsContainer"></div>
+    
+    <div class="buttons-container">
+      <button class="next-btn" id="nextBtn">Далее</button>
+    </div>
+    
+    <!-- Модальное окно выхода -->
+    <div id="exitModal" style="display:none; position:fixed; z-index:100; left:0; top:0; width:100vw; height:100vh; background:rgba(0,0,0,0.25); align-items:center; justify-content:center;">
+      <div style="background:#fff; border-radius:1.2rem; max-width:90vw; width:340px; padding:2rem 1.2rem; box-shadow:0 8px 32px #0002; text-align:center;">
+        <div style="font-size:1.15rem; margin-bottom:1.5rem; color:#222;">Вы действительно хотите выйти? Ваш прогресс не сохранится.</div>
+        <div style="display:flex; gap:1rem; justify-content:center;">
+          <button id="modalExitBtn" style="background:linear-gradient(90deg, var(--orange), var(--yellow)); color:#222; border:none; border-radius:1.5rem; padding:0.7rem 1.5rem; font-weight:600; cursor:pointer;">Выйти</button>
+          <button id="modalStayBtn" style="background:#eee; color:#222; border:none; border-radius:1.5rem; padding:0.7rem 1.5rem; font-weight:600; cursor:pointer;">Остаться</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Модальное окно завершения -->
+  <div class="completion-modal" id="completionModal">
+    <div class="completion-content">
+      <div class="checkmark">
+        <div class="checkmark-circle">
+          <div class="checkmark-icon">✓</div>
+        </div>
+      </div>
+      <div class="completion-title">Модуль PRO пройден!</div>
+      <button class="completion-btn" id="completionBtn">Вернуться в меню</button>
+    </div>
+  </div>
+
+  <!-- Модальное окно обратной связи -->
+  <div class="feedback-modal" id="feedbackModal">
+    <div class="feedback-content">
+      <div class="feedback-title">Оставь свой отзыв по модулю PRO</div>
+      <div class="feedback-options">
+        <div class="feedback-option" data-reaction="👍">👍</div>
+        <div class="feedback-option" data-reaction="👎">👎</div>
+        <div class="feedback-option" data-reaction="👌">👌</div>
+      </div>
+      <textarea class="feedback-text" id="feedbackText" placeholder="Ваш отзыв (необязательно)"></textarea>
+      <div class="feedback-buttons">
+        <button class="feedback-skip" id="feedbackSkip">Пропустить</button>
+        <button class="feedback-submit" id="feedbackSubmit">Отправить</button>
+      </div>
+      <div class="feedback-success" id="feedbackSuccess">Спасибо за ваш отзыв!</div>
+    </div>
+  </div>
+
+  <div class="ai-chat-modal" id="aiChatModal">
+    <div class="ai-chat-container">
+      <div class="ai-chat-header">
+        <div>Виджет диалога ChatGPT</div>
+        <button class="ai-chat-close" id="aiChatClose">×</button>
+      </div>
+      <div class="ai-chat-messages" id="aiChatMessages"></div>
+      <div class="ai-chat-input">
+        <textarea id="aiChatInput" placeholder="Отправьте ваш запрос"></textarea>
+        <button id="aiChatSend">Отправить</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // Конфигурация NocoDB
+    const config = {
+      orgs: 'weamcfo6',
+      projectName: 'p27jdsmk69wuimh',
+      tableName: 'mc6qh91f060pv4y',
+      feedbackTableName: 'mroqzljwv09ghb1',
+      apiToken: 'bocQfycJpJsTG_tbwEf8ma8E5rhoig0njMDXFWtJ',
+      apiVersion: 'v1'
+    };
+
+    // Основные элементы
+    const mainContent = document.getElementById('mainContent');
+    const nextBtn = document.getElementById('nextBtn');
+    const progressBar = document.getElementById('progressBar');
+    const cardsContainer = document.getElementById('cardsContainer');
+    const exitBtn = document.getElementById('exitBtn');
+    const exitModal = document.getElementById('exitModal');
+    const modalExitBtn = document.getElementById('modalExitBtn');
+    const modalStayBtn = document.getElementById('modalStayBtn');
+    const completionModal = document.getElementById('completionModal');
+    const completionBtn = document.getElementById('completionBtn');
+    const feedbackModal = document.getElementById('feedbackModal');
+    const feedbackOptions = document.querySelectorAll('.feedback-option');
+    const feedbackText = document.getElementById('feedbackText');
+    const feedbackSubmit = document.getElementById('feedbackSubmit');
+    const feedbackSkip = document.getElementById('feedbackSkip');
+    const feedbackSuccess = document.getElementById('feedbackSuccess');
+    const aiChatModal = document.getElementById('aiChatModal');
+    const aiChatMessages = document.getElementById('aiChatMessages');
+    const aiChatInput = document.getElementById('aiChatInput');
+    const aiChatSend = document.getElementById('aiChatSend');
+    const aiChatClose = document.getElementById('aiChatClose');
+
+    // Все контентные блоки
+    const contentBlocks = [
+      {
+        title: "Добро пожаловать на уровень PRO",
+        content: `🎯 Итак, вы уже умеете формулировать запросы и знаете, что чем понятнее объясните ChatGPT что хотите, тем лучше получите ответ<br><br>
+        Но всё равно иногда может происходить так, что:<br>
+        — ответ какой-то общий…<br>
+        — это не то, что вы имели в виду<br>
+        — снова приходится переспрашивать<br><br>
+        💡 Это нормально<br><br>
+        Просто ChatGPT не умеет читать мысли и не понимает контекста, если его не задать. Поэтому чтобы получить точный и релевантный ответ, нужно научиться управлять промтом: задавать направление, цель, роль, формат, стиль и тд.`
+      },
+      {
+        title: "",
+        content: `В данном модуле вы освоите техники, которые помогут сделать работу с ChatGPT более осмысленной, точной и предсказуемой даже в сложных задачах 👍<br><br>
+        Вы научитесь:<br>
+        ✅ Собирать промпты по методике CRAFT<br>
+        ✅ Управлять форматом, стилем и тоном ответа<br>
+        ✅ Строить запрос под конкретную задачу<br>
+        📌 Всё это — без заумных терминов и с реальными примерами`
+      },
+      {
+        title: "Метод [CRAFT] - лучший способ сделать промпт понятным и точным",
+        content: `🧩 Иногда ChatGPT отвечает не так, как вы хотели не потому, что «плохо работает», а потому, что запрос был неполным или расплывчатым. Метод CRAFT поможет решить эту проблему в 90% случаев.`
+      },
+      {
+        title: "",
+        content: `CRAFT — это аббревиатура из пяти элементов:<br><br>
+        1️⃣ C — Context (контекст)<br>
+        - Что происходит? Кто вы? В какой ситуации используется ответ?<br><br>
+        2️⃣ R — Role (роль)<br>
+        - В какой роли должен выступить ChatGPT? Эксперт, наставник, редактор?<br><br>
+        3️⃣ A — Action (действие)<br>
+        - Что нужно сделать: объяснить, написать, придумать, структурировать?<br><br>
+        4️⃣ F — Format (формат ответа)<br>
+        - Как представить результат: таблица, список, план, текст, инструкция?<br><br>
+        5️⃣ T — Tone (тональность)<br>
+        - Как это должно звучать: дружелюбно, строго, лаконично, эмоционально?<br><br>
+        🔍 Это не про сложность, а про ясность и управление<br>
+        Давайте пройдемся по каждому этапу и посмотрим, как в итоге эволюционирует промт на выходе 🙏`
+      },
+      {
+        title: "",
+        content: `<div class="quiz-container" id="quizBlock1">
+          <div class="quiz-question"><b>Что означает буква R в методе CRAFT?</b></div>
+          <div class="quiz-options">
+            <div class="quiz-option" data-correct="false">Результат</div>
+            <div class="quiz-option" data-correct="true">Роль</div>
+            <div class="quiz-option" data-correct="false">Расширение</div>
+          </div>
+          <div class="quiz-feedback">
+            📌 Правильный ответ: R — это Role (роль), то есть кто должен «играть» ChatGPT: эксперт, редактор, коуч и т.д.
+          </div>
+          <button class="quiz-submit-btn">Проверить ответ</button>
+        </div>`,
+        hasQuiz: true
+      },
+      {
+        title: "Эволюция промта шаг за шагом",
+        content: `За отправную точку возьмем запрос<br>
+        👉 Напиши текст о кофе<br><br>
+        ⬇️ А теперь давайте усилим его по методике CRAFT<br><br>
+        1️⃣ CONTEXT — Контекст<br>
+        Это предыстория, которая помогает ChatGPT понять общую картину<br>
+        👉 Я владелец небольшой кофейни в спальном районе Москвы<br><br>
+        2️⃣ ROLE — Роль<br>
+        Указывая роль, вы задаете рамки и направление для ИИ: кто он и с какой позиции должен отвечать.<br>
+        👉 Выступи в роли опытного бариста и копирайтера, который специализируется на создании контента для кофеен.<br><br>
+        3️⃣ ACTION — Действие<br>
+        Четко опишите, что именно должен сделать ИИ<br>
+        👉 Создай информативный и увлекательный текст для раздела "О кофе" на нашем сайте`
+      },
+      {
+        title: "",
+        content: `4️⃣ FORMAT — Формат ответа<br>
+        Укажите желаемый формат ответа, чтобы получить именно то, что вам нужно<br>
+        👉 Заголовок + вступление + 3 раздела по каждому методу заваривания + заключение. Объём — до 2000 знаков.<br><br>
+        5️⃣ TONE — Тональность<br>
+        Задайте стиль, чтобы ответ звучал так, как нужно вам<br>
+        👉 Тон дружелюбный, но экспертный. Используй разговорную лексику, избегай клише и шаблонных фраз.`
+      },
+      {
+        title: "",
+        content: `Соберем вместе и получим:<br><br>
+        Я владелец небольшой кофейни в спальном районе Москвы.<br>
+        Выступи в роли опытного бариста и копирайтера, который специализируется на создании контента для кофеен. Создай информативный и увлекательный текст для раздела "О кофе" на нашем сайте.<br>
+        Заголовок + вступление + 3 раздела по каждому методу заваривания + заключение. Объём — до 2000 знаков.<br>
+        Тон дружелюбный, но экспертный. Используй разговорную лексику, избегай клише и шаблонных фраз.`
+      },
+      {
+        title: "",
+        content: `📌 Видите, как из одного общего запроса получился осмысленный, точный и управляемый промпт?<br>
+        Перейдите в чат по ссылке ниже, чтобы убедиться, насколько отличаются ответы ChatGPT в зависимости от промта на примере с кофе ⬇️<br><br>
+        <a href="https://chatgpt.com/share/681b9372-aa08-8011-96df-64e9e2f0f22b" target="_blank">https://chatgpt.com/share/681b9372-aa08-8011-96df-64e9e2f0f22b</a>`
+      },
+      {
+        title: "",
+        content: `<div class="quiz-container" id="quizBlock2">
+          <div class="quiz-question"><b>Что именно делает изначальный промпт "Напиши текст о кофе" неэффективным?</b></div>
+          <div class="quiz-options">
+            <div class="quiz-option" data-correct="false">Он слишком короткий</div>
+            <div class="quiz-option" data-correct="true">В нём отсутствует структура, цель и формат</div>
+            <div class="quiz-option" data-correct="false">Он использует слово "кофе", а это банально</div>
+          </div>
+          <div class="quiz-feedback">
+            📌 Правильный ответ: в нём отсутствует структура, цель и стиль. Главная проблема не в длине, а в том, что промпт не уточняет что именно нужно, для кого и в каком виде. ChatGPT начинает гадать и результат получается непредсказуемый.
+          </div>
+          <button class="quiz-submit-btn">Проверить ответ</button>
+        </div>`,
+        hasQuiz: true
+      },
+      {
+        title: "Трансформируйте любой запрос в CRAFT по шаблону",
+        content: `🧩 Необязательно собирать промпт вручную каждый раз.Вы можете просто попросить ChatGPT сделать это за вас, используя универсальный шаблон.`
+      },
+      {
+        title: "",
+        content: `Скопируйте и вставьте в ChatGPT:<br><br>
+        Ты — эксперт по промпт-инженерии. Улучши мой промпт по методике CRAFT.<br>
+        Уточни контекст, если он не задан. Назначь роль исполнителю. Определи целевую аудиторию. Укажи формат ответа (например, список, статья, таблица). Задай стиль и тон. При нехватке данных — уточни. Учитывай ограничения (длина, формальность, терминология). Сохрани исходный смысл. Раздели сложные задачи на блоки. Представь результат в структурированной форме.<br>
+        Подготовь две версии: базовую и детализированную. Затем спроси, какая лучше, и доработай выбранную по моим комментариям.<br>
+        Мой промпт: [вставьте сюда свой запрос]`
+      },
+      {
+        title: "",
+        content: `📌 С этим шаблоном вы сможете трансформировать любой промпт в сильный и понятный без лишних усилий.<br>
+        Попробуйте сами со своим промтом или посмотрите как это работает на примере составления плана ужинов для семьи из 4-ёх человек ⬇️<br>
+        <a href="https://chatgpt.com/share/681b9938-dd74-8011-9642-238f4f5aff53" target="_blank">https://chatgpt.com/share/681b9938-dd74-8011-9642-238f4f5aff53</a>`
+      },
+      {
+        title: "Важно помнить и не забывать уточнять",
+        content: `ФОРМАТ<br>
+        ✅ Сделай список из 5 пунктов<br>
+        ✅ Оформи в виде таблицы вопрос - ответ<br>
+        ✅ Напиши как инструкцию с шагами`
+      },
+      {
+        title: "",
+        content: `ТОНАЛЬНОСТЬ<br>
+        ✅ Напиши дружелюбно, но по делу<br>
+        ✅ Сделай легко и с юмором<br>
+        ✅ Оформи как эксперт, но без занудства<br>
+        ✅ Избегай клише и официоза`
+      },
+      {
+        title: "",
+        content: `ПРИМЕРЫ<br>
+        ✅ Вот пример такого текста: [вставка]<br>
+        ✅ Сделай в похожем стиле<br>
+        ✅ Разберись в логике этого списка и продолжи по образцу<br>
+        ✅ Сделай так же, но на другую тему<br><br>
+        📌 Все эти детали – как поворот руля: с ними ChatGPT едет туда, куда нужно, а не куда получится`
+      },
+      {
+        title: "",
+        content: `<div class="quiz-container" id="quizBlock3">
+          <div class="quiz-question"><b>В каком из вариантов правильно задан формат ответа?</b></div>
+          <div class="quiz-options">
+            <div class="quiz-option" data-correct="false">Напиши интересно</div>
+            <div class="quiz-option" data-correct="true">Сделай список из 5 пунктов</div>
+            <div class="quiz-option" data-correct="false">Ответь красиво</div>
+          </div>
+          <div class="quiz-feedback">
+            📌 Правильный ответ: сделай список из 5 пунктов, так это вполне конкретный формат, а не общая характеристика.
+          </div>
+          <button class="quiz-submit-btn">Проверить ответ</button>
+        </div>`,
+        hasQuiz: true
+      },
+      {
+        title: "5 бытовых примеров, где полезно составлять промты по методу CRAFT",
+        content: `Ниже запросы будут короткими, но держите в голове, что их, как раз, и нужно трансформировать под CRAFT, чтобы усилить ответы ChatGPT<br><br>
+        ✅ 1. Пост в соцсети<br>
+        — Попросите: «Напиши коротко, цепляюще, с призывом»<br><br>
+        ✅ 2. Письмо клиенту или партнёру<br>
+        — Задайте стиль, цель и формат — и получите готовый черновик<br><br>
+        ✅ 3. Объяснение сложной темы<br>
+        — Например: «Объясни как 10-летнему, что такое блокчейн»<br><br>
+        ✅ 4. План обучения или задачи<br>
+        — По шагам, с разбивкой по дням или темам<br><br>
+        ✅ 5. Идеи для подарков или мероприятий<br>
+        — Учитывайте повод, бюджет, интересы<br><br>
+        📌 Когда вы задаёте контекст, роль, действие, формат и стиль — результат получается ближе к нужному в 9 случаях из 10.`
+      },
+      {
+        title: "Попробуйте сами собрать свой CRAFT-промпт",
+        content: `🎯 Возьмите любую задачу, которая первая придет в голову и используйте заготовку, ниже, чтобы подставить свои данные<br><br>
+        ❗️Мы рекомендуем именно прописать руками несколько раз, чтобы усвоить логику, ну а далее уже можете использовать шаблон, который был выше<br><br>
+        <div style="background: #f5f5f5; padding: 1rem; border-radius: 8px; margin: 1rem 0;">
+        <strong>Моя задача:</strong><br>
+        [что нужно сделать]<br><br>
+        <strong>Контекст:</strong><br>
+        [кто я, в какой ситуации]<br><br>
+        <strong>Роль ChatGPT:</strong><br>
+        [в чьей роли он отвечает]<br><br>
+        <strong>Формат:</strong><br>
+        [список, таблица, текст, план]<br><br>
+        <strong>Тональность:</strong><br>
+        [экспертно, с юмором, как пират]
+        </div>`
+      },
+      {
+        title: "Модуль 2 пройден! 🚀",
+        content: `🎉 Отличная работа! Вы прокачали навык продвинутых запросов и теперь умеете управлять ChatGPT гораздо точнее.<br><br>
+        Теперь вы знаете, как:<br>
+        ✅ Структурировать запрос по методу CRAFT<br>
+        ✅ Уточнять контекст, формат, стиль и роль<br>
+        ✅ Добавлять примеры и управлять тоном<br>
+        ✅ Получать нужные ответы на свои запросы<br><br>
+        📌 Теперь вы не просто «спрашиваете» ChatGPT — вы ставите ему задачу и получаете результат, который вам действительно полезен.`
+      },
+      {
+        title: "А что, если пойти дальше?",
+        content: `🎯 В этом модуле вы научились собирать сильные промпты по методике CRAFT: добавлять контекст, указывать роль, выбирать формат и стиль, уточнять задачи и получать нужный результат.<br><br>
+        Теперь ChatGPT стал для вас не просто чатом, а инструментом, которым вы умеете управлять. Но это ещё не всё…`
+      },
+      {
+        title: "",
+        content: `В следующем модуле вы:<br>
+        ✅ Узнаете 40+ нестандартных способов использования ChatGPT<br>
+        ✅ Настроите его под себя<br>
+        ✅ Разберётесь в разных моделях<br>
+        ✅ Познакомитесь с GPTs<br>
+        ✅ Откроете для себя другие нейросети: для картинок, видео, презентаций, музыки и сайтов<br><br>
+        И в итоге увидите, как всё складывается в полноценную нейро-экосистему доступную уже сейчас 😎<br><br>
+        📌 Это будет не про технику, а про расширение горизонтов. Вы увидите, как применять ИИ в жизни, как делегировать, экспериментировать и не отставать от будущего.<br><br>
+        🚀 Готовы к следующему шагу?`
+      }
+    ];
+    
+    // Переменные состояния
+    let isFeedbackSubmitted = false;
+    let userRecordId = null;
+    let selectedReaction = null;
+    let userProgress = 0;
+    let nextBtnCooldown = false;
+    let activeQuizAnswered = false;
+    let currentBlockIndex = 0;
+    const totalBlocks = contentBlocks.length;
+    let emptySpace = null;
+    let isFirstBlockAdded = false;
+    let chatHistory = [];
+
+    // Декодирование URL-encoded строки
+    function decodeURIComponentSafe(str) {
+      try {
+        return decodeURIComponent(str || '');
+      } catch (e) {
+        return str || '';
+      }
+    }
+
+    // Получение данных пользователя из cookie
+    function getUserData() {
+      const getCookie = (name) => {
+        const match = document.cookie.match(new RegExp(`${name}=([^;]+)`));
+        return match ? decodeURIComponentSafe(match[1]) : null;
+      };
+
+      return {
+        id: getCookie('tg_user_id'),
+        name: getCookie('tg_name'),
+        username: getCookie('tg_username'),
+        avatar: getCookie('tg_avatar')
+      };
+    }
+
+    // Форматирование текущей даты
+    function getCurrentDate() {
+      const now = new Date();
+      const day = String(now.getDate()).padStart(2, '0');
+      const month = String(now.getMonth() + 1).padStart(2, '0');
+      const year = now.getFullYear();
+      const hours = String(now.getHours()).padStart(2, '0');
+      const minutes = String(now.getMinutes()).padStart(2, '0');
+      
+      return `${day}.${month}.${year} ${hours}:${minutes}`;
+    }
+
+    async function findUserRecord() {
+      const userData = getUserData();
+      if (!userData.id) {
+        console.error('User ID not found in cookies');
+        return null;
+      }
+
+      try {
+        const response = await fetch(
+          `https://app.nocodb.com/api/${config.apiVersion}/db/data/${config.orgs}/${config.projectName}/${config.tableName}`,
+          {
+            headers: { 'xc-token': config.apiToken }
+          }
+        );
+
+        if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+        
+        const data = await response.json();
+        const userRecord = data.list.find(record => record.tg_user_id === userData.id);
+        return userRecord?.Id;
+      } catch (error) {
+        console.error('Error finding user record:', error);
+        return null;
+      }
+    }
+
+    async function updateProgress() {
+      if (!userRecordId) {
+        userRecordId = await findUserRecord();
+        if (!userRecordId) {
+          console.error('Failed to get user record ID');
+          return false;
+        }
+      }
+
+      try {
+        const response = await fetch(
+          `https://app.nocodb.com/api/${config.apiVersion}/db/data/${config.orgs}/${config.projectName}/${config.tableName}/${userRecordId}`,
+          {
+            method: 'PATCH',
+            headers: {
+              'Content-Type': 'application/json',
+              'xc-token': config.apiToken
+            },
+            body: JSON.stringify({ progress: 3 })
+          }
+        );
+
+        if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+        return true;
+      } catch (error) {
+        console.error('Error updating progress:', error);
+        return false;
+      }
+    }
+
+    async function sendFeedback(reaction, text) {
+      const userData = getUserData();
+      if (!userData.id) return false;
+
+      try {
+        const response = await fetch(
+          `https://app.nocodb.com/api/${config.apiVersion}/db/data/${config.orgs}/${config.projectName}/${config.feedbackTableName}`,
+          {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              'xc-token': config.apiToken
+            },
+            body: JSON.stringify({
+              user_id: userData.id,
+              name: userData.name || 'Не указано',
+              username: userData.username || 'Не указан',
+              emoji: reaction,
+              description: text,
+              date: getCurrentDate(),
+              вспомогательное_окно: 'Модуль PRO'
+            })
+          }
+        );
+
+        if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+        return true;
+      } catch (error) {
+        console.error('Error sending feedback:', error);
+        return false;
+      }
+    }
+
+    function lockFeedbackForm() {
+      isFeedbackSubmitted = true;
+      feedbackOptions.forEach(opt => {
+        opt.style.pointerEvents = 'none';
+        opt.style.opacity = '0.6';
+      });
+      feedbackText.disabled = true;
+      feedbackSubmit.disabled = true;
+      feedbackSkip.disabled = true;
+    }
+
+    function unlockFeedbackForm() {
+      isFeedbackSubmitted = false;
+      feedbackOptions.forEach(opt => {
+        opt.style.pointerEvents = '';
+        opt.style.opacity = '';
+      });
+      feedbackText.disabled = false;
+      feedbackSubmit.disabled = false;
+      feedbackSkip.disabled = false;
+    }
+
+    async function completeModule() {
+      try {
+        if (!userRecordId) {
+          userRecordId = await findUserRecord();
+          if (!userRecordId) {
+            console.error('Failed to get user record ID');
+            completionModal.classList.add('active');
+            return;
+          }
+        }
+    
+        const response = await fetch(
+          `https://app.nocodb.com/api/${config.apiVersion}/db/data/${config.orgs}/${config.projectName}/${config.tableName}/${userRecordId}`,
+          {
+            headers: { 'xc-token': config.apiToken }
+          }
+        );
+    
+        if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+        
+        const data = await response.json();
+        const currentProgress = data.progress || 0;
+        
+        // Если прогресс 3 - показываем форму отзыва
+        if (currentProgress === 3) {
+          feedbackModal.classList.add('active');
+          return;
+        }
+        
+        // Если прогресс меньше 4, обновляем до 4
+        if (currentProgress < 4) {
+          const updateResponse = await fetch(
+            `https://app.nocodb.com/api/${config.apiVersion}/db/data/${config.orgs}/${config.projectName}/${config.tableName}/${userRecordId}`,
+            {
+              method: 'PATCH',
+              headers: {
+                'Content-Type': 'application/json',
+                'xc-token': config.apiToken
+              },
+              body: JSON.stringify({ progress: 4 })
+            }
+          );
+    
+          if (!updateResponse.ok) throw new Error(`HTTP error! status: ${updateResponse.status}`);
+          
+          // После обновления показываем форму отзыва
+          feedbackModal.classList.add('active');
+        } else {
+          // Если прогресс уже 4 или больше - сразу показываем завершение
+          completionModal.classList.add('active');
+        }
+      } catch (error) {
+        console.error('Error:', error);
+        feedbackModal.classList.add('active');
+      }
+    }
+
+    function addContentBlock(index) {
+      if (index === 0 && isFirstBlockAdded) return;
+      
+      if (emptySpace) emptySpace.remove();
+      emptySpace = null;
+    
+      const block = document.createElement('div');
+      block.className = 'content-block';
+      block.style.opacity = '0';
+      block.style.transform = 'translateY(20px)';
+      
+      if (contentBlocks[index].title) {
+        const title = document.createElement('h2');
+        title.className = 'content-title';
+        title.innerHTML = `${contentBlocks[index].title}`;
+        block.appendChild(title);
+      }
+      
+      if (contentBlocks[index].image) {
+        const img = document.createElement('img');
+        img.className = 'content-image';
+        img.src = `photo_course/${contentBlocks[index].image}`;
+        img.alt = contentBlocks[index].title;
+        block.appendChild(img);
+      }
+      
+      const content = document.createElement('div');
+      content.innerHTML = contentBlocks[index].content;
+      block.appendChild(content);
+      
+      cardsContainer.appendChild(block);
+      emptySpace = document.createElement('div');
+      emptySpace.className = 'empty-space';
+      cardsContainer.appendChild(emptySpace);
+      
+      if (index === 0) isFirstBlockAdded = true;
+      
+      // Анимация появления блока контента
+      setTimeout(() => {
+        block.style.opacity = '1';
+        block.style.transform = 'translateY(0)';
+        block.style.transition = 'opacity 0.5s ease-out, transform 0.5s ease-out';
+        
+        window.scrollTo({
+          top: block.offsetTop - document.querySelector('.header-bar').offsetHeight,
+          behavior: 'smooth'
+        });
+        
+        if (contentBlocks[index].hasQuiz) {
+          initQuiz(block);
+        }
+      }, 150); // Небольшая задержка для плавного появления
+    }
+
+    function initQuiz(block) {
+      nextBtn.disabled = true;
+      const quizContainer = block.querySelector('.quiz-container');
+      if (!quizContainer) return;
+      
+      const options = quizContainer.querySelectorAll('.quiz-option');
+      const submitBtn = quizContainer.querySelector('.quiz-submit-btn');
+      const feedback = quizContainer.querySelector('.quiz-feedback');
+      
+      let selectedOption = null;
+      activeQuizAnswered = false;
+      
+      options.forEach(option => {
+        option.addEventListener('click', () => {
+          if (activeQuizAnswered) return;
+          
+          options.forEach(opt => opt.classList.remove('selected'));
+          option.classList.add('selected');
+          selectedOption = option;
+          
+          submitBtn.classList.add('active');
+        });
+      });
+      
+      submitBtn.addEventListener('click', () => {
+        if (!selectedOption || activeQuizAnswered) return;
+        
+        activeQuizAnswered = true;
+        const isCorrect = selectedOption.dataset.correct === 'true';
+        
+        if (isCorrect) {
+          selectedOption.classList.add('correct');
+        } else {
+          selectedOption.classList.add('incorrect');
+          options.forEach(opt => {
+            if (opt.dataset.correct === 'true') {
+              opt.classList.add('correct');
+            }
+          });
+        }
+        
+        feedback.classList.add('show');
+        submitBtn.style.display = 'none';
+        nextBtn.disabled = false;
+      });
+    }
+
+    function updateProgressBar() {
+      progressBar.style.width = ((currentBlockIndex + 1) / totalBlocks) * 100 + '%';
+    }
+
+    // Обновленная функция openAIChat
+    function openAIChat() {
+      aiChatModal.classList.add('active');
+      
+      // Добавляем приветственное сообщение, если чат пустой
+      if (chatHistory.length === 0) {
+        chatHistory.push({
+          role: 'assistant',
+          content: 'Привет! Я ИИ-Ассистент. Скорее задай свой вопрос!'
+        });
+      }
+      
+      renderChatHistory();
+    }
+    
+    // Обновленная функция closeAIChat с проверкой
+    function closeAIChat() {
+      // Проверяем, есть ли неотвеченные сообщения пользователя
+      const lastMessage = chatHistory[chatHistory.length - 1];
+      if (lastMessage?.role === 'user') {
+        // Показываем подтверждение выхода
+        if (confirm('ИИ еще не отправил ответ на ваш промт, выход в текущий момент отменит ваш запрос. Все равно выйти?')) {
+          aiChatModal.classList.remove('active');
+        }
+      } else {
+        aiChatModal.classList.remove('active');
+      }
+    }
+    
+    // Обновленный обработчик для кнопки закрытия
+    aiChatClose.addEventListener('click', closeAIChat);
+    
+    function closeAIChat() {
+      aiChatModal.classList.remove('active');
+    }
+    
+    function renderChatHistory() {
+      aiChatMessages.innerHTML = '';
+      chatHistory.forEach(msg => {
+        const messageDiv = document.createElement('div');
+        messageDiv.className = `ai-chat-message ${msg.role}`;
+        messageDiv.textContent = msg.content;
+        aiChatMessages.appendChild(messageDiv);
+      });
+      aiChatMessages.scrollTop = aiChatMessages.scrollHeight;
+    }
+    
+    async function sendMessageToAI(message) {
+      // Добавляем сообщение пользователя в историю
+      chatHistory.push({ role: 'user', content: message });
+      renderChatHistory();
+      
+      // Создаем индикатор загрузки с точками
+      const loadingDiv = document.createElement('div');
+      loadingDiv.className = 'ai-chat-message assistant';
+      
+      const dotsContainer = document.createElement('div');
+      dotsContainer.className = 'loading-dots';
+      dotsContainer.innerHTML = '<span></span><span></span><span></span>';
+      
+      loadingDiv.appendChild(dotsContainer);
+      aiChatMessages.appendChild(loadingDiv);
+      aiChatMessages.scrollTop = aiChatMessages.scrollHeight;
+      
+      try {
+        // Здесь будет вызов API DeepSeek
+        const response = await fetch('https://api.deepseek.com/v1/chat/completions', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': 'Bearer sk-b7e4c56da9f84bf3812f439619c8a722'
+          },
+          body: JSON.stringify({
+            model: "deepseek-chat",
+            messages: chatHistory,
+            temperature: 0.7
+          })
+        });
+        
+        if (!response.ok) throw new Error('Ошибка API');
+        
+        const data = await response.json();
+        const aiResponse = data.choices[0].message.content;
+        
+        // Удаляем индикатор загрузки
+        aiChatMessages.removeChild(loadingDiv);
+        
+        // Добавляем ответ ИИ в историю
+        chatHistory.push({ role: 'assistant', content: aiResponse });
+        renderChatHistory();
+        
+      } catch (error) {
+        console.error('Ошибка:', error);
+        aiChatMessages.removeChild(loadingDiv);
+        
+        const errorDiv = document.createElement('div');
+        errorDiv.className = 'ai-chat-message assistant';
+        errorDiv.textContent = 'Произошла ошибка. Пожалуйста, попробуйте позже.';
+        aiChatMessages.appendChild(errorDiv);
+        aiChatMessages.scrollTop = aiChatMessages.scrollHeight;
+      }
+    }
+
+    // Обработчики событий
+    exitBtn.addEventListener('click', () => exitModal.style.display = 'flex');
+    modalExitBtn.addEventListener('click', () => window.location.href = 'index.html');
+    modalStayBtn.addEventListener('click', () => exitModal.style.display = 'none');
+    completionBtn.addEventListener('click', () => window.location.href = 'index.html');
+
+    nextBtn.addEventListener('click', () => {
+      if (nextBtnCooldown || nextBtn.disabled) return;
+      
+      nextBtnCooldown = true;
+      nextBtn.disabled = true;
+      
+      if (currentBlockIndex < totalBlocks - 1) {
+        currentBlockIndex++;
+        addContentBlock(currentBlockIndex);
+        updateProgressBar();
+        
+        if (currentBlockIndex === totalBlocks - 1) {
+          nextBtn.textContent = 'Завершить';
+          nextBtn.onclick = function() {
+            nextBtn.disabled = true;
+            nextBtn.style.background = 'var(--disabled)';
+            completeModule();
+          };
+        }
+      }
+      
+      setTimeout(() => {
+        nextBtnCooldown = false;
+        const hasUnansweredQuiz = document.querySelector('.quiz-container:not(.answered)') && !activeQuizAnswered;
+        nextBtn.disabled = hasUnansweredQuiz;
+      }, 500);
+    });
+
+    feedbackOptions.forEach(option => {
+      option.addEventListener('click', () => {
+        if (isFeedbackSubmitted) return;
+        
+        if (option.classList.contains('selected')) {
+          option.classList.remove('selected');
+          selectedReaction = null;
+          feedbackText.style.display = 'none';
+          feedbackSubmit.style.display = 'none';
+          feedbackSkip.style.display = 'block';
+        } else {
+          feedbackOptions.forEach(opt => opt.classList.remove('selected'));
+          option.classList.add('selected');
+          selectedReaction = option.dataset.reaction;
+          feedbackText.style.display = 'block';
+          feedbackSubmit.style.display = 'block';
+          feedbackSkip.style.display = 'none';
+        }
+      });
+    });
+
+    feedbackText.style.display = 'none';
+    feedbackSubmit.style.display = 'none';
+    feedbackSkip.style.display = 'block';
+
+    feedbackSubmit.addEventListener('click', async () => {
+      if (!selectedReaction || isFeedbackSubmitted) return;
+      
+      lockFeedbackForm();
+      
+      // Обновляем прогресс до 4 при отправке отзыва
+      if (userRecordId) {
+        try {
+          await fetch(
+            `https://app.nocodb.com/api/${config.apiVersion}/db/data/${config.orgs}/${config.projectName}/${config.tableName}/${userRecordId}`,
+            {
+              method: 'PATCH',
+              headers: {
+                'Content-Type': 'application/json',
+                'xc-token': config.apiToken
+              },
+              body: JSON.stringify({ progress: 4 })
+            }
+          );
+        } catch (error) {
+          console.error('Error updating progress:', error);
+        }
+      }
+      
+      const success = await sendFeedback(selectedReaction, feedbackText.value.trim());
+      
+      if (success) {
+        feedbackSuccess.style.display = 'block';
+        feedbackSubmit.style.display = 'none';
+        feedbackText.style.display = 'none';
+        feedbackSkip.style.display = 'none';
+        
+        setTimeout(() => {
+          feedbackModal.classList.remove('active');
+          completionModal.classList.add('active');
+          unlockFeedbackForm();
+        }, 1500);
+      } else {
+        alert('Не удалось отправить отзыв. Пожалуйста, попробуйте позже.');
+        unlockFeedbackForm();
+      }
+    });
+
+    feedbackSkip.addEventListener('click', async () => {
+      if (isFeedbackSubmitted) return;
+      
+      // Обновляем прогресс до 4 при пропуске отзыва
+      if (userRecordId) {
+        try {
+          await fetch(
+            `https://app.nocodb.com/api/${config.apiVersion}/db/data/${config.orgs}/${config.projectName}/${config.tableName}/${userRecordId}`,
+            {
+              method: 'PATCH',
+              headers: {
+                'Content-Type': 'application/json',
+                'xc-token': config.apiToken
+              },
+              body: JSON.stringify({ progress: 4 })
+            }
+          );
+        } catch (error) {
+          console.error('Error updating progress:', error);
+        }
+      }
+      
+      feedbackModal.classList.remove('active');
+      completionModal.classList.add('active');
+    });
+
+    // Обработчики чата
+    document.addEventListener('click', (e) => {
+      if (e.target.classList.contains('ai-chat-btn') || 
+          e.target.id === 'aiChatBtn1' || 
+          e.target.id === 'aiChatBtn2' || 
+          e.target.id === 'aiChatBtn3') {
+        openAIChat();
+      }
+    });
+
+    aiChatClose.addEventListener('click', closeAIChat);
+    
+    aiChatSend.addEventListener('click', () => {
+      const message = aiChatInput.value.trim();
+      if (message) {
+        aiChatInput.value = '';
+        sendMessageToAI(message);
+      }
+    });
+    
+    aiChatInput.addEventListener('keypress', (e) => {
+      if (e.key === 'Enter' && !e.shiftKey) {
+        e.preventDefault();
+        aiChatSend.click();
+      }
+    });
+
+        // Инициализация
+    (async function init() {
+      // Изначально скрываем элементы интерфейса
+      document.querySelector('.header-bar').style.opacity = '0';
+      document.querySelector('.header-bar').style.transform = 'translateY(-20px)';
+      document.querySelector('.buttons-container').style.opacity = '0';
+      document.querySelector('.buttons-container').style.transform = 'translateY(20px)';
+      
+      userRecordId = await findUserRecord();
+      if (userRecordId) {
+        const response = await fetch(
+          `https://app.nocodb.com/api/${config.apiVersion}/db/data/${config.orgs}/${config.projectName}/${config.tableName}/${userRecordId}`,
+          {
+            headers: { 'xc-token': config.apiToken }
+          }
+        );
+        if (response.ok) {
+          const data = await response.json();
+          userProgress = data.progress || 0;
+        }
+      }
+      
+      // Показываем все элементы с анимацией после небольшой задержки
+      setTimeout(() => {
+        // Показываем основной контент
+        mainContent.style.opacity = '1';
+        
+        // Показываем шапку
+        document.querySelector('.header-bar').style.opacity = '1';
+        document.querySelector('.header-bar').style.transform = 'translateY(0)';
+        document.querySelector('.header-bar').style.transition = 'opacity 0.5s ease-out, transform 0.5s ease-out';
+        
+        // Показываем кнопки
+        document.querySelector('.buttons-container').style.opacity = '1';
+        document.querySelector('.buttons-container').style.transform = 'translateY(0)';
+        document.querySelector('.buttons-container').style.transition = 'opacity 0.5s ease-out, transform 0.5s ease-out';
+        
+        // Добавляем первый блок контента
+        if (!isFirstBlockAdded) {
+          addContentBlock(0);
+        }
+        updateProgressBar();
+      }, 100);
+    })();
+  </script>
+</body>
+</html>
