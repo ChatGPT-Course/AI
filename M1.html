@@ -266,7 +266,6 @@
   <!-- Панель прогресса -->
   <div class="progress-panel">
     <div class="progress-info">
-      <div class="module-title">Модуль 1: Основы ИИ</div>
       <div class="progress-bar-container">
         <div class="progress-bar" id="progressBar"></div>
       </div>
@@ -364,12 +363,14 @@
           updateButtonText();
         }, 1000);
 
-        // Плавный скролл к блоку
+        // Плавный скролл к блоку так, чтобы он начинался под панелью
         if (blockNumber > 1) {
           setTimeout(() => {
-            block.scrollIntoView({ 
-              behavior: 'smooth', 
-              block: 'start' 
+            const panelHeight = 80; // Высота панели прогресса
+            const blockTop = block.offsetTop - panelHeight;
+            window.scrollTo({ 
+              top: blockTop, 
+              behavior: 'smooth' 
             });
           }, 200);
         }
