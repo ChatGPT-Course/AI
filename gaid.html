@@ -76,12 +76,12 @@
 
     .module-card {
       background: #ffffff;
-      border-radius: 16px;
+      border-radius: 12px;
       padding: 1.5rem;
       text-align: left;
       transition: all 0.3s ease;
-      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
-      border: 2px solid #f0f0f0;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+      border: 1px solid #e5e7eb;
       cursor: pointer;
       position: relative;
       overflow: hidden;
@@ -89,65 +89,91 @@
 
     /* Состояния карточек */
     .module-card.completed {
-      border-color: #4CAF50;
-      background: linear-gradient(135deg, #f8fff8, #ffffff);
+      border-color: #10b981;
+      background: linear-gradient(135deg, #ecfdf5, #ffffff);
     }
 
     .module-card.current {
-      border-color: #FF9800;
-      background: linear-gradient(135deg, #fff8f0, #ffffff);
-      box-shadow: 0 4px 20px rgba(255, 152, 0, 0.2);
+      border-color: #f59e0b;
+      background: linear-gradient(135deg, #fffbeb, #ffffff);
+      box-shadow: 0 4px 12px rgba(245, 158, 11, 0.15);
     }
 
     .module-card.locked {
-      background: #f9f9f9;
-      border-color: #e0e0e0;
+      background: #f9fafb;
+      border-color: #d1d5db;
       cursor: not-allowed;
       opacity: 0.7;
     }
 
     .module-card:hover:not(.locked) {
-      transform: translateY(-4px);
-      box-shadow: 0 8px 30px rgba(0, 0, 0, 0.12);
+      transform: translateY(-2px);
+      box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
+    }
+
+    .module-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      margin-bottom: 1rem;
     }
 
     .module-label {
-      position: absolute;
-      top: 0;
-      left: 0;
-      background: #8b5cf6;
+      background: #6366f1;
       color: white;
-      padding: 0.4rem 0.8rem;
+      padding: 0.3rem 0.7rem;
       font-size: 0.75rem;
       font-weight: 600;
-      border-radius: 0 0 12px 0;
+      border-radius: 6px;
       text-transform: uppercase;
       letter-spacing: 0.5px;
     }
 
     .module-card.completed .module-label {
-      background: #4CAF50;
+      background: #10b981;
     }
 
     .module-card.current .module-label {
-      background: #FF9800;
+      background: #f59e0b;
     }
 
     .module-card.locked .module-label {
-      background: #999;
+      background: #6b7280;
+    }
+
+    .favorite-btn {
+      background: none;
+      border: none;
+      cursor: pointer;
+      padding: 0.5rem;
+      border-radius: 8px;
+      transition: all 0.2s ease;
+      width: 36px;
+      height: 36px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .favorite-btn:hover {
+      background: #f3f4f6;
+    }
+
+    .favorite-icon {
+      width: 20px;
+      height: 20px;
+      fill: #d1d5db;
+      transition: fill 0.2s ease;
+    }
+
+    .favorite-btn.active .favorite-icon {
+      fill: #fbbf24;
     }
 
     .module-content {
-      margin-top: 1.5rem;
       display: flex;
-      align-items: flex-start;
-      gap: 1rem;
-    }
-
-    .module-icon {
-      font-size: 2.5rem;
-      margin-right: 0.5rem;
-      flex-shrink: 0;
+      flex-direction: column;
+      gap: 0.5rem;
     }
 
     .module-info {
@@ -362,11 +388,11 @@
       <span class="nav-label">Guides</span>
     </button>
 
-    <button class="nav-button" id="challengesBtn">
+    <button class="nav-button" id="favoriteBtn">
       <svg class="nav-icon" viewBox="0 0 24 24">
-        <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/>
+        <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/>
       </svg>
-      <span class="nav-label">Challenges</span>
+      <span class="nav-label">Избранное</span>
     </button>
 
     <button class="nav-button" id="aiToolsBtn">
@@ -461,6 +487,30 @@
       const parts = value.split(`; ${name}=`);
       if (parts.length === 2) return parts.pop().split(';').shift();
       return null;
+    }
+
+    // Функции для работы с избранным
+    function getFavorites() {
+      const favorites = localStorage.getItem('favoriteModules');
+      return favorites ? JSON.parse(favorites) : [];
+    }
+
+    function toggleFavorite(moduleId) {
+      let favorites = getFavorites();
+      const index = favorites.indexOf(moduleId);
+      
+      if (index > -1) {
+        favorites.splice(index, 1);
+      } else {
+        favorites.push(moduleId);
+      }
+      
+      localStorage.setItem('favoriteModules', JSON.stringify(favorites));
+      renderModules(); // Перерендер для обновления кнопок
+    }
+
+    function isFavorite(moduleId) {
+      return getFavorites().includes(moduleId);
     }
 
     // Получить данные пользователя из NocoDB
@@ -636,9 +686,15 @@
         }
         
         moduleCard.innerHTML = `
-          <div class="module-label">${module.label}</div>
+          <div class="module-header">
+            <div class="module-label">${module.label}</div>
+            <button class="favorite-btn ${isFavorite(module.id) ? 'active' : ''}" onclick="toggleFavorite('${module.id}')">
+              <svg class="favorite-icon" viewBox="0 0 24 24">
+                <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/>
+              </svg>
+            </button>
+          </div>
           <div class="module-content">
-            <div class="module-icon">${module.icon}</div>
             <div class="module-info">
               <h3 class="module-title">${module.title}</h3>
               <p class="module-description">${module.description}</p>
@@ -687,11 +743,11 @@
 
     // Обработчики навигации
     document.getElementById('guidesBtn').addEventListener('click', () => {
-      window.location.href = 'main.html';
+      window.location.href = 'index.html';
     });
 
-    document.getElementById('challengesBtn').addEventListener('click', () => {
-      console.log('Challenges clicked');
+    document.getElementById('favoriteBtn').addEventListener('click', () => {
+      window.location.href = 'favorite.html';
     });
 
     document.getElementById('aiToolsBtn').addEventListener('click', () => {
@@ -701,6 +757,9 @@
     document.getElementById('profileBtn').addEventListener('click', () => {
       console.log('Profile clicked');
     });
+
+    // Глобальная функция для кнопок избранного
+    window.toggleFavorite = toggleFavorite;
 
     // Инициализация при загрузке страницы
     document.addEventListener('DOMContentLoaded', () => {
