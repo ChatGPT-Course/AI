@@ -207,11 +207,23 @@
     }
 
     button:focus {
-      outline: none;
+      outline: none !important;
     }
 
     button:active {
-      outline: none;
+      outline: none !important;
+    }
+
+    button:focus-visible {
+      outline: none !important;
+    }
+
+    *:focus {
+      outline: none !important;
+    }
+
+    *:active {
+      outline: none !important;
     }
 
     .favorite-icon {
@@ -460,9 +472,9 @@
 
     <button class="nav-button" id="aiToolsBtn">
       <svg class="nav-icon" viewBox="0 0 24 24">
-        <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/>
+        <path d="M9 11H7v3h2v-3zm4 0h-2v3h2v-3zm4 0h-2v3h2v-3zm2-7h-2V2a1 1 0 0 0-1-1H8a1 1 0 0 0-1 1v2H5a1 1 0 0 0-1 1v5a1 1 0 0 0 1 1v6a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1v-6a1 1 0 0 0 1-1V5a1 1 0 0 0-1-1zM9 2h6v2H9V2zm9 17H6v-5h12v5zm1-7H5V6h14v6z"/>
       </svg>
-      <span class="nav-label">Инструменты</span>
+      <span class="nav-label">ИИ чат</span>
     </button>
 
     <button class="nav-button" id="profileBtn">
@@ -863,11 +875,11 @@
     });
 
     document.getElementById('aiToolsBtn').addEventListener('click', () => {
-      console.log('AI Tools clicked');
+      window.location.href = 'chat.html';
     });
 
     document.getElementById('profileBtn').addEventListener('click', () => {
-      console.log('Profile clicked');
+      window.location.href = 'profile.html';
     });
 
     // Глобальная функция для кнопок избранного
