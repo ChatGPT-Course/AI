@@ -209,6 +209,40 @@
       color: #2196F3;
     }
 
+    /* Загрузочный экран */
+    .loading-screen {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: calc(100% - 80px);
+      background: #ffffff;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      z-index: 1000;
+      transition: opacity 0.5s ease;
+    }
+
+    .loading-screen.hidden {
+      opacity: 0;
+      pointer-events: none;
+    }
+
+    .spinner {
+      width: 50px;
+      height: 50px;
+      border: 4px solid #f3f4f6;
+      border-top: 4px solid #8b5cf6;
+      border-radius: 50%;
+      animation: spin 1s linear infinite;
+    }
+
+    @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+
     @media (max-width: 768px) {
       .main-content {
         padding: 1rem 0.5rem;
@@ -230,6 +264,11 @@
   </style>
 </head>
 <body>
+  <!-- Загрузочный экран -->
+  <div class="loading-screen" id="loadingScreen">
+    <div class="spinner"></div>
+  </div>
+
   <div class="main-content">
     <div class="profile-header">
       <h1 class="profile-title">Мой профиль</h1>
@@ -343,7 +382,7 @@
       if (!userId) {
         console.log('User ID not found in cookies');
         if (!isUpdate) loadProfileData();
-        return;
+        return Promise.resolve();
       }
 
       try {
@@ -495,9 +534,24 @@
       // Уже на странице профиля
     });
 
+    // Функция скрытия загрузочного экрана
+    function hideLoadingScreen() {
+      const loadingScreen = document.getElementById('loadingScreen');
+      if (loadingScreen) {
+        loadingScreen.classList.add('hidden');
+        // Полностью убираем элемент через 500ms после начала анимации
+        setTimeout(() => {
+          loadingScreen.style.display = 'none';
+        }, 500);
+      }
+    }
+
     // Инициализация при загрузке страницы
     document.addEventListener('DOMContentLoaded', () => {
-      getUserData();
+      getUserData().then(() => {
+        // Скрываем загрузочный экран после получения данных
+        hideLoadingScreen();
+      });
       startAutoUpdate();
     });
 
