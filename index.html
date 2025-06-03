@@ -358,7 +358,8 @@
           username: userData.username || 'Не указан',
           progress: 0,
           oplata: 0,
-          data: ''
+          data: '',
+          date_join: new Date().toISOString().split('T')[0] // Устанавливаем текущую дату в формате YYYY-MM-DD
         };
 
         console.log('Данные для создания пользователя:', newUserData);
