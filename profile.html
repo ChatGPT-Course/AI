@@ -56,6 +56,7 @@
       border: 1px solid #e0e0e0;
       margin-bottom: 1.5rem;
       width: 100%;
+      max-width: 100%;
     }
 
     .user-avatar {
@@ -104,11 +105,16 @@
       flex-direction: column;
       gap: 0.2rem;
       margin-top: 0.5rem;
+      align-items: flex-start;
     }
 
     .user-meta-item {
       font-size: 0.85rem;
       color: #6c757d;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      width: 100%;
     }
 
     .user-meta-label {
@@ -237,6 +243,7 @@
       padding: 1.5rem;
       transition: all 0.3s ease;
       cursor: pointer;
+      position: relative;
     }
 
     .tariff-card.active {
@@ -245,16 +252,44 @@
     }
 
     .tariff-card-header {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      margin-bottom: 0.5rem;
+      position: relative;
+      margin-bottom: 1rem;
     }
 
     .tariff-name {
       font-size: 1.2rem;
       font-weight: 600;
       color: #2c3e50;
+      background: #ffffff;
+      border: 2px solid #e9ecef;
+      border-radius: 20px;
+      padding: 0.5rem 1rem;
+      display: inline-block;
+      position: absolute;
+      top: -2rem;
+      left: 0;
+      z-index: 1;
+    }
+
+    .tariff-card.active .tariff-name {
+      border-color: #2196F3;
+      background: #f8fbff;
+    }
+
+    .tariff-current-badge {
+      background: #10b981;
+      color: white;
+      font-size: 0.75rem;
+      font-weight: 600;
+      padding: 0.2rem 0.6rem;
+      border-radius: 12px;
+      margin-left: 0.5rem;
+    }
+
+    .tariff-description {
+      color: #6c757d;
+      line-height: 1.5;
+      margin-bottom: 1rem;
     }
 
     .tariff-price {
@@ -262,6 +297,7 @@
       font-weight: 600;
       padding: 0.3rem 0.8rem;
       border-radius: 20px;
+      display: inline-block;
     }
 
     .tariff-price.free {
@@ -274,10 +310,23 @@
       color: #92400e;
     }
 
-    .tariff-description {
-      color: #6c757d;
-      line-height: 1.5;
-      margin-top: 0.5rem;
+    .buy-pro-button {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+      border: none;
+      border-radius: 8px;
+      padding: 0.8rem 1.5rem;
+      font-size: 1rem;
+      font-weight: 600;
+      cursor: pointer;
+      margin-top: 1rem;
+      width: 100%;
+      transition: all 0.2s ease;
+    }
+
+    .buy-pro-button:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
     }
 
     .profile-card {
@@ -618,29 +667,30 @@
   <div class="tariff-modal" id="tariffModal">
     <div class="tariff-modal-content">
       <div class="tariff-modal-header">
-        <h2 class="tariff-modal-title">Тарифы курса</h2>
+        <h2 class="tariff-modal-title">Тарифный план</h2>
         <button class="tariff-close-btn" id="tariffCloseBtn">×</button>
       </div>
       
       <div class="tariff-cards">
         <div class="tariff-card" id="limitedTariffCard">
           <div class="tariff-card-header">
-            <div class="tariff-name">Ограниченный</div>
-            <div class="tariff-price free">Бесплатно</div>
+            <div class="tariff-name" id="limitedTariffName">Ограниченный</div>
           </div>
           <div class="tariff-description">
             Доступ к базовым материалам курса и первым модулям. Идеально для знакомства с темой искусственного интеллекта.
           </div>
+          <div class="tariff-price free">Бесплатно</div>
+          <button class="buy-pro-button" id="buyProButton" style="display: none;">Купить тариф "PRO"</button>
         </div>
         
         <div class="tariff-card" id="fullTariffCard">
           <div class="tariff-card-header">
-            <div class="tariff-name">Полный</div>
-            <div class="tariff-price paid">2990₽ единожды</div>
+            <div class="tariff-name" id="fullTariffName">Полный</div>
           </div>
           <div class="tariff-description">
             Полный доступ ко всем материалам курса, практическим заданиям и дополнительным ресурсам. Максимальная польза от обучения.
           </div>
+          <div class="tariff-price paid">2990₽ единожды</div>
         </div>
       </div>
     </div>
@@ -874,14 +924,24 @@
     function updateTariffHighlight(currentTariff) {
       const limitedCard = document.getElementById('limitedTariffCard');
       const fullCard = document.getElementById('fullTariffCard');
+      const limitedName = document.getElementById('limitedTariffName');
+      const fullName = document.getElementById('fullTariffName');
+      const buyProButton = document.getElementById('buyProButton');
       
+      // Убираем все активные состояния и бейджи
       limitedCard.classList.remove('active');
       fullCard.classList.remove('active');
+      limitedName.innerHTML = 'Ограниченный';
+      fullName.innerHTML = 'Полный';
+      buyProButton.style.display = 'none';
       
       if (currentTariff === 'limited') {
         limitedCard.classList.add('active');
+        limitedName.innerHTML = 'Ограниченный<span class="tariff-current-badge">Текущий</span>';
+        buyProButton.style.display = 'block';
       } else {
         fullCard.classList.add('active');
+        fullName.innerHTML = 'Полный<span class="tariff-current-badge">Текущий</span>';
       }
     }
 
