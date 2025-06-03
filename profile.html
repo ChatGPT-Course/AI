@@ -238,11 +238,11 @@
 
     <div class="stats-grid">
       <div class="stat-card">
-        <div class="stat-number" id="completedModules">0</div>
+        <div class="stat-number" id="completedModules">0/5</div>
         <div class="stat-label">Пройдено модулей</div>
       </div>
       <div class="stat-card">
-        <div class="stat-number" id="totalProgress">0%</div>
+        <div class="stat-number" id="totalProgress">--</div>
         <div class="stat-label">Общий прогресс</div>
       </div>
     </div>
@@ -268,15 +268,7 @@
       </div>
     </div>
 
-    <div class="achievements">
-      <h3 class="achievements-title">Достижения</h3>
-      <div id="achievementsList">
-        <div class="achievement-item">
-          <span class="achievement-icon">🎯</span>
-          <span class="achievement-text">Первый шаг - начали курс</span>
-        </div>
-      </div>
-    </div>
+    
   </div>
 
   <div class="navigation-panel">
@@ -328,9 +320,9 @@
       document.getElementById('courseStatus').textContent = 'Активный';
       document.getElementById('regDate').textContent = new Date().toLocaleDateString('ru-RU');
       
-      // Имитация статистики
-      document.getElementById('completedModules').textContent = '1';
-      document.getElementById('totalProgress').textContent = '20%';
+      // Обновленная статистика
+      document.getElementById('completedModules').textContent = '0/5';
+      document.getElementById('totalProgress').textContent = '--';
     }
 
     // Обработчики навигации
