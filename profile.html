@@ -470,14 +470,8 @@
         new Date().toLocaleDateString('ru-RU');
       document.getElementById('regDate').textContent = regDateText;
       
-      // Подсчитываем завершенные модули
-      let completedModules = 0;
-      modules.forEach(module => {
-        const progress = moduleProgress[module.id] || 0;
-        if (progress >= 10) { // Модуль считается завершенным при прогрессе 10/10
-          completedModules++;
-        }
-      });
+      // Количество пройденных модулей равно общему прогрессу пользователя
+      const completedModules = userProgress;
       
       // Обновляем статистику
       document.getElementById('completedModules').textContent = `${completedModules}/5`;
