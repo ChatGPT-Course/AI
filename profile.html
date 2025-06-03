@@ -1,0 +1,357 @@
+
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Профиль пользователя</title>
+  <script src="https://telegram.org/js/telegram-web-app.js"></script>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Arial, sans-serif;
+      background: #ffffff;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .main-content {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      justify-content: flex-start;
+      align-items: center;
+      padding: 2rem 1rem;
+      max-width: 600px;
+      margin: 0 auto;
+      padding-bottom: 120px;
+    }
+
+    .profile-header {
+      text-align: center;
+      margin-bottom: 3rem;
+    }
+
+    .profile-title {
+      font-size: 2rem;
+      font-weight: 700;
+      color: #2c3e50;
+      margin-bottom: 0.5rem;
+    }
+
+    .profile-subtitle {
+      font-size: 1rem;
+      color: #6c757d;
+    }
+
+    .profile-card {
+      background: #ffffff;
+      border-radius: 12px;
+      padding: 2rem;
+      width: 100%;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+      border: 1px solid #e0e0e0;
+      margin-bottom: 1.5rem;
+    }
+
+    .profile-info {
+      display: flex;
+      flex-direction: column;
+      gap: 1rem;
+    }
+
+    .info-item {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 0.8rem 0;
+      border-bottom: 1px solid #f0f0f0;
+    }
+
+    .info-item:last-child {
+      border-bottom: none;
+    }
+
+    .info-label {
+      font-weight: 600;
+      color: #2c3e50;
+    }
+
+    .info-value {
+      color: #6c757d;
+    }
+
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+      gap: 1rem;
+      margin-bottom: 2rem;
+    }
+
+    .stat-card {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+      padding: 1.5rem;
+      border-radius: 12px;
+      text-align: center;
+    }
+
+    .stat-number {
+      font-size: 2rem;
+      font-weight: 700;
+      margin-bottom: 0.5rem;
+    }
+
+    .stat-label {
+      font-size: 0.9rem;
+      opacity: 0.9;
+    }
+
+    .achievements {
+      background: #ffffff;
+      border-radius: 12px;
+      padding: 1.5rem;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+      border: 1px solid #e0e0e0;
+    }
+
+    .achievements-title {
+      font-size: 1.2rem;
+      font-weight: 600;
+      color: #2c3e50;
+      margin-bottom: 1rem;
+    }
+
+    .achievement-item {
+      display: flex;
+      align-items: center;
+      padding: 0.8rem;
+      background: #f8f9fa;
+      border-radius: 8px;
+      margin-bottom: 0.5rem;
+    }
+
+    .achievement-icon {
+      font-size: 1.5rem;
+      margin-right: 1rem;
+    }
+
+    .achievement-text {
+      font-weight: 500;
+      color: #2c3e50;
+    }
+
+    .navigation-panel {
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      background: #ffffff;
+      border-top: 1px solid #e0e0e0;
+      padding: 1rem 0;
+      display: flex;
+      justify-content: space-around;
+      align-items: center;
+      box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.1);
+    }
+
+    .nav-button {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 0.5rem 1rem;
+      background: none;
+      border: none;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      min-width: 70px;
+      border-radius: 8px;
+      outline: none !important;
+      -webkit-tap-highlight-color: transparent !important;
+    }
+
+    .nav-button:hover {
+      background: #f8f9fa;
+    }
+
+    .nav-button.active {
+      background: #e3f2fd;
+    }
+
+    .nav-icon {
+      width: 24px;
+      height: 24px;
+      margin-bottom: 0.3rem;
+      fill: #6c757d;
+      transition: fill 0.2s ease;
+    }
+
+    .nav-button:hover .nav-icon,
+    .nav-button.active .nav-icon {
+      fill: #2196F3;
+    }
+
+    .nav-label {
+      font-size: 0.8rem;
+      color: #6c757d;
+      font-weight: 500;
+      transition: color 0.2s ease;
+    }
+
+    .nav-button:hover .nav-label,
+    .nav-button.active .nav-label {
+      color: #2196F3;
+    }
+
+    @media (max-width: 768px) {
+      .main-content {
+        padding: 1rem 0.5rem;
+        padding-bottom: 100px;
+      }
+
+      .profile-title {
+        font-size: 1.5rem;
+      }
+
+      .profile-card {
+        padding: 1.5rem;
+      }
+
+      .stats-grid {
+        grid-template-columns: 1fr 1fr;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="main-content">
+    <div class="profile-header">
+      <h1 class="profile-title">Мой профиль</h1>
+      <p class="profile-subtitle">Информация о вашем аккаунте</p>
+    </div>
+
+    <div class="stats-grid">
+      <div class="stat-card">
+        <div class="stat-number" id="completedModules">0</div>
+        <div class="stat-label">Пройдено модулей</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-number" id="totalProgress">0%</div>
+        <div class="stat-label">Общий прогресс</div>
+      </div>
+    </div>
+
+    <div class="profile-card">
+      <div class="profile-info">
+        <div class="info-item">
+          <span class="info-label">Имя пользователя</span>
+          <span class="info-value" id="userName">Загрузка...</span>
+        </div>
+        <div class="info-item">
+          <span class="info-label">Telegram ID</span>
+          <span class="info-value" id="userTgId">Загрузка...</span>
+        </div>
+        <div class="info-item">
+          <span class="info-label">Статус курса</span>
+          <span class="info-value" id="courseStatus">Загрузка...</span>
+        </div>
+        <div class="info-item">
+          <span class="info-label">Дата регистрации</span>
+          <span class="info-value" id="regDate">Загрузка...</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="achievements">
+      <h3 class="achievements-title">Достижения</h3>
+      <div id="achievementsList">
+        <div class="achievement-item">
+          <span class="achievement-icon">🎯</span>
+          <span class="achievement-text">Первый шаг - начали курс</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="navigation-panel">
+    <button class="nav-button" id="guidesBtn">
+      <svg class="nav-icon" viewBox="0 0 24 24">
+        <path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-5 14H7v-2h7v2zm3-4H7v-2h10v2zm0-4H7V7h10v2z"/>
+      </svg>
+      <span class="nav-label">Курс</span>
+    </button>
+
+    <button class="nav-button" id="favoriteBtn">
+      <svg class="nav-icon" viewBox="0 0 24 24">
+        <path d="M4 2v20l8-4 8 4V2H4z"/>
+      </svg>
+      <span class="nav-label">Избранное</span>
+    </button>
+
+    <button class="nav-button" id="aiToolsBtn">
+      <svg class="nav-icon" viewBox="0 0 24 24">
+        <path d="M20 2H4c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h4l4 4 4-4h4c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zm-2 12H6v-2h12v2zm0-3H6V9h12v2zm0-3H6V6h12v2z"/>
+      </svg>
+      <span class="nav-label">ИИ чат</span>
+    </button>
+
+    <button class="nav-button active" id="profileBtn">
+      <svg class="nav-icon" viewBox="0 0 24 24">
+        <path d="M12 2C13.1 2 14 2.9 14 4C14 5.1 13.1 6 12 6C10.9 6 10 5.1 10 4C10 2.9 10.9 2 12 2ZM21 9V7L15 7V9C15 11.7 12.7 14 10 14S5 11.7 5 9V7H3V9C3 12.4 5.4 15.1 8.5 15.8V18H7V20H17V18H15.5V15.8C18.6 15.1 21 12.4 21 9Z"/>
+      </svg>
+      <span class="nav-label">Профиль</span>
+    </button>
+  </div>
+
+  <script>
+    // Получить данные пользователя из cookies
+    function getCookie(name) {
+      const value = `; ${document.cookie}`;
+      const parts = value.split(`; ${name}=`);
+      if (parts.length === 2) return parts.pop().split(';').shift();
+      return null;
+    }
+
+    // Загрузка данных профиля
+    function loadProfileData() {
+      const userName = getCookie('tg_name') || 'Не указано';
+      const userTgId = getCookie('tg_user_id') || 'Не указан';
+      
+      document.getElementById('userName').textContent = userName;
+      document.getElementById('userTgId').textContent = userTgId;
+      document.getElementById('courseStatus').textContent = 'Активный';
+      document.getElementById('regDate').textContent = new Date().toLocaleDateString('ru-RU');
+      
+      // Имитация статистики
+      document.getElementById('completedModules').textContent = '1';
+      document.getElementById('totalProgress').textContent = '20%';
+    }
+
+    // Обработчики навигации
+    document.getElementById('guidesBtn').addEventListener('click', () => {
+      window.location.href = 'gaid.html';
+    });
+
+    document.getElementById('favoriteBtn').addEventListener('click', () => {
+      window.location.href = 'favorite.html';
+    });
+
+    document.getElementById('aiToolsBtn').addEventListener('click', () => {
+      window.location.href = 'chat.html';
+    });
+
+    document.getElementById('profileBtn').addEventListener('click', () => {
+      // Уже на странице профиля
+    });
+
+    // Инициализация при загрузке страницы
+    document.addEventListener('DOMContentLoaded', loadProfileData);
+  </script>
+</body>
+</html>
