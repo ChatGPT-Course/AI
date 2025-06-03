@@ -180,48 +180,10 @@
       background: #f3f4f6;
     }
 
-    .favorite-btn:focus {
-      outline: none;
-      border: none;
-    }
-
-    .favorite-btn:active {
-      outline: none;
-      border: none;
-    }
-
-    .nav-button:focus {
-      outline: none;
-    }
-
-    .nav-button:active {
-      outline: none;
-    }
-
-    .module-start-btn:focus {
-      outline: none;
-    }
-
-    .module-start-btn:active {
-      outline: none;
-    }
-
-    button:focus {
+    /* Глобальная настройка для убирания всех обводок */
+    * {
       outline: none !important;
-      box-shadow: none !important;
-      border: none !important;
-    }
-
-    button:active {
-      outline: none !important;
-      box-shadow: none !important;
-      border: none !important;
-    }
-
-    button:focus-visible {
-      outline: none !important;
-      box-shadow: none !important;
-      border: none !important;
+      -webkit-tap-highlight-color: transparent !important;
     }
 
     *:focus {
@@ -234,16 +196,37 @@
       box-shadow: none !important;
     }
 
-    .nav-button:focus {
+    *:focus-visible {
       outline: none !important;
       box-shadow: none !important;
-      border: none !important;
     }
 
-    .nav-button:active {
+    /* Специфичные настройки для кнопок */
+    button {
+      outline: none !important;
+      border: none;
+      -webkit-tap-highlight-color: transparent !important;
+    }
+
+    button:focus {
       outline: none !important;
       box-shadow: none !important;
-      border: none !important;
+    }
+
+    button:active {
+      outline: none !important;
+      box-shadow: none !important;
+    }
+
+    button:focus-visible {
+      outline: none !important;
+      box-shadow: none !important;
+    }
+
+    /* Настройки для карточек модулей */
+    .module-card {
+      outline: none !important;
+      -webkit-tap-highlight-color: transparent !important;
     }
 
     .module-card:focus {
@@ -256,6 +239,22 @@
       outline: none !important;
       box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06) !important;
       border: 1px solid #e5e7eb !important;
+    }
+
+    /* Настройки для навигационных кнопок */
+    .nav-button {
+      outline: none !important;
+      -webkit-tap-highlight-color: transparent !important;
+    }
+
+    .nav-button:focus {
+      outline: none !important;
+      box-shadow: none !important;
+    }
+
+    .nav-button:active {
+      outline: none !important;
+      box-shadow: none !important;
     }
 
     .favorite-icon {
