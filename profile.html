@@ -100,22 +100,30 @@
       margin: 0;
     }
 
-    .user-meta {
-      display: flex;
-      flex-direction: column;
-      gap: 0.2rem;
-      margin-top: 0.5rem;
-      align-items: flex-start;
+    .profile-user-meta {
+      background: #ffffff;
+      border-radius: 12px;
+      padding: 1.5rem;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+      border: 1px solid #e0e0e0;
+      margin-bottom: 1.5rem;
       width: 100%;
+      max-width: 100%;
     }
 
     .user-meta-item {
-      font-size: 0.85rem;
+      font-size: 0.9rem;
       color: #6c757d;
       display: flex;
       align-items: center;
+      justify-content: flex-start;
       gap: 0.5rem;
       width: 100%;
+      margin-bottom: 0.8rem;
+    }
+
+    .user-meta-item:last-child {
+      margin-bottom: 0;
     }
 
     .user-meta-label {
@@ -538,6 +546,10 @@
         padding: 1rem;
       }
 
+      .profile-user-meta {
+        padding: 1rem;
+      }
+
       .user-avatar {
         width: 50px;
         height: 50px;
@@ -600,22 +612,23 @@
         <div class="user-details">
           <h2 class="user-name" id="userName">Загрузка...</h2>
           <p class="user-username" id="userUsername">@загрузка...</p>
-          <div class="user-meta">
-            <div class="user-meta-item">
-              <span class="user-meta-label">Дата регистрации:</span> 
-              <span id="regDate">Загрузка...</span>
-            </div>
-            <div class="user-meta-item">
-              <span class="user-meta-label">Telegram ID:</span> 
-              <span id="userTgId">Загрузка...</span>
-            </div>
-            <div class="user-meta-item">
-              <span class="user-meta-label">Статус курса:</span>
-              <div class="course-status-container">
-                <span class="course-status" id="courseStatus">Загрузка...</span>
-                <button class="info-question-btn" id="tariffInfoBtn" title="Информация о тарифах">?</button>
-              </div>
-            </div>
+        </div>
+      </div>
+      
+      <div class="profile-user-meta">
+        <div class="user-meta-item">
+          <span class="user-meta-label">Telegram ID:</span> 
+          <span id="userTgId">Загрузка...</span>
+        </div>
+        <div class="user-meta-item">
+          <span class="user-meta-label">Дата регистрации:</span> 
+          <span id="regDate">Загрузка...</span>
+        </div>
+        <div class="user-meta-item">
+          <span class="user-meta-label">Статус курса:</span>
+          <div class="course-status-container">
+            <span class="course-status" id="courseStatus">Загрузка...</span>
+            <button class="info-question-btn" id="tariffInfoBtn" title="Информация о тарифах">?</button>
           </div>
         </div>
       </div>
