@@ -319,6 +319,30 @@
       setCookie('tg_username', userData.username);
       setCookie('tg_name', `${userData.first_name} ${userData.last_name}`.trim());
       setCookie('tg_language', userData.language_code);
+      
+      // Сохраняем аватар пользователя
+      saveUserAvatar(userData);
+    }
+
+    // Функция сохранения аватара пользователя
+    async function saveUserAvatar(userData) {
+      try {
+        if (tg.initDataUnsafe && tg.initDataUnsafe.user && tg.initDataUnsafe.user.photo_url) {
+          const photoUrl = tg.initDataUnsafe.user.photo_url;
+          setCookie('tg_avatar_url', photoUrl);
+          console.log('Аватар пользователя сохранен:', photoUrl);
+        } else {
+          // Генерируем аватар с инициалами пользователя
+          const initials = `${userData.first_name.charAt(0)}${userData.last_name.charAt(0)}`.toUpperCase();
+          setCookie('tg_avatar_initials', initials);
+          console.log('Инициалы пользователя сохранены:', initials);
+        }
+      } catch (error) {
+        console.log('Ошибка сохранения аватара:', error);
+        // Генерируем аватар с инициалами как fallback
+        const initials = `${userData.first_name.charAt(0)}${userData.last_name.charAt(0)}`.toUpperCase();
+        setCookie('tg_avatar_initials', initials);
+      }
     }
 
     // Проверить пользователя в NocoDB
