@@ -179,9 +179,81 @@
       background: #f3f4f6;
     }
 
-    .favorite-btn:focus {
-      outline: none;
+    /* Глобальная настройка для убирания всех обводок */
+    * {
+      outline: none !important;
+      -webkit-tap-highlight-color: transparent !important;
+    }
+
+    *:focus {
+      outline: none !important;
+      box-shadow: none !important;
+    }
+
+    *:active {
+      outline: none !important;
+      box-shadow: none !important;
+    }
+
+    *:focus-visible {
+      outline: none !important;
+      box-shadow: none !important;
+    }
+
+    /* Специфичные настройки для кнопок */
+    button {
+      outline: none !important;
       border: none;
+      -webkit-tap-highlight-color: transparent !important;
+    }
+
+    button:focus {
+      outline: none !important;
+      box-shadow: none !important;
+    }
+
+    button:active {
+      outline: none !important;
+      box-shadow: none !important;
+    }
+
+    button:focus-visible {
+      outline: none !important;
+      box-shadow: none !important;
+    }
+
+    /* Настройки для карточек модулей */
+    .module-card {
+      outline: none !important;
+      -webkit-tap-highlight-color: transparent !important;
+    }
+
+    .module-card:focus {
+      outline: none !important;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06) !important;
+      border: 1px solid #e5e7eb !important;
+    }
+
+    .module-card:active {
+      outline: none !important;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06) !important;
+      border: 1px solid #e5e7eb !important;
+    }
+
+    /* Настройки для навигационных кнопок */
+    .nav-button {
+      outline: none !important;
+      -webkit-tap-highlight-color: transparent !important;
+    }
+
+    .nav-button:focus {
+      outline: none !important;
+      box-shadow: none !important;
+    }
+
+    .nav-button:active {
+      outline: none !important;
+      box-shadow: none !important;
     }
 
     .favorite-icon {
