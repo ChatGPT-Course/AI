@@ -114,9 +114,63 @@
       transition: color 0.2s ease;
     }
 
-    .nav-button:focus {
-      outline: none;
+    /* Глобальная настройка для убирания всех обводок */
+    * {
+      outline: none !important;
+      -webkit-tap-highlight-color: transparent !important;
+    }
+
+    *:focus {
+      outline: none !important;
+      box-shadow: none !important;
+    }
+
+    *:active {
+      outline: none !important;
+      box-shadow: none !important;
+    }
+
+    *:focus-visible {
+      outline: none !important;
+      box-shadow: none !important;
+    }
+
+    /* Специфичные настройки для кнопок */
+    button {
+      outline: none !important;
       border: none;
+      -webkit-tap-highlight-color: transparent !important;
+    }
+
+    button:focus {
+      outline: none !important;
+      box-shadow: none !important;
+    }
+
+    button:active {
+      outline: none !important;
+      box-shadow: none !important;
+    }
+
+    button:focus-visible {
+      outline: none !important;
+      box-shadow: none !important;
+    }
+
+    /* Настройки для навигационных кнопок */
+    .nav-button {
+      outline: none !important;
+      -webkit-tap-highlight-color: transparent !important;
+    }
+
+    .nav-button:focus {
+      outline: none !important;
+      box-shadow: none !important;
+    }
+
+    .nav-button:active {
+      outline: none !important;
+      box-shadow: none !important;
     }
 
     .nav-button:hover .nav-label {
