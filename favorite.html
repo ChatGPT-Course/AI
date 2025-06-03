@@ -623,7 +623,11 @@
       userId = getCookie('tg_user_id');
 
       if (!userId) {
-        console.error('User ID not found in cookies');
+        console.log('User ID not found in cookies');
+        userProgress = 0;
+        userPayment = 0;
+        moduleProgress = {};
+        if (!isUpdate) renderModules();
         return;
       }
 
