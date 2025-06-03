@@ -215,7 +215,7 @@
         Здесь вы найдете все необходимые материалы для успешного обучения. 
         Выберите нужный раздел в навигации внизу экрана и начните свой путь к новым знаниям.
       </p>
-      <div class="loading-message" id="loadingMessage">Загружаем ваши данные...</div>
+      
     </div>
   </div>
 
@@ -385,52 +385,34 @@
         console.log('Начинаем инициализацию приложения...');
 
         // Проверяем доступность Telegram WebApp
-        if (!window.Telegram || !window.Telegram.WebApp) {
-          throw new Error('Приложение должно быть запущено в Telegram');
+        if (window.Telegram && window.Telegram.WebApp) {
+          // Инициализируем Telegram WebApp
+          tg.ready();
+          console.log('Telegram WebApp инициализирован');
+
+          // Получаем данные пользователя
+          userData = getTelegramUserData();
+          console.log('Полученные данные пользователя:', userData);
+
+          // Сохраняем в cookies
+          saveUserData(userData);
+          console.log('Данные сохранены в cookies');
+
+          // Проверяем в базе данных
+          await checkUserInDatabase(userData);
         }
-
-        // Инициализируем Telegram WebApp
-        tg.ready();
-        console.log('Telegram WebApp инициализирован');
-
-        // Получаем данные пользователя
-        userData = getTelegramUserData();
-        console.log('Полученные данные пользователя:', userData);
-
-        // Сохраняем в cookies
-        saveUserData(userData);
-        console.log('Данные сохранены в cookies');
-
-        // Проверяем в базе данных
-        await checkUserInDatabase(userData);
-
-        // Скрываем сообщение о загрузке
-        document.getElementById('loadingMessage').style.display = 'none';
 
         console.log('Инициализация завершена успешно');
         isInitialized = true;
 
       } catch (error) {
         console.error('Ошибка инициализации:', error);
-
-        // Показываем ошибку пользователю
-        const loadingMessage = document.getElementById('loadingMessage');
-        loadingMessage.textContent = `Ошибка: ${error.message}`;
-        loadingMessage.style.color = '#dc3545';
-
-        // Если есть возможность, показываем alert через Telegram
-        if (tg.showAlert) {
-          tg.showAlert(`Ошибка инициализации: ${error.message}`);
-        }
+        isInitialized = true; // Позволяем работать даже с ошибками
       }
     }
 
     // Обработчики навигации
     document.getElementById('guidesBtn').addEventListener('click', () => {
-      if (!isInitialized) {
-        console.warn('Приложение еще не инициализировано');
-        return;
-      }
       window.location.href = 'gaid.html';
     });
 
@@ -439,17 +421,11 @@
     });
 
     document.getElementById('aiToolsBtn').addEventListener('click', () => {
-      console.log('AI Tools clicked');
-      if (tg.showAlert) {
-        tg.showAlert('Раздел находится в разработке');
-      }
+      window.location.href = 'chat.html';
     });
 
     document.getElementById('profileBtn').addEventListener('click', () => {
-      console.log('Profile clicked');
-      if (tg.showAlert) {
-        tg.showAlert('Раздел находится в разработке');
-      }
+      window.location.href = 'profile.html';
     });
 
     // Запускаем инициализацию после загрузки DOM
