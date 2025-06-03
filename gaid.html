@@ -168,16 +168,11 @@
       cursor: pointer;
       padding: 0.5rem;
       border-radius: 8px;
-      transition: all 0.2s ease;
       width: 36px;
       height: 36px;
       display: flex;
       align-items: center;
       justify-content: center;
-    }
-
-    .favorite-btn:hover {
-      background: #f3f4f6;
     }
 
     /* Глобальная настройка для убирания всех обводок */
@@ -285,12 +280,7 @@
       color: #2c3e50;
     }
 
-    .module-title-row {
-      display: flex;
-      align-items: center;
-      gap: 0.5rem;
-      margin-bottom: 1rem;
-    }
+    
 
     .info-btn {
       background: #f3f4f6;
@@ -305,6 +295,7 @@
       font-size: 0.8rem;
       color: #6c757d;
       transition: all 0.2s ease;
+      flex-shrink: 0;
     }
 
     .info-btn:hover {
@@ -320,13 +311,16 @@
       background: #ffffff;
       border: 1px solid #e5e7eb;
       border-radius: 8px;
-      padding: 1rem 1.5rem;
+      padding: 1rem 2rem;
       box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
       z-index: 1000;
       font-size: 0.9rem;
       color: #2c3e50;
       opacity: 0;
       transition: opacity 0.3s ease;
+      min-width: 280px;
+      max-width: 90vw;
+      text-align: center;
     }
 
     .notification.show {
@@ -529,7 +523,7 @@
         <div class="overall-progress-bar-container">
           <div class="overall-progress-bar" id="overallProgressBar" style="width: 0%"></div>
         </div>
-        <div style="text-align: center; margin-top: 0.5rem; font-size: 0.9rem; color: #6c757d; font-weight: 500;" id="overallProgressPercent">0%</div>
+        <div style="text-align: left; margin-top: 0.5rem; font-size: 0.9rem; color: #6c757d; font-weight: 500;" id="overallProgressPercent">0%</div>
       </div>
     </div>
 
@@ -862,7 +856,10 @@
         
         moduleCard.innerHTML = `
           <div class="module-header">
-            <div class="module-label">${module.label}</div>
+            <div style="display: flex; align-items: center; gap: 0.5rem;">
+              <div class="module-label">${module.label}</div>
+              <button class="info-btn" onclick="showModuleInfo('${module.description}')">i</button>
+            </div>
             <button class="favorite-btn ${isFavorite(module.id) ? 'active' : ''}">
               <svg class="favorite-icon" viewBox="0 0 24 24">
                 <path d="M4 2v20l8-4 8 4V2H4z"/>
@@ -871,10 +868,7 @@
           </div>
           <div class="module-content">
             <div class="module-info">
-              <div class="module-title-row">
-                <h3 class="module-title">${module.title}</h3>
-                <button class="info-btn" onclick="showModuleInfo('${module.description}')">i</button>
-              </div>
+              <h3 class="module-title">${module.title}</h3>
               
               <div class="module-progress">
                 <div class="progress-label">Прогресс модуля</div>
