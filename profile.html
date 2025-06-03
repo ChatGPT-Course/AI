@@ -302,12 +302,157 @@
   </div>
 
   <script>
+    // Конфигурация NocoDB
+    const config = {
+      orgs: 'weamcfo6',
+      projectName: 'p27jdsmk69wuimh',
+      tableName: 'mc6qh91f060pv4y',
+      apiToken: 'bocQfycJpJsTG_tbwEf8ma8E5rhoig0njMDXFWtJ',
+      baseUrl: 'https://app.nocodb.com/api/v1/db/data'
+    };
+
+    let userId = null;
+    let lastUpdateTime = 0;
+    let checkInterval = null;
+    let userProgress = 0;
+    let userPayment = 0;
+    let moduleProgress = {};
+    let userRegDate = null;
+
+    // Структура модулей для подсчета статистики
+    const modules = [
+      { id: 'intro', progressField: 'INTRO_progress' },
+      { id: 'm1', progressField: 'M1_progress' },
+      { id: 'm2', progressField: 'M2_progress' },
+      { id: 'm3', progressField: 'M3_progress' },
+      { id: 'm4', progressField: 'M4_progress' }
+    ];
+
     // Получить данные пользователя из cookies
     function getCookie(name) {
       const value = `; ${document.cookie}`;
       const parts = value.split(`; ${name}=`);
       if (parts.length === 2) return parts.pop().split(';').shift();
       return null;
+    }
+
+    // Получить данные пользователя из NocoDB
+    async function getUserData(isUpdate = false) {
+      userId = getCookie('tg_user_id');
+      
+      if (!userId) {
+        console.log('User ID not found in cookies');
+        if (!isUpdate) loadProfileData();
+        return;
+      }
+
+      try {
+        const response = await fetch(`${config.baseUrl}/${config.orgs}/${config.projectName}/${config.tableName}`, {
+          headers: {
+            'xc-token': config.apiToken
+          }
+        });
+
+        if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+        
+        const data = await response.json();
+        const user = data.list.find(u => u.tg_user_id == userId);
+        
+        if (user) {
+          const newProgress = user.progress || 0;
+          const newPayment = user.oplata || 0;
+          const newRegDate = user.date_join || null;
+          
+          // Получаем прогресс по модулям
+          const newModuleProgress = {};
+          modules.forEach(module => {
+            newModuleProgress[module.id] = user[module.progressField] || 0;
+          });
+          
+          // Проверяем, изменились ли данные
+          if (isUpdate && (newProgress !== userProgress || newPayment !== userPayment || 
+              JSON.stringify(newModuleProgress) !== JSON.stringify(moduleProgress) ||
+              newRegDate !== userRegDate)) {
+            console.log('Данные пользователя обновлены:', { 
+              progress: newProgress, 
+              payment: newPayment,
+              moduleProgress: newModuleProgress,
+              regDate: newRegDate
+            });
+            
+            userProgress = newProgress;
+            userPayment = newPayment;
+            moduleProgress = newModuleProgress;
+            userRegDate = newRegDate;
+            lastUpdateTime = Date.now();
+            
+            // Плавное обновление интерфейса
+            updateInterface();
+          } else if (!isUpdate) {
+            userProgress = newProgress;
+            userPayment = newPayment;
+            moduleProgress = newModuleProgress;
+            userRegDate = newRegDate;
+            lastUpdateTime = Date.now();
+            loadProfileData();
+          }
+        } else {
+          if (!isUpdate) {
+            userProgress = 0;
+            userPayment = 0;
+            moduleProgress = {};
+            userRegDate = null;
+            loadProfileData();
+          }
+        }
+      } catch (error) {
+        console.error('Error fetching user data:', error);
+        if (!isUpdate) {
+          userProgress = 0;
+          userPayment = 0;
+          moduleProgress = {};
+          userRegDate = null;
+          loadProfileData();
+        }
+      }
+    }
+
+    // Плавное обновление интерфейса
+    function updateInterface() {
+      const mainContent = document.querySelector('.main-content');
+      
+      // Добавляем плавный переход
+      mainContent.style.transition = 'opacity 0.3s ease';
+      mainContent.style.opacity = '0.9';
+      
+      setTimeout(() => {
+        loadProfileData();
+        mainContent.style.opacity = '1';
+      }, 150);
+    }
+
+    // Запуск автоматической проверки обновлений
+    function startAutoUpdate() {
+      // Очищаем предыдущий интервал если есть
+      if (checkInterval) {
+        clearInterval(checkInterval);
+      }
+      
+      // Устанавливаем проверку каждые 3 секунды
+      checkInterval = setInterval(() => {
+        getUserData(true);
+      }, 3000);
+      
+      console.log('Автоматическая проверка обновлений запущена (каждые 3 сек)');
+    }
+
+    // Остановка автоматической проверки
+    function stopAutoUpdate() {
+      if (checkInterval) {
+        clearInterval(checkInterval);
+        checkInterval = null;
+        console.log('Автоматическая проверка обновлений остановлена');
+      }
     }
 
     // Загрузка данных профиля
@@ -318,10 +463,24 @@
       document.getElementById('userName').textContent = userName;
       document.getElementById('userTgId').textContent = userTgId;
       document.getElementById('courseStatus').textContent = 'Активный';
-      document.getElementById('regDate').textContent = new Date().toLocaleDateString('ru-RU');
       
-      // Обновленная статистика
-      document.getElementById('completedModules').textContent = '0/5';
+      // Отображаем дату регистрации из базы данных или текущую дату
+      const regDateText = userRegDate ? 
+        new Date(userRegDate).toLocaleDateString('ru-RU') : 
+        new Date().toLocaleDateString('ru-RU');
+      document.getElementById('regDate').textContent = regDateText;
+      
+      // Подсчитываем завершенные модули
+      let completedModules = 0;
+      modules.forEach(module => {
+        const progress = moduleProgress[module.id] || 0;
+        if (progress >= 10) { // Модуль считается завершенным при прогрессе 10/10
+          completedModules++;
+        }
+      });
+      
+      // Обновляем статистику
+      document.getElementById('completedModules').textContent = `${completedModules}/5`;
       document.getElementById('totalProgress').textContent = '--';
     }
 
@@ -343,7 +502,26 @@
     });
 
     // Инициализация при загрузке страницы
-    document.addEventListener('DOMContentLoaded', loadProfileData);
+    document.addEventListener('DOMContentLoaded', () => {
+      getUserData();
+      startAutoUpdate();
+    });
+
+    // Остановка проверки при уходе со страницы
+    window.addEventListener('beforeunload', () => {
+      stopAutoUpdate();
+    });
+
+    // Возобновление проверки при возвращении на страницу
+    document.addEventListener('visibilitychange', () => {
+      if (document.visibilityState === 'visible') {
+        if (!checkInterval) {
+          startAutoUpdate();
+        }
+      } else {
+        stopAutoUpdate();
+      }
+    });
   </script>
 </body>
 </html>
