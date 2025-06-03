@@ -1,0 +1,477 @@
+
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ИИ чат</title>
+  <script src="https://telegram.org/js/telegram-web-app.js"></script>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Arial, sans-serif;
+      background: #ffffff;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .chat-container {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      max-width: 800px;
+      margin: 0 auto;
+      width: 100%;
+      padding-bottom: 80px;
+    }
+
+    .chat-header {
+      background: #ffffff;
+      border-bottom: 1px solid #e0e0e0;
+      padding: 1rem 2rem;
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+    }
+
+    .chat-title {
+      font-size: 1.3rem;
+      font-weight: 600;
+      color: #2c3e50;
+    }
+
+    .chat-status {
+      font-size: 0.8rem;
+      color: #10b981;
+      background: #ecfdf5;
+      padding: 0.3rem 0.8rem;
+      border-radius: 12px;
+    }
+
+    .chat-messages {
+      flex: 1;
+      padding: 1rem 2rem;
+      overflow-y: auto;
+      min-height: calc(100vh - 200px);
+    }
+
+    .message {
+      margin-bottom: 1rem;
+      display: flex;
+      align-items: flex-start;
+      gap: 0.8rem;
+    }
+
+    .message.user {
+      flex-direction: row-reverse;
+    }
+
+    .message-avatar {
+      width: 36px;
+      height: 36px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.2rem;
+      flex-shrink: 0;
+    }
+
+    .message.ai .message-avatar {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+    }
+
+    .message.user .message-avatar {
+      background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+      color: white;
+    }
+
+    .message-content {
+      max-width: 70%;
+      padding: 1rem 1.2rem;
+      border-radius: 18px;
+      line-height: 1.5;
+    }
+
+    .message.ai .message-content {
+      background: #f8f9fa;
+      color: #2c3e50;
+      border-bottom-left-radius: 6px;
+    }
+
+    .message.user .message-content {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+      border-bottom-right-radius: 6px;
+    }
+
+    .chat-input-container {
+      position: fixed;
+      bottom: 80px;
+      left: 0;
+      right: 0;
+      background: #ffffff;
+      border-top: 1px solid #e0e0e0;
+      padding: 1rem 2rem;
+    }
+
+    .chat-input-wrapper {
+      max-width: 800px;
+      margin: 0 auto;
+      display: flex;
+      gap: 0.8rem;
+      align-items: flex-end;
+    }
+
+    .chat-input {
+      flex: 1;
+      border: 1px solid #e0e0e0;
+      border-radius: 20px;
+      padding: 0.8rem 1.2rem;
+      font-size: 1rem;
+      resize: none;
+      max-height: 120px;
+      min-height: 44px;
+      outline: none;
+    }
+
+    .chat-input:focus {
+      border-color: #667eea;
+    }
+
+    .send-button {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+      border: none;
+      border-radius: 50%;
+      width: 44px;
+      height: 44px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      outline: none;
+    }
+
+    .send-button:hover:not(:disabled) {
+      transform: scale(1.05);
+    }
+
+    .send-button:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+
+    .typing-indicator {
+      display: none;
+      align-items: center;
+      gap: 0.8rem;
+      margin-bottom: 1rem;
+    }
+
+    .typing-dots {
+      display: flex;
+      gap: 0.3rem;
+    }
+
+    .typing-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: #667eea;
+      animation: typing 1.4s infinite ease-in-out;
+    }
+
+    .typing-dot:nth-child(2) {
+      animation-delay: 0.2s;
+    }
+
+    .typing-dot:nth-child(3) {
+      animation-delay: 0.4s;
+    }
+
+    @keyframes typing {
+      0%, 80%, 100% {
+        transform: scale(0.8);
+        opacity: 0.5;
+      }
+      40% {
+        transform: scale(1);
+        opacity: 1;
+      }
+    }
+
+    .navigation-panel {
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      background: #ffffff;
+      border-top: 1px solid #e0e0e0;
+      padding: 1rem 0;
+      display: flex;
+      justify-content: space-around;
+      align-items: center;
+      box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.1);
+    }
+
+    .nav-button {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 0.5rem 1rem;
+      background: none;
+      border: none;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      min-width: 70px;
+      border-radius: 8px;
+      outline: none !important;
+      -webkit-tap-highlight-color: transparent !important;
+    }
+
+    .nav-button:hover {
+      background: #f8f9fa;
+    }
+
+    .nav-button.active {
+      background: #e3f2fd;
+    }
+
+    .nav-icon {
+      width: 24px;
+      height: 24px;
+      margin-bottom: 0.3rem;
+      fill: #6c757d;
+      transition: fill 0.2s ease;
+    }
+
+    .nav-button:hover .nav-icon,
+    .nav-button.active .nav-icon {
+      fill: #2196F3;
+    }
+
+    .nav-label {
+      font-size: 0.8rem;
+      color: #6c757d;
+      font-weight: 500;
+      transition: color 0.2s ease;
+    }
+
+    .nav-button:hover .nav-label,
+    .nav-button.active .nav-label {
+      color: #2196F3;
+    }
+
+    @media (max-width: 768px) {
+      .chat-header,
+      .chat-messages,
+      .chat-input-container {
+        padding-left: 1rem;
+        padding-right: 1rem;
+      }
+
+      .message-content {
+        max-width: 85%;
+      }
+
+      .chat-input-container {
+        bottom: 70px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="chat-container">
+    <div class="chat-header">
+      <h1 class="chat-title">ИИ Помощник</h1>
+      <span class="chat-status">● Онлайн</span>
+    </div>
+
+    <div class="chat-messages" id="chatMessages">
+      <div class="message ai">
+        <div class="message-avatar">🤖</div>
+        <div class="message-content">
+          Привет! Я ваш ИИ-помощник по курсу. Задавайте любые вопросы о материалах курса, и я постараюсь помочь вам разобраться. Чем могу быть полезен?
+        </div>
+      </div>
+    </div>
+
+    <div class="typing-indicator" id="typingIndicator">
+      <div class="message-avatar" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white;">🤖</div>
+      <div class="typing-dots">
+        <div class="typing-dot"></div>
+        <div class="typing-dot"></div>
+        <div class="typing-dot"></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="chat-input-container">
+    <div class="chat-input-wrapper">
+      <textarea 
+        class="chat-input" 
+        id="chatInput" 
+        placeholder="Напишите ваш вопрос..."
+        rows="1"
+      ></textarea>
+      <button class="send-button" id="sendButton">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+          <path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z"/>
+        </svg>
+      </button>
+    </div>
+  </div>
+
+  <div class="navigation-panel">
+    <button class="nav-button" id="guidesBtn">
+      <svg class="nav-icon" viewBox="0 0 24 24">
+        <path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-5 14H7v-2h7v2zm3-4H7v-2h10v2zm0-4H7V7h10v2z"/>
+      </svg>
+      <span class="nav-label">Курс</span>
+    </button>
+
+    <button class="nav-button" id="favoriteBtn">
+      <svg class="nav-icon" viewBox="0 0 24 24">
+        <path d="M4 2v20l8-4 8 4V2H4z"/>
+      </svg>
+      <span class="nav-label">Избранное</span>
+    </button>
+
+    <button class="nav-button active" id="aiToolsBtn">
+      <svg class="nav-icon" viewBox="0 0 24 24">
+        <path d="M20 2H4c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h4l4 4 4-4h4c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zm-2 12H6v-2h12v2zm0-3H6V9h12v2zm0-3H6V6h12v2z"/>
+      </svg>
+      <span class="nav-label">ИИ чат</span>
+    </button>
+
+    <button class="nav-button" id="profileBtn">
+      <svg class="nav-icon" viewBox="0 0 24 24">
+        <path d="M12 2C13.1 2 14 2.9 14 4C14 5.1 13.1 6 12 6C10.9 6 10 5.1 10 4C10 2.9 10.9 2 12 2ZM21 9V7L15 7V9C15 11.7 12.7 14 10 14S5 11.7 5 9V7H3V9C3 12.4 5.4 15.1 8.5 15.8V18H7V20H17V18H15.5V15.8C18.6 15.1 21 12.4 21 9Z"/>
+      </svg>
+      <span class="nav-label">Профиль</span>
+    </button>
+  </div>
+
+  <script>
+    const chatMessages = document.getElementById('chatMessages');
+    const chatInput = document.getElementById('chatInput');
+    const sendButton = document.getElementById('sendButton');
+    const typingIndicator = document.getElementById('typingIndicator');
+
+    // Автоматическое изменение размера textarea
+    chatInput.addEventListener('input', function() {
+      this.style.height = 'auto';
+      this.style.height = Math.min(this.scrollHeight, 120) + 'px';
+    });
+
+    // Отправка сообщения по Enter
+    chatInput.addEventListener('keydown', function(e) {
+      if (e.key === 'Enter' && !e.shiftKey) {
+        e.preventDefault();
+        sendMessage();
+      }
+    });
+
+    // Отправка сообщения по кнопке
+    sendButton.addEventListener('click', sendMessage);
+
+    function sendMessage() {
+      const message = chatInput.value.trim();
+      if (!message) return;
+
+      // Добавляем сообщение пользователя
+      addMessage(message, 'user');
+      chatInput.value = '';
+      chatInput.style.height = 'auto';
+
+      // Показываем индикатор печати
+      showTypingIndicator();
+
+      // Имитируем ответ ИИ
+      setTimeout(() => {
+        hideTypingIndicator();
+        const aiResponse = generateAIResponse(message);
+        addMessage(aiResponse, 'ai');
+      }, 1500 + Math.random() * 1000);
+    }
+
+    function addMessage(text, sender) {
+      const messageDiv = document.createElement('div');
+      messageDiv.className = `message ${sender}`;
+      
+      const avatar = document.createElement('div');
+      avatar.className = 'message-avatar';
+      avatar.textContent = sender === 'ai' ? '🤖' : '👤';
+      
+      const content = document.createElement('div');
+      content.className = 'message-content';
+      content.textContent = text;
+      
+      messageDiv.appendChild(avatar);
+      messageDiv.appendChild(content);
+      
+      chatMessages.appendChild(messageDiv);
+      scrollToBottom();
+    }
+
+    function showTypingIndicator() {
+      typingIndicator.style.display = 'flex';
+      scrollToBottom();
+    }
+
+    function hideTypingIndicator() {
+      typingIndicator.style.display = 'none';
+    }
+
+    function scrollToBottom() {
+      setTimeout(() => {
+        chatMessages.scrollTop = chatMessages.scrollHeight;
+      }, 100);
+    }
+
+    function generateAIResponse(userMessage) {
+      const responses = [
+        "Отличный вопрос! По курсу искусственного интеллекта могу сказать, что это очень актуальная и развивающаяся область.",
+        "Интересно! В контексте нашего курса рекомендую обратить внимание на практические примеры в модулях.",
+        "Хороший вопрос! Этот материал подробно разбирается в одном из модулей курса. Изучили ли вы его уже?",
+        "Спасибо за вопрос! Для лучшего понимания рекомендую пройти соответствующие разделы курса.",
+        "Это важная тема! В курсе есть специальные упражнения, которые помогут вам лучше разобраться в этом вопросе."
+      ];
+      
+      return responses[Math.floor(Math.random() * responses.length)];
+    }
+
+    // Обработчики навигации
+    document.getElementById('guidesBtn').addEventListener('click', () => {
+      window.location.href = 'gaid.html';
+    });
+
+    document.getElementById('favoriteBtn').addEventListener('click', () => {
+      window.location.href = 'favorite.html';
+    });
+
+    document.getElementById('aiToolsBtn').addEventListener('click', () => {
+      // Уже на странице чата
+    });
+
+    document.getElementById('profileBtn').addEventListener('click', () => {
+      window.location.href = 'profile.html';
+    });
+
+    // Фокус на поле ввода при загрузке
+    document.addEventListener('DOMContentLoaded', () => {
+      chatInput.focus();
+      scrollToBottom();
+    });
+  </script>
+</body>
+</html>
