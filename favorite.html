@@ -506,17 +506,7 @@
 
   <div class="main-content">
     <div class="progress-section" id="progressSection">
-      <h1 class="progress-title">Общий прогресс</h1>
-      <p class="progress-subtitle">Ваше продвижение по курсу</p>
-      <div class="overall-progress">
-        <div class="overall-progress-label">
-          <span>Пройдено блоков</span>
-          <span id="overallProgressText">0/50</span>
-        </div>
-        <div class="overall-progress-bar-container">
-          <div class="overall-progress-bar" id="overallProgressBar" style="width: 0%"></div>
-        </div>
-      </div>
+      <h1 class="progress-title">Сохраненные модули</h1>
     </div>
 
     <div class="modules-container" id="modulesContainer">
@@ -807,7 +797,7 @@
         modulesContainer.innerHTML = `
           <div style="text-align: center; padding: 2rem; color: #6c757d;">
             <h3>Нет избранных модулей</h3>
-            <p>Добавьте модули в избранное в разделе "Курс"</p>
+            <p>Добавьте модули в избранное в разделе "<a href="gaid.html" style="color: #8b5cf6; text-decoration: none; font-weight: 600;">Курс</a>"</p>
           </div>
         `;
         updateUserInfo();
@@ -898,17 +888,9 @@
     function updateUserInfo() {
       const userName = getCookie('tg_name') || 'Пользователь';
       const progressTitle = document.querySelector('.progress-title');
-      const progressSubtitle = document.querySelector('.progress-subtitle');
 
       if (progressTitle) {
-        progressTitle.textContent = `Избранные модули`;
-      }
-
-      // Обновляем общий прогресс
-      updateOverallProgress();
-
-      if (progressSubtitle) {
-        progressSubtitle.textContent = 'Ваши сохраненные модули';
+        progressTitle.textContent = `Сохраненные модули`;
       }
     }
 
