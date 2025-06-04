@@ -192,6 +192,35 @@
       color: #2196F3;
     }
 
+    .mobile-notice {
+      background: #fff3cd;
+      border: 1px solid #ffeaa7;
+      border-radius: 12px;
+      padding: 1.5rem;
+      margin-top: 2rem;
+      max-width: 500px;
+    }
+
+    .mobile-notice-text {
+      font-size: 0.95rem;
+      color: #856404;
+      line-height: 1.6;
+      margin: 0;
+    }
+
+    .support-link {
+      color: #0066cc;
+      text-decoration: none;
+      font-weight: 600;
+      border-bottom: 1px solid transparent;
+      transition: all 0.2s ease;
+    }
+
+    .support-link:hover {
+      color: #0052a3;
+      border-bottom-color: #0052a3;
+    }
+
     @media (max-width: 768px) {
       .welcome-title {
         font-size: 1.8rem;
@@ -203,6 +232,15 @@
 
       .main-content {
         padding: 1rem;
+      }
+
+      .mobile-notice {
+        margin-top: 1.5rem;
+        padding: 1.2rem;
+      }
+
+      .mobile-notice-text {
+        font-size: 0.9rem;
       }
     }
   </style>
@@ -216,6 +254,14 @@
         Здесь вы найдете все необходимые материалы для успешного обучения. 
         Выберите нужный раздел в навигации внизу экрана и начните свой путь к новым знаниям.
       </p>
+      
+      <div class="mobile-notice">
+        <p class="mobile-notice-text">
+          ⚠️ Курс в первую очередь составлен для мобильных устройств, при использовании ПК могут возникать проблемы. 
+          Если вы столкнулись с проблемой, или желаете задать вопрос - обратитесь в 
+          <a href="help.html" class="support-link">поддержку</a>
+        </p>
+      </div>
       
     </div>
   </div>
