@@ -84,7 +84,7 @@
       flex: 1;
       display: flex;
       flex-direction: column;
-      gap: 0.4rem;
+      gap: 0.3rem;
     }
 
     .user-main-info {
@@ -107,236 +107,28 @@
       margin: 0;
     }
 
-    .course-status-row {
-      display: flex;
-      align-items: center;
-      gap: 0.5rem;
-      margin: 0.2rem 0;
-    }
-
-    .course-status-text {
-      font-size: 0.9rem;
-      color: #2c3e50;
+    .course-status {
+      display: inline-block;
+      padding: 0.2rem 0.6rem;
+      border-radius: 12px;
+      font-size: 0.75rem;
       font-weight: 500;
     }
 
-    .course-status-value {
-      font-size: 0.9rem;
-      font-weight: 600;
-    }
-
-    .course-status-value.limited {
+    .course-status.limited {
+      background: #fef3c7;
       color: #92400e;
     }
 
-    .course-status-value.full {
+    .course-status.full {
+      background: #d1fae5;
       color: #065f46;
-    }
-
-    .info-icon {
-      width: 18px;
-      height: 18px;
-      background: #2196F3;
-      border-radius: 50%;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      cursor: pointer;
-      transition: all 0.2s ease;
-      font-size: 0.75rem;
-      color: white;
-      font-weight: bold;
-    }
-
-    .info-icon:hover {
-      background: #1976D2;
-      transform: scale(1.1);
     }
 
     .user-id-info {
       font-size: 0.85rem;
       color: #6c757d;
-      margin-top: 0.1rem;
-    }
-
-    /* Модальное окно тарифного плана */
-    .plan-modal {
-      position: fixed;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-      background: rgba(0, 0, 0, 0.5);
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      z-index: 1001;
-      opacity: 0;
-      visibility: hidden;
-      transition: all 0.3s ease;
-    }
-
-    .plan-modal.show {
-      opacity: 1;
-      visibility: visible;
-    }
-
-    .plan-modal-content {
-      background: #ffffff;
-      border-radius: 16px;
-      max-width: 90vw;
-      width: 420px;
-      max-height: 90vh;
-      overflow-y: auto;
-      box-shadow: 0 12px 40px rgba(0, 0, 0, 0.15);
-      position: relative;
-    }
-
-    .plan-modal-header {
-      padding: 1.5rem 1.5rem 1rem 1.5rem;
-      border-bottom: 1px solid #e9ecef;
-      position: relative;
-    }
-
-    .plan-modal-title {
-      font-size: 1.4rem;
-      font-weight: 700;
-      color: #2c3e50;
-      margin: 0;
-      text-align: center;
-    }
-
-    .plan-modal-close {
-      position: absolute;
-      top: 1rem;
-      right: 1rem;
-      background: none;
-      border: none;
-      font-size: 1.5rem;
-      color: #6c757d;
-      cursor: pointer;
-      width: 32px;
-      height: 32px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      border-radius: 6px;
-      transition: all 0.2s ease;
-    }
-
-    .plan-modal-close:hover {
-      background: #f8f9fa;
-      color: #495057;
-    }
-
-    .plan-modal-body {
-      padding: 1.5rem;
-    }
-
-    .plan-card {
-      border: 2px solid #e9ecef;
-      border-radius: 12px;
-      padding: 1.5rem;
-      margin-bottom: 1rem;
-      transition: all 0.2s ease;
-      position: relative;
-    }
-
-    .plan-card.current {
-      border-color: #2196F3;
-      background: #f3f8ff;
-    }
-
-    .plan-card:hover {
-      border-color: #c4c9d1;
-    }
-
-    .plan-card.current:hover {
-      border-color: #1976D2;
-    }
-
-    .plan-name {
-      font-size: 1.2rem;
-      font-weight: 700;
-      color: #2c3e50;
-      margin: 0 0 0.5rem 0;
-      position: relative;
-    }
-
-    .plan-current-badge {
-      position: absolute;
-      top: -0.5rem;
-      right: -0.5rem;
-      background: #2196F3;
-      color: white;
-      font-size: 0.7rem;
-      font-weight: 600;
-      padding: 0.3rem 0.8rem;
-      border-radius: 12px;
-      transform: rotate(15deg);
-    }
-
-    .plan-description {
-      color: #6c757d;
-      margin-bottom: 1rem;
-      line-height: 1.5;
-    }
-
-    .plan-features {
-      list-style: none;
-      padding: 0;
-      margin: 0 0 1rem 0;
-    }
-
-    .plan-features li {
-      padding: 0.3rem 0;
-      color: #495057;
-      display: flex;
-      align-items: center;
-      gap: 0.5rem;
-    }
-
-    .plan-features li:before {
-      content: "✓";
-      color: #28a745;
-      font-weight: bold;
-    }
-
-    .plan-price {
-      font-size: 1.5rem;
-      font-weight: 700;
-      color: #2c3e50;
-      margin-bottom: 1rem;
-    }
-
-    .plan-price .price-note {
-      font-size: 0.8rem;
-      color: #6c757d;
-      font-weight: 400;
-    }
-
-    .plan-buy-btn {
-      width: 100%;
-      background: linear-gradient(90deg, #28a745, #20c997);
-      color: white;
-      border: none;
-      border-radius: 8px;
-      padding: 0.8rem 1rem;
-      font-size: 1rem;
-      font-weight: 600;
-      cursor: pointer;
-      transition: all 0.2s ease;
-    }
-
-    .plan-buy-btn:hover {
-      background: linear-gradient(90deg, #218838, #1ca085);
-      transform: translateY(-1px);
-    }
-
-    .plan-buy-btn:disabled {
-      background: #6c757d;
-      cursor: not-allowed;
-      transform: none;
+      margin-top: 0.3rem;
     }
 
     .stats-grid {
@@ -603,11 +395,7 @@
         <div class="user-main-info">
           <h2 class="user-name" id="userName">Загрузка...</h2>
           <span class="user-username" id="userUsername">(@загрузка...)</span>
-        </div>
-        <div class="course-status-row">
-          <span class="course-status-text">Курс:</span>
-          <span class="course-status-value" id="courseStatusValue">Загрузка...</span>
-          <div class="info-icon" id="planInfoBtn">i</div>
+          <span class="course-status" id="courseStatus">Загрузка...</span>
         </div>
         <div class="user-id-info">
           ID: <span id="userTgId">Загрузка...</span>
@@ -679,55 +467,6 @@
       </svg>
       <span class="nav-label">Профиль</span>
     </button>
-  </div>
-
-  <!-- Модальное окно тарифного плана -->
-  <div class="plan-modal" id="planModal">
-    <div class="plan-modal-content">
-      <div class="plan-modal-header">
-        <h2 class="plan-modal-title">Тарифный план</h2>
-        <button class="plan-modal-close" id="planModalClose">×</button>
-      </div>
-      <div class="plan-modal-body">
-        <div class="plan-card" id="limitedPlanCard">
-          <h3 class="plan-name">
-            Ограниченный
-            <span class="plan-current-badge" id="limitedBadge" style="display: none;">Текущий</span>
-          </h3>
-          <div class="plan-description">
-            Базовый доступ к курсу с ограниченным функционалом
-          </div>
-          <ul class="plan-features">
-            <li>Доступ к первому модулю</li>
-            <li>Базовые материалы курса</li>
-            <li>Техническая поддержка</li>
-          </ul>
-          <div class="plan-price">
-            Бесплатно
-          </div>
-        </div>
-
-        <div class="plan-card" id="proPlanCard">
-          <h3 class="plan-name">
-            PRO
-            <span class="plan-current-badge" id="proBadge" style="display: none;">Текущий</span>
-          </h3>
-          <div class="plan-description">
-            Полный доступ ко всем возможностям курса
-          </div>
-          <ul class="plan-features">
-            <li>Доступ ко всем модулям</li>
-            <li>Дополнительные материалы</li>
-            <li>Приоритетная поддержка</li>
-            <li>Сертификат о прохождении</li>
-          </ul>
-          <div class="plan-price">
-            2990₽ <span class="price-note">единоразово</span>
-          </div>
-          <button class="plan-buy-btn" id="buyProBtn">Купить тариф "PRO"</button>
-        </div>
-      </div>
-    </div>
   </div>
 
   <script>
@@ -918,16 +657,16 @@
       document.getElementById('userTgId').textContent = userTgId;
 
       // Определяем статус курса
-      const courseStatusElement = document.getElementById('courseStatusValue');
+      const courseStatusElement = document.getElementById('courseStatus');
       if (userPayment === 0) {
         courseStatusElement.textContent = 'Ограниченный';
-        courseStatusElement.className = 'course-status-value limited';
+        courseStatusElement.className = 'course-status limited';
       } else if (userProgress >= 1) {
-        courseStatusElement.textContent = 'PRO';
-        courseStatusElement.className = 'course-status-value full';
+        courseStatusElement.textContent = 'Полный';
+        courseStatusElement.className = 'course-status full';
       } else {
         courseStatusElement.textContent = 'Ограниченный';
-        courseStatusElement.className = 'course-status-value limited';
+        courseStatusElement.className = 'course-status limited';
       }
 
       // Отображаем дату регистрации из базы данных или текущую дату
@@ -955,55 +694,6 @@
       loadUserAvatar();
     }
 
-    // Функция обновления модального окна тарифных планов
-    function updatePlanModal() {
-      const limitedCard = document.getElementById('limitedPlanCard');
-      const proCard = document.getElementById('proPlanCard');
-      const limitedBadge = document.getElementById('limitedBadge');
-      const proBadge = document.getElementById('proBadge');
-      const buyProBtn = document.getElementById('buyProBtn');
-
-      // Сбрасываем состояния
-      limitedCard.classList.remove('current');
-      proCard.classList.remove('current');
-      limitedBadge.style.display = 'none';
-      proBadge.style.display = 'none';
-
-      if (userPayment === 0) {
-        // Пользователь на ограниченном тарифе
-        limitedCard.classList.add('current');
-        limitedBadge.style.display = 'block';
-        buyProBtn.style.display = 'block';
-        buyProBtn.disabled = false;
-      } else {
-        // Пользователь на PRO тарифе
-        proCard.classList.add('current');
-        proBadge.style.display = 'block';
-        buyProBtn.style.display = 'none';
-      }
-    }
-
-    // Обработчики модального окна тарифного плана
-    document.getElementById('planInfoBtn').addEventListener('click', () => {
-      updatePlanModal();
-      document.getElementById('planModal').classList.add('show');
-    });
-
-    document.getElementById('planModalClose').addEventListener('click', () => {
-      document.getElementById('planModal').classList.remove('show');
-    });
-
-    document.getElementById('planModal').addEventListener('click', (e) => {
-      if (e.target === document.getElementById('planModal')) {
-        document.getElementById('planModal').classList.remove('show');
-      }
-    });
-
-    document.getElementById('buyProBtn').addEventListener('click', () => {
-      // Здесь будет логика покупки PRO тарифа
-      alert('Функция покупки PRO тарифа в разработке');
-    });
-
     // Обработчики навигации
     document.getElementById('guidesBtn').addEventListener('click', () => {
       window.location.href = 'gaid.html';
@@ -1018,7 +708,7 @@
     });
 
     document.getElementById('profileBtn').addEventListener('click', () => {
-      // Уже на странице профиля
+      window.location.href = 'index.html';
     });
 
     // Функция скрытия загрузочного экрана
