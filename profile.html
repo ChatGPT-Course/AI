@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="ru">
 <head>
@@ -27,36 +26,37 @@
       flex-direction: column;
       justify-content: flex-start;
       align-items: center;
-      padding: 2rem 1rem;
       max-width: 600px;
       margin: 0 auto;
       padding-bottom: 90px;
     }
 
     .profile-header {
+      background: #f8f9fa;
+      width: 100%;
+      padding: 1rem 2rem;
+      border-bottom: 1px solid #e0e0e0;
       margin-bottom: 2rem;
     }
 
     .profile-title {
-      font-size: 1.8rem;
-      font-weight: 700;
+      font-size: 1.5rem;
+      font-weight: 600;
       color: #2c3e50;
-      margin-bottom: 1.5rem;
       text-align: center;
     }
 
     .profile-user-info {
       display: flex;
-      align-items: flex-start;
+      align-items: center;
       gap: 1rem;
       background: #ffffff;
       border-radius: 12px;
       padding: 1.5rem;
       box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
       border: 1px solid #e0e0e0;
-      margin-bottom: 1.5rem;
-      width: 100%;
-      max-width: 100%;
+      margin: 0 1rem 2rem 1rem;
+      width: calc(100% - 2rem);
     }
 
     .user-avatar {
@@ -87,6 +87,13 @@
       gap: 0.3rem;
     }
 
+    .user-main-info {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      flex-wrap: wrap;
+    }
+
     .user-name {
       font-size: 1.2rem;
       font-weight: 600;
@@ -100,36 +107,12 @@
       margin: 0;
     }
 
-    .user-meta {
-      display: flex;
-      flex-direction: column;
-      gap: 0.2rem;
-      margin-top: 0.5rem;
-      align-items: flex-start;
-      width: 100%;
-    }
-
-    .user-meta-item {
-      font-size: 0.85rem;
-      color: #6c757d;
-      display: flex;
-      align-items: center;
-      gap: 0.5rem;
-      width: 100%;
-    }
-
-    .user-meta-label {
-      font-weight: 500;
-      color: #2c3e50;
-    }
-
     .course-status {
       display: inline-block;
       padding: 0.2rem 0.6rem;
       border-radius: 12px;
       font-size: 0.75rem;
       font-weight: 500;
-      margin-left: 0.5rem;
     }
 
     .course-status.limited {
@@ -142,208 +125,57 @@
       color: #065f46;
     }
 
-    .course-status-container {
-      display: flex;
-      align-items: center;
-      gap: 0.5rem;
-    }
-
-    .info-question-btn {
-      width: 20px;
-      height: 20px;
-      border-radius: 50%;
-      background: #e3f2fd;
-      border: 1px solid #2196F3;
-      color: #2196F3;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      cursor: pointer;
-      font-size: 12px;
-      font-weight: 600;
-      transition: all 0.2s ease;
-    }
-
-    .info-question-btn:hover {
-      background: #2196F3;
-      color: white;
-    }
-
-    /* Модальное окно тарифов */
-    .tariff-modal {
-      display: none;
-      position: fixed;
-      z-index: 1000;
-      left: 0;
-      top: 0;
-      width: 100%;
-      height: 100%;
-      background: rgba(0, 0, 0, 0.5);
-      align-items: center;
-      justify-content: center;
-    }
-
-    .tariff-modal.show {
-      display: flex;
-    }
-
-    .tariff-modal-content {
-      background: #ffffff;
-      border-radius: 16px;
-      max-width: 90vw;
-      width: 500px;
-      padding: 2rem;
-      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.15);
-      position: relative;
-      max-height: 90vh;
-      overflow-y: auto;
-    }
-
-    .tariff-modal-header {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      margin-bottom: 1.5rem;
-    }
-
-    .tariff-modal-title {
-      font-size: 1.4rem;
-      font-weight: 600;
-      color: #2c3e50;
-    }
-
-    .tariff-close-btn {
-      width: 32px;
-      height: 32px;
-      border: none;
-      background: #f8f9fa;
-      border-radius: 50%;
-      cursor: pointer;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 18px;
+    .user-id-info {
+      font-size: 0.85rem;
       color: #6c757d;
-      transition: all 0.2s ease;
+      margin-top: 0.3rem;
     }
 
-    .tariff-close-btn:hover {
-      background: #e9ecef;
-      color: #495057;
-    }
-
-    .tariff-cards {
-      display: flex;
-      flex-direction: column;
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
       gap: 1rem;
+      margin: 0 1rem 2rem 1rem;
+      width: calc(100% - 2rem);
     }
 
-    .tariff-card {
-      border: 2px solid #e9ecef;
-      border-radius: 12px;
-      padding: 1.5rem;
-      transition: all 0.3s ease;
-      cursor: pointer;
-      position: relative;
-    }
-
-    .tariff-card.active {
-      border-color: #2196F3;
-      background: #f8fbff;
-    }
-
-    .tariff-card-header {
-      position: relative;
-      margin-bottom: 1rem;
-    }
-
-    .tariff-name {
-      font-size: 1.2rem;
-      font-weight: 600;
-      color: #2c3e50;
-      background: #ffffff;
-      border: 2px solid #e9ecef;
-      border-radius: 20px;
-      padding: 0.5rem 1rem;
-      display: inline-block;
-      position: absolute;
-      top: -2rem;
-      left: 0;
-      z-index: 1;
-    }
-
-    .tariff-card.active .tariff-name {
-      border-color: #2196F3;
-      background: #f8fbff;
-    }
-
-    .tariff-current-badge {
-      background: #10b981;
-      color: white;
-      font-size: 0.75rem;
-      font-weight: 600;
-      padding: 0.2rem 0.6rem;
-      border-radius: 12px;
-      margin-left: 0.5rem;
-    }
-
-    .tariff-description {
-      color: #6c757d;
-      line-height: 1.5;
-      margin-bottom: 1rem;
-    }
-
-    .tariff-price {
-      font-size: 1rem;
-      font-weight: 600;
-      padding: 0.3rem 0.8rem;
-      border-radius: 20px;
-      display: inline-block;
-    }
-
-    .tariff-price.free {
-      background: #d1fae5;
-      color: #065f46;
-    }
-
-    .tariff-price.paid {
-      background: #fef3c7;
-      color: #92400e;
-    }
-
-    .buy-pro-button {
+    .stat-card {
       background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
       color: white;
-      border: none;
-      border-radius: 8px;
-      padding: 0.8rem 1.5rem;
-      font-size: 1rem;
-      font-weight: 600;
-      cursor: pointer;
-      margin-top: 1rem;
-      width: 100%;
-      transition: all 0.2s ease;
-    }
-
-    .buy-pro-button:hover {
-      transform: translateY(-1px);
-      box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
-    }
-
-    .profile-card {
-      background: #ffffff;
+      padding: 1.5rem;
       border-radius: 12px;
-      padding: 2rem;
-      width: 100%;
-      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
-      border: 1px solid #e0e0e0;
-      margin-bottom: 1.5rem;
-    }
-
-    .profile-info {
+      text-align: center;
+      min-height: 100px;
       display: flex;
       flex-direction: column;
-      gap: 1rem;
+      justify-content: center;
+    }
+
+    .stat-card.empty {
+      background: #f8f9fa;
+      border: 2px dashed #dee2e6;
+      color: #6c757d;
+    }
+
+    .stat-number {
+      font-size: 1.8rem;
+      font-weight: 700;
+      margin-bottom: 0.5rem;
+    }
+
+    .stat-label {
+      font-size: 0.85rem;
+      opacity: 0.9;
+    }
+
+    .additional-info {
+      background: #ffffff;
+      border-radius: 12px;
+      padding: 1.5rem;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+      border: 1px solid #e0e0e0;
+      margin: 0 1rem;
+      width: calc(100% - 2rem);
     }
 
     .info-item {
@@ -367,65 +199,32 @@
       color: #6c757d;
     }
 
-    .stats-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
-      gap: 1rem;
-      margin-bottom: 2rem;
-      width: 100%;
-    }
-
-    .stat-card {
-      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-      color: white;
-      padding: 1.5rem;
-      border-radius: 12px;
-      text-align: center;
-    }
-
-    .stat-number {
-      font-size: 2rem;
-      font-weight: 700;
-      margin-bottom: 0.5rem;
-    }
-
-    .stat-label {
-      font-size: 0.9rem;
-      opacity: 0.9;
-    }
-
-    .achievements {
-      background: #ffffff;
-      border-radius: 12px;
-      padding: 1.5rem;
-      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
-      border: 1px solid #e0e0e0;
-    }
-
-    .achievements-title {
-      font-size: 1.2rem;
-      font-weight: 600;
-      color: #2c3e50;
-      margin-bottom: 1rem;
-    }
-
-    .achievement-item {
-      display: flex;
-      align-items: center;
-      padding: 0.8rem;
+    .faq-button {
       background: #f8f9fa;
+      border: 1px solid #e0e0e0;
       border-radius: 8px;
-      margin-bottom: 0.5rem;
+      padding: 1rem;
+      width: 100%;
+      text-align: left;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
     }
 
-    .achievement-icon {
-      font-size: 1.5rem;
-      margin-right: 1rem;
+    .faq-button:hover {
+      background: #e9ecef;
     }
 
-    .achievement-text {
+    .faq-button-text {
       font-weight: 500;
       color: #2c3e50;
+    }
+
+    .faq-button-arrow {
+      color: #6c757d;
+      font-size: 1.2rem;
     }
 
     .navigation-panel {
@@ -525,17 +324,18 @@
     }
 
     @media (max-width: 768px) {
-      .main-content {
-        padding: 1rem 0.5rem;
-        padding-bottom: 80px;
+      .profile-header {
+        padding: 1rem;
       }
 
       .profile-title {
-        font-size: 1.5rem;
+        font-size: 1.3rem;
       }
 
       .profile-user-info {
         padding: 1rem;
+        margin: 0 0.5rem 1.5rem 0.5rem;
+        width: calc(100% - 1rem);
       }
 
       .user-avatar {
@@ -552,33 +352,24 @@
         font-size: 0.8rem;
       }
 
-      .user-meta-item {
-        font-size: 0.8rem;
-      }
-
-      .profile-card {
-        padding: 1.5rem;
-      }
-
       .stats-grid {
-        grid-template-columns: repeat(auto-fit, minmax(100px, 1fr));
+        margin: 0 0.5rem 1.5rem 0.5rem;
+        width: calc(100% - 1rem);
       }
 
-      .tariff-modal-content {
-        width: 95%;
-        padding: 1.5rem;
-      }
-
-      .tariff-cards {
-        gap: 0.8rem;
-      }
-
-      .tariff-card {
+      .stat-card {
         padding: 1rem;
+        min-height: 80px;
       }
 
-      .tariff-name {
-        font-size: 1.1rem;
+      .stat-number {
+        font-size: 1.5rem;
+      }
+
+      .additional-info {
+        margin: 0 0.5rem;
+        width: calc(100% - 1rem);
+        padding: 1rem;
       }
     }
   </style>
@@ -590,39 +381,29 @@
   </div>
 
   <div class="main-content">
+    <!-- Верхняя серая панель -->
     <div class="profile-header">
       <h1 class="profile-title">Мой профиль</h1>
-      
-      <div class="profile-user-info">
-        <div class="user-avatar" id="userAvatar">
-          <!-- Аватар будет загружен динамически -->
-        </div>
-        <div class="user-details">
+    </div>
+
+    <!-- Информация о пользователе -->
+    <div class="profile-user-info">
+      <div class="user-avatar" id="userAvatar">
+        <!-- Аватар будет загружен динамически -->
+      </div>
+      <div class="user-details">
+        <div class="user-main-info">
           <h2 class="user-name" id="userName">Загрузка...</h2>
-          <p class="user-username" id="userUsername">@загрузка...</p>
-          <div class="user-meta">
-            <div class="user-meta-item">
-              <span class="user-meta-label">Дата регистрации:</span> 
-              <span id="regDate">Загрузка...</span>
-            </div>
-            <div class="user-meta-item">
-              <span class="user-meta-label">Telegram ID:</span> 
-              <span id="userTgId">Загрузка...</span>
-            </div>
-            <div class="user-meta-item">
-              <span class="user-meta-label">Статус курса:</span>
-              <div class="course-status-container">
-                <span class="course-status" id="courseStatus">Загрузка...</span>
-                <button class="info-question-btn" id="tariffInfoBtn" title="Информация о тарифах">?</button>
-              </div>
-            </div>
-          </div>
+          <span class="user-username" id="userUsername">(@загрузка...)</span>
+          <span class="course-status" id="courseStatus">Загрузка...</span>
+        </div>
+        <div class="user-id-info">
+          ID: <span id="userTgId">Загрузка...</span>
         </div>
       </div>
     </div>
 
-    <h2 style="font-size: 1.4rem; font-weight: 600; color: #2c3e50; margin-bottom: 1rem; text-align: left; width: 100%;">Статистика</h2>
-
+    <!-- Статистика (4 блока) -->
     <div class="stats-grid">
       <div class="stat-card">
         <div class="stat-number" id="completedModules">0/5</div>
@@ -636,9 +417,26 @@
         <div class="stat-number" id="daysWithUs">0</div>
         <div class="stat-label">Вы с нами</div>
       </div>
+      <div class="stat-card empty">
+        <div class="stat-number">--</div>
+        <div class="stat-label">Скоро</div>
+      </div>
     </div>
 
-    
+    <!-- Дополнительная информация -->
+    <div class="additional-info">
+      <div class="info-item">
+        <span class="info-label">Дата регистрации</span>
+        <span class="info-value" id="regDate">Загрузка...</span>
+      </div>
+
+      <div class="info-item">
+        <button class="faq-button">
+          <span class="faq-button-text">Часто задаваемые вопросы</span>
+          <span class="faq-button-arrow">›</span>
+        </button>
+      </div>
+    </div>
   </div>
 
   <div class="navigation-panel">
@@ -669,39 +467,6 @@
       </svg>
       <span class="nav-label">Профиль</span>
     </button>
-  </div>
-
-  <!-- Модальное окно тарифов -->
-  <div class="tariff-modal" id="tariffModal">
-    <div class="tariff-modal-content">
-      <div class="tariff-modal-header">
-        <h2 class="tariff-modal-title">Тарифный план</h2>
-        <button class="tariff-close-btn" id="tariffCloseBtn">×</button>
-      </div>
-      
-      <div class="tariff-cards">
-        <div class="tariff-card" id="limitedTariffCard">
-          <div class="tariff-card-header">
-            <div class="tariff-name" id="limitedTariffName">Ограниченный</div>
-          </div>
-          <div class="tariff-description">
-            Доступ к базовым материалам курса и первым модулям. Идеально для знакомства с темой искусственного интеллекта.
-          </div>
-          <div class="tariff-price free">Бесплатно</div>
-          <button class="buy-pro-button" id="buyProButton" style="display: none;">Купить тариф "PRO"</button>
-        </div>
-        
-        <div class="tariff-card" id="fullTariffCard">
-          <div class="tariff-card-header">
-            <div class="tariff-name" id="fullTariffName">Полный</div>
-          </div>
-          <div class="tariff-description">
-            Полный доступ ко всем материалам курса, практическим заданиям и дополнительным ресурсам. Максимальная польза от обучения.
-          </div>
-          <div class="tariff-price paid">2990₽ единожды</div>
-        </div>
-      </div>
-    </div>
   </div>
 
   <script>
@@ -742,7 +507,7 @@
     // Получить данные пользователя из NocoDB
     async function getUserData(isUpdate = false) {
       userId = getCookie('tg_user_id');
-      
+
       if (!userId) {
         console.log('User ID not found in cookies');
         if (!isUpdate) loadProfileData();
@@ -757,21 +522,21 @@
         });
 
         if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
-        
+
         const data = await response.json();
         const user = data.list.find(u => u.tg_user_id == userId);
-        
+
         if (user) {
           const newProgress = user.progress || 0;
           const newPayment = user.oplata || 0;
           const newRegDate = user.date_join || null;
-          
+
           // Получаем прогресс по модулям
           const newModuleProgress = {};
           modules.forEach(module => {
             newModuleProgress[module.id] = user[module.progressField] || 0;
           });
-          
+
           // Проверяем, изменились ли данные
           if (isUpdate && (newProgress !== userProgress || newPayment !== userPayment || 
               JSON.stringify(newModuleProgress) !== JSON.stringify(moduleProgress) ||
@@ -782,13 +547,13 @@
               moduleProgress: newModuleProgress,
               regDate: newRegDate
             });
-            
+
             userProgress = newProgress;
             userPayment = newPayment;
             moduleProgress = newModuleProgress;
             userRegDate = newRegDate;
             lastUpdateTime = Date.now();
-            
+
             // Плавное обновление интерфейса
             updateInterface();
           } else if (!isUpdate) {
@@ -823,11 +588,11 @@
     // Плавное обновление интерфейса
     function updateInterface() {
       const mainContent = document.querySelector('.main-content');
-      
+
       // Добавляем плавный переход
       mainContent.style.transition = 'opacity 0.3s ease';
       mainContent.style.opacity = '0.9';
-      
+
       setTimeout(() => {
         loadProfileData();
         mainContent.style.opacity = '1';
@@ -840,12 +605,12 @@
       if (checkInterval) {
         clearInterval(checkInterval);
       }
-      
+
       // Устанавливаем проверку каждые 3 секунды
       checkInterval = setInterval(() => {
         getUserData(true);
       }, 3000);
-      
+
       console.log('Автоматическая проверка обновлений запущена (каждые 3 сек)');
     }
 
@@ -863,7 +628,7 @@
       const avatarContainer = document.getElementById('userAvatar');
       const avatarUrl = getCookie('tg_avatar_url');
       const avatarInitials = getCookie('tg_avatar_initials');
-      
+
       if (avatarUrl) {
         // Загружаем фото пользователя
         const img = document.createElement('img');
@@ -886,79 +651,47 @@
       const userName = getCookie('tg_name') || 'Не указано';
       const userTgId = getCookie('tg_user_id') || 'Не указан';
       const username = getCookie('tg_username') || '';
-      
+
       document.getElementById('userName').textContent = userName;
-      document.getElementById('userUsername').textContent = username ? `@${username}` : 'Не указан';
+      document.getElementById('userUsername').textContent = username ? `(@${username})` : '';
       document.getElementById('userTgId').textContent = userTgId;
-      
+
       // Определяем статус курса
       const courseStatusElement = document.getElementById('courseStatus');
-      let currentTariff = 'limited';
       if (userPayment === 0) {
         courseStatusElement.textContent = 'Ограниченный';
         courseStatusElement.className = 'course-status limited';
-        currentTariff = 'limited';
       } else if (userProgress >= 1) {
         courseStatusElement.textContent = 'Полный';
         courseStatusElement.className = 'course-status full';
-        currentTariff = 'full';
       } else {
         courseStatusElement.textContent = 'Ограниченный';
         courseStatusElement.className = 'course-status limited';
-        currentTariff = 'limited';
       }
-      
-      // Обновляем подсветку тарифов в модальном окне
-      updateTariffHighlight(currentTariff);
-      
+
       // Отображаем дату регистрации из базы данных или текущую дату
       const regDateText = userRegDate ? 
         new Date(userRegDate).toLocaleDateString('ru-RU') : 
         new Date().toLocaleDateString('ru-RU');
       document.getElementById('regDate').textContent = regDateText;
-      
+
       // Подсчитываем количество дней с момента регистрации
       const regDate = userRegDate ? new Date(userRegDate) : new Date();
       const currentDate = new Date();
       const timeDifference = currentDate.getTime() - regDate.getTime();
       const daysDifference = Math.ceil(timeDifference / (1000 * 3600 * 24));
       const daysWithUs = daysDifference > 0 ? daysDifference : 1; // Минимум 1 день
-      
+
       // Количество пройденных модулей равно общему прогрессу пользователя
       const completedModules = userProgress;
-      
+
       // Обновляем статистику
       document.getElementById('completedModules').textContent = `${completedModules}/5`;
       document.getElementById('totalProgress').textContent = '--';
       document.getElementById('daysWithUs').textContent = `${daysWithUs} дн.`;
-      
+
       // Загружаем аватар
       loadUserAvatar();
-    }
-
-    // Обновление подсветки тарифов
-    function updateTariffHighlight(currentTariff) {
-      const limitedCard = document.getElementById('limitedTariffCard');
-      const fullCard = document.getElementById('fullTariffCard');
-      const limitedName = document.getElementById('limitedTariffName');
-      const fullName = document.getElementById('fullTariffName');
-      const buyProButton = document.getElementById('buyProButton');
-      
-      // Убираем все активные состояния и бейджи
-      limitedCard.classList.remove('active');
-      fullCard.classList.remove('active');
-      limitedName.innerHTML = 'Ограниченный';
-      fullName.innerHTML = 'Полный';
-      buyProButton.style.display = 'none';
-      
-      if (currentTariff === 'limited') {
-        limitedCard.classList.add('active');
-        limitedName.innerHTML = 'Ограниченный<span class="tariff-current-badge">Текущий</span>';
-        buyProButton.style.display = 'block';
-      } else {
-        fullCard.classList.add('active');
-        fullName.innerHTML = 'Полный<span class="tariff-current-badge">Текущий</span>';
-      }
     }
 
     // Обработчики навигации
@@ -1012,26 +745,6 @@
         }
       } else {
         stopAutoUpdate();
-      }
-    });
-
-    // Обработчики модального окна тарифов
-    const tariffModal = document.getElementById('tariffModal');
-    const tariffInfoBtn = document.getElementById('tariffInfoBtn');
-    const tariffCloseBtn = document.getElementById('tariffCloseBtn');
-
-    tariffInfoBtn.addEventListener('click', () => {
-      tariffModal.classList.add('show');
-    });
-
-    tariffCloseBtn.addEventListener('click', () => {
-      tariffModal.classList.remove('show');
-    });
-
-    // Закрытие модального окна по клику вне его
-    tariffModal.addEventListener('click', (e) => {
-      if (e.target === tariffModal) {
-        tariffModal.classList.remove('show');
       }
     });
   </script>
