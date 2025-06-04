@@ -423,7 +423,7 @@
     // Отправка сообщения по кнопке
     sendButton.addEventListener('click', sendMessage);
 
-    function sendMessage() {
+    async function sendMessage() {
       const message = chatInput.value.trim();
       if (!message) return;
 
@@ -435,12 +435,16 @@
       // Показываем индикатор печати
       showTypingIndicator();
 
-      // Имитируем ответ ИИ
-      setTimeout(() => {
+      // Отправляем запрос к ChatGPT через CloudFlare Worker
+      try {
+        const aiResponse = await sendToGPT(message);
         hideTypingIndicator();
-        const aiResponse = generateAIResponse(message);
         addMessage(aiResponse, 'ai');
-      }, 1500 + Math.random() * 1000);
+      } catch (error) {
+        hideTypingIndicator();
+        const fallbackResponse = generateFallbackResponse(message);
+        addMessage(fallbackResponse, 'ai');
+      }
     }
 
     function addMessage(text, sender) {
@@ -477,13 +481,63 @@
       }, 100);
     }
 
-    function generateAIResponse(userMessage) {
+    // Конфигурация для ChatGPT API
+    const API_CONFIG = {
+      // ВАЖНО: Замените URL на ваш CloudFlare Worker
+      workerURL: 'https://openai-proxy.egorspirin10.workers.dev/',
+      model: 'gpt-3.5-turbo',
+      maxTokens: 1000
+    };
+
+    // Функция для отправки запроса к ChatGPT через CloudFlare Worker
+    async function sendToGPT(message) {
+      try {
+        const response = await fetch(`${API_CONFIG.workerURL}/chat/completions`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            model: API_CONFIG.model,
+            messages: [
+              {
+                role: 'system',
+                content: 'Ты - ИИ-помощник по курсу искусственного интеллекта. Отвечай кратко, понятно и по делу. Помогай с вопросами по курсу.'
+              },
+              {
+                role: 'user',
+                content: message
+              }
+            ],
+            max_tokens: API_CONFIG.maxTokens,
+            temperature: 0.7
+          })
+        });
+
+        if (!response.ok) {
+          throw new Error(`HTTP error! status: ${response.status}`);
+        }
+
+        const data = await response.json();
+        
+        if (data.choices && data.choices[0] && data.choices[0].message) {
+          return data.choices[0].message.content;
+        } else {
+          throw new Error('Неверный формат ответа от API');
+        }
+        
+      } catch (error) {
+        console.error('Ошибка при обращении к ChatGPT:', error);
+        return generateFallbackResponse(message);
+      }
+    }
+
+    // Резервные ответы на случай ошибки API
+    function generateFallbackResponse(userMessage) {
       const responses = [
-        "Отличный вопрос! По курсу искусственного интеллекта могу сказать, что это очень актуальная и развивающаяся область.",
-        "Интересно! В контексте нашего курса рекомендую обратить внимание на практические примеры в модулях.",
-        "Хороший вопрос! Этот материал подробно разбирается в одном из модулей курса. Изучили ли вы его уже?",
-        "Спасибо за вопрос! Для лучшего понимания рекомендую пройти соответствующие разделы курса.",
-        "Это важная тема! В курсе есть специальные упражнения, которые помогут вам лучше разобраться в этом вопросе."
+        "Извините, сейчас возникли технические проблемы с ИИ. Попробуйте позже или обратитесь к материалам курса.",
+        "Технический сбой! Рекомендую изучить соответствующий модуль курса для получения ответа на ваш вопрос.",
+        "Сервис временно недоступен. Вы можете найти ответы в разделах курса или попробовать задать вопрос позже."
       ];
       
       return responses[Math.floor(Math.random() * responses.length)];
@@ -499,7 +553,7 @@
     });
 
     document.getElementById('aiToolsBtn').addEventListener('click', () => {
-      window.location.href = 'index.html';
+      // Уже на странице чата
     });
 
     document.getElementById('profileBtn').addEventListener('click', () => {
