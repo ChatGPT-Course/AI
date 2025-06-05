@@ -478,6 +478,7 @@
 
     <div class="text-block" id="block17">
       <h2>ВАЖНОЕ ЗАКЛЮЧЕНИЕ</h2>
+      <img src="https://raw.githubusercontent.com/username/repository/main/7.jpg" alt="" class="block-image">
       <p><span class="emoji">❗</span> <b>ОБЯЗАТЕЛЬНО ПОЛУЧИТЕ ДОСТУП К ChatGPT</b></p>
       <p>👉 Без этого дальнейшее изучение курса теряет смысл, так как вся практика строится на работе с ChatGPT</p>
       <p>Выделите время и настройте доступ любым удобным способом из этого модуля. Уверены, что когда вы начнёте пользоваться ChatGPT, вы оцените все его возможности.</p>
@@ -503,6 +504,16 @@
     let currentBlock = 1;
     const totalBlocks = 17;
     let isButtonDisabled = false;
+    let userId = null;
+
+    // Конфигурация NocoDB
+    const config = {
+      orgs: 'weamcfo6',
+      projectName: 'p27jdsmk69wuimh',
+      tableName: 'mc6qh91f060pv4y',
+      apiToken: 'bocQfycJpJsTG_tbwEf8ma8E5rhoig0njMDXFWtJ',
+      baseUrl: 'https://app.nocodb.com/api/v1/db/data'
+    };
 
     // Элементы
     const progressBar = document.getElementById('progressBar');
@@ -513,9 +524,91 @@
     const cancelExit = document.getElementById('cancelExit');
     const continueButton = document.getElementById('continueButton');
 
+    // Получить данные пользователя из cookies
+    function getCookie(name) {
+      const value = `; ${document.cookie}`;
+      const parts = value.split(`; ${name}=`);
+      if (parts.length === 2) return parts.pop().split(';').shift();
+      return null;
+    }
+
+    // Загрузить прогресс пользователя при инициализации
+    async function loadUserProgress() {
+      userId = getCookie('tg_user_id');
+      
+      if (!userId) {
+        console.log('User ID не найден');
+        return;
+      }
+
+      try {
+        const response = await fetch(`${config.baseUrl}/${config.orgs}/${config.projectName}/${config.tableName}`, {
+          headers: {
+            'xc-token': config.apiToken
+          }
+        });
+
+        if (!response.ok) return;
+
+        const data = await response.json();
+        const user = data.list.find(u => u.tg_user_id == userId);
+
+        if (user && user.M1_progress) {
+          const savedProgress = user.M1_progress;
+          if (savedProgress > 0 && savedProgress <= totalBlocks) {
+            currentBlock = savedProgress;
+            console.log('Загружен прогресс:', currentBlock);
+          }
+        }
+      } catch (error) {
+        console.error('Ошибка при загрузке прогресса:', error);
+      }
+    }
+
+    // Сохранить прогресс в NocoDB
+    async function saveProgress() {
+      if (!userId) {
+        userId = getCookie('tg_user_id');
+        if (!userId) return;
+      }
+
+      try {
+        const response = await fetch(`${config.baseUrl}/${config.orgs}/${config.projectName}/${config.tableName}`, {
+          headers: {
+            'xc-token': config.apiToken
+          }
+        });
+
+        if (!response.ok) return;
+
+        const data = await response.json();
+        const user = data.list.find(u => u.tg_user_id == userId);
+
+        if (user) {
+          const updateResponse = await fetch(`${config.baseUrl}/${config.orgs}/${config.projectName}/${config.tableName}/${user.Id}`, {
+            method: 'PATCH',
+            headers: {
+              'Content-Type': 'application/json',
+              'xc-token': config.apiToken
+            },
+            body: JSON.stringify({
+              M1_progress: currentBlock
+            })
+          });
+
+          if (updateResponse.ok) {
+            console.log('Прогресс сохранен:', currentBlock);
+          }
+        }
+      } catch (error) {
+        console.error('Ошибка при сохранении прогресса:', error);
+      }
+    }
+
     // Показать первый блок при загрузке
-    document.addEventListener('DOMContentLoaded', () => {
-      showBlock(1);
+    document.addEventListener('DOMContentLoaded', async () => {
+      await loadUserProgress();
+      showBlock(currentBlock);
       updateProgress();
     });
 
@@ -588,8 +681,10 @@
         currentBlock++;
         showBlock(currentBlock);
         updateProgress();
+        saveProgress(); // Сохраняем прогресс при каждом продвижении
       } else {
         // Завершение модуля
+        saveProgress(); // Финальное сохранение
         alert('Модуль завершен! Поздравляем!');
         window.location.href = 'gaid.html';
       }
@@ -601,6 +696,7 @@
     });
 
     confirmExit.addEventListener('click', () => {
+      saveProgress(); // Сохраняем прогресс при выходе
       window.location.href = 'gaid.html';
     });
 
@@ -612,6 +708,18 @@
     exitModal.addEventListener('click', (e) => {
       if (e.target === exitModal) {
         exitModal.style.display = 'none';
+      }
+    });
+
+    // Сохранение прогресса при закрытии страницы
+    window.addEventListener('beforeunload', () => {
+      saveProgress();
+    });
+
+    // Сохранение прогресса при смене видимости страницы
+    document.addEventListener('visibilitychange', () => {
+      if (document.visibilityState === 'hidden') {
+        saveProgress();
       }
     });
 
