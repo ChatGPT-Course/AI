@@ -1165,14 +1165,28 @@
       });
     });
 
+    // Переменная для отслеживания текущего уведомления
+    let currentNotification = null;
+
     // Функция показа уведомления о добавлении в избранное
     function showFavoriteNotification(moduleLabel, moduleId) {
-      // Создаем уведомление
+      // Скрываем текущее уведомление если есть
+      if (currentNotification) {
+        currentNotification.classList.remove('show');
+        setTimeout(() => {
+          if (currentNotification.parentNode) {
+            currentNotification.parentNode.removeChild(currentNotification);
+          }
+        }, 300);
+      }
+
+      // Создаем новое уведомление
       const notification = document.createElement('div');
       notification.className = 'notification';
+      currentNotification = notification;
       
       const isFav = isFavorite(moduleId);
-      const action = isFav ? 'добавлен в' : 'удален из';
+      const action = isFav ? 'добавлено в' : 'удалено из';
       
       notification.innerHTML = `
         ${moduleLabel} ${action} <a href="favorite.html">избранное</a>
@@ -1191,6 +1205,10 @@
         setTimeout(() => {
           if (notification.parentNode) {
             notification.parentNode.removeChild(notification);
+          }
+          // Очищаем ссылку на текущее уведомление
+          if (currentNotification === notification) {
+            currentNotification = null;
           }
         }, 300);
       }, 2000);
