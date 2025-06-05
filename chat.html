@@ -46,7 +46,20 @@
       color: #2c3e50;
     }
 
-    
+    .limit-display {
+      font-size: 0.9rem;
+      color: #6c757d;
+      font-weight: 500;
+      padding: 0.3rem 0.8rem;
+      border-radius: 20px;
+      background: #e9ecef;
+    }
+
+    .limit-display.warning {
+      background: #fff3cd;
+      color: #856404;
+      border: 1px solid #ffeaa7;
+    }
 
     .chat-messages {
       flex: 1;
@@ -327,13 +340,18 @@
     @media (max-width: 768px) {
       .chat-header {
         padding: 1rem;
+        flex-direction: column;
+        gap: 0.5rem;
       }
 
       .chat-title {
         font-size: 1.2rem;
       }
 
-      
+      .limit-display {
+        font-size: 0.8rem;
+        align-self: flex-end;
+      }
 
       .chat-messages,
       .chat-input-container {
@@ -360,6 +378,7 @@
   <div class="chat-container">
     <div class="chat-header">
       <h1 class="chat-title">ChatGPT чат</h1>
+      <div class="limit-display" id="limitDisplay">Осталось запросов: 30</div>
     </div>
 
     <div class="chat-messages" id="chatMessages">
@@ -468,6 +487,12 @@
       const message = chatInput.value.trim();
       if (!message) return;
 
+      // Проверяем лимит запросов
+      if (remainingRequests <= 0) {
+        addMessage('Извините, вы исчерпали дневной лимит запросов (30 сообщений в день). Попробуйте завтра!', 'ai');
+        return;
+      }
+
       // Добавляем сообщение пользователя
       addMessage(message, 'user');
       chatInput.value = '';
@@ -475,16 +500,6 @@
 
       // Показываем индикатор печати
       showTypingIndicator();
-
-      // Проверяем лимит после отправки сообщения
-      const hasRequests = await checkRequestsAvailable();
-      
-      if (!hasRequests) {
-        hideTypingIndicator();
-        addMessage('На сегодня лимит запросов исчерпан. Возвращайтесь завтра!', 'ai');
-        blockChatInput();
-        return;
-      }
 
       // Отправляем запрос к ChatGPT через CloudFlare Worker
       try {
@@ -559,37 +574,69 @@
       return new Date().getDate();
     }
 
-    // Инициализировать пользователя в базе если нужно
-    async function initializeUser() {
+    // Проверить и обновить лимиты пользователя
+    async function checkAndUpdateLimits() {
       userId = getCookie('tg_user_id');
       
       if (!userId) {
-        console.log('User ID не найден');
-        return;
+        console.log('User ID не найден, используем локальные лимиты');
+        remainingRequests = 30;
+        updateLimitDisplay();
+        return true;
       }
 
       try {
+        // Получаем данные пользователя
         const response = await fetch(`${limitConfig.baseUrl}/${limitConfig.orgs}/${limitConfig.projectName}/${limitConfig.tableName}`, {
           headers: {
             'xc-token': limitConfig.apiToken
           }
         });
 
-        if (!response.ok) return;
+        if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
 
         const data = await response.json();
         const user = data.list.find(u => u.tg_user_id == userId);
 
-        if (user && !user.ai_chat_limit) {
-          // Инициализируем лимит для нового пользователя
+        if (user) {
           const currentDay = getCurrentDay();
-          const limitData = `${currentDay}:${dailyLimit}`;
-          await updateUserLimit(user.Id, limitData);
-          console.log('Лимит инициализирован для пользователя');
+          let limitData = user.ai_chat_limit;
+
+          if (!limitData) {
+            // Первый раз - устанавливаем лимит
+            limitData = `${currentDay}:${dailyLimit}`;
+            await updateUserLimit(user.Id, limitData);
+            remainingRequests = dailyLimit;
+          } else {
+            // Парсим данные лимита
+            const [storedDay, storedLimit] = limitData.split(':');
+            const storedDayNum = parseInt(storedDay);
+            const storedLimitNum = parseInt(storedLimit);
+
+            if (storedDayNum !== currentDay) {
+              // Новый день - сбрасываем лимит
+              limitData = `${currentDay}:${dailyLimit}`;
+              await updateUserLimit(user.Id, limitData);
+              remainingRequests = dailyLimit;
+              console.log(`Новый день! Лимит сброшен на ${dailyLimit} запросов`);
+            } else {
+              // Тот же день - используем оставшиеся запросы
+              remainingRequests = storedLimitNum;
+            }
+          }
+        } else {
+          console.log('Пользователь не найден в базе');
+          remainingRequests = dailyLimit;
         }
 
+        updateLimitDisplay();
+        return remainingRequests > 0;
+
       } catch (error) {
-        console.error('Ошибка при инициализации пользователя:', error);
+        console.error('Ошибка при проверке лимитов:', error);
+        remainingRequests = dailyLimit;
+        updateLimitDisplay();
+        return true;
       }
     }
 
@@ -617,6 +664,8 @@
     // Уменьшить счетчик запросов
     async function decrementRequestCounter() {
       if (!userId) {
+        remainingRequests = Math.max(0, remainingRequests - 1);
+        updateLimitDisplay();
         return;
       }
 
@@ -634,77 +683,35 @@
 
         if (user) {
           const currentDay = getCurrentDay();
-          let limitData = user.ai_chat_limit;
+          const newCount = Math.max(0, remainingRequests - 1);
+          const newLimitData = `${currentDay}:${newCount}`;
           
-          if (limitData) {
-            const [storedDay, storedLimit] = limitData.split(':');
-            const storedDayNum = parseInt(storedDay);
-            const storedLimitNum = parseInt(storedLimit);
-            
-            if (storedDayNum === currentDay && storedLimitNum > 0) {
-              const newCount = storedLimitNum - 1;
-              const newLimitData = `${currentDay}:${newCount}`;
-              await updateUserLimit(user.Id, newLimitData);
-              console.log(`Счетчик уменьшен: ${newCount} запросов осталось`);
-            }
-          }
+          await updateUserLimit(user.Id, newLimitData);
+          remainingRequests = newCount;
+          updateLimitDisplay();
         }
       } catch (error) {
         console.error('Ошибка при уменьшении счетчика:', error);
       }
     }
 
-    // Проверить доступность запросов в реальном времени
-    async function checkRequestsAvailable() {
-      userId = getCookie('tg_user_id');
-      
-      if (!userId) {
-        return true; // Если нет ID пользователя, разрешаем запрос
+    // Обновить отображение лимита в интерфейсе
+    function updateLimitDisplay() {
+      const limitElement = document.getElementById('limitDisplay');
+      if (limitElement) {
+        limitElement.textContent = `Осталось запросов: ${remainingRequests}`;
+        limitElement.className = `limit-display ${remainingRequests <= 5 ? 'warning' : ''}`;
       }
 
-      try {
-        const response = await fetch(`${limitConfig.baseUrl}/${limitConfig.orgs}/${limitConfig.projectName}/${limitConfig.tableName}`, {
-          headers: {
-            'xc-token': limitConfig.apiToken
-          }
-        });
+      // Блокируем кнопку отправки если лимит исчерпан
+      sendButton.disabled = remainingRequests <= 0;
+      chatInput.disabled = remainingRequests <= 0;
 
-        if (!response.ok) return true;
-
-        const data = await response.json();
-        const user = data.list.find(u => u.tg_user_id == userId);
-
-        if (user) {
-          const currentDay = getCurrentDay();
-          let limitData = user.ai_chat_limit;
-
-          if (!limitData) {
-            return true; // Первый запрос - разрешаем
-          }
-
-          const [storedDay, storedLimit] = limitData.split(':');
-          const storedDayNum = parseInt(storedDay);
-          const storedLimitNum = parseInt(storedLimit);
-
-          if (storedDayNum !== currentDay) {
-            return true; // Новый день - разрешаем
-          }
-
-          return storedLimitNum > 0; // Проверяем оставшиеся запросы
-        }
-
-        return true;
-      } catch (error) {
-        console.error('Ошибка при проверке лимитов:', error);
-        return true; // При ошибке разрешаем запрос
+      if (remainingRequests <= 0) {
+        chatInput.placeholder = 'Лимит запросов исчерпан на сегодня';
+      } else {
+        chatInput.placeholder = 'Напишите ваш вопрос...';
       }
-    }
-
-    // Заблокировать ввод чата
-    function blockChatInput() {
-      sendButton.disabled = true;
-      chatInput.disabled = true;
-      chatInput.placeholder = 'Лимит запросов исчерпан на сегодня';
     }
 
     function showTypingIndicator() {
@@ -841,13 +848,15 @@ URL воркера: ${API_CONFIG.workerURL}
 
     // Фокус на поле ввода при загрузке
     document.addEventListener('DOMContentLoaded', async () => {
-      // Инициализируем пользователя если нужно
-      await initializeUser();
+      // Проверяем лимиты пользователя
+      await checkAndUpdateLimits();
       
       // Симулируем загрузку данных
       setTimeout(() => {
         hideLoadingScreen();
-        chatInput.focus();
+        if (remainingRequests > 0) {
+          chatInput.focus();
+        }
         scrollToBottom();
       }, 800);
     });
