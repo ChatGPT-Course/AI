@@ -450,18 +450,18 @@
     function addMessage(text, sender) {
       const messageDiv = document.createElement('div');
       messageDiv.className = `message ${sender}`;
-      
+
       const avatar = document.createElement('div');
       avatar.className = 'message-avatar';
       avatar.textContent = sender === 'ai' ? '🤖' : '👤';
-      
+
       const content = document.createElement('div');
       content.className = 'message-content';
       content.textContent = text;
-      
+
       messageDiv.appendChild(avatar);
       messageDiv.appendChild(content);
-      
+
       chatMessages.appendChild(messageDiv);
       scrollToBottom();
     }
@@ -486,7 +486,7 @@
       // ВАЖНО: Замените URL на ваш CloudFlare Worker
       workerURL: 'https://openai-proxy.egorspirin10.workers.dev/',
       model: 'gpt-3.5-turbo',
-      maxTokens: 1000
+      maxTokens: 100
     };
 
     // Функция для отправки запроса к ChatGPT через CloudFlare Worker
@@ -519,13 +519,13 @@
         }
 
         const data = await response.json();
-        
+
         if (data.choices && data.choices[0] && data.choices[0].message) {
           return data.choices[0].message.content;
         } else {
           throw new Error('Неверный формат ответа от API');
         }
-        
+
       } catch (error) {
         console.error('Ошибка при обращении к ChatGPT:', error);
         return generateFallbackResponse(message);
@@ -539,7 +539,7 @@
         "Технический сбой! Рекомендую изучить соответствующий модуль курса для получения ответа на ваш вопрос.",
         "Сервис временно недоступен. Вы можете найти ответы в разделах курса или попробовать задать вопрос позже."
       ];
-      
+
       return responses[Math.floor(Math.random() * responses.length)];
     }
 
