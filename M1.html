@@ -17,7 +17,7 @@
       background: #ffffff;
       min-height: 100vh;
       padding-top: 80px;
-      padding-bottom: 100px;
+      padding-bottom: 120px;
     }
 
     /* Фиксированная панель прогресса */
@@ -93,6 +93,9 @@
       max-width: 800px;
       margin: 0 auto;
       padding: 2rem;
+      min-height: calc(100vh - 200px);
+      display: flex;
+      flex-direction: column;
     }
 
     .text-block {
@@ -103,11 +106,13 @@
       line-height: 1.7;
       font-size: 1.1rem;
       color: #2c3e50;
+      display: none;
     }
 
     .text-block.visible {
       opacity: 1;
       transform: translateY(0);
+      display: block;
     }
 
     .text-block h2 {
@@ -869,6 +874,7 @@
       for (let i = 1; i <= currentBlock; i++) {
         const block = document.getElementById(`block${i}`);
         if (block) {
+          block.style.display = 'block';
           block.classList.add('visible');
         }
       }
@@ -1022,7 +1028,9 @@
       const block = document.getElementById(`block${blockNumber}`);
       
       if (block && !block.classList.contains('visible')) {
-        // Плавное появление блока
+        // Сначала показываем блок
+        block.style.display = 'block';
+        // Затем плавное появление
         setTimeout(() => {
           block.classList.add('visible');
         }, 100);
@@ -1099,13 +1107,14 @@
       await saveProgress();
       
       // Проверяем, нужно ли показывать отзыв
-      if (previousProgress === 1) {
-        // Пользователь впервые завершает модуль
+      if (previousProgress < 2) {
+        // Пользователь впервые завершает модуль (прогресс был 0 или 1)
         showReviewModal();
       } else {
-        // Пользователь уже проходил модуль
+        // Пользователь уже завершал модуль (прогресс был 2 и выше)
         await updateOverallProgress();
-        showCompletionModal();
+        // Сразу переходим в меню без показа окна завершения
+        window.location.href = 'gaid.html';
       }
     }
 
@@ -1164,8 +1173,14 @@
       exitModal.style.display = 'flex';
     });
 
-    confirmExit.addEventListener('click', () => {
-      saveProgress(); // Сохраняем прогресс при выходе
+    confirmExit.addEventListener('click', async () => {
+      await saveProgress(); // Сохраняем прогресс при выходе
+      
+      // Если пользователь выходит на 17/17, помечаем модуль как пройденный
+      if (currentBlock === totalBlocks) {
+        await updateOverallProgress();
+      }
+      
       window.location.href = 'gaid.html';
     });
 
@@ -1181,14 +1196,24 @@
     });
 
     // Сохранение прогресса при закрытии страницы
-    window.addEventListener('beforeunload', () => {
-      saveProgress();
+    window.addEventListener('beforeunload', async () => {
+      await saveProgress();
+      
+      // Если пользователь выходит на 17/17, помечаем модуль как пройденный
+      if (currentBlock === totalBlocks) {
+        await updateOverallProgress();
+      }
     });
 
     // Сохранение прогресса при смене видимости страницы
-    document.addEventListener('visibilitychange', () => {
+    document.addEventListener('visibilitychange', async () => {
       if (document.visibilityState === 'hidden') {
-        saveProgress();
+        await saveProgress();
+        
+        // Если пользователь выходит на 17/17, помечаем модуль как пройденный
+        if (currentBlock === totalBlocks) {
+          await updateOverallProgress();
+        }
       }
     });
 
