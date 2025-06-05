@@ -827,9 +827,10 @@
           buttonText = userPayment === 0 && module.id === 'm1' ? 'Требуется оплата' : 'Заблокировано';
         }
 
-        // Получаем прогресс модуля (от 0 до 10)
+        // Получаем прогресс модуля (для М1 до 17, для остальных до 10)
+        const maxProgress = module.id === 'm1' ? 17 : 10;
         const currentModuleProgress = moduleProgress[module.id] || 0;
-        const progressPercentage = (currentModuleProgress / 10) * 100;
+        const progressPercentage = (currentModuleProgress / maxProgress) * 100;
 
         const moduleCard = document.createElement('div');
         moduleCard.className = `module-card ${moduleState}`;
@@ -853,7 +854,7 @@
                 <div class="progress-bar-container">
                   <div class="progress-bar" style="width: ${progressPercentage}%"></div>
                 </div>
-                <div class="progress-text">${currentModuleProgress}/10</div>
+                <div class="progress-text">${currentModuleProgress}/${maxProgress}</div>
               </div>
 
               <button class="module-start-btn">${buttonText}</button>
