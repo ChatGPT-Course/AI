@@ -441,8 +441,9 @@
         hideTypingIndicator();
         addMessage(aiResponse, 'ai');
       } catch (error) {
+        console.error('💥 Ошибка в sendMessage:', error);
         hideTypingIndicator();
-        const fallbackResponse = generateFallbackResponse(message);
+        const fallbackResponse = generateFallbackResponse(message, error);
         addMessage(fallbackResponse, 'ai');
       }
     }
@@ -486,61 +487,87 @@
       // ВАЖНО: Замените URL на ваш CloudFlare Worker
       workerURL: 'https://openai-proxy.egorspirin10.workers.dev/',
       model: 'gpt-3.5-turbo',
-      maxTokens: 100
+      maxTokens: 1000
     };
 
     // Функция для отправки запроса к ChatGPT через CloudFlare Worker
     async function sendToGPT(message) {
+      console.log('🚀 Отправляем запрос к воркеру:', API_CONFIG.workerURL);
+      
       try {
+        const requestBody = {
+          model: API_CONFIG.model,
+          messages: [
+            {
+              role: 'system',
+              content: 'Ты - ИИ-помощник по курсу искусственного интеллекта. Отвечай кратко, понятно и по делу. Помогай с вопросами по курсу.'
+            },
+            {
+              role: 'user',
+              content: message
+            }
+          ],
+          max_tokens: API_CONFIG.maxTokens,
+          temperature: 0.7
+        };
+
+        console.log('📦 Тело запроса:', JSON.stringify(requestBody, null, 2));
+
         const response = await fetch(`${API_CONFIG.workerURL}/chat/completions`, {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
           },
-          body: JSON.stringify({
-            model: API_CONFIG.model,
-            messages: [
-              {
-                role: 'system',
-                content: 'Ты - ИИ-помощник по курсу искусственного интеллекта. Отвечай кратко, понятно и по делу. Помогай с вопросами по курсу.'
-              },
-              {
-                role: 'user',
-                content: message
-              }
-            ],
-            max_tokens: API_CONFIG.maxTokens,
-            temperature: 0.7
-          })
+          body: JSON.stringify(requestBody)
         });
 
+        console.log('📡 Статус ответа:', response.status);
+        console.log('📋 Заголовки ответа:', Object.fromEntries(response.headers.entries()));
+
         if (!response.ok) {
-          throw new Error(`HTTP error! status: ${response.status}`);
+          const errorText = await response.text();
+          console.error('❌ Ошибка HTTP:', errorText);
+          throw new Error(`HTTP ${response.status}: ${errorText}`);
         }
 
         const data = await response.json();
+        console.log('✅ Полный ответ от API:', JSON.stringify(data, null, 2));
 
         if (data.choices && data.choices[0] && data.choices[0].message) {
           return data.choices[0].message.content;
         } else {
-          throw new Error('Неверный формат ответа от API');
+          console.error('❌ Неверная структура ответа:', data);
+          throw new Error(`Неверный формат ответа: ${JSON.stringify(data)}`);
         }
 
       } catch (error) {
-        console.error('Ошибка при обращении к ChatGPT:', error);
-        return generateFallbackResponse(message);
+        console.error('💥 ПОЛНАЯ ОШИБКА:', error);
+        
+        // Создаем детальную ошибку
+        const detailedError = new Error(`Детали ошибки:
+        
+Тип: ${error.name}
+Сообщение: ${error.message}
+URL воркера: ${API_CONFIG.workerURL}
+Время: ${new Date().toISOString()}
+
+Проверьте:
+1. Доступность воркера: ${API_CONFIG.workerURL}
+2. Правильность URL (должен заканчиваться на /)
+3. Настройки CORS в воркере
+4. API ключ OpenAI в коде воркера`);
+        
+        return generateFallbackResponse(message, detailedError);
       }
     }
 
-    // Резервные ответы на случай ошибки API
-    function generateFallbackResponse(userMessage) {
-      const responses = [
-        "Извините, сейчас возникли технические проблемы с ИИ. Попробуйте позже или обратитесь к материалам курса.",
-        "Технический сбой! Рекомендую изучить соответствующий модуль курса для получения ответа на ваш вопрос.",
-        "Сервис временно недоступен. Вы можете найти ответы в разделах курса или попробовать задать вопрос позже."
-      ];
-
-      return responses[Math.floor(Math.random() * responses.length)];
+    // Подробные ошибки для отладки
+    function generateFallbackResponse(userMessage, error = null) {
+      if (error) {
+        return `ОШИБКА ОТЛАДКИ:\n\nСообщение: ${error.message}\n\nТип ошибки: ${error.name}\n\nURL воркера: ${API_CONFIG.workerURL}\n\nВаше сообщение: "${userMessage}"\n\nВремя: ${new Date().toLocaleString()}\n\nПроверьте:\n1. Работает ли CloudFlare Worker\n2. Правильный ли URL воркера\n3. Есть ли API ключ в воркере`;
+      }
+      
+      return `ОШИБКА: Неизвестная проблема при отправке сообщения "${userMessage}" в ${new Date().toLocaleString()}`;
     }
 
     // Обработчики навигации
