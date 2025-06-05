@@ -263,6 +263,238 @@
       transform: translateY(-1px);
     }
 
+    /* Модальное окно отзыва */
+    .review-modal {
+      display: none;
+      position: fixed;
+      z-index: 300;
+      left: 0;
+      top: 0;
+      width: 100vw;
+      height: 100vh;
+      background: rgba(0, 0, 0, 0.5);
+      align-items: center;
+      justify-content: center;
+    }
+
+    .review-modal-content {
+      background: #ffffff;
+      border-radius: 20px;
+      max-width: 90vw;
+      width: 450px;
+      padding: 2.5rem 2rem;
+      box-shadow: 0 20px 60px rgba(0, 0, 0, 0.2);
+      text-align: center;
+      animation: modalAppear 0.5s ease;
+    }
+
+    @keyframes modalAppear {
+      from {
+        opacity: 0;
+        transform: scale(0.9) translateY(20px);
+      }
+      to {
+        opacity: 1;
+        transform: scale(1) translateY(0);
+      }
+    }
+
+    .review-title {
+      font-size: 1.5rem;
+      font-weight: 700;
+      margin-bottom: 1rem;
+      color: #2c3e50;
+    }
+
+    .review-subtitle {
+      color: #6c757d;
+      margin-bottom: 2rem;
+      line-height: 1.5;
+    }
+
+    .emoji-rating {
+      display: flex;
+      justify-content: center;
+      gap: 1rem;
+      margin-bottom: 2rem;
+    }
+
+    .emoji-btn {
+      background: none;
+      border: 2px solid #e9ecef;
+      border-radius: 50%;
+      width: 60px;
+      height: 60px;
+      font-size: 2rem;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .emoji-btn:hover {
+      border-color: #8b5cf6;
+      background: #f8f6ff;
+      transform: scale(1.1);
+    }
+
+    .emoji-btn.selected {
+      border-color: #8b5cf6;
+      background: #8b5cf6;
+      color: white;
+    }
+
+    .review-comment {
+      width: 100%;
+      padding: 1rem;
+      border: 2px solid #e9ecef;
+      border-radius: 12px;
+      font-size: 1rem;
+      font-family: inherit;
+      resize: vertical;
+      min-height: 100px;
+      margin-bottom: 2rem;
+      transition: border-color 0.3s ease;
+    }
+
+    .review-comment:focus {
+      outline: none;
+      border-color: #8b5cf6;
+    }
+
+    .review-buttons {
+      display: flex;
+      gap: 1rem;
+      justify-content: center;
+    }
+
+    /* Модальное окно завершения */
+    .completion-modal {
+      display: none;
+      position: fixed;
+      z-index: 300;
+      left: 0;
+      top: 0;
+      width: 100vw;
+      height: 100vh;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      align-items: center;
+      justify-content: center;
+    }
+
+    .completion-content {
+      background: #ffffff;
+      border-radius: 20px;
+      max-width: 90vw;
+      width: 500px;
+      padding: 3rem 2rem;
+      text-align: center;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .completion-content::before {
+      content: '';
+      position: absolute;
+      top: -50%;
+      left: -50%;
+      width: 200%;
+      height: 200%;
+      background: linear-gradient(45deg, transparent, rgba(139, 92, 246, 0.1), transparent);
+      animation: shine 2s infinite;
+    }
+
+    @keyframes shine {
+      0% { transform: translateX(-100%) translateY(-100%) rotate(45deg); }
+      100% { transform: translateX(100%) translateY(100%) rotate(45deg); }
+    }
+
+    .completion-icon {
+      font-size: 4rem;
+      margin-bottom: 1.5rem;
+      animation: bounce 1s infinite;
+    }
+
+    @keyframes bounce {
+      0%, 20%, 50%, 80%, 100% { transform: translateY(0); }
+      40% { transform: translateY(-10px); }
+      60% { transform: translateY(-5px); }
+    }
+
+    .completion-title {
+      font-size: 2rem;
+      font-weight: 700;
+      margin-bottom: 1rem;
+      color: #2c3e50;
+    }
+
+    .completion-text {
+      color: #6c757d;
+      margin-bottom: 2rem;
+      line-height: 1.6;
+      font-size: 1.1rem;
+    }
+
+    .completion-button {
+      background: linear-gradient(90deg, #8b5cf6, #a855f7);
+      color: white;
+      border: none;
+      border-radius: 12px;
+      padding: 1rem 2rem;
+      font-size: 1.1rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.3s ease;
+    }
+
+    .completion-button:hover {
+      background: linear-gradient(90deg, #7c3aed, #9333ea);
+      transform: translateY(-2px);
+    }
+
+    /* Загрузочная анимация */
+    .loading-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100vw;
+      height: 100vh;
+      background: #ffffff;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      z-index: 1000;
+      opacity: 1;
+      transition: opacity 0.5s ease;
+    }
+
+    .loading-overlay.hide {
+      opacity: 0;
+      pointer-events: none;
+    }
+
+    .loader {
+      width: 50px;
+      height: 50px;
+      border: 4px solid #f3f3f3;
+      border-top: 4px solid #8b5cf6;
+      border-radius: 50%;
+      animation: spin 1s linear infinite;
+      margin-bottom: 1rem;
+    }
+
+    @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+
+    .loading-text {
+      color: #6c757d;
+      font-size: 1.1rem;
+    }
+
     @media (max-width: 768px) {
       .progress-panel {
         padding: 0.8rem 1rem;
@@ -298,10 +530,26 @@
         padding: 0.8rem 1.5rem;
         font-size: 0.9rem;
       }
+
+      .review-modal-content {
+        width: 350px;
+        padding: 2rem 1.5rem;
+      }
+
+      .completion-content {
+        width: 400px;
+        padding: 2.5rem 1.5rem;
+      }
     }
   </style>
 </head>
 <body>
+  <!-- Загрузочная анимация -->
+  <div class="loading-overlay" id="loadingOverlay">
+    <div class="loader"></div>
+    <div class="loading-text">Загружаем ваш прогресс...</div>
+  </div>
+
   <!-- Панель прогресса -->
   <div class="progress-panel">
     <div class="progress-info">
@@ -501,17 +749,54 @@
     </div>
   </div>
 
+  <!-- Модальное окно отзыва -->
+  <div class="review-modal" id="reviewModal">
+    <div class="review-modal-content">
+      <div class="review-title">Оставьте отзыв о модуле</div>
+      <div class="review-subtitle">Ваше мнение поможет нам улучшить курс</div>
+      
+      <div class="emoji-rating">
+        <button class="emoji-btn" data-rating="1">😞</button>
+        <button class="emoji-btn" data-rating="2">😐</button>
+        <button class="emoji-btn" data-rating="3">😊</button>
+      </div>
+      
+      <textarea class="review-comment" id="reviewComment" placeholder="Поделитесь своими впечатлениями о модуле (необязательно)"></textarea>
+      
+      <div class="review-buttons">
+        <button class="modal-button secondary" id="skipReview">Пропустить</button>
+        <button class="modal-button primary" id="submitReview">Отправить</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Модальное окно завершения -->
+  <div class="completion-modal" id="completionModal">
+    <div class="completion-content">
+      <div class="completion-icon">🎉</div>
+      <div class="completion-title">Модуль завершён!</div>
+      <div class="completion-text">
+        Поздравляем! Вы успешно завершили первый модуль курса. 
+        Теперь вы знаете все способы получения доступа к ChatGPT.
+      </div>
+      <button class="completion-button" id="completionButton">Вернуться к курсу</button>
+    </div>
+  </div>
+
   <script>
     let currentBlock = 1;
     const totalBlocks = 17;
     let isButtonDisabled = false;
     let userId = null;
+    let selectedRating = null;
+    let previousProgress = 1;
 
     // Конфигурация NocoDB
     const config = {
       orgs: 'weamcfo6',
       projectName: 'p27jdsmk69wuimh',
       tableName: 'mc6qh91f060pv4y',
+      reviewTableName: 'mroqzljwv09ghb1',
       apiToken: 'bocQfycJpJsTG_tbwEf8ma8E5rhoig0njMDXFWtJ',
       baseUrl: 'https://app.nocodb.com/api/v1/db/data'
     };
@@ -524,6 +809,9 @@
     const confirmExit = document.getElementById('confirmExit');
     const cancelExit = document.getElementById('cancelExit');
     const continueButton = document.getElementById('continueButton');
+    const loadingOverlay = document.getElementById('loadingOverlay');
+    const reviewModal = document.getElementById('reviewModal');
+    const completionModal = document.getElementById('completionModal');
 
     // Получить данные пользователя из cookies
     function getCookie(name) {
@@ -539,6 +827,7 @@
       
       if (!userId) {
         console.log('User ID не найден');
+        hideLoading();
         return;
       }
 
@@ -549,21 +838,68 @@
           }
         });
 
-        if (!response.ok) return;
+        if (!response.ok) {
+          hideLoading();
+          return;
+        }
 
         const data = await response.json();
         const user = data.list.find(u => u.tg_user_id == userId);
 
         if (user && user.M1_progress) {
           const savedProgress = user.M1_progress;
+          previousProgress = savedProgress;
           if (savedProgress > 0 && savedProgress <= totalBlocks) {
             currentBlock = savedProgress;
             console.log('Загружен прогресс:', currentBlock);
+            
+            // Быстро показываем все блоки до текущего
+            await fastLoadToCurrentBlock();
           }
         }
       } catch (error) {
         console.error('Ошибка при загрузке прогресса:', error);
       }
+      
+      hideLoading();
+    }
+
+    // Быстрая загрузка до текущего блока
+    async function fastLoadToCurrentBlock() {
+      for (let i = 1; i <= currentBlock; i++) {
+        const block = document.getElementById(`block${i}`);
+        if (block) {
+          block.classList.add('visible');
+        }
+      }
+      
+      // Небольшая задержка для плавности
+      await new Promise(resolve => setTimeout(resolve, 300));
+      
+      // Скролл к текущему блоку
+      if (currentBlock > 1) {
+        const currentBlockElement = document.getElementById(`block${currentBlock}`);
+        if (currentBlockElement) {
+          const panelHeight = 80;
+          const blockTop = currentBlockElement.offsetTop - panelHeight;
+          window.scrollTo({ 
+            top: blockTop, 
+            behavior: 'smooth' 
+          });
+        }
+      }
+    }
+
+    // Скрыть загрузочную анимацию
+    function hideLoading() {
+      setTimeout(() => {
+        loadingOverlay.classList.add('hide');
+        setTimeout(() => {
+          loadingOverlay.style.display = 'none';
+          showBlock(currentBlock);
+          updateProgress();
+        }, 500);
+      }, 1000);
     }
 
     // Сохранить прогресс в NocoDB
@@ -606,40 +942,108 @@
       }
     }
 
+    // Обновить общий прогресс пользователя до 2 при завершении модуля
+    async function updateOverallProgress() {
+      if (!userId) return;
+
+      try {
+        const response = await fetch(`${config.baseUrl}/${config.orgs}/${config.projectName}/${config.tableName}`, {
+          headers: {
+            'xc-token': config.apiToken
+          }
+        });
+
+        if (!response.ok) return;
+
+        const data = await response.json();
+        const user = data.list.find(u => u.tg_user_id == userId);
+
+        if (user) {
+          const updateResponse = await fetch(`${config.baseUrl}/${config.orgs}/${config.projectName}/${config.tableName}/${user.Id}`, {
+            method: 'PATCH',
+            headers: {
+              'Content-Type': 'application/json',
+              'xc-token': config.apiToken
+            },
+            body: JSON.stringify({
+              progress: 2
+            })
+          });
+
+          if (updateResponse.ok) {
+            console.log('Общий прогресс обновлен до 2');
+          }
+        }
+      } catch (error) {
+        console.error('Ошибка при обновлении общего прогресса:', error);
+      }
+    }
+
+    // Сохранить отзыв
+    async function saveReview(rating, comment) {
+      if (!userId) return;
+
+      try {
+        const reviewData = {
+          tg_user_id: userId,
+          module: 'M1',
+          rating: rating,
+          comment: comment || '',
+          date: new Date().toISOString().split('T')[0]
+        };
+
+        const createResponse = await fetch(`${config.baseUrl}/${config.orgs}/${config.projectName}/${config.reviewTableName}`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'xc-token': config.apiToken
+          },
+          body: JSON.stringify(reviewData)
+        });
+
+        if (createResponse.ok) {
+          console.log('Отзыв сохранен');
+          return true;
+        }
+      } catch (error) {
+        console.error('Ошибка при сохранении отзыва:', error);
+      }
+      
+      return false;
+    }
+
     // Показать первый блок при загрузке
     document.addEventListener('DOMContentLoaded', async () => {
       await loadUserProgress();
-      showBlock(currentBlock);
-      updateProgress();
     });
 
     // Функция показа блока
     function showBlock(blockNumber) {
       const block = document.getElementById(`block${blockNumber}`);
       
-      if (block) {
+      if (block && !block.classList.contains('visible')) {
         // Плавное появление блока
         setTimeout(() => {
           block.classList.add('visible');
         }, 100);
+      }
 
-        // Показать кнопку продолжения через секунду
+      // Показать кнопку продолжения через секунду
+      setTimeout(() => {
+        continueButton.classList.add('visible');
+        updateButtonText();
+      }, 1000);
+
+      // Плавный скролл к блоку так, чтобы он начинался под панелью
+      if (blockNumber > 1) {
         setTimeout(() => {
-          continueButton.classList.add('visible');
-          updateButtonText();
-        }, 1000);
-
-        // Плавный скролл к блоку так, чтобы он начинался под панелью
-        if (blockNumber > 1) {
-          setTimeout(() => {
-            const panelHeight = 80; // Высота панели прогресса
-            const blockTop = block.offsetTop - panelHeight;
-            window.scrollTo({ 
-              top: blockTop, 
-              behavior: 'smooth' 
-            });
-          }, 200);
-        }
+          const panelHeight = 80; // Высота панели прогресса
+          const blockTop = block.offsetTop - panelHeight;
+          window.scrollTo({ 
+            top: blockTop, 
+            behavior: 'smooth' 
+          });
+        }, 200);
       }
     }
 
@@ -685,10 +1089,74 @@
         saveProgress(); // Сохраняем прогресс при каждом продвижении
       } else {
         // Завершение модуля
-        saveProgress(); // Финальное сохранение
-        alert('Модуль завершен! Поздравляем!');
-        window.location.href = 'gaid.html';
+        handleModuleCompletion();
       }
+    });
+
+    // Обработка завершения модуля
+    async function handleModuleCompletion() {
+      // Сохраняем финальный прогресс
+      await saveProgress();
+      
+      // Проверяем, нужно ли показывать отзыв
+      if (previousProgress === 1) {
+        // Пользователь впервые завершает модуль
+        showReviewModal();
+      } else {
+        // Пользователь уже проходил модуль
+        await updateOverallProgress();
+        showCompletionModal();
+      }
+    }
+
+    // Показать модальное окно отзыва
+    function showReviewModal() {
+      reviewModal.style.display = 'flex';
+    }
+
+    // Показать модальное окно завершения
+    function showCompletionModal() {
+      completionModal.style.display = 'flex';
+    }
+
+    // Обработчики для отзыва
+    document.querySelectorAll('.emoji-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        // Убираем выделение с других кнопок
+        document.querySelectorAll('.emoji-btn').forEach(b => b.classList.remove('selected'));
+        // Выделяем текущую
+        btn.classList.add('selected');
+        selectedRating = parseInt(btn.dataset.rating);
+      });
+    });
+
+    document.getElementById('submitReview').addEventListener('click', async () => {
+      if (!selectedRating) {
+        alert('Пожалуйста, выберите оценку');
+        return;
+      }
+      
+      const comment = document.getElementById('reviewComment').value;
+      const success = await saveReview(selectedRating, comment);
+      
+      if (success) {
+        reviewModal.style.display = 'none';
+        await updateOverallProgress();
+        showCompletionModal();
+      } else {
+        alert('Ошибка при сохранении отзыва. Попробуйте еще раз.');
+      }
+    });
+
+    document.getElementById('skipReview').addEventListener('click', async () => {
+      reviewModal.style.display = 'none';
+      await updateOverallProgress();
+      showCompletionModal();
+    });
+
+    // Обработчик кнопки завершения
+    document.getElementById('completionButton').addEventListener('click', () => {
+      window.location.href = 'gaid.html';
     });
 
     // Модальное окно выхода
