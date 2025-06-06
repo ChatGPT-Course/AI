@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="ru">
 <head>
@@ -280,7 +279,7 @@
       color: #2c3e50;
     }
 
-    
+
 
     .info-btn {
       background: #2196F3;
@@ -626,6 +625,123 @@
         font-size: 0.9rem;
       }
     }
+
+    /* Модальное окно для подтверждения сброса прогресса */
+    .reset-modal-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0, 0, 0, 0.5);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      z-index: 1001;
+      opacity: 0;
+      visibility: hidden;
+      transition: all 0.3s ease;
+    }
+
+    .reset-modal-overlay.show {
+      opacity: 1;
+      visibility: visible;
+    }
+
+    .reset-modal-content {
+      background: white;
+      border-radius: 12px;
+      padding: 1.5rem;
+      max-width: 90%;
+      width: 400px;
+      max-height: 80%;
+      overflow-y: auto;
+      position: relative;
+      transform: scale(0.9);
+      transition: transform 0.3s ease;
+    }
+
+    .reset-modal-overlay.show .reset-modal-content {
+      transform: scale(1);
+    }
+
+    .reset-modal-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 1rem;
+      padding-bottom: 0.5rem;
+      border-bottom: 1px solid #e5e7eb;
+    }
+
+    .reset-modal-title {
+      font-size: 1.2rem;
+      font-weight: 600;
+      color: #2c3e50;
+      margin: 0;
+    }
+
+    .reset-modal-close {
+      background: none;
+      border: none;
+      font-size: 1.5rem;
+      cursor: pointer;
+      padding: 0.2rem;
+      width: 32px;
+      height: 32px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 6px;
+      color: #6c757d;
+      transition: all 0.2s ease;
+    }
+
+    .reset-modal-close:hover {
+      background: #f3f4f6;
+      color: #374151;
+    }
+
+    .reset-modal-body {
+      color: #6c757d;
+      line-height: 1.6;
+      font-size: 0.95rem;
+      margin-bottom: 1.5rem;
+    }
+
+    .reset-modal-actions {
+      display: flex;
+      justify-content: flex-end;
+      gap: 0.75rem;
+    }
+
+    .reset-modal-actions button {
+      border: none;
+      border-radius: 8px;
+      padding: 0.75rem 1.25rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      font-size: 0.9rem;
+    }
+
+    .cancel-reset-btn {
+      background: #e5e7eb;
+      color: #374151;
+    }
+
+    .cancel-reset-btn:hover {
+      background: #d1d5db;
+    }
+
+    .confirm-reset-btn {
+      background: #ef4444;
+      color: white;
+    }
+
+    .confirm-reset-btn:hover {
+      background: #dc2626;
+    }
   </style>
 </head>
 <body>
@@ -694,6 +810,24 @@
       </div>
       <div class="modal-body" id="modalBody">
         <!-- Описание модуля будет добавлено здесь -->
+      </div>
+    </div>
+  </div>
+
+  <!-- Модальное окно для подтверждения сброса прогресса -->
+  <div class="reset-modal-overlay" id="resetProgressModal">
+    <div class="reset-modal-content">
+      <div class="reset-modal-header">
+        <h3 class="reset-modal-title">Сброс прогресса</h3>
+        <button class="reset-modal-close" id="resetModalClose">×</button>
+      </div>
+      <div class="reset-modal-body">
+        <p>Вы действительно хотите перепройти "<span id="resetModuleName"></span>"?</p>
+        <p>Ваш прогресс будет сброшен до 0.</p>
+      </div>
+      <div class="reset-modal-actions">
+        <button class="cancel-reset-btn" id="cancelResetBtn">Отмена</button>
+        <button class="confirm-reset-btn" id="confirmResetBtn">Сбросить</button>
       </div>
     </div>
   </div>
@@ -768,6 +902,7 @@
     let lastUpdateTime = 0;
     let checkInterval = null;
     let moduleProgress = {};
+    let currentModuleId = null; // ID текущего модуля для сброса
 
     // Получить данные пользователя из cookies
     function getCookie(name) {
@@ -786,15 +921,15 @@
     function toggleFavorite(moduleId) {
       let favorites = getFavorites();
       const index = favorites.indexOf(moduleId);
-      
+
       if (index > -1) {
         favorites.splice(index, 1);
       } else {
         favorites.push(moduleId);
       }
-      
+
       localStorage.setItem('favoriteModules', JSON.stringify(favorites));
-      
+
       // Обновляем только кнопку избранного без перерендера
       const moduleCards = document.querySelectorAll('.module-card');
       moduleCards.forEach(card => {
@@ -817,7 +952,7 @@
     // Получить данные пользователя из NocoDB
     async function getUserData(isUpdate = false) {
       userId = getCookie('tg_user_id');
-      
+
       if (!userId) {
         console.log('User ID not found in cookies');
         userProgress = 0;
@@ -835,20 +970,20 @@
         });
 
         if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
-        
+
         const data = await response.json();
         const user = data.list.find(u => u.tg_user_id == userId);
-        
+
         if (user) {
           const newProgress = user.progress || 0;
           const newPayment = user.oplata || 0;
-          
+
           // Получаем прогресс по модулям
           const newModuleProgress = {};
           modules.forEach(module => {
             newModuleProgress[module.id] = user[module.progressField] || 0;
           });
-          
+
           // Проверяем, изменились ли данные
           if (isUpdate && (newProgress !== userProgress || newPayment !== userPayment || 
               JSON.stringify(newModuleProgress) !== JSON.stringify(moduleProgress))) {
@@ -857,12 +992,12 @@
               payment: newPayment,
               moduleProgress: newModuleProgress
             });
-            
+
             userProgress = newProgress;
             userPayment = newPayment;
             moduleProgress = newModuleProgress;
             lastUpdateTime = Date.now();
-            
+
             // Плавное обновление интерфейса
             updateInterface();
           } else if (!isUpdate) {
@@ -894,11 +1029,11 @@
     // Плавное обновление интерфейса
     function updateInterface() {
       const modulesContainer = document.getElementById('modulesContainer');
-      
+
       // Добавляем плавный переход
       modulesContainer.style.transition = 'opacity 0.3s ease';
       modulesContainer.style.opacity = '0.7';
-      
+
       setTimeout(() => {
         renderModules();
         modulesContainer.style.opacity = '1';
@@ -911,12 +1046,12 @@
       if (checkInterval) {
         clearInterval(checkInterval);
       }
-      
+
       // Устанавливаем проверку каждые 3 секунды
       checkInterval = setInterval(() => {
         getUserData(true);
       }, 3000);
-      
+
       console.log('Автоматическая проверка обновлений запущена (каждые 3 сек)');
     }
 
@@ -934,11 +1069,11 @@
       if (userProgress === 5) {
         return 'completed'; // Все модули завершены
       }
-      
+
       if (userProgress > module.requiredProgress) {
         return 'completed'; // Модуль пройден
       }
-      
+
       // Логика текущего модуля
       if (module.id === 'intro' && userProgress === 0) {
         return 'current';
@@ -947,7 +1082,7 @@
       } else if (userProgress >= module.requiredProgress) {
         return userProgress === module.requiredProgress ? 'current' : 'completed';
       }
-      
+
       return 'locked'; // Модуль заблокирован
     }
 
@@ -958,7 +1093,7 @@
 
       modules.forEach((module, index) => {
         const moduleState = getModuleState(module, index);
-        
+
         // Логика доступности
         let isAvailable = false;
         let buttonText = 'Начать';
@@ -983,12 +1118,12 @@
         const maxProgress = module.id === 'm1' ? 17 : 10;
         const currentModuleProgress = moduleProgress[module.id] || 0;
         const progressPercentage = (currentModuleProgress / maxProgress) * 100;
-        
+
         const moduleCard = document.createElement('div');
         moduleCard.className = `module-card ${moduleState}`;
-        
-        
-        
+
+
+
         moduleCard.innerHTML = `
           <div class="module-header">
             <div style="display: flex; align-items: center; gap: 0.5rem;">
@@ -1004,7 +1139,7 @@
           <div class="module-content">
             <div class="module-info">
               <h3 class="module-title">${module.title}</h3>
-              
+
               <div class="module-progress">
                 <div class="progress-label">Прогресс модуля</div>
                 <div class="progress-bar-container">
@@ -1012,17 +1147,17 @@
                 </div>
                 <div class="progress-text">${currentModuleProgress}/${maxProgress}</div>
               </div>
-              
+
               <button class="module-start-btn" data-file="${module.file}" data-available="${isAvailable}">${buttonText}</button>
             </div>
           </div>
         `;
-        
+
         // Добавляем обработчики событий после создания элемента
         const favoriteBtn = moduleCard.querySelector('.favorite-btn');
         const infoBtn = moduleCard.querySelector('.info-btn');
         const startBtn = moduleCard.querySelector('.module-start-btn');
-        
+
         favoriteBtn.addEventListener('click', (e) => {
           e.preventDefault();
           e.stopPropagation();
@@ -1042,14 +1177,21 @@
           startBtn.addEventListener('click', (e) => {
             e.preventDefault();
             e.stopPropagation();
-            startModule(module.file);
+            if (buttonText === 'Повторить') {
+              // Открываем модальное окно для подтверждения сброса прогресса
+              currentModuleId = module.id;
+              document.getElementById('resetModuleName').textContent = module.title;
+              openResetModal();
+            } else {
+              startModule(module.file);
+            }
             return false;
           });
         }
-        
+
         modulesContainer.appendChild(moduleCard);
       });
-      
+
       // Обновляем информацию о пользователе
       updateUserInfo();
     }
@@ -1058,14 +1200,14 @@
     function updateUserInfo() {
       const progressTitle = document.querySelector('.progress-title');
       const progressSubtitle = document.querySelector('.progress-subtitle');
-      
+
       if (progressTitle) {
         progressTitle.textContent = 'Общий прогресс';
       }
-      
+
       // Обновляем общий прогресс
       updateOverallProgress();
-      
+
       if (progressSubtitle) {
         progressSubtitle.textContent = 'Ваше продвижение по курсу';
       }
@@ -1083,15 +1225,15 @@
       });
 
       const progressPercentage = (completedBlocks / totalBlocks) * 100;
-      
+
       const progressBar = document.getElementById('overallProgressBar');
       const progressText = document.getElementById('overallProgressText');
       const progressPercent = document.getElementById('overallProgressPercent');
-      
+
       if (progressBar) {
         progressBar.style.width = `${progressPercentage}%`;
       }
-      
+
       if (progressText) {
         progressText.textContent = `${completedBlocks}/${totalBlocks}`;
       }
@@ -1104,6 +1246,43 @@
     // Начать модуль
     function startModule(file) {
       window.location.href = file;
+    }
+
+    // Сброс прогресса модуля
+    async function resetModuleProgress() {
+      const moduleId = currentModuleId;
+      const module = modules.find(m => m.id === moduleId);
+
+      if (!module) {
+        console.error('Module not found');
+        closeResetModal();
+        return;
+      }
+
+      try {
+        const data = {};
+        data[module.progressField] = 0;
+
+        const response = await fetch(`${config.baseUrl}/${config.orgs}/${config.projectName}/${config.tableName}/${userId}`, {
+          method: 'PATCH',
+          headers: {
+            'xc-token': config.apiToken,
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify(data)
+        });
+
+        if (!response.ok) {
+          throw new Error(`HTTP error! status: ${response.status}`);
+        }
+
+        // Обновляем данные и интерфейс
+        await getUserData(true);
+        closeResetModal();
+      } catch (error) {
+        console.error('Error resetting module progress:', error);
+        closeResetModal();
+      }
     }
 
     // Обработчики навигации
@@ -1129,10 +1308,10 @@
       const modal = document.getElementById('moduleInfoModal');
       const modalTitle = document.getElementById('modalTitle');
       const modalBody = document.getElementById('modalBody');
-      
+
       modalTitle.textContent = title;
       modalBody.textContent = description;
-      
+
       modal.classList.add('show');
     }
 
@@ -1142,25 +1321,64 @@
       modal.classList.remove('show');
     }
 
+    // Функция открытия модального окна сброса прогресса
+    function openResetModal() {
+      const modal = document.getElementById('resetProgressModal');
+      modal.classList.add('show');
+    }
+
+    // Функция закрытия модального окна сброса прогресса
+    function closeResetModal() {
+      const modal = document.getElementById('resetProgressModal');
+      modal.classList.remove('show');
+    }
+
     // Обработчики для модального окна
     document.addEventListener('DOMContentLoaded', () => {
       const modal = document.getElementById('moduleInfoModal');
       const modalClose = document.getElementById('modalClose');
-      
+
       // Закрытие по кнопке
       modalClose.addEventListener('click', closeModuleInfo);
-      
+
       // Закрытие по клику на фон
       modal.addEventListener('click', (e) => {
         if (e.target === modal) {
           closeModuleInfo();
         }
       });
-      
+
       // Закрытие по Escape
       document.addEventListener('keydown', (e) => {
         if (e.key === 'Escape' && modal.classList.contains('show')) {
           closeModuleInfo();
+        }
+      });
+
+      // Обработчики для модального окна сброса прогресса
+      const resetModal = document.getElementById('resetProgressModal');
+      const resetModalClose = document.getElementById('resetModalClose');
+      const cancelResetBtn = document.getElementById('cancelResetBtn');
+      const confirmResetBtn = document.getElementById('confirmResetBtn');
+
+      // Закрытие по кнопке
+      resetModalClose.addEventListener('click', closeResetModal);
+      cancelResetBtn.addEventListener('click', closeResetModal);
+
+      // Подтверждение сброса
+      confirmResetBtn.addEventListener('click', resetModuleProgress);
+
+      // Закрытие по клику на фон
+      resetModal.addEventListener('click', (e) => {
+        if (e.target === resetModal) {
+          closeResetModal();
+        }
+      });
+
+      // Закрытие по Escape для reset modal
+      document.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape' && resetModal.classList.contains('show')) {
+          closeResetModal();
         }
       });
     });
@@ -1184,21 +1402,21 @@
       const notification = document.createElement('div');
       notification.className = 'notification';
       currentNotification = notification;
-      
+
       const isFav = isFavorite(moduleId);
       const action = isFav ? 'добавлено в' : 'удалено из';
-      
+
       notification.innerHTML = `
         ${moduleLabel} ${action} <a href="favorite.html">избранное</a>
       `;
-      
+
       document.body.appendChild(notification);
-      
+
       // Показываем уведомление
       setTimeout(() => {
         notification.classList.add('show');
       }, 100);
-      
+
       // Скрываем через 2 секунды
       setTimeout(() => {
         notification.classList.remove('show');
@@ -1237,21 +1455,21 @@
         hideLoadingScreen();
       });
       startAutoUpdate();
-      
+
       // Инициализация модального окна
       const modal = document.getElementById('moduleInfoModal');
       const modalClose = document.getElementById('modalClose');
-      
+
       // Закрытие по кнопке
       modalClose.addEventListener('click', closeModuleInfo);
-      
+
       // Закрытие по клику на фон
       modal.addEventListener('click', (e) => {
         if (e.target === modal) {
           closeModuleInfo();
         }
       });
-      
+
       // Закрытие по Escape
       document.addEventListener('keydown', (e) => {
         if (e.key === 'Escape' && modal.classList.contains('show')) {
