@@ -711,7 +711,7 @@
 
     .reset-modal-actions {
       display: flex;
-      justify-content: flex-end;
+      justify-content: center;
       gap: 0.75rem;
     }
 
@@ -723,6 +723,7 @@
       cursor: pointer;
       transition: all 0.3s ease;
       font-size: 0.9rem;
+      min-width: 100px;
     }
 
     .cancel-reset-btn {
@@ -737,10 +738,33 @@
     .confirm-reset-btn {
       background: #ef4444;
       color: white;
+      position: relative;
     }
 
-    .confirm-reset-btn:hover {
+    .confirm-reset-btn:hover:not(:disabled) {
       background: #dc2626;
+    }
+
+    .confirm-reset-btn:disabled {
+      background: #ef4444;
+      opacity: 0.7;
+      cursor: not-allowed;
+    }
+
+    .reset-loading {
+      display: none;
+      width: 16px;
+      height: 16px;
+      border: 2px solid #ffffff40;
+      border-top: 2px solid #ffffff;
+      border-radius: 50%;
+      animation: resetSpin 1s linear infinite;
+      margin-right: 8px;
+    }
+
+    @keyframes resetSpin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
     }
   </style>
 </head>
@@ -827,7 +851,10 @@
       </div>
       <div class="reset-modal-actions">
         <button class="cancel-reset-btn" id="cancelResetBtn">Отмена</button>
-        <button class="confirm-reset-btn" id="confirmResetBtn">Сбросить</button>
+        <button class="confirm-reset-btn" id="confirmResetBtn">
+          <span class="reset-loading" id="resetLoading"></span>
+          <span id="resetBtnText">Сбросить</span>
+        </button>
       </div>
     </div>
   </div>
@@ -1259,30 +1286,90 @@
         return;
       }
 
-      try {
-        const data = {};
-        data[module.progressField] = 0;
+      // Показываем загрузку
+      showResetLoading();
 
-        const response = await fetch(`${config.baseUrl}/${config.orgs}/${config.projectName}/${config.tableName}/${userId}`, {
-          method: 'PATCH',
+      try {
+        // Сначала получаем текущие данные пользователя
+        const response = await fetch(`${config.baseUrl}/${config.orgs}/${config.projectName}/${config.tableName}`, {
           headers: {
-            'xc-token': config.apiToken,
-            'Content-Type': 'application/json'
-          },
-          body: JSON.stringify(data)
+            'xc-token': config.apiToken
+          }
         });
 
         if (!response.ok) {
           throw new Error(`HTTP error! status: ${response.status}`);
         }
 
-        // Обновляем данные и интерфейс
-        await getUserData(true);
+        const data = await response.json();
+        const user = data.list.find(u => u.tg_user_id == userId);
+
+        if (!user) {
+          throw new Error('User not found');
+        }
+
+        // Обновляем прогресс модуля на 0
+        const updateData = {};
+        updateData[module.progressField] = 0;
+
+        const updateResponse = await fetch(`${config.baseUrl}/${config.orgs}/${config.projectName}/${config.tableName}/${user.Id}`, {
+          method: 'PATCH',
+          headers: {
+            'xc-token': config.apiToken,
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify(updateData)
+        });
+
+        if (!updateResponse.ok) {
+          throw new Error(`HTTP error! status: ${updateResponse.status}`);
+        }
+
+        console.log(`Прогресс модуля ${module.progressField} сброшен до 0`);
+
+        // Скрываем загрузку
+        hideResetLoading();
+        
+        // Закрываем модальное окно
         closeResetModal();
+
+        // Обновляем данные и переходим к модулю
+        await getUserData(true);
+        
+        // Переходим к модулю
+        window.location.href = module.file;
+
       } catch (error) {
         console.error('Error resetting module progress:', error);
+        hideResetLoading();
         closeResetModal();
       }
+    }
+
+    // Показать загрузку в кнопке сброса
+    function showResetLoading() {
+      const confirmBtn = document.getElementById('confirmResetBtn');
+      const cancelBtn = document.getElementById('cancelResetBtn');
+      const loading = document.getElementById('resetLoading');
+      const btnText = document.getElementById('resetBtnText');
+
+      confirmBtn.disabled = true;
+      cancelBtn.disabled = true;
+      loading.style.display = 'inline-block';
+      btnText.textContent = 'Сброс...';
+    }
+
+    // Скрыть загрузку в кнопке сброса
+    function hideResetLoading() {
+      const confirmBtn = document.getElementById('confirmResetBtn');
+      const cancelBtn = document.getElementById('cancelResetBtn');
+      const loading = document.getElementById('resetLoading');
+      const btnText = document.getElementById('resetBtnText');
+
+      confirmBtn.disabled = false;
+      cancelBtn.disabled = false;
+      loading.style.display = 'none';
+      btnText.textContent = 'Сбросить';
     }
 
     // Обработчики навигации
