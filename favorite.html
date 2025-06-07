@@ -827,8 +827,8 @@
           buttonText = userPayment === 0 && module.id === 'm1' ? 'Требуется оплата' : 'Заблокировано';
         }
 
-        // Получаем прогресс модуля (для intro до 5, для М1 до 17, для M2 до 19, для M3 до 24, для остальных до 10)
-        const maxProgress = module.id === 'intro' ? 5 : (module.id === 'm1' ? 17 : (module.id === 'm2' ? 19 : (module.id === 'm3' ? 24 : 10)));
+        // Получаем прогресс модуля (для intro до 5, для М1 до 17, для M2 до 19, для M3 до 24, для M4 до 8)
+        const maxProgress = module.id === 'intro' ? 5 : (module.id === 'm1' ? 17 : (module.id === 'm2' ? 19 : (module.id === 'm3' ? 24 : (module.id === 'm4' ? 8 : 10))));
         const currentModuleProgress = moduleProgress[module.id] || 0;
         const progressPercentage = (currentModuleProgress / maxProgress) * 100;
 
@@ -897,7 +897,7 @@
 
     // Обновить общий прогресс
     function updateOverallProgress() {
-      const totalBlocks = 75; // Общее количество блоков во всех модулях (intro: 5, M1: 17, M2: 19, M3: 24, M4: 10)
+      const totalBlocks = 73; // Общее количество блоков во всех модулях (intro: 5, M1: 17, M2: 19, M3: 24, M4: 8)
       let completedBlocks = 0;
 
       // Считаем завершенные блоки из всех модулей
