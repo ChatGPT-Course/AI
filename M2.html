@@ -1406,14 +1406,20 @@
 
     // Сохранить отзыв
     async function saveReview(rating, comment) {
-      if (!userId) return;
+      if (!userId) return false;
 
       try {
+        // Получаем данные пользователя
+        const userName = getCookie('tg_name') || '-';
+        const userUsername = getCookie('tg_username') || '-';
+
         const reviewData = {
-          tg_user_id: userId,
-          module: 'M2',
+          user_id: userId,
+          name: userName,
+          username: userUsername,
+          module: 'М2',
           rating: rating,
-          comment: comment || '',
+          discription: comment || '-',
           date: new Date().toISOString().split('T')[0]
         };
 
@@ -1652,6 +1658,33 @@
     });
 
     document.getElementById('skipReview').addEventListener('click', async () => {
+      // Сохраняем запись о пропуске отзыва
+      const userName = getCookie('tg_name') || '-';
+      const userUsername = getCookie('tg_username') || '-';
+      
+      try {
+        const skipData = {
+          user_id: userId || '-',
+          name: userName,
+          username: userUsername,
+          module: 'М2',
+          rating: '-',
+          discription: 'пропуск отзыва',
+          date: new Date().toISOString().split('T')[0]
+        };
+
+        await fetch(`${config.baseUrl}/${config.orgs}/${config.projectName}/${config.reviewTableName}`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'xc-token': config.apiToken
+          },
+          body: JSON.stringify(skipData)
+        });
+      } catch (error) {
+        console.error('Ошибка при сохранении пропуска отзыва:', error);
+      }
+
       reviewModal.style.display = 'none';
       // Обновляем прогресс до 3 даже при пропуске отзыва
       await updateOverallProgress();
