@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="ru">
 <head>
@@ -593,7 +592,7 @@
     // Загрузить прогресс пользователя при инициализации
     async function loadUserProgress() {
       userId = getCookie('tg_user_id');
-      
+
       if (!userId) {
         console.log('User ID не найден');
         hideLoading();
@@ -621,7 +620,7 @@
           if (savedProgress > 0 && savedProgress <= totalBlocks) {
             currentBlock = savedProgress;
             console.log('Загружен прогресс:', currentBlock);
-            
+
             // Быстро показываем все блоки до текущего
             await fastLoadToCurrentBlock();
           }
@@ -629,7 +628,7 @@
       } catch (error) {
         console.error('Ошибка при загрузке прогресса:', error);
       }
-      
+
       hideLoading();
     }
 
@@ -642,10 +641,10 @@
           block.classList.add('visible');
         }
       }
-      
+
       // Небольшая задержка для плавности
       await new Promise(resolve => setTimeout(resolve, 300));
-      
+
       // Скролл к текущему блоку
       if (currentBlock > 1) {
         const currentBlockElement = document.getElementById(`block${currentBlock}`);
@@ -757,7 +756,7 @@
     // Функция показа блока
     function showBlock(blockNumber) {
       const block = document.getElementById(`block${blockNumber}`);
-      
+
       if (block && !block.classList.contains('visible')) {
         // Сначала показываем блок
         block.style.display = 'block';
@@ -805,22 +804,22 @@
     // Функция защиты от спама кнопки
     function disableButtonTemporarily() {
       if (isButtonDisabled) return false;
-      
+
       isButtonDisabled = true;
       continueButton.classList.add('disabled');
-      
+
       setTimeout(() => {
         isButtonDisabled = false;
         continueButton.classList.remove('disabled');
       }, 500);
-      
+
       return true;
     }
 
     // Обработчик кнопки продолжения
     continueButton.addEventListener('click', () => {
       if (!disableButtonTemporarily()) return;
-      
+
       if (currentBlock < totalBlocks) {
         currentBlock++;
         showBlock(currentBlock);
@@ -836,10 +835,10 @@
     async function handleModuleCompletion() {
       // Сохраняем финальный прогресс
       await saveProgress();
-      
+
       // Обновляем общий прогресс до 1
       await updateOverallProgress();
-      
+
       // Показываем модальное окно завершения
       showCompletionModal();
     }
@@ -861,12 +860,12 @@
 
     confirmExit.addEventListener('click', async () => {
       await saveProgress(); // Сохраняем прогресс при выходе
-      
+
       // Если пользователь выходит на 5/5, помечаем модуль как пройденный
       if (currentBlock === totalBlocks) {
         await updateOverallProgress();
       }
-      
+
       window.location.href = 'gaid.html';
     });
 
@@ -884,7 +883,7 @@
     // Сохранение прогресса при закрытии страницы
     window.addEventListener('beforeunload', async () => {
       await saveProgress();
-      
+
       // Если пользователь выходит на 5/5, помечаем модуль как пройденный
       if (currentBlock === totalBlocks) {
         await updateOverallProgress();
@@ -895,12 +894,85 @@
     document.addEventListener('visibilitychange', async () => {
       if (document.visibilityState === 'hidden') {
         await saveProgress();
-        
+
         // Если пользователь выходит на 5/5, помечаем модуль как пройденный
         if (currentBlock === totalBlocks) {
           await updateOverallProgress();
         }
       }
+    });
+
+    // Сохранить отзыв
+    async function saveReview(rating, comment) {
+      if (!userId) return false;
+
+      try {
+        // Получаем данные пользователя
+        const userName = getCookie('tg_name') || '-';
+        const userUsername = getCookie('tg_username') || '-';
+
+        const reviewData = {
+          user_id: userId,
+          name: userName,
+          username: userUsername,
+          module: 'Вступление',
+          rating: rating,
+          discription: comment || '-',
+          date: new Date().toISOString().split('T')[0]
+        };
+
+        const createResponse = await fetch(`${config.baseUrl}/${config.orgs}/${config.projectName}/${config.reviewTableName}`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'xc-token': config.apiToken
+          },
+          body: JSON.stringify(reviewData)
+        });
+
+        if (createResponse.ok) {
+          console.log('Отзыв сохранен');
+          return true;
+        }
+      } catch (error) {
+        console.error('Ошибка при сохранении отзыва:', error);
+      }
+
+      return false;
+    }
+
+    document.getElementById('skipReview').addEventListener('click', async () => {
+      // Сохраняем запись о пропуске отзыва
+      const userName = getCookie('tg_name') || '-';
+      const userUsername = getCookie('tg_username') || '-';
+
+      try {
+        const skipData = {
+          user_id: userId || '-',
+          name: userName,
+          username: userUsername,
+          module: 'Вступление',
+          rating: '-',
+          discription: 'пропуск отзыва',
+          date: new Date().toISOString().split('T')[0]
+        };
+
+        await fetch(`${config.baseUrl}/${config.orgs}/${config.projectName}/${config.reviewTableName}`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'xc-token': config.apiToken
+          },
+          body: JSON.stringify(skipData)
+        });
+      } catch (error) {
+        console.error('Ошибка при сохранении пропуска отзыва:', error);
+      }
+
+      reviewModal.style.display = 'none';
+      // Обновляем прогресс до 1 даже при пропуске отзыва
+      await updateOverallProgress();
+      showCompletionModal();
     });
   </script>
 </body>
