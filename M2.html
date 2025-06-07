@@ -1209,6 +1209,7 @@
     let selectedRating = null;
     let previousProgress = 1;
     let chatHistory = [];
+    let quizResults = {}; // Результаты квизов
 
     // Конфигурация NocoDB
     const config = {
@@ -1418,8 +1419,8 @@
           name: userName,
           username: userUsername,
           module: 'М2',
-          rating: rating,
-          discription: comment || '-',
+          emoji: rating,
+          description: comment || '-',
           date: new Date().toISOString().split('T')[0]
         };
 
@@ -1465,6 +1466,7 @@
       setTimeout(() => {
         continueButton.classList.add('visible');
         updateButtonText();
+        updateContinueButtonState(); // Проверяем состояние кнопки
       }, 1000);
 
       // Плавный скролл к блоку так, чтобы он начинался под панелью
@@ -1487,13 +1489,24 @@
     function initQuizzes() {
       const quizContainers = document.querySelectorAll('.quiz-container');
       
-      quizContainers.forEach(container => {
+      quizContainers.forEach((container, index) => {
         const options = container.querySelectorAll('.quiz-option');
         const submitBtn = container.querySelector('.quiz-submit-btn');
         const feedback = container.querySelector('.quiz-feedback');
+        const quizId = container.id || `quiz${index + 1}`;
         
         let selectedOption = null;
-        let quizAnswered = false;
+        let quizAnswered = quizResults[quizId] || false;
+        
+        // Если квиз уже пройден, показываем результат
+        if (quizAnswered) {
+          feedback.classList.add('show');
+          submitBtn.style.display = 'none';
+          const correctOption = Array.from(options).find(opt => opt.dataset.correct === 'true');
+          if (correctOption) {
+            correctOption.classList.add('correct');
+          }
+        }
         
         options.forEach(option => {
           option.addEventListener('click', () => {
@@ -1511,6 +1524,7 @@
           if (!selectedOption || quizAnswered) return;
           
           quizAnswered = true;
+          quizResults[quizId] = true;
           const isCorrect = selectedOption.dataset.correct === 'true';
           
           if (isCorrect) {
@@ -1526,8 +1540,43 @@
           
           feedback.classList.add('show');
           submitBtn.style.display = 'none';
+          
+          // Обновляем состояние кнопки продолжить
+          updateContinueButtonState();
         });
       });
+    }
+
+    // Проверка на блокирующие блоки (квизы)
+    function isBlockingBlock(blockNumber) {
+      const blockingBlocks = [5, 7, 14]; // Блоки с квизами
+      return blockingBlocks.includes(blockNumber);
+    }
+
+    // Проверка завершения квизов
+    function areRequiredQuizzesCompleted(blockNumber) {
+      if (blockNumber === 5) {
+        return quizResults['quizBlock1'] || false;
+      } else if (blockNumber === 7) {
+        return quizResults['quizBlock2'] || false;
+      } else if (blockNumber === 14) {
+        return quizResults['quizBlock3'] || false;
+      }
+      return true;
+    }
+
+    // Обновление состояния кнопки продолжить
+    function updateContinueButtonState() {
+      if (isBlockingBlock(currentBlock)) {
+        const canContinue = areRequiredQuizzesCompleted(currentBlock);
+        if (canContinue) {
+          continueButton.classList.remove('disabled');
+          continueButton.textContent = currentBlock < totalBlocks ? 'Продолжить' : 'Завершить модуль';
+        } else {
+          continueButton.classList.add('disabled');
+          continueButton.textContent = 'Пройдите тест';
+        }
+      }
     }
 
     // Обновление текста кнопки
@@ -1564,6 +1613,15 @@
     // Обработчик кнопки продолжения
     continueButton.addEventListener('click', () => {
       if (!disableButtonTemporarily()) return;
+      
+      // Проверяем, является ли текущий блок блокирующим
+      if (isBlockingBlock(currentBlock)) {
+        const canContinue = areRequiredQuizzesCompleted(currentBlock);
+        if (!canContinue) {
+          // Блокируем переход, если квиз не пройден
+          return;
+        }
+      }
       
       if (currentBlock < totalBlocks) {
         currentBlock++;
@@ -1668,8 +1726,8 @@
           name: userName,
           username: userUsername,
           module: 'М2',
-          rating: '-',
-          discription: 'пропуск отзыва',
+          emoji: '-',
+          description: 'пропуск отзыва',
           date: new Date().toISOString().split('T')[0]
         };
 
