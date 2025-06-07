@@ -455,156 +455,6 @@
     }
 
     /* Адаптивность */
-    /* Модальное окно для повторного прохождения */
-    .repeat-modal-overlay {
-      position: fixed;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-      background: rgba(0, 0, 0, 0.5);
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      z-index: 1001;
-      opacity: 0;
-      visibility: hidden;
-      transition: all 0.3s ease;
-    }
-
-    .repeat-modal-overlay.show {
-      opacity: 1;
-      visibility: visible;
-    }
-
-    .repeat-modal-content {
-      background: white;
-      border-radius: 12px;
-      padding: 1.5rem;
-      max-width: 90%;
-      width: 400px;
-      max-height: 80%;
-      overflow-y: auto;
-      position: relative;
-      transform: scale(0.9);
-      transition: transform 0.3s ease;
-    }
-
-    .repeat-modal-overlay.show .repeat-modal-content {
-      transform: scale(1);
-    }
-
-    .repeat-modal-header {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      margin-bottom: 1rem;
-      padding-bottom: 0.5rem;
-      border-bottom: 1px solid #e5e7eb;
-    }
-
-    .repeat-modal-title {
-      font-size: 1.2rem;
-      font-weight: 600;
-      color: #2c3e50;
-      margin: 0;
-    }
-
-    .repeat-modal-close {
-      background: none;
-      border: none;
-      font-size: 1.5rem;
-      cursor: pointer;
-      padding: 0.2rem;
-      width: 32px;
-      height: 32px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      border-radius: 6px;
-      color: #6c757d;
-      transition: all 0.2s ease;
-    }
-
-    .repeat-modal-close:hover {
-      background: #f3f4f6;
-      color: #374151;
-    }
-
-    .repeat-modal-body {
-      color: #6c757d;
-      line-height: 1.6;
-      font-size: 0.95rem;
-      margin-bottom: 1.5rem;
-    }
-
-    .repeat-modal-actions {
-      display: flex;
-      justify-content: center;
-      gap: 0.75rem;
-    }
-
-    .repeat-modal-actions button {
-      border: none;
-      border-radius: 8px;
-      padding: 0.75rem 1.25rem;
-      font-weight: 600;
-      cursor: pointer;
-      transition: all 0.3s ease;
-      font-size: 0.9rem;
-      min-width: 100px;
-    }
-
-    .cancel-repeat-btn {
-      background: #e5e7eb;
-      color: #374151;
-    }
-
-    .cancel-repeat-btn:hover {
-      background: #d1d5db;
-    }
-
-    .continue-repeat-btn {
-      background: #3b82f6;
-      color: white;
-    }
-
-    .continue-repeat-btn:hover {
-      background: #2563eb;
-    }
-
-    .reset-repeat-btn {
-      background: #ef4444;
-      color: white;
-      position: relative;
-    }
-
-    .reset-repeat-btn:hover:not(:disabled) {
-      background: #dc2626;
-    }
-
-    .reset-repeat-btn:disabled {
-      background: #ef4444;
-      opacity: 0.7;
-      cursor: not-allowed;
-    }
-
-    .repeat-loading {
-      display: none;
-      width: 16px;
-      height: 16px;
-      border: 2px solid #ffffff40;
-      border-top: 2px solid #ffffff;
-      border-radius: 50%;
-      animation: repeatSpin 1s linear infinite;
-      margin-right: 8px;
-    }
-
-    @keyframes repeatSpin {
-      0% { transform: rotate(0deg); }
-      100% { transform: rotate(360deg); }
-    }
-
     @media (max-width: 768px) {
       .main-content {
         padding: 1rem 0.5rem;
@@ -661,22 +511,6 @@
 
     <div class="modules-container" id="modulesContainer">
       <!-- Модули будут загружены динамически через JavaScript -->
-    </div>
-  </div>
-
-  <!-- Модальное окно для повторного прохождения -->
-  <div class="repeat-modal-overlay" id="repeatProgressModal">
-    <div class="repeat-modal-content">
-      <div class="repeat-modal-header">
-        <h3 class="repeat-modal-title">Повторное прохождение</h3>
-        <button class="repeat-modal-close" id="repeatModalClose">×</button>
-      </div>
-      <div class="repeat-modal-body" id="repeatModalBody">
-        <p>Что вы хотите сделать с модулем "<span id="repeatModuleName"></span>"?</p>
-      </div>
-      <div class="repeat-modal-actions" id="repeatModalActions">
-        <!-- Кнопки будут добавлены динамически -->
-      </div>
     </div>
   </div>
 
@@ -755,9 +589,9 @@
       {
         id: 'm3',
         icon: '⚡',
-        title: 'Практическое применение',
+        title: 'Продвинутые техники ИИ',
         label: 'Модуль 3',
-        description: 'Практическое применение ИИ. Работа с реальными проектами',
+        description: 'Продвинутые техники работы с ИИ. Методика CRAFT и профессиональные промпты',
         file: 'M3.html',
         requiredProgress: 3,
         progressField: 'M3_progress'
@@ -780,7 +614,6 @@
     let lastUpdateTime = 0;
     let checkInterval = null;
     let moduleProgress = {};
-    let currentModuleId = null; // ID текущего модуля для сброса
 
     // Получить данные пользователя из cookies
     function getCookie(name) {
@@ -994,8 +827,8 @@
           buttonText = userPayment === 0 && module.id === 'm1' ? 'Требуется оплата' : 'Заблокировано';
         }
 
-        // Получаем прогресс модуля (для intro до 5, для М1 до 17, для M2 до 19, для остальных до 10)
-        const maxProgress = module.id === 'intro' ? 5 : (module.id === 'm1' ? 17 : (module.id === 'm2' ? 19 : 10));
+        // Получаем прогресс модуля (для intro до 5, для М1 до 17, для M2 до 19, для M3 до 24, для остальных до 10)
+        const maxProgress = module.id === 'intro' ? 5 : (module.id === 'm1' ? 17 : (module.id === 'm2' ? 19 : (module.id === 'm3' ? 24 : 10)));
         const currentModuleProgress = moduleProgress[module.id] || 0;
         const progressPercentage = (currentModuleProgress / maxProgress) * 100;
 
@@ -1041,25 +874,7 @@
         if (isAvailable) {
           startBtn.addEventListener('click', (e) => {
             e.stopPropagation();
-            if (buttonText === 'Повторить') {
-              // Открываем модальное окно для повторного прохождения
-              currentModuleId = module.id;
-              const currentModuleProgress = moduleProgress[module.id] || 0;
-              const maxProgress = module.id === 'intro' ? 5 : (module.id === 'm1' ? 17 : (module.id === 'm2' ? 19 : 10));
-              
-              document.getElementById('repeatModuleName').textContent = module.title;
-              
-              // Проверяем, полностью ли пройден модуль
-              if (currentModuleProgress >= maxProgress) {
-                // Модуль полностью пройден - предлагаем отменить или сбросить
-                openRepeatModal('complete');
-              } else {
-                // Модуль частично пройден - предлагаем продолжить или отменить
-                openRepeatModal('partial', currentModuleProgress, maxProgress);
-              }
-            } else {
-              startModule(module.file);
-            }
+            startModule(module.file);
           });
         }
 
@@ -1082,7 +897,7 @@
 
     // Обновить общий прогресс
     function updateOverallProgress() {
-      const totalBlocks = 66; // Общее количество блоков во всех модулях (intro: 5, M1: 17, M2: 19, M3-M4: по 10)
+      const totalBlocks = 75; // Общее количество блоков во всех модулях (intro: 5, M1: 17, M2: 19, M3: 24, M4: 10)
       let completedBlocks = 0;
 
       // Считаем завершенные блоки из всех модулей
@@ -1127,174 +942,6 @@
       window.location.href = 'profile.html';
     });
 
-    // Функция открытия модального окна повторения
-    function openRepeatModal(type, currentProgress = 0, maxProgress = 0) {
-      const modal = document.getElementById('repeatProgressModal');
-      const modalBody = document.getElementById('repeatModalBody');
-      const modalActions = document.getElementById('repeatModalActions');
-      
-      modalActions.innerHTML = ''; // Очищаем кнопки
-      
-      if (type === 'complete') {
-        // Модуль полностью пройден
-        modalBody.innerHTML = `
-          <p>Модуль "<span id="repeatModuleName">${modules.find(m => m.id === currentModuleId)?.title}</span>" полностью пройден.</p>
-          <p>Вы можете сбросить прогресс и начать заново.</p>
-        `;
-        
-        modalActions.innerHTML = `
-          <button class="cancel-repeat-btn" id="cancelRepeatBtn">Отмена</button>
-          <button class="reset-repeat-btn" id="resetRepeatBtn">
-            <span class="repeat-loading" id="repeatLoading"></span>
-            <span id="resetBtnText">Сбросить</span>
-          </button>
-        `;
-        
-        // Добавляем обработчики
-        document.getElementById('cancelRepeatBtn').addEventListener('click', closeRepeatModal);
-        document.getElementById('resetRepeatBtn').addEventListener('click', resetModuleProgress);
-        
-      } else if (type === 'partial') {
-        // Модуль частично пройден
-        modalBody.innerHTML = `
-          <p>Модуль "<span id="repeatModuleName">${modules.find(m => m.id === currentModuleId)?.title}</span>" пройден частично (${currentProgress}/${maxProgress}).</p>
-          <p>Вы можете продолжить с места остановки или сбросить прогресс.</p>
-        `;
-        
-        modalActions.innerHTML = `
-          <button class="cancel-repeat-btn" id="cancelRepeatBtn">Отмена</button>
-          <button class="continue-repeat-btn" id="continueRepeatBtn">Продолжить</button>
-          <button class="reset-repeat-btn" id="resetRepeatBtn">
-            <span class="repeat-loading" id="repeatLoading"></span>
-            <span id="resetBtnText">Сбросить</span>
-          </button>
-        `;
-        
-        // Добавляем обработчики
-        document.getElementById('cancelRepeatBtn').addEventListener('click', closeRepeatModal);
-        document.getElementById('continueRepeatBtn').addEventListener('click', continueModule);
-        document.getElementById('resetRepeatBtn').addEventListener('click', resetModuleProgress);
-      }
-      
-      modal.classList.add('show');
-    }
-
-    // Функция закрытия модального окна повторения
-    function closeRepeatModal() {
-      const modal = document.getElementById('repeatProgressModal');
-      modal.classList.remove('show');
-    }
-
-    // Функция продолжения модуля
-    function continueModule() {
-      const module = modules.find(m => m.id === currentModuleId);
-      if (module) {
-        closeRepeatModal();
-        window.location.href = module.file;
-      }
-    }
-
-    // Сброс прогресса модуля
-    async function resetModuleProgress() {
-      const moduleId = currentModuleId;
-      const module = modules.find(m => m.id === moduleId);
-
-      if (!module) {
-        console.error('Module not found');
-        closeRepeatModal();
-        return;
-      }
-
-      // Показываем загрузку
-      showRepeatLoading();
-
-      try {
-        // Сначала получаем текущие данные пользователя
-        const response = await fetch(`${config.baseUrl}/${config.orgs}/${config.projectName}/${config.tableName}`, {
-          headers: {
-            'xc-token': config.apiToken
-          }
-        });
-
-        if (!response.ok) {
-          throw new Error(`HTTP error! status: ${response.status}`);
-        }
-
-        const data = await response.json();
-        const user = data.list.find(u => u.tg_user_id == userId);
-
-        if (!user) {
-          throw new Error('User not found');
-        }
-
-        // Обновляем прогресс модуля на 0
-        const updateData = {};
-        updateData[module.progressField] = 0;
-
-        const updateResponse = await fetch(`${config.baseUrl}/${config.orgs}/${config.projectName}/${config.tableName}/${user.Id}`, {
-          method: 'PATCH',
-          headers: {
-            'xc-token': config.apiToken,
-            'Content-Type': 'application/json'
-          },
-          body: JSON.stringify(updateData)
-        });
-
-        if (!updateResponse.ok) {
-          throw new Error(`HTTP error! status: ${updateResponse.status}`);
-        }
-
-        console.log(`Прогресс модуля ${module.progressField} сброшен до 0`);
-
-        // Скрываем загрузку
-        hideRepeatLoading();
-        
-        // Закрываем модальное окно
-        closeRepeatModal();
-
-        // Обновляем данные и переходим к модулю
-        await getUserData(true);
-        
-        // Переходим к модулю
-        window.location.href = module.file;
-
-      } catch (error) {
-        console.error('Error resetting module progress:', error);
-        hideRepeatLoading();
-        closeRepeatModal();
-      }
-    }
-
-    // Показать загрузку в кнопке сброса
-    function showRepeatLoading() {
-      const resetBtn = document.getElementById('resetRepeatBtn');
-      const cancelBtn = document.getElementById('cancelRepeatBtn');
-      const continueBtn = document.getElementById('continueRepeatBtn');
-      const loading = document.getElementById('repeatLoading');
-      const btnText = document.getElementById('resetBtnText');
-
-      if (resetBtn) resetBtn.disabled = true;
-      if (cancelBtn) cancelBtn.disabled = true;
-      if (continueBtn) continueBtn.disabled = true;
-      if (loading) loading.style.display = 'inline-block';
-      if (btnText) btnText.textContent = 'Сброс...';
-    }
-
-    // Скрыть загрузку в кнопке сброса
-    function hideRepeatLoading() {
-      const resetBtn = document.getElementById('resetRepeatBtn');
-      const cancelBtn = document.getElementById('cancelRepeatBtn');
-      const continueBtn = document.getElementById('continueRepeatBtn');
-      const loading = document.getElementById('repeatLoading');
-      const btnText = document.getElementById('resetBtnText');
-
-      if (resetBtn) resetBtn.disabled = false;
-      if (cancelBtn) cancelBtn.disabled = false;
-      if (continueBtn) continueBtn.disabled = false;
-      if (loading) loading.style.display = 'none';
-      if (btnText) btnText.textContent = 'Сбросить';
-    }
-
     // Глобальная функция для кнопок избранного
     window.toggleFavorite = toggleFavorite;
 
@@ -1317,27 +964,6 @@
         hideLoadingScreen();
       });
       startAutoUpdate();
-
-      // Обработчики для модального окна повторения
-      const repeatModal = document.getElementById('repeatProgressModal');
-      const repeatModalClose = document.getElementById('repeatModalClose');
-
-      // Закрытие по кнопке
-      repeatModalClose.addEventListener('click', closeRepeatModal);
-
-      // Закрытие по клику на фон
-      repeatModal.addEventListener('click', (e) => {
-        if (e.target === repeatModal) {
-          closeRepeatModal();
-        }
-      });
-
-      // Закрытие по Escape для repeat modal
-      document.addEventListener('keydown', (e) => {
-        if (e.key === 'Escape' && repeatModal.classList.contains('show')) {
-          closeRepeatModal();
-        }
-      });
     });
 
     // Остановка проверки при уходе со страницы
