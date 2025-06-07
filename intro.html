@@ -710,7 +710,7 @@
         const data = await response.json();
         const user = data.list.find(u => u.tg_user_id == userId);
 
-        if (user && user.progress === 0) {
+        if (user) {
           const updateResponse = await fetch(`${config.baseUrl}/${config.orgs}/${config.projectName}/${config.tableName}/${user.Id}`, {
             method: 'PATCH',
             headers: {
@@ -773,7 +773,7 @@
       if (currentBlock < totalBlocks) {
         continueButton.textContent = 'Продолжить';
       } else {
-        continueButton.textContent = 'Завершить';
+        continueButton.textContent = 'Завершить модуль';
       }
     }
 
