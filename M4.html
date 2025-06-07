@@ -1023,16 +1023,14 @@
       }, 1000);
 
       // Плавный скролл к блоку так, чтобы он начинался под панелью
-      if (blockNumber > 1) {
-        setTimeout(() => {
-          const panelHeight = 80; // Высота панели прогресса
-          const blockTop = block.offsetTop - panelHeight;
-          window.scrollTo({ 
-            top: blockTop, 
-            behavior: 'smooth' 
-          });
-        }, 200);
-      }
+      setTimeout(() => {
+        const panelHeight = 80; // Высота панели прогресса
+        const blockTop = block.offsetTop - panelHeight;
+        window.scrollTo({ 
+          top: blockTop, 
+          behavior: 'smooth' 
+        });
+      }, 200);
     }
 
     // Обновление текста кнопки
