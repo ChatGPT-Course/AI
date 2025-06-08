@@ -999,8 +999,8 @@
           name: userName,
           username: userUsername,
           module: 'М1',
-          emoji: rating,
-          description: comment || '-',
+          rating: rating,
+          discription: comment || '-',
           date: new Date().toISOString().split('T')[0]
         };
 
@@ -1100,7 +1100,6 @@
         currentBlock++;
         showBlock(currentBlock);
         updateProgress();
-        saveProgress(); // Сохраняем прогресс при каждом продвижении
       } else {
         // Завершение модуля
         handleModuleCompletion();
@@ -1199,8 +1198,8 @@
           name: userName,
           username: userUsername,
           module: 'М1',
-          emoji: '-',
-          description: 'пропуск отзыва',
+          rating: '-',
+          discription: 'пропуск отзыва',
           date: new Date().toISOString().split('T')[0]
         };
 
