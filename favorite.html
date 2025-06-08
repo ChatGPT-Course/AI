@@ -512,6 +512,15 @@
     <div class="modules-container" id="modulesContainer">
       <!-- Модули будут загружены динамически через JavaScript -->
     </div>
+
+    <!-- Сообщение об ошибке соединения -->
+    <div class="error-message" id="errorMessage" style="display: none;">
+      <div style="text-align: center; padding: 3rem 2rem; color: #dc3545;">
+        <div class="spinner" style="margin: 0 auto 1rem auto;"></div>
+        <h3 style="margin-bottom: 1rem; color: #dc3545;">Проблема с соединением</h3>
+        <p style="color: #6c757d;">Не удается получить данные пользователя. Повторная попытка...</p>
+      </div>
+    </div>
   </div>
 
   <div class="navigation-panel">
@@ -656,7 +665,10 @@
         userProgress = 0;
         userPayment = 0;
         moduleProgress = {};
-        if (!isUpdate) renderModules();
+        if (!isUpdate) {
+          hideErrorMessage();
+          renderModules();
+        }
         return Promise.resolve();
       }
 
@@ -697,12 +709,14 @@
             lastUpdateTime = Date.now();
 
             // Плавное обновление интерфейса
+            hideErrorMessage();
             updateInterface();
           } else if (!isUpdate) {
             userProgress = newProgress;
             userPayment = newPayment;
             moduleProgress = newModuleProgress;
             lastUpdateTime = Date.now();
+            hideErrorMessage();
             renderModules();
           }
         } else {
@@ -710,18 +724,34 @@
             userProgress = 0;
             userPayment = 0;
             moduleProgress = {};
+            hideErrorMessage();
             renderModules();
           }
         }
       } catch (error) {
         console.error('Error fetching user data:', error);
         if (!isUpdate) {
-          userProgress = 0;
-          userPayment = 0;
-          moduleProgress = {};
-          renderModules();
+          showErrorMessage();
+          // Повторная попытка через 3 секунды
+          setTimeout(() => {
+            getUserData(false);
+          }, 3000);
         }
       }
+    }
+
+    // Показать сообщение об ошибке
+    function showErrorMessage() {
+      document.getElementById('progressSection').style.display = 'none';
+      document.getElementById('modulesContainer').style.display = 'none';
+      document.getElementById('errorMessage').style.display = 'block';
+    }
+
+    // Скрыть сообщение об ошибке
+    function hideErrorMessage() {
+      document.getElementById('progressSection').style.display = 'block';
+      document.getElementById('modulesContainer').style.display = 'block';
+      document.getElementById('errorMessage').style.display = 'none';
     }
 
     // Плавное обновление интерфейса
