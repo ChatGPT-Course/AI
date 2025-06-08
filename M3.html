@@ -1650,7 +1650,6 @@
         currentBlock++;
         showBlock(currentBlock);
         updateProgress();
-        saveProgress(); // Сохраняем прогресс при каждом продвижении
       } else {
         // Завершение модуля
         handleModuleCompletion();
@@ -1782,7 +1781,12 @@
       exitModal.style.display = 'flex';
     });
 
-    confirmExit.addEventListener('click', async () => {
+    confirmExit.addEventListener('click', async (e) => {
+      // Защита от спама кнопки
+      if (confirmExit.disabled) return;
+      confirmExit.disabled = true;
+      confirmExit.textContent = 'Сохраняем...';
+
       await saveProgress(); // Сохраняем прогресс при выходе
       
       // Если пользователь выходит на последнем блоке, помечаем модуль как пройденный
