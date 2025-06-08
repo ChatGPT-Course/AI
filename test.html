@@ -291,11 +291,14 @@
       background: white;
       padding: 24px;
       border-radius: 12px;
-      max-width: 400px;
+      max-width: 500px;
       width: 90%;
+      max-height: 90vh;
+      overflow-y: auto;
       box-shadow: 0 10px 25px rgba(0,0,0,0.2);
       transform: translateY(-20px);
       transition: transform 0.3s;
+      position: relative;
     }
 
     .modal-overlay.active .modal-content {
@@ -655,29 +658,7 @@
       min-width: 40px;
     }
 
-    .reset-all-btn {
-      width: 100%;
-      padding: 10px 16px;
-      background: var(--error);
-      color: white;
-      border: none;
-      border-radius: 6px;
-      font-weight: 500;
-      font-size: 14px;
-      cursor: pointer;
-      transition: background 0.3s;
-      margin-top: 16px;
-    }
-
-    .reset-all-btn:hover {
-      background: #d32f2f;
-    }
-
-    .reset-all-btn:disabled {
-      background: var(--medium-gray);
-      color: var(--dark-gray);
-      cursor: not-allowed;
-    }
+    
 
     /* Улучшение стилей фильтра */
     .sort-dropdown {
@@ -946,9 +927,7 @@
           </div>
         </div>
 
-        <button class="reset-all-btn" id="resetAllModulesBtn">
-          Сбросить все прогрессы внутри модулей
-        </button>
+        
       </div>
 
       <div class="modal-buttons">
@@ -1232,10 +1211,10 @@
         progress: user.progress || 0,
         modules: {
           intro: user.intro_progress || 0,
-          m1: user.m1_progress || 0,
-          m2: user.m2_progress || 0,
-          m3: user.m3_progress || 0,
-          m4: user.m4_progress || 0
+          m1: user.M1_progress || 0,
+          m2: user.M2_progress || 0,
+          m3: user.M3_progress || 0,
+          m4: user.M4_progress || 0
         }
       };
 
@@ -1276,6 +1255,7 @@
           const max = moduleConfig[moduleId].max;
           
           slider.value = progress;
+          slider.max = max;
           progressText.textContent = `${progress}/${max}`;
           progressValue.textContent = `${progress}/${max}`;
         }
@@ -1313,10 +1293,10 @@
           oplata: data.oplata ? 1 : 0,
           progress: data.progress,
           intro_progress: data.modules.intro,
-          m1_progress: data.modules.m1,
-          m2_progress: data.modules.m2,
-          m3_progress: data.modules.m3,
-          m4_progress: data.modules.m4
+          M1_progress: data.modules.m1,
+          M2_progress: data.modules.m2,
+          M3_progress: data.modules.m3,
+          M4_progress: data.modules.m4
         };
 
         const response = await fetch(
@@ -1341,10 +1321,10 @@
           allUsers[userIndex].oplata = data.oplata ? 1 : 0;
           allUsers[userIndex].progress = data.progress;
           allUsers[userIndex].intro_progress = data.modules.intro;
-          allUsers[userIndex].m1_progress = data.modules.m1;
-          allUsers[userIndex].m2_progress = data.modules.m2;
-          allUsers[userIndex].m3_progress = data.modules.m3;
-          allUsers[userIndex].m4_progress = data.modules.m4;
+          allUsers[userIndex].M1_progress = data.modules.m1;
+          allUsers[userIndex].M2_progress = data.modules.m2;
+          allUsers[userIndex].M3_progress = data.modules.m3;
+          allUsers[userIndex].M4_progress = data.modules.m4;
         }
 
         applyFilters();
@@ -1502,18 +1482,7 @@
         });
       });
 
-      // Кнопка сброса всех прогрессов модулей
-      document.getElementById('resetAllModulesBtn').addEventListener('click', () => {
-        if (confirm('Вы уверены, что хотите сбросить все прогрессы внутри модулей? Это действие нельзя отменить.')) {
-          Object.keys(moduleConfig).forEach(moduleId => {
-            const slider = document.querySelector(`.module-progress-slider[data-module="${moduleId}"]`);
-            if (slider) {
-              slider.value = 0;
-              updateModuleProgress(moduleId, 0);
-            }
-          });
-        }
-      });
+      
     }
 
     // Запуск приложения
