@@ -1210,7 +1210,7 @@
         oplata: user.oplata == 1,
         progress: user.progress || 0,
         modules: {
-          intro: user.intro_progress || 0,
+          intro: user.INTRO_progress || 0,
           m1: user.M1_progress || 0,
           m2: user.M2_progress || 0,
           m3: user.M3_progress || 0,
@@ -1292,7 +1292,7 @@
         const updateData = {
           oplata: data.oplata ? 1 : 0,
           progress: data.progress,
-          intro_progress: data.modules.intro,
+          INTRO_progress: data.modules.intro,
           M1_progress: data.modules.m1,
           M2_progress: data.modules.m2,
           M3_progress: data.modules.m3,
@@ -1320,7 +1320,7 @@
         if (userIndex !== -1) {
           allUsers[userIndex].oplata = data.oplata ? 1 : 0;
           allUsers[userIndex].progress = data.progress;
-          allUsers[userIndex].intro_progress = data.modules.intro;
+          allUsers[userIndex].INTRO_progress = data.modules.intro;
           allUsers[userIndex].M1_progress = data.modules.m1;
           allUsers[userIndex].M2_progress = data.modules.m2;
           allUsers[userIndex].M3_progress = data.modules.m3;
