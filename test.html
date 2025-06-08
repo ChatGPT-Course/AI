@@ -1133,6 +1133,31 @@
       `;
     }
 
+    // Вычисление общего процента прохождения
+    function calculateOverallProgress(user) {
+      const totalBlocks = 83; // Общее количество блоков во всех модулях
+      let completedBlocks = 0;
+
+      // Суммируем прогресс по всем модулям
+      completedBlocks += user.INTRO_progress || 0;
+      completedBlocks += user.M1_progress || 0;
+      completedBlocks += user.M2_progress || 0;
+      completedBlocks += user.M3_progress || 0;
+      completedBlocks += user.M4_progress || 0;
+
+      return Math.round((completedBlocks / totalBlocks) * 100);
+    }
+
+    // Получение цвета для процента
+    function getProgressColor(percentage) {
+      if (percentage >= 0 && percentage <= 24) return '#F44336'; // красный
+      if (percentage >= 25 && percentage <= 49) return '#FF9800'; // оранжевый
+      if (percentage >= 50 && percentage <= 74) return '#FFC107'; // желтый
+      if (percentage >= 75 && percentage <= 89) return '#8BC34A'; // между зеленым и оранжевым
+      if (percentage >= 90 && percentage <= 100) return '#4CAF50'; // салатовый
+      return '#666'; // по умолчанию
+    }
+
     // Рендеринг пользователей
     function renderUsers(users) {
       if (users.length === 0) {
@@ -1147,13 +1172,42 @@
       const fragment = document.createDocumentFragment();
 
       users.forEach(user => {
+        // Вычисляем общий процент прохождения
+        const overallPercentage = calculateOverallProgress(user);
+        const progressColor = getProgressColor(overallPercentage);
+        const isCompleted = overallPercentage === 100;
+
         const userCard = document.createElement('div');
         userCard.className = 'user-card';
+        
+        // Если курс завершен на 100%, окрашиваем фон карточки
+        if (isCompleted) {
+          userCard.style.background = 'linear-gradient(135deg, #e8f5e8, #ffffff)';
+          userCard.style.borderColor = '#4CAF50';
+        }
 
-        // Имя пользователя с ссылкой
+        // Имя пользователя с ссылкой и процентом
         const userName = document.createElement('div');
         userName.className = 'user-name';
-        userName.textContent = user.name || 'Без имени';
+        
+        const nameText = document.createElement('span');
+        nameText.textContent = user.name || 'Без имени';
+        userName.appendChild(nameText);
+
+        // Процент прохождения с цветовой индикацией
+        const progressPercent = document.createElement('span');
+        progressPercent.style.color = progressColor;
+        progressPercent.style.fontWeight = '600';
+        progressPercent.style.marginLeft = '8px';
+        progressPercent.textContent = `(${overallPercentage}%`;
+        
+        // Добавляем галочку если 100%
+        if (isCompleted) {
+          progressPercent.textContent += ' ✓';
+        }
+        
+        progressPercent.textContent += ')';
+        userName.appendChild(progressPercent);
 
         if (user.tg_id) {
           const userLink = document.createElement('a');
