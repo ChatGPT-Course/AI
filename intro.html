@@ -824,7 +824,6 @@
         currentBlock++;
         showBlock(currentBlock);
         updateProgress();
-        saveProgress(); // Сохраняем прогресс при каждом продвижении
       } else {
         // Завершение модуля
         handleModuleCompletion();
@@ -858,7 +857,12 @@
       exitModal.style.display = 'flex';
     });
 
-    confirmExit.addEventListener('click', async () => {
+    confirmExit.addEventListener('click', async (e) => {
+      // Защита от спама кнопки
+      if (confirmExit.disabled) return;
+      confirmExit.disabled = true;
+      confirmExit.textContent = 'Сохраняем...';
+
       await saveProgress(); // Сохраняем прогресс при выходе
 
       // Если пользователь выходит на 5/5, помечаем модуль как пройденный
@@ -916,8 +920,8 @@
           name: userName,
           username: userUsername,
           module: 'Вступление',
-          emoji: rating,
-          description: comment || '-',
+          rating: rating,
+          discription: comment || '-',
           date: new Date().toISOString().split('T')[0]
         };
 
@@ -952,8 +956,8 @@
           name: userName,
           username: userUsername,
           module: 'Вступление',
-          emoji: '-',
-          description: 'пропуск отзыва',
+          rating: '-',
+          discription: 'пропуск отзыва',
           date: new Date().toISOString().split('T')[0]
         };
 
