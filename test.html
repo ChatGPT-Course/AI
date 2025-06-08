@@ -19,7 +19,7 @@
       --shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
       --filter-bg: #f0f2f5;
     }
-    
+
     body {
       margin: 0;
       font-family: 'Segoe UI', Roboto, Arial, sans-serif;
@@ -28,26 +28,26 @@
       line-height: 1.5;
       overflow-x: hidden;
     }
-    
+
     .container {
       max-width: 100%;
       margin: 0 auto;
       padding: 20px;
       box-sizing: border-box;
     }
-    
+
     .header {
       margin-bottom: 20px;
       text-align: center;
     }
-    
+
     h1 {
       color: var(--orange);
       margin: 0 0 20px 0;
       font-size: 24px;
       font-weight: 600;
     }
-    
+
     .controls {
       display: flex;
       flex-direction: column;
@@ -55,7 +55,7 @@
       margin-bottom: 20px;
       max-width: 100%;
     }
-    
+
     .search-input {
       width: 100%;
       padding: 10px 15px;
@@ -67,11 +67,11 @@
       box-sizing: border-box;
       max-width: 100%;
     }
-    
+
     .search-input:focus {
       border-color: var(--orange);
     }
-    
+
     .sort-btn {
       padding: 10px 15px;
       border-radius: 8px;
@@ -84,7 +84,7 @@
       text-align: left;
       position: relative;
     }
-    
+
     .sort-btn::after {
       content: "▼";
       position: absolute;
@@ -93,7 +93,7 @@
       transform: translateY(-50%);
       font-size: 10px;
     }
-    
+
     .sort-dropdown {
       position: absolute;
       background: var(--filter-bg);
@@ -105,11 +105,11 @@
       margin-top: 5px;
       padding: 10px 0;
     }
-    
+
     .sort-dropdown.show {
       display: block;
     }
-    
+
     .sort-group-title {
       padding: 8px 15px;
       font-weight: 600;
@@ -117,7 +117,7 @@
       font-size: 13px;
       text-transform: uppercase;
     }
-    
+
     .sort-option {
       padding: 10px 15px;
       cursor: pointer;
@@ -126,11 +126,11 @@
       align-items: center;
       justify-content: space-between;
     }
-    
+
     .sort-option:hover {
       background: rgba(0, 0, 0, 0.05);
     }
-    
+
     .sort-checkbox {
       width: 16px;
       height: 16px;
@@ -140,25 +140,25 @@
       align-items: center;
       justify-content: center;
     }
-    
+
     .sort-checkbox.checked {
       background: var(--orange);
       border-color: var(--orange);
     }
-    
+
     .sort-checkbox.checked::after {
       content: "✓";
       color: white;
       font-size: 12px;
     }
-    
+
     .filter-actions {
       display: flex;
       justify-content: space-between;
       padding: 10px 15px;
       border-top: 1px solid var(--medium-gray);
     }
-    
+
     .filter-btn {
       padding: 8px 16px;
       border-radius: 6px;
@@ -167,29 +167,29 @@
       cursor: pointer;
       border: none;
     }
-    
+
     .filter-btn.reset {
       background: var(--medium-gray);
       color: var(--text);
     }
-    
+
     .filter-btn.apply {
       background: var(--orange);
       color: white;
     }
-    
+
     .divider {
       height: 1px;
       background: var(--medium-gray);
       margin: 10px 0;
     }
-    
+
     .users-list {
       display: grid;
       grid-template-columns: 1fr;
       gap: 15px;
     }
-    
+
     .user-card {
       background: white;
       border-radius: 8px;
@@ -198,7 +198,7 @@
       position: relative;
       margin-bottom: 15px;
     }
-    
+
     .user-name {
       font-weight: 500;
       margin: 0 0 4px 0;
@@ -208,20 +208,20 @@
       align-items: center;
       gap: 8px;
     }
-    
+
     .user-link {
       color: var(--blue);
       text-decoration: none;
       font-size: 14px;
       cursor: pointer;
     }
-    
+
     .user-username {
       color: #666;
       margin: 0;
       font-size: 14px;
     }
-    
+
     .user-payment-status {
       position: absolute;
       top: 16px;
@@ -231,17 +231,17 @@
       font-weight: 500;
       font-size: 12px;
     }
-    
+
     .user-payment-status.paid {
       background-color: var(--success);
       color: white;
     }
-    
+
     .user-payment-status.unpaid {
       background-color: var(--error);
       color: white;
     }
-    
+
     .settings-btn {
       position: absolute;
       right: 16px;
@@ -252,11 +252,11 @@
       color: #666;
       font-size: 18px;
     }
-    
+
     .settings-btn:hover {
       color: var(--orange);
     }
-    
+
     .user-progress {
       position: absolute;
       right: 44px;
@@ -265,7 +265,7 @@
       font-weight: 500;
       font-size: 14px;
     }
-    
+
     .modal-overlay {
       position: fixed;
       top: 0;
@@ -281,12 +281,12 @@
       visibility: hidden;
       transition: opacity 0.3s;
     }
-    
+
     .modal-overlay.active {
       opacity: 1;
       visibility: visible;
     }
-    
+
     .modal-content {
       background: white;
       padding: 24px;
@@ -297,61 +297,61 @@
       transform: translateY(-20px);
       transition: transform 0.3s;
     }
-    
+
     .modal-overlay.active .modal-content {
       transform: translateY(0);
     }
-    
+
     .modal-title {
       margin: 0 0 20px 0;
       color: var(--text);
       font-size: 18px;
       font-weight: 500;
     }
-    
+
     .modal-field {
       margin-bottom: 20px;
     }
-    
+
     .modal-info {
       padding: 8px 0;
       font-size: 14px;
     }
-    
+
     .modal-info-label {
       color: #666;
       margin-right: 8px;
     }
-    
+
     .modal-divider {
       height: 1px;
       background: var(--medium-gray);
       margin: 20px 0;
     }
-    
+
     .payment-control {
       display: flex;
       align-items: center;
       justify-content: space-between;
     }
-    
+
     .payment-label {
       font-weight: 500;
       font-size: 14px;
     }
-    
+
     .payment-checkbox {
       display: flex;
       align-items: center;
       gap: 8px;
     }
-    
+
     .payment-checkbox input {
       width: 18px;
       height: 18px;
       accent-color: var(--success);
     }
-    
+
     .progress-container {
       position: relative;
       margin: 25px 0 35px;
@@ -359,7 +359,7 @@
       display: flex;
       align-items: center;
     }
-    
+
     .progress-line {
       position: absolute;
       width: 100%;
@@ -367,7 +367,7 @@
       background: var(--medium-gray);
       border-radius: 2px;
     }
-    
+
     .progress-filled {
       position: absolute;
       height: 4px;
@@ -375,7 +375,7 @@
       border-radius: 2px;
       left: 0;
     }
-    
+
     .progress-slider {
       width: 100%;
       margin: 0;
@@ -385,7 +385,7 @@
       position: relative;
       z-index: 2;
     }
-    
+
     .progress-slider::-webkit-slider-thumb {
       -webkit-appearance: none;
       width: 20px;
@@ -396,7 +396,7 @@
       position: relative;
       z-index: 3;
     }
-    
+
     .progress-marks {
       position: absolute;
       top: 50%;
@@ -408,7 +408,7 @@
       transform: translateY(-50%);
       z-index: 1;
     }
-    
+
     .progress-mark {
       width: 16px;
       height: 16px;
@@ -416,11 +416,11 @@
       background: var(--medium-gray);
       position: relative;
     }
-    
+
     .progress-mark.active {
       background: var(--blue);
     }
-    
+
     .progress-mark::after {
       content: attr(data-value);
       position: absolute;
@@ -430,13 +430,13 @@
       font-size: 12px;
       color: #666;
     }
-    
+
     .progress-mark.active::after {
       font-weight: bold;
       font-size: 14px;
       color: var(--blue);
     }
-    
+
     .progress-hint {
       text-align: center;
       margin-top: 25px;
@@ -444,14 +444,14 @@
       color: #666;
       min-height: 20px;
     }
-    
+
     .modal-buttons {
       display: flex;
       justify-content: flex-end;
       gap: 12px;
       margin-top: 20px;
     }
-    
+
     .modal-btn {
       padding: 8px 16px;
       border-radius: 6px;
@@ -462,24 +462,24 @@
       transition: all 0.3s;
       position: relative;
     }
-    
+
     .modal-btn.save {
       background-color: var(--success);
       color: white;
     }
-    
+
     .modal-btn.cancel {
       background-color: var(--medium-gray);
       color: var(--text);
     }
-    
+
     .modal-btn:disabled {
       background-color: var(--medium-gray);
       color: var(--dark-gray);
       cursor: not-allowed;
       opacity: 0.7;
     }
-    
+
     .spinner {
       display: inline-block;
       width: 16px;
@@ -490,29 +490,29 @@
       animation: spin 1s ease-in-out infinite;
       margin-left: 8px;
     }
-    
+
     @keyframes spin {
       to { transform: rotate(360deg); }
     }
-    
+
     .access-denied {
       text-align: center;
       padding: 40px 20px;
       display: none;
     }
-    
+
     .access-denied h2 {
       color: var(--error);
       margin-bottom: 16px;
     }
-    
+
     .loading {
       display: flex;
       justify-content: center;
       align-items: center;
       padding: 40px 0;
     }
-    
+
     .loading-spinner {
       width: 32px;
       height: 32px;
@@ -521,17 +521,17 @@
       border-top-color: var(--orange);
       animation: spin 1s linear infinite;
     }
-    
+
     .hidden {
       display: none;
     }
-    
+
     .empty-state {
       text-align: center;
       padding: 40px 20px;
       color: #666;
     }
-    
+
     .notification {
       position: fixed;
       top: 20px;
@@ -549,9 +549,233 @@
       transition: opacity 0.3s;
       text-align: center;
     }
-    
+
     .notification.show {
       opacity: 1;
+    }
+
+    .modules-progress {
+      margin-bottom: 20px;
+    }
+
+    .module-accordion {
+      border: 1px solid var(--medium-gray);
+      border-radius: 8px;
+      margin-bottom: 8px;
+      overflow: hidden;
+    }
+
+    .module-accordion-header {
+      padding: 12px 16px;
+      background: var(--light-gray);
+      cursor: pointer;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      transition: background 0.3s;
+      user-select: none;
+    }
+
+    .module-accordion-header:hover {
+      background: #e8eaf0;
+    }
+
+    .module-accordion-header.active {
+      background: #dde2f0;
+    }
+
+    .module-title {
+      font-weight: 500;
+      font-size: 14px;
+    }
+
+    .module-progress-text {
+      font-size: 13px;
+      color: var(--orange);
+      font-weight: 600;
+    }
+
+    .accordion-arrow {
+      font-size: 12px;
+      color: #666;
+      transition: transform 0.3s;
+    }
+
+    .module-accordion-header.active .accordion-arrow {
+      transform: rotate(180deg);
+    }
+
+    .module-accordion-content {
+      display: none;
+      padding: 16px;
+      background: white;
+    }
+
+    .module-accordion-content.active {
+      display: block;
+    }
+
+    .module-progress-container {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .module-progress-slider {
+      flex: 1;
+      height: 6px;
+      background: var(--medium-gray);
+      border-radius: 3px;
+      outline: none;
+      -webkit-appearance: none;
+    }
+
+    .module-progress-slider::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      width: 18px;
+      height: 18px;
+      border-radius: 50%;
+      background: var(--orange);
+      cursor: pointer;
+    }
+
+    .module-progress-slider::-moz-range-thumb {
+      width: 18px;
+      height: 18px;
+      border-radius: 50%;
+      background: var(--orange);
+      cursor: pointer;
+      border: none;
+    }
+
+    .module-progress-value {
+      font-size: 13px;
+      color: #666;
+      font-weight: 500;
+      min-width: 40px;
+    }
+
+    .reset-all-btn {
+      width: 100%;
+      padding: 10px 16px;
+      background: var(--error);
+      color: white;
+      border: none;
+      border-radius: 6px;
+      font-weight: 500;
+      font-size: 14px;
+      cursor: pointer;
+      transition: background 0.3s;
+      margin-top: 16px;
+    }
+
+    .reset-all-btn:hover {
+      background: #d32f2f;
+    }
+
+    .reset-all-btn:disabled {
+      background: var(--medium-gray);
+      color: var(--dark-gray);
+      cursor: not-allowed;
+    }
+
+    /* Улучшение стилей фильтра */
+    .sort-dropdown {
+      background: white;
+      border: 1px solid var(--medium-gray);
+      border-radius: 12px;
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+      padding: 8px 0;
+    }
+
+    .sort-group-title {
+      padding: 12px 20px 8px;
+      font-weight: 600;
+      color: var(--orange);
+      font-size: 13px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .sort-option {
+      padding: 12px 20px;
+      cursor: pointer;
+      transition: all 0.2s;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      font-size: 14px;
+    }
+
+    .sort-option:hover {
+      background: rgba(255, 152, 0, 0.08);
+    }
+
+    .sort-checkbox {
+      width: 18px;
+      height: 18px;
+      border: 2px solid var(--medium-gray);
+      border-radius: 4px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      transition: all 0.2s;
+    }
+
+    .sort-checkbox.checked {
+      background: var(--orange);
+      border-color: var(--orange);
+      transform: scale(1.1);
+    }
+
+    .sort-checkbox.checked::after {
+      content: "✓";
+      color: white;
+      font-size: 12px;
+      font-weight: bold;
+    }
+
+    .filter-actions {
+      display: flex;
+      justify-content: space-between;
+      padding: 16px 20px 8px;
+      border-top: 1px solid #f0f0f0;
+      margin-top: 8px;
+    }
+
+    .filter-btn {
+      padding: 8px 20px;
+      border-radius: 8px;
+      font-size: 14px;
+      font-weight: 600;
+      cursor: pointer;
+      border: none;
+      transition: all 0.2s;
+    }
+
+    .filter-btn.reset {
+      background: #f5f5f5;
+      color: #666;
+    }
+
+    .filter-btn.reset:hover {
+      background: #e0e0e0;
+    }
+
+    .filter-btn.apply {
+      background: var(--orange);
+      color: white;
+    }
+
+    .filter-btn.apply:hover {
+      background: #e68900;
+      transform: translateY(-1px);
+    }
+
+    .divider {
+      height: 1px;
+      background: #f0f0f0;
+      margin: 8px 0;
     }
   </style>
 </head>
@@ -562,7 +786,7 @@
         <h1>Управление курсом</h1>
         <div class="controls">
           <input type="text" class="search-input" id="searchInput" placeholder="Поиск по имени или юзернейму...">
-          
+
           <div style="position: relative;">
             <button class="sort-btn" id="sortBtn">Фильтр пользователей</button>
             <div class="sort-dropdown" id="sortDropdown">
@@ -575,9 +799,9 @@
                 <span>Неоплаченные</span>
                 <div class="sort-checkbox" data-sort="unpaid"></div>
               </div>
-              
+
               <div class="divider"></div>
-              
+
               <div class="sort-group-title">Фильтр по прогрессу</div>
               <div class="sort-option" data-sort="progress-asc">
                 <span>По возрастанию</span>
@@ -587,7 +811,7 @@
                 <span>По убыванию</span>
                 <div class="sort-checkbox" data-sort="progress-desc"></div>
               </div>
-              
+
               <div class="filter-actions">
                 <button class="filter-btn reset" id="resetFilter">Сбросить</button>
                 <button class="filter-btn apply" id="applyFilter">Применить</button>
@@ -596,38 +820,35 @@
           </div>
         </div>
       </div>
-      
+
       <div id="usersContainer">
         <div class="loading">
           <div class="loading-spinner"></div>
         </div>
       </div>
     </div>
-    
+
     <div id="accessDenied" class="access-denied">
       <h2>Доступ запрещен</h2>
       <p>У вас нет прав для просмотра этой страницы.</p>
       <p id="accessErrorDetails" style="color: #888; font-size: 12px; margin-top: 10px;"></p>
     </div>
   </div>
-  
+
   <div class="modal-overlay" id="settingsModal">
     <div class="modal-content">
       <h3 class="modal-title">Редактирование пользователя</h3>
-      
+
       <div class="modal-field">
         <div class="modal-info">
-          <span class="modal-info-label">Имя:</span>
+          <span class="modal-info-label">Пользователь:</span>
           <span id="modalUserName"></span>
-        </div>
-        <div class="modal-info">
-          <span class="modal-info-label">Юзернейм:</span>
-          <span id="modalUserUsername"></span>
+          <span id="modalUserUsername" style="color: #666; margin-left: 8px;"></span>
         </div>
       </div>
-      
+
       <div class="modal-divider"></div>
-      
+
       <div class="modal-field">
         <div class="modal-label">Оплата</div>
         <div class="payment-control">
@@ -638,9 +859,9 @@
           </div>
         </div>
       </div>
-      
+
       <div class="modal-field">
-        <div class="modal-label">Прогресс</div>
+        <div class="modal-label">Прогресс общий</div>
         <div class="progress-container">
           <div class="progress-line"></div>
           <div class="progress-filled" id="progressFilled"></div>
@@ -649,7 +870,87 @@
         </div>
         <div class="progress-hint" id="progressHint"></div>
       </div>
-      
+
+      <div class="modal-field">
+        <div class="modal-label" style="margin-bottom: 1rem;">Прогресс по модулям</div>
+        
+        <div class="modules-progress">
+          <div class="module-accordion">
+            <div class="module-accordion-header" data-module="intro">
+              <span class="module-title">Вступление</span>
+              <span class="module-progress-text">0/5</span>
+              <span class="accordion-arrow">▼</span>
+            </div>
+            <div class="module-accordion-content" data-module="intro">
+              <div class="module-progress-container">
+                <input type="range" min="0" max="5" value="0" class="module-progress-slider" data-module="intro" step="1">
+                <div class="module-progress-value">0/5</div>
+              </div>
+            </div>
+          </div>
+
+          <div class="module-accordion">
+            <div class="module-accordion-header" data-module="m1">
+              <span class="module-title">Модуль 1</span>
+              <span class="module-progress-text">0/17</span>
+              <span class="accordion-arrow">▼</span>
+            </div>
+            <div class="module-accordion-content" data-module="m1">
+              <div class="module-progress-container">
+                <input type="range" min="0" max="17" value="0" class="module-progress-slider" data-module="m1" step="1">
+                <div class="module-progress-value">0/17</div>
+              </div>
+            </div>
+          </div>
+
+          <div class="module-accordion">
+            <div class="module-accordion-header" data-module="m2">
+              <span class="module-title">Модуль 2</span>
+              <span class="module-progress-text">0/19</span>
+              <span class="accordion-arrow">▼</span>
+            </div>
+            <div class="module-accordion-content" data-module="m2">
+              <div class="module-progress-container">
+                <input type="range" min="0" max="19" value="0" class="module-progress-slider" data-module="m2" step="1">
+                <div class="module-progress-value">0/19</div>
+              </div>
+            </div>
+          </div>
+
+          <div class="module-accordion">
+            <div class="module-accordion-header" data-module="m3">
+              <span class="module-title">Модуль 3</span>
+              <span class="module-progress-text">0/24</span>
+              <span class="accordion-arrow">▼</span>
+            </div>
+            <div class="module-accordion-content" data-module="m3">
+              <div class="module-progress-container">
+                <input type="range" min="0" max="24" value="0" class="module-progress-slider" data-module="m3" step="1">
+                <div class="module-progress-value">0/24</div>
+              </div>
+            </div>
+          </div>
+
+          <div class="module-accordion">
+            <div class="module-accordion-header" data-module="m4">
+              <span class="module-title">Модуль 4</span>
+              <span class="module-progress-text">0/18</span>
+              <span class="accordion-arrow">▼</span>
+            </div>
+            <div class="module-accordion-content" data-module="m4">
+              <div class="module-progress-container">
+                <input type="range" min="0" max="18" value="0" class="module-progress-slider" data-module="m4" step="1">
+                <div class="module-progress-value">0/18</div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <button class="reset-all-btn" id="resetAllModulesBtn">
+          Сбросить все прогрессы внутри модулей
+        </button>
+      </div>
+
       <div class="modal-buttons">
         <button class="modal-btn cancel" id="modalCancelBtn">Отмена</button>
         <button class="modal-btn save" id="modalSaveBtn">Сохранить</button>
@@ -669,7 +970,7 @@
       apiVersion: 'v1',
       allowedAdminIds: [1515638372, 266495650] // Только ваш ID
     };
-    
+
     // Элементы
     const adminContent = document.getElementById('adminContent');
     const accessDenied = document.getElementById('accessDenied');
@@ -692,7 +993,7 @@
     const modalCancelBtn = document.getElementById('modalCancelBtn');
     const modalSaveBtn = document.getElementById('modalSaveBtn');
     const notification = document.getElementById('notification');
-    
+
     // Переменные состояния
     let allUsers = [];
     let filteredUsers = [];
@@ -703,6 +1004,15 @@
     let currentEditingUserId = null;
     let currentEditingUserData = null;
     let isSaving = false;
+
+    // Конфигурация модулей
+    const moduleConfig = {
+      intro: { max: 5, title: 'Вступление' },
+      m1: { max: 17, title: 'Модуль 1' },
+      m2: { max: 19, title: 'Модуль 2' },
+      m3: { max: 24, title: 'Модуль 3' },
+      m4: { max: 18, title: 'Модуль 4' }
+    };
 
     // Подсказки для прогресса
     const progressHints = [
@@ -737,7 +1047,7 @@
           mark.classList.remove('active');
         }
       });
-      
+
       // Обновление заполненной линии
       const percent = (value / 5) * 100;
       progressFilled.style.width = `${percent}%`;
@@ -761,19 +1071,19 @@
     // Проверка доступа
     function checkAccess() {
       currentUserTelegramId = getTelegramUserId();
-      
+
       if (!currentUserTelegramId) {
         console.error('Telegram ID не найден');
         accessErrorDetails.textContent = "Telegram ID не найден в cookies";
         return false;
       }
-      
+
       if (!config.allowedAdminIds.includes(currentUserTelegramId)) {
         console.error('Доступ запрещен для этого ID');
         accessErrorDetails.textContent = `Ваш ID: ${currentUserTelegramId} не имеет доступа`;
         return false;
       }
-      
+
       return true;
     }
 
@@ -783,18 +1093,18 @@
         const now = Date.now();
         if (now - lastUpdateTime < 1000) return;
         lastUpdateTime = now;
-        
+
         const response = await fetch(
           `https://app.nocodb.com/api/${config.apiVersion}/db/data/${config.orgs}/${config.projectName}/${config.tableName}`,
           {
             headers: { 'xc-token': config.apiToken }
           }
         );
-        
+
         if (!response.ok) {
           throw new Error(`Ошибка HTTP: ${response.status}`);
         }
-        
+
         const data = await response.json();
         allUsers = data.list || [];
         applyFilters();
@@ -807,13 +1117,13 @@
     // Фильтрация и сортировка
     function applyFilters() {
       const searchTerm = searchInput.value.toLowerCase();
-      
+
       // Фильтрация по поиску
       filteredUsers = allUsers.filter(user => {
         return (user.name && user.name.toLowerCase().includes(searchTerm)) ||
                (user.username && user.username.toLowerCase().includes(searchTerm));
       });
-      
+
       // Применение выбранной сортировки
       if (currentSort === 'paid') {
         filteredUsers = filteredUsers.filter(user => user.oplata == 1);
@@ -824,7 +1134,7 @@
       } else if (currentSort === 'progress-desc') {
         filteredUsers.sort((a, b) => (b.progress || 0) - (a.progress || 0));
       }
-      
+
       renderUsers(filteredUsers);
     }
 
@@ -854,18 +1164,18 @@
         `;
         return;
       }
-      
+
       const fragment = document.createDocumentFragment();
-      
+
       users.forEach(user => {
         const userCard = document.createElement('div');
         userCard.className = 'user-card';
-        
+
         // Имя пользователя с ссылкой
         const userName = document.createElement('div');
         userName.className = 'user-name';
         userName.textContent = user.name || 'Без имени';
-        
+
         if (user.tg_id) {
           const userLink = document.createElement('a');
           userLink.className = 'user-link';
@@ -874,27 +1184,27 @@
           userLink.target = '_blank';
           userName.appendChild(userLink);
         }
-        
+
         userCard.appendChild(userName);
-        
+
         // Юзернейм
         const userUsername = document.createElement('div');
         userUsername.className = 'user-username';
         userUsername.textContent = `@${user.username || 'без username'}`;
         userCard.appendChild(userUsername);
-        
+
         // Статус оплаты
         const paymentStatus = document.createElement('div');
         paymentStatus.className = `user-payment-status ${user.oplata == 1 ? 'paid' : 'unpaid'}`;
         paymentStatus.textContent = user.oplata == 1 ? 'Оплачен' : 'Не оплачен';
         userCard.appendChild(paymentStatus);
-        
+
         // Прогресс
         const userProgress = document.createElement('div');
         userProgress.className = 'user-progress';
         userProgress.textContent = `${user.progress || 0}/5`;
         userCard.appendChild(userProgress);
-        
+
         // Кнопка шестеренки
         const settingsBtn = document.createElement('button');
         settingsBtn.className = 'settings-btn';
@@ -904,10 +1214,10 @@
           openSettingsModal(user);
         });
         userCard.appendChild(settingsBtn);
-        
+
         fragment.appendChild(userCard);
       });
-      
+
       usersContainer.innerHTML = '';
       usersContainer.appendChild(fragment);
     }
@@ -919,12 +1229,19 @@
         name: user.name,
         username: user.username,
         oplata: user.oplata == 1,
-        progress: user.progress || 0
+        progress: user.progress || 0,
+        modules: {
+          intro: user.intro_progress || 0,
+          m1: user.m1_progress || 0,
+          m2: user.m2_progress || 0,
+          m3: user.m3_progress || 0,
+          m4: user.m4_progress || 0
+        }
       };
-      
+
       modalUserName.textContent = user.name || 'Без имени';
-      modalUserUsername.textContent = `@${user.username || 'без username'}`;
-      
+      modalUserUsername.textContent = `(@${user.username || 'без username'})`;
+
       // Настройка статуса оплаты
       if (currentEditingUserData.oplata) {
         paymentStatusText.textContent = 'Оплачен';
@@ -935,13 +1252,48 @@
         paymentStatusText.style.color = 'var(--error)';
         paymentCheckbox.checked = false;
       }
-      
-      // Настройка ползунка прогресса
+
+      // Настройка ползунка общего прогресса
       progressSlider.value = currentEditingUserData.progress;
       updateProgressMarks(currentEditingUserData.progress);
       updateProgressHint(currentEditingUserData.progress);
-      
+
+      // Настройка прогресса модулей
+      setupModuleProgress();
+
       settingsModal.classList.add('active');
+    }
+
+    // Настройка прогресса модулей
+    function setupModuleProgress() {
+      Object.keys(moduleConfig).forEach(moduleId => {
+        const slider = document.querySelector(`.module-progress-slider[data-module="${moduleId}"]`);
+        const progressText = document.querySelector(`.module-accordion-header[data-module="${moduleId}"] .module-progress-text`);
+        const progressValue = document.querySelector(`.module-accordion-content[data-module="${moduleId}"] .module-progress-value`);
+        
+        if (slider && progressText && progressValue) {
+          const progress = currentEditingUserData.modules[moduleId];
+          const max = moduleConfig[moduleId].max;
+          
+          slider.value = progress;
+          progressText.textContent = `${progress}/${max}`;
+          progressValue.textContent = `${progress}/${max}`;
+        }
+      });
+    }
+
+    // Обновление прогресса модуля
+    function updateModuleProgress(moduleId, value) {
+      const max = moduleConfig[moduleId].max;
+      const progressText = document.querySelector(`.module-accordion-header[data-module="${moduleId}"] .module-progress-text`);
+      const progressValue = document.querySelector(`.module-accordion-content[data-module="${moduleId}"] .module-progress-value`);
+      
+      if (progressText && progressValue) {
+        progressText.textContent = `${value}/${max}`;
+        progressValue.textContent = `${value}/${max}`;
+      }
+      
+      currentEditingUserData.modules[moduleId] = parseInt(value);
     }
 
     // Обновление подсказки прогресса
@@ -956,7 +1308,17 @@
         modalSaveBtn.disabled = true;
         modalCancelBtn.disabled = true;
         modalSaveBtn.innerHTML = 'Сохранение <span class="spinner"></span>';
-        
+
+        const updateData = {
+          oplata: data.oplata ? 1 : 0,
+          progress: data.progress,
+          intro_progress: data.modules.intro,
+          m1_progress: data.modules.m1,
+          m2_progress: data.modules.m2,
+          m3_progress: data.modules.m3,
+          m4_progress: data.modules.m4
+        };
+
         const response = await fetch(
           `https://app.nocodb.com/api/${config.apiVersion}/db/data/${config.orgs}/${config.projectName}/${config.tableName}/${userId}`,
           {
@@ -965,24 +1327,26 @@
               'Content-Type': 'application/json',
               'xc-token': config.apiToken
             },
-            body: JSON.stringify({
-              oplata: data.oplata ? 1 : 0,
-              progress: data.progress
-            })
+            body: JSON.stringify(updateData)
           }
         );
-        
+
         if (!response.ok) {
           throw new Error(`HTTP ошибка: ${response.status}`);
         }
-        
+
         // Обновляем локальные данные
         const userIndex = allUsers.findIndex(user => user.Id === userId);
         if (userIndex !== -1) {
           allUsers[userIndex].oplata = data.oplata ? 1 : 0;
           allUsers[userIndex].progress = data.progress;
+          allUsers[userIndex].intro_progress = data.modules.intro;
+          allUsers[userIndex].m1_progress = data.modules.m1;
+          allUsers[userIndex].m2_progress = data.modules.m2;
+          allUsers[userIndex].m3_progress = data.modules.m3;
+          allUsers[userIndex].m4_progress = data.modules.m4;
         }
-        
+
         applyFilters();
         showNotification('Настройки успешно сохранены');
         return true;
@@ -1022,16 +1386,16 @@
       sortBtn.addEventListener('click', () => {
         sortDropdown.classList.toggle('show');
       });
-      
+
       // Обработка выбора фильтра (вся строка кликабельна)
       document.querySelectorAll('.sort-option').forEach(option => {
         option.addEventListener('click', (e) => {
           const sortType = option.dataset.sort;
           const checkbox = option.querySelector('.sort-checkbox');
-          
+
           // Определяем группу (оплата или прогресс)
           const isPaymentGroup = sortType === 'paid' || sortType === 'unpaid';
-          
+
           // Сбрасываем все чекбоксы в соответствующей группе
           if (isPaymentGroup) {
             document.querySelectorAll('[data-sort="paid"], [data-sort="unpaid"] .sort-checkbox').forEach(cb => {
@@ -1042,7 +1406,7 @@
               cb.classList.remove('checked');
             });
           }
-          
+
           // Переключаем текущий чекбокс
           if (checkbox.classList.contains('checked')) {
             checkbox.classList.remove('checked');
@@ -1053,7 +1417,7 @@
           }
         });
       });
-      
+
       // Сброс фильтра
       resetFilter.addEventListener('click', () => {
         document.querySelectorAll('.sort-checkbox').forEach(checkbox => {
@@ -1063,28 +1427,28 @@
         sortDropdown.classList.remove('show');
         applyFilters();
       });
-      
+
       // Применение фильтра
       applyFilter.addEventListener('click', () => {
         sortDropdown.classList.remove('show');
         applyFilters();
       });
-      
+
       // Закрытие dropdown при клике вне его
       document.addEventListener('click', (e) => {
         if (!sortBtn.contains(e.target) && !sortDropdown.contains(e.target)) {
           sortDropdown.classList.remove('show');
         }
       });
-      
+
       // Поиск
       searchInput.addEventListener('input', applyFilters);
-      
+
       // Чекбокс оплаты в модальном окне
       paymentCheckbox.addEventListener('change', () => {
         currentEditingUserData.oplata = paymentCheckbox.checked;
       });
-      
+
       // Ползунок прогресса
       progressSlider.addEventListener('input', () => {
         const progress = parseInt(progressSlider.value);
@@ -1092,21 +1456,62 @@
         updateProgressMarks(progress);
         updateProgressHint(progress);
       });
-      
+
       // Кнопка отмены
       modalCancelBtn.addEventListener('click', () => {
         if (!isSaving) {
           settingsModal.classList.remove('active');
         }
       });
-      
+
       // Кнопка сохранения
       modalSaveBtn.addEventListener('click', async () => {
         if (isSaving) return;
-        
+
         const success = await updateUser(currentEditingUserId, currentEditingUserData);
         if (success) {
           settingsModal.classList.remove('active');
+        }
+      });
+
+      // Аккордеоны модулей
+      document.querySelectorAll('.module-accordion-header').forEach(header => {
+        header.addEventListener('click', () => {
+          const moduleId = header.dataset.module;
+          const content = document.querySelector(`.module-accordion-content[data-module="${moduleId}"]`);
+          const isActive = header.classList.contains('active');
+          
+          // Закрываем все аккордеоны
+          document.querySelectorAll('.module-accordion-header').forEach(h => h.classList.remove('active'));
+          document.querySelectorAll('.module-accordion-content').forEach(c => c.classList.remove('active'));
+          
+          // Открываем выбранный, если он не был активен
+          if (!isActive) {
+            header.classList.add('active');
+            content.classList.add('active');
+          }
+        });
+      });
+
+      // Ползунки прогресса модулей
+      document.querySelectorAll('.module-progress-slider').forEach(slider => {
+        slider.addEventListener('input', (e) => {
+          const moduleId = e.target.dataset.module;
+          const value = e.target.value;
+          updateModuleProgress(moduleId, value);
+        });
+      });
+
+      // Кнопка сброса всех прогрессов модулей
+      document.getElementById('resetAllModulesBtn').addEventListener('click', () => {
+        if (confirm('Вы уверены, что хотите сбросить все прогрессы внутри модулей? Это действие нельзя отменить.')) {
+          Object.keys(moduleConfig).forEach(moduleId => {
+            const slider = document.querySelector(`.module-progress-slider[data-module="${moduleId}"]`);
+            if (slider) {
+              slider.value = 0;
+              updateModuleProgress(moduleId, 0);
+            }
+          });
         }
       });
     }
