@@ -1254,7 +1254,7 @@
     });
 
     // Сохранение прогресса при закрытии страницы
-    window.addEventListener('beforeunload', async () => {
+    window.addEventListener('beforeunload', async (e) => {
       await saveProgress();
       
       // Если пользователь выходит на 17/17, помечаем модуль как пройденный
@@ -1272,6 +1272,24 @@
         if (currentBlock === totalBlocks) {
           await updateOverallProgress();
         }
+      }
+    });
+
+    // Сохранение прогресса при потере фокуса страницы
+    window.addEventListener('blur', async () => {
+      await saveProgress();
+      
+      if (currentBlock === totalBlocks) {
+        await updateOverallProgress();
+      }
+    });
+
+    // Сохранение прогресса при скрытии страницы (работает в мобильных браузерах)
+    document.addEventListener('pagehide', async () => {
+      await saveProgress();
+      
+      if (currentBlock === totalBlocks) {
+        await updateOverallProgress();
       }
     });
 
