@@ -594,59 +594,71 @@
       <h1 class="profile-title">Мой профиль</h1>
     </div>
 
-    <!-- Информация о пользователе -->
-    <div class="profile-user-info">
-      <div class="user-avatar" id="userAvatar">
-        <!-- Аватар будет загружен динамически -->
+    <!-- Основной контент профиля -->
+    <div class="profile-content" id="profileContent">
+      <!-- Информация о пользователе -->
+      <div class="profile-user-info">
+        <div class="user-avatar" id="userAvatar">
+          <!-- Аватар будет загружен динамически -->
+        </div>
+        <div class="user-details">
+          <div class="user-main-info">
+            <h2 class="user-name" id="userName">Загрузка...</h2>
+            <span class="user-username" id="userUsername">(@загрузка...)</span>
+          </div>
+          <div class="course-status-row">
+            <span class="course-status-text">Курс:</span>
+            <span class="course-status-value" id="courseStatusValue">Загрузка...</span>
+            <div class="info-icon" id="planInfoBtn">i</div>
+          </div>
+          <div class="user-id-info">
+            ID: <span id="userTgId">Загрузка...</span>
+          </div>
+        </div>
       </div>
-      <div class="user-details">
-        <div class="user-main-info">
-          <h2 class="user-name" id="userName">Загрузка...</h2>
-          <span class="user-username" id="userUsername">(@загрузка...)</span>
+
+      <!-- Статистика (4 блока) -->
+      <div class="stats-grid">
+        <div class="stat-card">
+          <div class="stat-number" id="completedModules">0/5</div>
+          <div class="stat-label">Пройдено модулей</div>
         </div>
-        <div class="course-status-row">
-          <span class="course-status-text">Курс:</span>
-          <span class="course-status-value" id="courseStatusValue">Загрузка...</span>
-          <div class="info-icon" id="planInfoBtn">i</div>
+        <div class="stat-card">
+          <div class="stat-number" id="totalProgress">--</div>
+          <div class="stat-label">Общий прогресс</div>
         </div>
-        <div class="user-id-info">
-          ID: <span id="userTgId">Загрузка...</span>
+        <div class="stat-card">
+          <div class="stat-number" id="daysWithUs">0</div>
+          <div class="stat-label">Вы с нами</div>
+        </div>
+        <div class="stat-card empty">
+          <div class="stat-number">--</div>
+          <div class="stat-label">Скоро</div>
+        </div>
+      </div>
+
+      <!-- Дополнительная информация -->
+      <div class="additional-info">
+        <div class="info-item">
+          <span class="info-label">Дата регистрации</span>
+          <span class="info-value" id="regDate">Загрузка...</span>
+        </div>
+
+        <div class="info-item">
+          <button class="faq-button">
+            <span class="faq-button-text">Часто задаваемые вопросы</span>
+            <span class="faq-button-arrow">›</span>
+          </button>
         </div>
       </div>
     </div>
 
-    <!-- Статистика (4 блока) -->
-    <div class="stats-grid">
-      <div class="stat-card">
-        <div class="stat-number" id="completedModules">0/5</div>
-        <div class="stat-label">Пройдено модулей</div>
-      </div>
-      <div class="stat-card">
-        <div class="stat-number" id="totalProgress">--</div>
-        <div class="stat-label">Общий прогресс</div>
-      </div>
-      <div class="stat-card">
-        <div class="stat-number" id="daysWithUs">0</div>
-        <div class="stat-label">Вы с нами</div>
-      </div>
-      <div class="stat-card empty">
-        <div class="stat-number">--</div>
-        <div class="stat-label">Скоро</div>
-      </div>
-    </div>
-
-    <!-- Дополнительная информация -->
-    <div class="additional-info">
-      <div class="info-item">
-        <span class="info-label">Дата регистрации</span>
-        <span class="info-value" id="regDate">Загрузка...</span>
-      </div>
-
-      <div class="info-item">
-        <button class="faq-button">
-          <span class="faq-button-text">Часто задаваемые вопросы</span>
-          <span class="faq-button-arrow">›</span>
-        </button>
+    <!-- Сообщение об ошибке соединения -->
+    <div class="error-message" id="errorMessage" style="display: none;">
+      <div style="text-align: center; padding: 3rem 2rem; color: #dc3545;">
+        <div class="spinner" style="margin: 0 auto 1rem auto;"></div>
+        <h3 style="margin-bottom: 1rem; color: #dc3545;">Проблема с соединением</h3>
+        <p style="color: #6c757d;">Не удается получить данные пользователя. Повторная попытка...</p>
       </div>
     </div>
   </div>
@@ -771,7 +783,10 @@
 
       if (!userId) {
         console.log('User ID not found in cookies');
-        if (!isUpdate) loadProfileData();
+        if (!isUpdate) {
+          hideErrorMessage();
+          loadProfileData();
+        }
         return Promise.resolve();
       }
 
@@ -816,6 +831,7 @@
             lastUpdateTime = Date.now();
 
             // Плавное обновление интерфейса
+            hideErrorMessage();
             updateInterface();
           } else if (!isUpdate) {
             userProgress = newProgress;
@@ -823,6 +839,7 @@
             moduleProgress = newModuleProgress;
             userRegDate = newRegDate;
             lastUpdateTime = Date.now();
+            hideErrorMessage();
             loadProfileData();
           }
         } else {
@@ -831,19 +848,32 @@
             userPayment = 0;
             moduleProgress = {};
             userRegDate = null;
+            hideErrorMessage();
             loadProfileData();
           }
         }
       } catch (error) {
         console.error('Error fetching user data:', error);
         if (!isUpdate) {
-          userProgress = 0;
-          userPayment = 0;
-          moduleProgress = {};
-          userRegDate = null;
-          loadProfileData();
+          showErrorMessage();
+          // Повторная попытка через 3 секунды
+          setTimeout(() => {
+            getUserData(false);
+          }, 3000);
         }
       }
+    }
+
+    // Показать сообщение об ошибке
+    function showErrorMessage() {
+      document.getElementById('profileContent').style.display = 'none';
+      document.getElementById('errorMessage').style.display = 'block';
+    }
+
+    // Скрыть сообщение об ошибке
+    function hideErrorMessage() {
+      document.getElementById('profileContent').style.display = 'block';
+      document.getElementById('errorMessage').style.display = 'none';
     }
 
     // Плавное обновление интерфейса
