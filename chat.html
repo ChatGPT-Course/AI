@@ -371,6 +371,13 @@
       </div>
     </div>
 
+    <!-- Сообщение об ошибке соединения -->
+    <div class="error-message" id="errorMessage" style="display: none; position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); text-align: center; padding: 3rem 2rem; color: #dc3545; background: white; border-radius: 12px; box-shadow: 0 4px 20px rgba(0,0,0,0.1);">
+      <div class="spinner" style="margin: 0 auto 1rem auto;"></div>
+      <h3 style="margin-bottom: 1rem; color: #dc3545;">Проблема с соединением</h3>
+      <p style="color: #6c757d;">Не удается получить данные пользователя. Повторная попытка...</p>
+    </div>
+
     <div class="typing-indicator" id="typingIndicator">
       <div class="message-avatar" style="background: linear-gradient(135deg, #10a37f 0%, #1a7f64 100%); color: white; border: 2px solid #e9ecef; font-weight: 600;">AI</div>
       <div class="typing-dots">
@@ -565,6 +572,7 @@
       
       if (!userId) {
         console.log('User ID не найден');
+        hideErrorMessage();
         return;
       }
 
@@ -575,7 +583,7 @@
           }
         });
 
-        if (!response.ok) return;
+        if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
 
         const data = await response.json();
         const user = data.list.find(u => u.tg_user_id == userId);
@@ -588,9 +596,26 @@
           console.log('Лимит инициализирован для пользователя');
         }
 
+        hideErrorMessage();
+
       } catch (error) {
         console.error('Ошибка при инициализации пользователя:', error);
+        showErrorMessage();
+        // Повторная попытка через 3 секунды
+        setTimeout(() => {
+          initializeUser();
+        }, 3000);
       }
+    }
+
+    // Показать сообщение об ошибке
+    function showErrorMessage() {
+      document.getElementById('errorMessage').style.display = 'block';
+    }
+
+    // Скрыть сообщение об ошибке
+    function hideErrorMessage() {
+      document.getElementById('errorMessage').style.display = 'none';
     }
 
     // Обновить лимит в базе данных
